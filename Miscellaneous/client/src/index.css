@@ -1,0 +1,332 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(210, 22%, 98%);
+  --foreground: hsl(210, 22%, 11%);
+  --muted: hsl(210, 40%, 96%);
+  --muted-foreground: hsl(210, 6%, 46%);
+  --popover: hsl(210, 22%, 98%);
+  --popover-foreground: hsl(210, 22%, 11%);
+  --card: hsl(210, 22%, 98%);
+  --card-foreground: hsl(210, 22%, 11%);
+  --border: hsl(214, 32%, 91%);
+  --input: hsl(214, 32%, 91%);
+  --primary: hsl(207, 90%, 54%);
+  --primary-foreground: hsl(210, 40%, 99%);
+  --secondary: hsl(210, 40%, 96%);
+  --secondary-foreground: hsl(210, 22%, 11%);
+  --accent: hsl(210, 40%, 96%);
+  --accent-foreground: hsl(210, 22%, 11%);
+  --destructive: hsl(0, 84%, 60%);
+  --destructive-foreground: hsl(210, 40%, 99%);
+  --ring: hsl(207, 90%, 54%);
+  --radius: 0.5rem;
+
+  /* LexFiat Design System - Official Color Palette */
+  --primary-bg-dark: #0a0e1a;
+  --primary-bg-light: #1a1f2e;
+  --accent-gold: #fbbf24;
+  --accent-amber: #d97706;
+  
+  /* Secondary Colors */
+  --card-bg-dark: #1e293b;
+  --card-bg-light: #334155;
+  --border-gray: #475569;
+  
+  /* Text Colors */
+  --text-primary: #e1e7ef;
+  --text-secondary: #94a3b8;
+  --text-muted: #6b7280;
+  
+  /* Status Colors */
+  --status-success: #10b981;
+  --status-processing: #3b82f6;
+  --status-warning: #f59e0b;
+  --status-critical: #ef4444;
+  --status-purple: #8b5cf6;
+  
+  /* Spacing System */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+}
+
+.dark {
+  --background: var(--primary-bg-dark);
+  --foreground: var(--text-primary);
+  --muted: var(--card-bg-dark);
+  --muted-foreground: var(--text-secondary);
+  --popover: var(--card-bg-light);
+  --popover-foreground: var(--text-primary);
+  --card: var(--card-bg-dark);
+  --card-foreground: var(--text-primary);
+  --border: var(--border-gray);
+  --input: var(--card-bg-light);
+  --primary: var(--accent-gold);
+  --primary-foreground: var(--primary-bg-dark);
+  --secondary: var(--card-bg-light);
+  --secondary-foreground: var(--text-primary);
+  --accent: var(--accent-gold);
+  --accent-foreground: var(--primary-bg-dark);
+  --destructive: var(--status-critical);
+  --destructive-foreground: var(--text-primary);
+  --ring: var(--accent-gold);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+  }
+
+  .font-serif {
+    font-family: 'DM Serif Display', serif;
+  }
+}
+
+/* LexFiat Design System - Utility Classes */
+.bg-primary-dark {
+  background-color: var(--primary-bg-dark);
+}
+
+.bg-primary-light {
+  background-color: var(--primary-bg-light);
+}
+
+.bg-card-dark {
+  background-color: var(--card-bg-dark);
+}
+
+.bg-card-light {
+  background-color: var(--card-bg-light);
+}
+
+.bg-accent-gold {
+  background-color: var(--accent-gold);
+}
+
+.text-primary {
+  color: var(--text-primary);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.text-accent-gold {
+  color: var(--accent-gold);
+}
+
+.bg-charcoal {
+  background-color: var(--charcoal);
+}
+
+.bg-warm-white {
+  background-color: var(--warm-white);
+}
+
+.bg-aqua {
+  background-color: var(--aqua);
+}
+
+.bg-light-green {
+  background-color: var(--light-green);
+}
+
+.bg-alert-red {
+  background-color: var(--alert-red);
+}
+
+.text-navy {
+  color: var(--navy);
+}
+
+.text-charcoal {
+  color: var(--charcoal);
+}
+
+.text-warm-white {
+  color: var(--warm-white);
+}
+
+.text-accent-gold {
+  color: var(--accent-gold);
+}
+
+.text-rich-gold {
+  color: var(--rich-gold);
+}
+
+.text-alert-amber {
+  color: var(--alert-amber);
+}
+
+/* LexFiat New Logo - Simplified Edison Bulb Design */
+/* Logo styles are now handled by the Logo component in /components/ui/logo.tsx */
+
+/* Conveyor Belt Animation */
+.flow-line {
+  position: relative;
+  height: 3px;
+  background: var(--border-gray);
+  overflow: hidden;
+}
+
+.flow-line::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.6), transparent);
+  animation: flow-pulse 4s ease-in-out infinite;
+}
+
+@keyframes flow-pulse {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+/* Progress Bar Animation */
+.progress-fill {
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-fill::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+/* Live Update Highlights */
+.live-update {
+  animation: highlight 3s ease-in-out;
+}
+
+@keyframes highlight {
+  0% { background-color: rgba(251, 191, 36, 0.2); }
+  100% { background-color: transparent; }
+}
+
+/* Status Pills */
+.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1.5rem;
+  background: rgba(30, 58, 95, 0.7);
+  border-radius: 25px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+/* Workflow Item Cards */
+.workflow-item {
+  background: rgba(30, 41, 59, 0.8);
+  border: 1px solid var(--border-gray);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border-left: 4px solid var(--priority-color);
+  transition: all 0.3s ease;
+}
+
+.workflow-item:hover {
+  background: rgba(51, 65, 85, 0.9);
+  border-color: var(--accent-gold);
+  transform: translateY(-2px);
+}
+
+/* Priority Colors */
+.priority-critical {
+  --priority-color: var(--status-critical);
+}
+
+.priority-high {
+  --priority-color: var(--status-warning);
+}
+
+.priority-normal {
+  --priority-color: var(--status-processing);
+}
+
+.priority-routine {
+  --priority-color: var(--status-success);
+}
+
+.border-aqua {
+  border-color: var(--aqua);
+}
+
+.border-light-green {
+  border-color: var(--light-green);
+}
+
+.border-alert-red {
+  border-color: var(--alert-red);
+}
+
+/* Custom gradients for workflow modules */
+.gradient-beacon {
+  background: linear-gradient(135deg, var(--aqua), var(--light-green));
+}
+
+/* Animation for notification pulse */
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+/* Responsive design utilities */
+@media (max-width: 768px) {
+  .mobile-hidden {
+    display: none;
+  }
+}
+
+/* Loading and skeleton states */
+.skeleton {
+  background: linear-gradient(90deg, transparent 25%, rgba(255,255,255,0.1) 50%, transparent 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

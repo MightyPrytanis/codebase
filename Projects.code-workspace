@@ -1,0 +1,21 @@
+{
+	"folders": [
+		{
+			"name": "Projects",
+			"path": "."
+		},
+		{
+			"name": "LexFiat",
+			"path": "LexFiat/LexFiat"
+		},
+		{
+			"name": "Cyrano",
+			"path": "Cyrano/Cyrano"
+		},
+		{
+			"name": "Cyrano",
+			"path": "Cyrano/Cyrano/Cyrano"
+		}
+	],
+	"settings": {}
+}
