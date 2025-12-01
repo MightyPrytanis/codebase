@@ -1,53 +1,111 @@
-# Projects Workspace Overview
+# Codebase - Cyrano Ecosystem Monorepo
 
-This directory (`/Users/davidtowne/Projects`) serves as the top-level workspace for several interrelated projects focused on automation, legal workflows, and archival tools. The key projects are Cyrano (MCP server), LexFiat (legal workflow app), and Arkiver (archival application). These are designed to integrate and support each other, with Cyrano providing the core backend functionality. Other subdirectories, such as Cosmos (an unrelated MCP experiment) and newcodex (a side project for CYBERTRONIA Transformers fanfiction), can be ignored for now.
+**Repository:** [MightyPrytanis/codebase](https://github.com/MightyPrytanis/codebase)  
+**Last Updated:** 2025-01-07  
+**Status:** Active Development
 
-## Project Descriptions
+## Overview
 
-- **Cyrano**: This is the MCP (Model Context Protocol) server, acting as a central interface for executing automation commands, scripts, and workflows across systems. It enables control, data retrieval, and integration with external tools and APIs, serving as the backend engine for connected applications.
+This monorepo consolidates all components of the Cyrano ecosystem, previously maintained as separate repositories:
+- LexFiat - Legal workflow intelligence platform
+- Cyrano - MCP server and AI orchestration engine
+- Arkiver - Universal data extraction system
+- Labs - Experimental projects (Potemkin, infinite-helix, etc.)
 
-- **LexFiat**: A legal workflow automation app designed for small legal practices. It supports tasks like scheduling, document drafting, research, citation checking, calendaring, and a unified UI with multi-model AI orchestration. The app is in an advanced alpha or pre-beta phase, featuring extensive frontend components, dashboard implementations, and partial backend elements (some of which may be unnecessary and subject to removal, as LexFiat is primarily a client for Cyrano MCP).
+## Repository Structure
 
-- **Arkiver**: An application planned for archival, record management, and data workflows. It is intended to leverage MCP tools for automation and integration, though it remains in a conceptual or early stage.
+```
+codebase/
+├── Cyrano/              # MCP server, engines, modules, tools
+├── LexFiat/            # Legal workflow platform (client + backend)
+├── apps/
+│   └── arkiver/        # Arkiver frontend application
+├── docs/                # Active documentation
+├── Labs/                # Experimental projects
+└── Legacy/              # Archived projects (SwimMeet, Cosmos, etc.)
+    └── Note: Legacy/ is excluded from main branch, preserved in archive/2024-10-10-snapshot
+```
 
-## Relationships Between Projects
+## Branches
 
-- **Cyrano as Backend**: Cyrano's MCP server provides the foundational automation and scripting capabilities upon which both LexFiat and Arkiver rely. It exposes endpoints and modules for tasks like document generation, external app communication, and system control.
+- **main** - Current active development (clean, production-ready code)
+- **archive/2024-10-10-snapshot** - Preserves October 10, 2024 state with all legacy items
 
-- **LexFiat Integration**: LexFiat acts as a client to Cyrano, using its modules for backend operations, including workflow processing, ethical reminders (GoodCounsel), and API integrations. This client-server model allows LexFiat to automate legal processes efficiently without duplicating backend logic.
+## Excluded from Repository
 
-- **Arkiver Integration**: Arkiver is designed to interface with Cyrano's MCP tools for data archiving and management workflows, building on the same automation framework as LexFiat.
+The following are intentionally excluded from git (see `.gitignore`):
+- `IP/` - Intellectual property documents (kept secret)
+- `.env` files - Environment variables and API keys
+- `Legacy/` - Archived legacy code (preserved in archive branch)
+- `Document Archive/` - Historical documentation (preserved in archive branch)
+- `node_modules/` - Dependencies
+- Build artifacts (`dist/`, `build/`)
 
-## Directory Structure
+## Active Projects
 
-- `/Cyrano`: MCP server code and automation modules.
-- `/LexFiat`: Legal app frontend, backend, and workflow components (note: server elements may be redundant and subject to removal).
-- `/Arkiver`: Archival app (future development focus).
-- `/Cosmos`: Ignore; standalone MCP experiment.
-- `/newcodex`: Ignore; fanfiction side project.
+### Cyrano
+MCP-compliant AI orchestration server with modular architecture:
+- **Engines:** GoodCounsel, MAE, Potemkin
+- **Modules:** Arkiver, Chronometric, RAG
+- **Tools:** 48+ MCP tools for legal workflow automation
 
-## Cyrano Laboratory (Experimental Section)
+### LexFiat
+Legal intelligence platform with adaptive workflow engine:
+- Dashboard with glass-morphism UI
+- Workflow pipeline (Intake → Analysis → Draft → Review)
+- GoodCounsel ethics and wellness guidance
+- Integration with Clio, Gmail, Calendar
 
-Cyrano Laboratory is the "research wing" or sandbox within the Cyrano ecosystem. It groups experimental and conceptual modules and tools that are under active development or testing. This section provides a space dedicated to innovation alongside the stable, core projects.
+### Arkiver
+Universal data extraction system:
+- Document extractors (PDF, DOCX, conversations)
+- Processors (text, email, entity, timeline, insight)
+- MCP integration for Cyrano ecosystem
 
-### Cyrano Laboratory: Potemkin Module
+## Documentation
 
-Potemkin is a specialized verification module within the Cyrano MCP server designed to aggressively fact-check AI-generated code claims against actual code behavior. Its primary purpose is to debunk delusions, hallucinations, and exaggerated hype about AI and software capabilities by parsing claims, running sandboxed execution and symbolic analysis, and generating evidence-based reports.
+Active documentation is in `docs/`:
+- Architecture guides
+- API documentation
+- UI specifications
+- Deployment checklists
+- Security policies
 
-#### Integration
+See `docs/ACTIVE_DOCUMENTATION_INDEX.md` for complete index.
 
-- Potemkin resides in the `/potemkin` directory of the Cyrano MCP server repository.
-- It exposes APIs (e.g., `/potemkin/verify`) for clients like LexFiat to submit code and claims for verification.
-- Potemkin leverages Cyrano's existing tools for API orchestration, GitHub integrations, multi-model evaluation, and secure sandboxed testing.
-- Designed to operate server-side, Potemkin ensures secure and scalable verification workflows.
+## Development
 
-Potemkin aims to enhance reliability and trust in AI-assisted development by providing transparent, verifiable debunking of software claims.  This module is an outgrowth of the Cyrano ecosystem's core value of developing technology that prioritizes truth and factual accuracy, user sovereignty and privacy, transparency, portability, value, and sustainability. 
+### Setup
+```bash
+# Install dependencies for each project
+cd Cyrano && npm install
+cd ../LexFiat && npm install
+cd ../apps/arkiver/frontend && npm install
+```
 
-## Setup and Usage Notes
+### Environment Variables
+Copy `.env.example` files and configure:
+- API keys for AI providers
+- Database connections
+- Integration credentials
 
-- Ensure Cyrano MCP is running to enable features in LexFiat and Arkiver.
-- Each project is tracked in its own GitHub repo for version control.
-- For detailed instructions, refer to individual README files in each subdirectory.
+See individual project READMEs for specific setup instructions.
 
+## Archive Branch
 
+The `archive/2024-10-10-snapshot` branch contains:
+- October 10, 2024 snapshot of the codebase
+- All Legacy/ projects (SwimMeet, Cosmos, Arkiver legacy versions)
+- Document Archive/ historical documentation
+- Miscellaneous tools and experimental code
 
+This branch is preserved for historical reference and is not actively developed.
+
+## Contributing
+
+This is a private repository. For access or questions, contact the repository owner.
+
+## License
+
+Copyright © 2025 Cognisint LLC  
+Licensed under Apache License, Version 2.0
