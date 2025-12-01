@@ -110,3 +110,7 @@ src/tools/tool-enhancer.ts
 # ===========================================
 # END PROTECTED IP SECTION
 # ===========================================
+
+# IP Directory - Keep secret
+IP/Legacy/
+Document Archive/

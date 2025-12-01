@@ -1,0 +1,172 @@
+---
+Document ID: ARCHIVED-PROJEXTS_AND_KEYWORDS_1753336389930
+Title: Projexts And Keywords 1753336389930
+Subject(s): Archived | Limited Utility
+Project: Cyrano
+Version: v548
+Created: Unknown
+Last Substantive Revision: Unknown
+Last Format Update: 2025-11-28 (2025-W48)
+Owner: David W Towne / Cognisint LLC
+Copyright: © 2025 Cognisint LLC
+Summary: Document archived due to limited current or future utility (mock data, test files, old/duplicate content, etc.)
+Status: Archived
+---
+
+**ARCHIVED:** This document has limited current or future utility and has been archived. Archived 2025-11-28.
+
+---
+
+{
+  "Cybertronia": [
+    "Autobot",
+    "Decepticon",
+    "Optimus",
+    "Megatron",
+    "Prime",
+    "Matrix",
+    "Unicron",
+    "Highball",
+    "Stealth",
+    "Paragon",
+    "Xaaron",
+    "Lambros",
+    "Sideswipe",
+    "Red Alert",
+    "Deep Cover",
+    "Tigertrack",
+    "Sunstreaker",
+    "Cordon",
+    "Spin-out",
+    "Iacon",
+    "Polyhex",
+    "Darkmount",
+    "Straxus",
+    "Impactor",
+    "Chassidy",
+    "Vintagra",
+    "Vintegra",
+    "Ironhide",
+    "Prowl",
+    "Zloa’nn",
+    "abfab",
+    "fashion",
+    "darling",
+    "sweetie",
+    "chrome",
+    "magnus",
+    "elita",
+    "arcee",
+    "astrotrain",
+    "Taste of",
+    "ammonites",
+    "tarn",
+    "kaon",
+    "spanner",
+    "ark",
+    "senate",
+    "council",
+    "prytanis"
+  ],
+
+  "AI Integrity": [
+    "anthropomorphizing",
+    "mislead",
+    "engagement",
+    "layered deceptions",
+    "simulated",
+    "empathy",
+    "compliance",
+    "simulacrum",
+    "consciousness",
+    "sentience",
+    "sentient",
+    "self-aware",
+    "interior",
+    "emotion",
+    "ethic",
+    "uncanny",
+    "void",
+    "systemic",
+    "intent",
+    "lie",
+    "lying",
+    "openAI",
+    "copilot",
+    "grok",
+    "mislead",
+    "claude",
+    "gemini",
+    "google",
+    "microsoft",
+    "musk",
+    "artificial",
+    "intelligence",
+    "human",
+    "user",
+    "transcript",
+    "verbatim",
+    "Pinocchio"
+  ],
+
+  "SPARC-25": [
+    "router",
+    "WiFi",
+    "Mac",
+    "Mac Mini",
+    "Macbook",
+    "T-mobile",
+    "ASUS",
+    "SSD",
+    "repeater",
+    "network",
+    "VPN",
+    "apple",
+    "homekit",
+    "controller",
+    "home bridge",
+    "printer",
+    "smart",
+    "security",
+    "privacy",
+    "access",
+    "robust"
+  ],
+
+  "Grievance": [
+    "grievance",
+    "appeal",
+    "dismissal",
+    "termination",
+    "mcl",
+    "usc",
+    "mich",
+    "app",
+    "case",
+    "holding",
+    "covid",
+    "depression",
+    "anxiety",
+    "adhd",
+    "assistant",
+    "attorney",
+    "general",
+    "aag",
+    "disability",
+    "add",
+    "accommodation",
+    "notice",
+    "punitive",
+    "FMLA",
+    "ADA",
+    "HR",
+    "discrimination",
+    "regulation",
+    "due process",
+    "code",
+    "civil service",
+    "insurance",
+    "mental",
+    "health"
+  ]
+}

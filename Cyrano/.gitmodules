@@ -1,0 +1,3 @@
+[submodule "SwimMeet"]
+	path = SwimMeet
+	url = git@github.com:MightyPrytanis/SwimMeet.git

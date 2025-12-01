@@ -1,0 +1,52 @@
+/* Middleboro-UI glass ocean extension
+   Imports Middleboro palette and adds glass ocean variables for the custom theme
+*/
+:root {
+  --middleboro-white: #F8F7F3;
+  --middleboro-blue: #7896AA;
+  --middleboro-tan: #A47C48;
+  --middleboro-purple: #AA329A;
+  --middleboro-green: #5A824A;
+  --middleboro-black: #252728;
+  --middleboro-orange: #D96D22;
+  --middleboro-red: #D12C26;
+  --middleboro-beige: #B8A995;
+  --middleboro-brown: #2D2119;
+}
+
+body.middleboro-ui {
+  background: linear-gradient(180deg, var(--middleboro-blue) 0%, var(--middleboro-green) 65%, var(--middleboro-beige) 100%);
+  color: var(--middleboro-black);
+}
+
+/* Glass ocean glassy, panel styles... (to inherit from original glass-ocean.css, then customize!) */
+
+.panel {
+  background: rgba(255,255,255,0.10);
+  border: 1px solid rgba(120,150,170,0.23);
+  border-radius: 20px;
+  box-shadow: 0 6px 40px rgba(41, 63, 97, 0.07);
+  color: var(--middleboro-black);
+}
+
+/* Seasonal & weather palettes for UI theme changes */
+:root[data-weather='snow'] {
+  --middleboro-blue: #A8BCCB;
+  --middleboro-green: #D6E2D5;
+  --middleboro-brown: #B5BAC2;
+}
+:root[data-weather='autumn'] {
+  --middleboro-green: #A6A94C;
+  --middleboro-brown: #9B6246;
+  --middleboro-red: #B44226;
+}
+:root[data-weather='rain'] {
+  --middleboro-blue: #5E7A99;
+  --middleboro-green: #679085;
+}
+:root[data-weather='fog'] {
+  --middleboro-white: #F4F6F8;
+  --middleboro-blue: #B7BACD;
+}
+
+/* Subtle dappled light overlay can be done with SVG/CSS animation – see JS/React example in comments. */

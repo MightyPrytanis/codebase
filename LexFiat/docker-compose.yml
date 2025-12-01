@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  lexfiat:
+    build: .
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY:-}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - XAI_API_KEY=${XAI_API_KEY:-}
+      - PUBLIC_OBJECT_SEARCH_PATHS=public/uploads,public/assets
+      - PRIVATE_OBJECT_DIR=private/uploads
+    volumes:
+      - lexfiat_uploads:/app/public/uploads
+      - lexfiat_assets:/app/public/assets
+      - lexfiat_private:/app/private/uploads
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-lexfiat}
+      - POSTGRES_USER=${POSTGRES_USER:-lexfiat}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+
+volumes:
+  lexfiat_uploads:
+  lexfiat_assets:
+  lexfiat_private:
+  postgres_data:

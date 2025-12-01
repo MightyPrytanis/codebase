@@ -1,0 +1,43 @@
+---
+Document ID: ARCHIVED-REQUIREMENTS
+Title: Requirements
+Subject(s): Archived | Limited Utility
+Project: Cyrano
+Version: v548
+Created: Unknown
+Last Substantive Revision: Unknown
+Last Format Update: 2025-11-28 (2025-W48)
+Owner: David W Towne / Cognisint LLC
+Copyright: © 2025 Cognisint LLC
+Summary: Document archived due to limited current or future utility (mock data, test files, old/duplicate content, etc.)
+Status: Archived
+---
+
+**ARCHIVED:** This document has limited current or future utility and has been archived. Archived 2025-11-28.
+
+---
+
+---
+Document ID: REQUIREMENTS
+Title: Requirements
+Subject(s): Potemkin | Requirements
+Project: Cyrano
+Version: v548
+Created: Unknown
+Last Substantive Revision: Unknown
+Last Format Update: 2025-11-28 (2025-W48)
+Owner: David W Towne / Cognisint LLC
+Copyright: © 2025 Cognisint LLC
+Status: Active
+---
+
+# Python Dependencies for Delphi Adapter
+
+requests>=2.31.0
+pyyaml>=6.0.1
+dataclasses>=0.6; python_version < '3.7'
+
+# Optional: For local model inference
+# transformers>=4.35.0
+# torch>=2.0.0
+# sentencepiece>=0.1.99

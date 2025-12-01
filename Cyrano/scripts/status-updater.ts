@@ -1,0 +1,313 @@
+#!/usr/bin/env tsx
+
+/**
+ * Status Updater Agent
+ * 
+ * Provides periodic stepwise updates, completion percentage, estimated time to completion,
+ * key blocks, and needed user inputs for ongoing projects.
+ * 
+ * Works with:
+ * - Agent coordination system (codebase projects)
+ * - LexFiat workflow executions
+ * - Custom task tracking systems
+ * 
+ * Usage:
+ *   tsx scripts/status-updater.ts [options]
+ * 
+ * Options:
+ *   --context <agent-coord|lexfiat|beta-release|custom|auto>  Context to monitor (default: auto)
+ *   --interval <seconds>                         Update interval in seconds (default: 30)
+ *   --output <console|file|both>                 Output destination (default: console)
+ *   --format <json|text|formatted>               Output format (default: formatted)
+ *   --once                                       Run once and exit (no periodic updates)
+ */
+
+import * as fs from 'fs';
+import * as path from 'path';
+import { fileURLToPath } from 'url';
+import { statusIndicator } from '../src/tools/status-indicator.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const PROJECT_ROOT = path.resolve(__dirname, '..');
+
+interface UpdaterConfig {
+  context: 'agent-coord' | 'lexfiat' | 'custom' | 'auto';
+  interval: number;
+  output: 'console' | 'file' | 'both';
+  format: 'json' | 'text' | 'formatted';
+  once: boolean;
+  customTasksPath?: string;
+  customProgressPath?: string;
+}
+
+function parseArgs(): UpdaterConfig {
+  const args = process.argv.slice(2);
+  const config: UpdaterConfig = {
+    context: 'auto',
+    interval: 30,
+    output: 'console',
+    format: 'formatted',
+    once: false
+  };
+
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    switch (arg) {
+      case '--context':
+        if (i + 1 < args.length) {
+          const context = args[++i] as any;
+          if (['agent-coord', 'lexfiat', 'beta-release', 'custom', 'auto'].includes(context)) {
+            config.context = context;
+          }
+        }
+        break;
+      case '--interval':
+        if (i + 1 < args.length) {
+          config.interval = parseInt(args[++i], 10) || 30;
+        }
+        break;
+      case '--output':
+        if (i + 1 < args.length) {
+          const output = args[++i] as any;
+          if (['console', 'file', 'both'].includes(output)) {
+            config.output = output;
+          }
+        }
+        break;
+      case '--format':
+        if (i + 1 < args.length) {
+          const format = args[++i] as any;
+          if (['json', 'text', 'formatted'].includes(format)) {
+            config.format = format;
+          }
+        }
+        break;
+      case '--once':
+        config.once = true;
+        break;
+      case '--custom-tasks-path':
+        if (i + 1 < args.length) {
+          config.customTasksPath = args[++i];
+        }
+        break;
+      case '--custom-progress-path':
+        if (i + 1 < args.length) {
+          config.customProgressPath = args[++i];
+        }
+        break;
+      case '--help':
+      case '-h':
+        printHelp();
+        process.exit(0);
+        break;
+    }
+  }
+
+  return config;
+}
+
+function printHelp() {
+  console.log(`
+Status Updater Agent
+
+Provides periodic stepwise updates, completion percentage, estimated time to completion,
+key blocks, and needed user inputs for ongoing projects.
+
+Usage:
+  tsx scripts/status-updater.ts [options]
+
+Options:
+  --context <agent-coord|lexfiat|beta-release|custom|auto>
+    Context to monitor (default: auto)
+    - agent-coord: Agent coordination system (codebase projects)
+    - lexfiat: LexFiat workflow executions
+    - beta-release: Beta release project (15-step codebase review/refactoring)
+    - custom: Custom task tracking (requires --custom-tasks-path)
+    - auto: Automatically detect context
+
+  --interval <seconds>
+    Update interval in seconds (default: 30)
+
+  --output <console|file|both>
+    Output destination (default: console)
+    - console: Print to console
+    - file: Write to .agent-coord/status-updates.log
+    - both: Print and write to file
+
+  --format <json|text|formatted>
+    Output format (default: formatted)
+    - json: Raw JSON output
+    - text: Plain text summary
+    - formatted: Formatted report with emojis and structure
+
+  --once
+    Run once and exit (no periodic updates)
+
+  --custom-tasks-path <path>
+    Custom path to tasks JSON file (for custom context)
+
+  --custom-progress-path <path>
+    Custom path to progress JSON file (for custom context)
+
+  --help, -h
+    Show this help message
+
+Examples:
+  # Monitor agent coordination system, update every 30 seconds
+  tsx scripts/status-updater.ts --context agent-coord
+
+  # Monitor LexFiat workflows, update every 60 seconds, output to file
+  tsx scripts/status-updater.ts --context lexfiat --interval 60 --output file
+
+  # Run once and get formatted report
+  tsx scripts/status-updater.ts --once --format formatted
+
+  # Monitor custom task system
+  tsx scripts/status-updater.ts --context custom \\
+    --custom-tasks-path /path/to/tasks.json \\
+    --custom-progress-path /path/to/progress.json
+`);
+}
+
+async function getStatusUpdate(config: UpdaterConfig): Promise<string> {
+  const args: any = {
+    context: config.context,
+    detailed: true,
+    include_history: false
+  };
+
+  if (config.customTasksPath) {
+    args.custom_tasks_path = config.customTasksPath;
+  }
+  if (config.customProgressPath) {
+    args.custom_progress_path = config.customProgressPath;
+  }
+
+  const result = await statusIndicator.execute(args);
+  
+  if (result.isError) {
+    return result.content[0].text;
+  }
+
+  const data = JSON.parse(result.content[0].text);
+
+  if (config.format === 'json') {
+    return JSON.stringify(data, null, 2);
+  } else if (config.format === 'text') {
+    return formatTextReport(data);
+  } else {
+    // formatted
+    return await statusIndicator.getFormattedReport();
+  }
+}
+
+function formatTextReport(data: any): string {
+  let report = `\nStatus Update - ${new Date(data.timestamp).toLocaleString()}\n`;
+  report += `═══════════════════════════════════════════════════════════\n\n`;
+  report += `Completion: ${data.summary.completionPercentage}\n`;
+  report += `Estimated Time Remaining: ${data.summary.estimatedTimeToCompletion}\n`;
+  report += `Tasks: ${data.summary.tasksCompleted}/${data.summary.totalTasks} completed, `;
+  report += `${data.summary.tasksInProgress} in progress, ${data.summary.tasksBlocked} blocked\n\n`;
+
+  if (data.keyBlocks && data.keyBlocks.length > 0) {
+    report += `Key Blocks (${data.keyBlocks.length}):\n`;
+    data.keyBlocks.forEach((block: any, idx: number) => {
+      report += `  ${idx + 1}. [${block.severity.toUpperCase()}] ${block.description}\n`;
+    });
+    report += `\n`;
+  }
+
+  if (data.neededUserInputs && data.neededUserInputs.length > 0) {
+    report += `Needed User Inputs (${data.neededUserInputs.length}):\n`;
+    data.neededUserInputs.forEach((input: any, idx: number) => {
+      report += `  ${idx + 1}. ${input.required ? '[REQUIRED]' : '[Optional]'} ${input.description}\n`;
+    });
+    report += `\n`;
+  }
+
+  if (data.stepwiseUpdates && data.stepwiseUpdates.length > 0) {
+    report += `Stepwise Updates:\n`;
+    data.stepwiseUpdates.forEach((update: any, idx: number) => {
+      report += `  ${idx + 1}. [${update.taskId}] ${update.title}\n`;
+      report += `     Status: ${update.status} | Progress: ${update.progress}\n`;
+      report += `     Current Step: ${update.currentStep}\n`;
+    });
+    report += `\n`;
+  }
+
+  return report;
+}
+
+function writeToFile(content: string) {
+  const logDir = path.join(PROJECT_ROOT, '.agent-coord');
+  if (!fs.existsSync(logDir)) {
+    fs.mkdirSync(logDir, { recursive: true });
+  }
+  const logFile = path.join(logDir, 'status-updates.log');
+  const timestamp = new Date().toISOString();
+  fs.appendFileSync(logFile, `\n[${timestamp}]\n${content}\n`);
+}
+
+async function runUpdater(config: UpdaterConfig) {
+  console.log(`🚀 Status Updater Agent Starting...\n`);
+  console.log(`Context: ${config.context}`);
+  console.log(`Interval: ${config.interval} seconds`);
+  console.log(`Output: ${config.output}`);
+  console.log(`Format: ${config.format}\n`);
+
+  const update = async () => {
+    try {
+      const report = await getStatusUpdate(config);
+
+      if (config.output === 'console' || config.output === 'both') {
+        console.log(report);
+      }
+
+      if (config.output === 'file' || config.output === 'both') {
+        writeToFile(report);
+      }
+    } catch (error) {
+      const errorMsg = `Error generating status update: ${error instanceof Error ? error.message : String(error)}`;
+      console.error(`❌ ${errorMsg}`);
+      if (config.output === 'file' || config.output === 'both') {
+        writeToFile(`ERROR: ${errorMsg}`);
+      }
+    }
+  };
+
+  // Run initial update
+  await update();
+
+  // If --once, exit now
+  if (config.once) {
+    return;
+  }
+
+  // Set up periodic updates
+  console.log(`\n⏰ Starting periodic updates (every ${config.interval} seconds)...`);
+  console.log(`Press Ctrl+C to stop\n`);
+
+  const intervalId = setInterval(update, config.interval * 1000);
+
+  // Handle graceful shutdown
+  process.on('SIGINT', () => {
+    console.log(`\n\n🛑 Stopping status updater...`);
+    clearInterval(intervalId);
+    process.exit(0);
+  });
+
+  process.on('SIGTERM', () => {
+    console.log(`\n\n🛑 Stopping status updater...`);
+    clearInterval(intervalId);
+    process.exit(0);
+  });
+}
+
+// Main execution
+const config = parseArgs();
+runUpdater(config).catch((error) => {
+  console.error(`Fatal error: ${error instanceof Error ? error.message : String(error)}`);
+  process.exit(1);
+});
+

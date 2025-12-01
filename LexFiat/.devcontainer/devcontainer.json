@@ -1,0 +1,47 @@
+{
+  "name": "LexFiat Legal Intelligence Platform",
+  "dockerComposeFile": "../docker-compose.yml",
+  "service": "lexfiat",
+  "workspaceFolder": "/app",
+  
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "18"
+    },
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.vscode-typescript-next",
+        "bradlc.vscode-tailwindcss",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-json",
+        "ms-vscode-remote.remote-containers",
+        "github.copilot"
+      ],
+      "settings": {
+        "typescript.preferences.includePackageJsonAutoImports": "on",
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode"
+      }
+    }
+  },
+  
+  "forwardPorts": [5000, 5432],
+  "portsAttributes": {
+    "5000": {
+      "label": "LexFiat App",
+      "onAutoForward": "openPreview"
+    },
+    "5432": {
+      "label": "PostgreSQL Database"
+    }
+  },
+  
+  "postCreateCommand": "npm install && npm run db:push",
+  
+  "remoteUser": "lexfiat"
+}

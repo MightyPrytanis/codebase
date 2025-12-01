@@ -1,0 +1,86 @@
+/**
+ * Module Registry
+ * 
+ * Central registry for all modules in the Cyrano system.
+ * Modules are registered here and can be discovered and accessed
+ * by engines and applications.
+ */
+/*
+ * Copyright 2025 Cognisint LLC
+ * Licensed under the Apache License, Version 2.0
+ * See LICENSE.md for full license text
+ */
+
+import { BaseModule } from './base-module.js';
+import { chronometricModule } from './chronometric/chronometric.js';
+
+class ModuleRegistry {
+  private modules: Map<string, BaseModule>;
+
+  constructor() {
+    this.modules = new Map();
+    // Auto-register Chronometric module
+    this.register(chronometricModule);
+  }
+
+  /**
+   * Register a module
+   */
+  register(module: BaseModule): void {
+    const info = module.getModuleInfo();
+    this.modules.set(info.name, module);
+  }
+
+  /**
+   * Get a module by name
+   */
+  get(name: string): BaseModule | undefined {
+    return this.modules.get(name);
+  }
+
+  /**
+   * Get all registered modules
+   */
+  getAll(): BaseModule[] {
+    return Array.from(this.modules.values());
+  }
+
+  /**
+   * Get module names
+   */
+  getNames(): string[] {
+    return Array.from(this.modules.keys());
+  }
+
+  /**
+   * Check if a module is registered
+   */
+  has(name: string): boolean {
+    return this.modules.has(name);
+  }
+
+  /**
+   * Unregister a module
+   */
+  unregister(name: string): void {
+    this.modules.delete(name);
+  }
+
+  /**
+   * Clear all modules
+   */
+  clear(): void {
+    this.modules.clear();
+  }
+
+  /**
+   * Get module count
+   */
+  getCount(): number {
+    return this.modules.size;
+  }
+}
+
+// Export singleton instance
+export const moduleRegistry = new ModuleRegistry();
+

@@ -1,0 +1,30 @@
+{
+  "name": "delphi-moral-reasoner",
+  "version": "1.0.0",
+  "description": "Delphi core engine for moral and ethical reasoning in legal, policy, and compliance pipelines.",
+  "main": "dist/delphi_client.js",
+  "types": "dist/delphi_client.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "ts-node delphi_client.ts"
+  },
+  "keywords": [
+    "delphi",
+    "moral-reasoner",
+    "ethics",
+    "policy-evaluation",
+    "ai-judgment",
+    "compliance",
+    "argument-analysis"
+  ],
+  "author": "Project Cyrano",
+  "license": "Apache 2.0",
+  "dependencies": {
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.3.0",
+    "ts-node": "^10.9.0"
+  }
+}

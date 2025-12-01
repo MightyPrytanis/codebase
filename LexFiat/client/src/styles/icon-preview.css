@@ -1,0 +1,121 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.icon-preview-container {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+    background: #1a1a1a;
+    color: #e0e0e0;
+    padding: 40px 20px;
+    line-height: 1.6;
+    min-height: 100vh;
+}
+
+.icon-preview-container .container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.icon-preview-container h1 {
+    color: #D89B6A;
+    margin-bottom: 10px;
+    font-size: 2.5em;
+}
+
+.icon-preview-container .subtitle {
+    color: #888;
+    margin-bottom: 40px;
+    font-size: 1.1em;
+}
+
+.icon-preview-container .section {
+    margin-bottom: 60px;
+    background: #2a2a2a;
+    padding: 30px;
+    border-radius: 12px;
+    border: 1px solid #3a3a3a;
+}
+
+.icon-preview-container .section h2 {
+    color: #D89B6A;
+    margin-bottom: 20px;
+    font-size: 1.8em;
+    border-bottom: 2px solid #3a3a3a;
+    padding-bottom: 10px;
+}
+
+.icon-preview-container .icon-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 30px;
+    margin-top: 20px;
+}
+
+.icon-preview-container .icon-item {
+    background: #1a1a1a;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #3a3a3a;
+    text-align: center;
+    transition: transform 0.2s, border-color 0.2s;
+}
+
+.icon-preview-container .icon-item:hover {
+    transform: translateY(-2px);
+    border-color: #D89B6A;
+}
+
+.icon-preview-container .icon-name {
+    font-weight: 600;
+    color: #e0e0e0;
+    margin-top: 15px;
+    font-size: 0.95em;
+}
+
+.icon-preview-container .icon-description {
+    color: #888;
+    font-size: 0.85em;
+    margin-top: 5px;
+}
+
+.icon-preview-container .icon-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.icon-preview-container .size-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.icon-preview-container .size-label {
+    font-size: 0.75em;
+    color: #666;
+    min-width: 50px;
+    text-align: right;
+}
+
+.icon-preview-container svg {
+    display: block;
+}
+
+.icon-preview-container .icon-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+.icon-preview-container .info-box {
+    background: #2a2a4a;
+    border: 1px solid #3a3a6a;
+    padding: 15px;
+    border-radius: 6px;
+    margin-top: 20px;
+    color: #a0a0d0;
+    font-size: 0.9em;
+}
+

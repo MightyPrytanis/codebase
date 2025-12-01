@@ -1,0 +1,3 @@
+---Work without interruption - if user input is required, work on things that don't depend on that input in the meantime.  If user approval at the end of any step is needed, work provisionally on the next section and the next and so on until all work is either complete or provisionally completed, pending approval and modification based on user inputs.  DO NOT STOP WORKING IF THERE IS WORK TO BE DONE.
+alwaysApply: true
+---

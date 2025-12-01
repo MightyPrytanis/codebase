@@ -1,0 +1,102 @@
+{
+  "toolSpecialist": {
+    "id": "agent-1",
+    "name": "Tool Specialist",
+    "focus": "All tool-related work",
+    "capabilities": [
+      "tool-implementation",
+      "tool-testing",
+      "tool-documentation"
+    ],
+    "currentTasks": [],
+    "status": "ready"
+  },
+  "moduleSpecialist": {
+    "id": "agent-2",
+    "name": "Module Specialist",
+    "focus": "Module layer implementation",
+    "capabilities": [
+      "module-abstraction",
+      "module-implementation",
+      "chronometric"
+    ],
+    "currentTasks": [],
+    "status": "ready"
+  },
+  "engineSpecialist": {
+    "id": "agent-3",
+    "name": "Engine Specialist",
+    "focus": "Engine layer implementation",
+    "capabilities": [
+      "engine-abstraction",
+      "mae",
+      "goodcounsel",
+      "potemkin"
+    ],
+    "currentTasks": [],
+    "status": "ready"
+  },
+  "uiSpecialist": {
+    "id": "agent-4",
+    "name": "UI/UX Specialist",
+    "focus": "LexFiat frontend",
+    "capabilities": [
+      "ui-components",
+      "integration-wiring",
+      "ux-refinement"
+    ],
+    "currentTasks": [],
+    "status": "ready"
+  },
+  "integrationSpecialist": {
+    "id": "agent-5",
+    "name": "Integration Specialist",
+    "focus": "External integrations",
+    "capabilities": [
+      "clio",
+      "gmail",
+      "outlook",
+      "westlaw",
+      "lexis"
+    ],
+    "currentTasks": [],
+    "status": "ready"
+  },
+  "arkiverSpecialist": {
+    "id": "agent-6",
+    "name": "Arkiver Specialist",
+    "focus": "ArkiverMJ recreation",
+    "capabilities": [
+      "arkiver-backend",
+      "tool-extraction",
+      "mcp-integration"
+    ],
+    "currentTasks": [],
+    "status": "ready"
+  },
+  "devopsSpecialist": {
+    "id": "agent-7",
+    "name": "DevOps Specialist",
+    "focus": "Infrastructure and deployment",
+    "capabilities": [
+      "deployment",
+      "cicd",
+      "security",
+      "monitoring"
+    ],
+    "currentTasks": [],
+    "status": "ready"
+  },
+  "documentationSpecialist": {
+    "id": "agent-8",
+    "name": "Documentation Specialist",
+    "focus": "Documentation and cleanup",
+    "capabilities": [
+      "documentation",
+      "user-guides",
+      "cleanup"
+    ],
+    "currentTasks": [],
+    "status": "ready"
+  }
+}

@@ -1,0 +1,97 @@
+name: Validate API keys (manual)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Run minimal curl-based checks
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          PERPLEXITY_API_KEY: ${{ secrets.PERPLEXITY_API_KEY }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          # Optional overrides (set as repo/organization secrets if you need non-default endpoints)
+          ANTHROPIC_TEST_URL: ${{ secrets.ANTHROPIC_TEST_URL }}
+          PERPLEXITY_TEST_URL: ${{ secrets.PERPLEXITY_TEST_URL }}
+          GEMINI_TEST_URL: ${{ secrets.GEMINI_TEST_URL }}
+          # New optional secrets:
+          ANTHROPIC_VERSION: ${{ secrets.ANTHROPIC_VERSION }}        # required by Anthropic API (optional; default used if unset)
+          PERPLEXITY_MODEL: ${{ secrets.PERPLEXITY_MODEL }}          # optionally override model (default is "sonar")
+        run: |
+          set -euo pipefail
+
+          mask_key() {
+            local k="$1"
+            if [ -z "${k:-}" ]; then
+              echo "<empty>"
+            else
+              echo "${k:0:6}...${k: -6}"
+            fi
+          }
+
+          echo "OpenAI: testing /v1/models"
+          status=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer ${OPENAI_API_KEY:-}" https://api.openai.com/v1/models || echo "000")
+          if [ "$status" = "200" ]; then
+            echo "OpenAI: VALID (HTTP 200)"
+          elif [ "$status" = "401" ] || [ "$status" = "403" ]; then
+            echo "OpenAI: INVALID (HTTP $status)"
+          else
+            echo "OpenAI: HTTP $status"
+          fi
+
+          echo "Anthropic: testing /v1/models"
+          ANTH_URL=${ANTHROPIC_TEST_URL:-https://api.anthropic.com/v1/models}
+
+          if [ -z "${ANTHROPIC_API_KEY:-}" ]; then
+            echo "Anthropic: ANTHROPIC_API_KEY not set; skipping Anthropic check"
+          else
+            # Always include the anthropic-version header (now using the same variable name).
+            extra_args=()
+            extra_args+=(-H "anthropic-version: ${ANTHROPIC_VERSION:-"2023-06-01"}")
+
+            echo "Anthropic: using key $(mask_key "${ANTHROPIC_API_KEY}") and anthropic-version='${ANTHROPIC_VERSION:-"2023-06-01"}'"
+            curl -s -o /tmp/anth_resp -w "%{http_code}" -H "x-api-key: ${ANTHROPIC_API_KEY}" "${extra_args[@]}" "$ANTH_URL" > /tmp/anth_code || echo "000" >/tmp/anth_code
+            anth_status=$(cat /tmp/anth_code)
+            if [ "$anth_status" = "200" ]; then
+              echo "Anthropic: VALID (HTTP 200)"
+            else
+              echo "Anthropic: HTTP $anth_status"
+              echo "Anthropic response (first 200 lines):"
+              sed -n '1,200p' /tmp/anth_resp || true
+            fi
+          fi
+
+          echo "Perplexity: testing (POST to chat/completions by default)"
+          PURL=${PERPLEXITY_TEST_URL:-https://api.perplexity.ai/chat/completions}
+          PMODEL=${PERPLEXITY_MODEL:-"sonar"}
+          PAYLOAD=$(jq -c -n --arg m "$PMODEL" '{"model":$m,"messages":[{"role":"user","content":"ping"}],"max_tokens":1}')
+          curl -s -o /tmp/perp_resp -w "%{http_code}" -H "Authorization: Bearer ${PERPLEXITY_API_KEY:-}" -H "Content-Type: application/json" -X POST -d "$PAYLOAD" "$PURL" > /tmp/perp_code || echo "000" >/tmp/perp_code
+          perp_status=$(cat /tmp/perp_code)
+          if [ "$perp_status" = "200" ]; then
+            echo "Perplexity: VALID (HTTP 200)"
+          else
+            echo "Perplexity: HTTP $perp_status"
+            echo "Perplexity response (first 200 lines):"
+            sed -n '1,200p' /tmp/perp_resp || true
+          fi
+
+          echo "Gemini: testing (try key as query param then header)"
+          GURL=${GEMINI_TEST_URL:-https://generativelanguage.googleapis.com/v1beta2/models}
+          status=$(curl -s -o /dev/null -w "%{http_code}" "${GURL}?key=${GEMINI_API_KEY:-}" || echo "000")
+          if [ "$status" = "200" ]; then
+            echo "Gemini: VALID (HTTP 200 via key=query param)"
+          else
+            status2=$(curl -s -o /dev/null -w "%{http_code}" -H "Authorization: Bearer ${GEMINI_API_KEY:-}" "$GURL" || echo "000")
+            if [ "$status2" = "200" ]; then
+              echo "Gemini: VALID (HTTP 200 via Authorization header)"
+            elif [ "$status2" = "401" ] || [ "$status2" = "403" ]; then
+              echo "Gemini: INVALID (HTTP $status2)"
+            else
+              echo "Gemini: HTTP $status2"
+            fi
+          fi
