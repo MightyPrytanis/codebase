@@ -14,9 +14,10 @@ Status: Active
 ---
 
 # Active Documentation Library Index
- **Total Active Documents:** ~45 (reduced from 92, 51% reduction)  
+ **Total Active Documents:** ~39 (reduced from 92; 6 additional docs archived 2025-12-04)  
 **Location:** `/Users/davidtowne/Desktop/Coding/codebase/docs/`  
-**Archive Summary:** See `docs/archive/one-offs/2025-01-07-archive-cleanup/ARCHIVE_SUMMARY.md`
+**Archive Summary:** See `docs/archive/one-offs/2025-01-07-archive-cleanup/ARCHIVE_SUMMARY.md`  
+**Latest Reduction:** `docs/archive/one-offs/2025-12-04-active-doc-reduction/` (duplicate/placeholder docs archived on 2025-12-04)
 
 ---
 
@@ -40,53 +41,38 @@ Status: Active
 
 ## Guides (8 documents)
 
-### Core Guides (6)
+### Core Guides (5)
 1. `GENERAL_GUIDE_BETA_RELEASE_PROJECT_TRACKING.md` - **Project tracking**
 2. `GENERAL_GUIDE_PRE_BETA_USER_CHECKLIST.md` - **User pre-beta checklist**
 3. `GENERAL_GUIDE_REALISTIC_WORK_PLAN.md` - **Master work plan**
 4. `GENERAL_GUIDE_SECURITY_POLICY.md` - Security policy
-5. `GENERAL_GUIDE_MONOREPO_STRUCTURE_WHERE_FILES_LIVE.md` - Monorepo structure
-6. `GENERAL_GUIDE_UNIVERSAL_AIHUMAN_INTERACTION_PROTOCOL.md` - **Ethics protocol**
+5. `GENERAL_GUIDE_UNIVERSAL_AIHUMAN_INTERACTION_PROTOCOL.md` - **Ethics protocol**
 
 ### Deployment Guides (2)
 1. `LEXFIAT_GUIDE_LEXFIAT_DEPLOYMENT_CHECKLIST.md` - LexFiat deployment
 2. `CYRANO_GUIDE_MCP_TOOL_REGISTRY_CHECKLIST.md` - MCP tool registry
 
+### Arkiver Guide (1)
+1. `ARKIVER_GUIDE_ARKIVER_EXTRACTION_PATTERNS.md` - Extraction workflow reference
+
 **Note:** Many guides have been archived. See `docs/archive/one-offs/2025-01-07-archive-cleanup/ARCHIVE_SUMMARY.md` for details.
 
 ---
 
-## Reference (18 documents - README files)
+## Reference (5 documents - README files)
 
-### Arkiver READMEs (4)
-1. `ARKIVER_README_ARKIVER_-_UNIVERSAL_DATA_EXTRACTION_SYSTEM.md` - Labs/Arkiver (Python)
-2. `ARKIVER_README_ARKIVER_APPLICATION.md` - Arkiver app overview
-3. `ARKIVER_README_ARKIVER_MODULE.md` - **Processing components module** (clarified scope)
-4. `ARKIVER_README_ARKIVER_PROCESSING_COMPONENTS.md` - Processing components details
+### Arkiver
+1. `ARKIVER_README_ARKIVER_MODULE.md` - **Processing components module** (authoritative scope)
 
-### Cyrano READMEs (1)
+### Cyrano
 1. `CYRANO_MCP_SERVER_README.md` - Cyrano MCP server implementation guide
 
-### LexFiat READMEs (1)
+### LexFiat
 1. `LEXFIAT_README_LEXFIAT.md` - LexFiat app overview
 
-### Engine READMEs (3)
-1. `GENERAL_README_GOODCOUNSEL_ENGINE.md` - GoodCounsel engine
-2. `GENERAL_README_MAE_ENGINE.md` - MAE engine
-3. `GENERAL_README_POTEMKIN_ENGINE.md` - Potemkin engine
-
-### Module READMEs (1)
-1. `GENERAL_README_CHRONOMETRIC_MODULE.md` - Chronometric module
-
-### Other READMEs (8)
-1. `GENERAL_README_COSMOS_-_P360_ENHANCEMENTS_DASHBOARD.md`
-2. `GENERAL_README_GETTING_STARTED_WITH_CREATE_REACT_APP.md`
-3. `GENERAL_README_MONOREPO_DIRECTORY.md`
-4. `GENERAL_README_MUSKIFICATION_METER.md`
-5. `GENERAL_README_POTEMKIN_STANDALONE_APP.md`
-6. `GENERAL_README_PROJECTS_WORKSPACE_OVERVIEW.md` - **Fixed: LexFiat backend references**
-7. `GENERAL_README_TASK_MANAGEMENT_COORDINATION_SYSTEM.md`
-8. `GENERAL_README_UNIVERSAL_INDEXER.md`
+### Workspace / Coordination
+1. `GENERAL_README_PROJECTS_WORKSPACE_OVERVIEW.md` - Active projects overview, thin-client reminder
+2. `GENERAL_README_TASK_MANAGEMENT_COORDINATION_SYSTEM.md` - Agent coordination and automation scripts
 
 ---
 
@@ -205,15 +191,13 @@ Status: Active
 
 ## README Documents Status
 
-**Total README files in active docs:** 18 files in `docs/reference/`
+**Total README files in active docs:** 5 files in `docs/reference/`
 
-All README documents were:
-- ✅ Moved to `docs/reference/` during reorganization
-- ✅ Given standardized headers
-- ✅ Renamed with descriptive prefixes (e.g., `ARKIVER_README_ARKIVER_APPLICATION.md`)
-- ✅ Preserved with original content
+Recent updates:
+- ✅ Duplicative/placeholder READMEs archived on 2025-12-04 (`docs/archive/one-offs/2025-12-04-active-doc-reduction/`)
+- ✅ Remaining READMEs retain standardized headers and align with their source directories
 
-**No README documents were lost or archived.**
+The current set covers Arkiver processing components, the Cyrano MCP server, LexFiat, and workspace coordination references.
 
 ---
 

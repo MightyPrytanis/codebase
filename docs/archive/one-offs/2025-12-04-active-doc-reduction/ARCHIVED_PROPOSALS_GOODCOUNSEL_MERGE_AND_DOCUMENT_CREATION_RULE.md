@@ -10,7 +10,7 @@ Last Format Update: 2025-11-28 (2025-W48)
 Owner: David W Towne / Cognisint LLC
 Copyright: © 2025 Cognisint LLC
 Summary: Proposals for merging GoodCounsel README with Philosophy document, other README/document overlaps, and enforceable rule for document creation.
-Status: Active
+Status: Archived (2025-12-04)
 ---
 
 # Proposals: GoodCounsel Merge Strategy & Document Creation Rule

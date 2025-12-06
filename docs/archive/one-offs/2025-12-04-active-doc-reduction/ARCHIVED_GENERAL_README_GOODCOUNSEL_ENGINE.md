@@ -9,7 +9,7 @@ Last Substantive Revision: 2025-11-28 (2025-W48)
 Last Format Update: 2025-11-28 (2025-W48)
 Owner: David W Towne / Cognisint LLC
 Copyright: © 2025 Cognisint LLC
-Status: Active
+Status: Archived (2025-12-04)
 ---
 
 Ethics and Wellness Engine
