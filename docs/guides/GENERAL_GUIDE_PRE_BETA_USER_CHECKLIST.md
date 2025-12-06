@@ -283,11 +283,14 @@ For beta release, you need two types of reviews:
 - **Snyk** (https://snyk.io) - Dependency and vulnerability scanning
 - **OWASP ZAP** (https://www.zaproxy.org) - Web application security testing
 - **Detailed Guide:** `docs/security/SECURITY_REVIEW_GUIDE.md`
+- **Repository:** `MightyPrytanis/codebase` (GitHub monorepo)
 
 **Pre-Beta Full Audit:**
 - **GitHub Copilot Chat** - Comprehensive codebase review
 - **VS Code Copilot** - Detailed file-by-file review
 - **Detailed Guide:** `docs/audit/CODE_AUDIT_GUIDE.md`
+- **Repository:** `MightyPrytanis/codebase` (GitHub monorepo)
+- **Note:** Codebase uploaded to GitHub (Step 13: 35% complete - optimization remaining)
 
 **Rationale:**
 - Snyk and OWASP ZAP are specialized security tools that will catch dependency vulnerabilities, known CVEs, and perform penetration testing

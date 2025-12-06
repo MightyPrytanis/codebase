@@ -161,3 +161,41 @@ export function handleWidgetVisibilityChange(
   return true;
 }
 
+/**
+ * Save widget configuration to backend
+ */
+export async function saveWidgetConfigToBackend(
+  userId: string,
+  widgets: WidgetConfig[]
+): Promise<boolean> {
+  try {
+    // Import here to avoid circular dependencies
+    const { executeCyranoTool } = await import('./cyrano-api');
+    
+    // Map widget config to workflow stages format
+    const workflowStages = widgets
+      .filter(w => ['intake', 'analysis', 'draft-prep', 'attorney-review'].includes(w.id))
+      .map((widget, index) => ({
+        id: widget.id,
+        name: widget.id.charAt(0).toUpperCase() + widget.id.slice(1).replace('-', ' '),
+        agent: widget.id,
+        description: `Workflow stage: ${widget.id}`,
+        order: index,
+      }));
+    
+    if (workflowStages.length > 0) {
+      await executeCyranoTool('workflow_manager', {
+        action: 'customize',
+        workflow_type: 'custom',
+        custom_stages: workflowStages,
+      });
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Failed to save widget config to backend:', error);
+    return false;
+  }
+}
+
+

@@ -1,0 +1,39 @@
+{
+  "name": "mightyprytanis-codebase",
+  "version": "1.0.0",
+  "description": "Monorepo for Cyrano MCP Server, LexFiat, and related applications",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "test": "npm run test --workspaces",
+    "lint": "npm run lint --workspaces",
+    "clean": "npm run clean --workspaces && rm -rf node_modules",
+    "cyrano:build": "npm run build -w packages/cyrano",
+    "cyrano:dev": "npm run dev -w packages/cyrano",
+    "lexfiat:build": "npm run build -w apps/LexFiat",
+    "lexfiat:dev": "npm run dev -w apps/LexFiat"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mightyprytanis/codebase.git"
+  },
+  "keywords": [
+    "mcp",
+    "legal-tech",
+    "monorepo",
+    "cyrano",
+    "lexfiat",
+    "arkiver"
+  ],
+  "author": "Cognisint LLC",
+  "license": "Apache-2.0"
+}
+

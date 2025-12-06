@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cosmos - P360 Enhancements Dashboard</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body class="light-mode">
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="brand">
+                    <div class="cosmos-logo">
+                        <svg viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Flying Saucer with Tilt and Depth -->
+                            <ellipse cx="20" cy="22" rx="14" ry="4" fill="white" opacity="0.9" transform="rotate(-8 20 22)"/>
+                            <circle cx="20" cy="18" r="5" fill="white" opacity="0.8" transform="rotate(-8 20 18)"/>
+                            <!-- Curved arc for depth -->
+                            <path d="M 7 21 Q 20 19 33 23" stroke="white" stroke-width="0.8" fill="none" opacity="0.6"/>
+                            
+                            <!-- Simple Stars -->
+                            <circle cx="10" cy="8" r="1.5" fill="white" opacity="0.7"/>
+                            <circle cx="30" cy="10" r="1" fill="white" opacity="0.6"/>
+                            <circle cx="8" cy="30" r="1" fill="white" opacity="0.6"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="brand-title">Cosmos</h1>
+                        <p class="brand-subtitle">P360 Enhancements Dashboard</p>
+                    </div>
+                </div>
+                <div class="header-controls">
+                    <button class="theme-toggle" id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <div class="user-menu">
+                        <i class="fas fa-user-circle"></i>
+                        <span>Demo User</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Authentication Modal -->
+        <div class="auth-modal" id="authModal">
+            <div class="auth-content">
+                <h2>Access Required</h2>
+                <p>Please authenticate to access the Cosmos dashboard</p>
+                <form id="authForm">
+                    <input type="text" placeholder="Username" id="username" required>
+                    <input type="password" placeholder="Password" id="password" required>
+                    <button type="submit">Access Dashboard</button>
+                </form>
+                <p class="auth-note">Demo credentials: username: <code>demo</code>, password: <code>cosmos2025</code></p>
+            </div>
+        </div>
+
+        <!-- Main Dashboard -->
+        <main class="dashboard" id="dashboard" style="display: none;">
+            <!-- Status Bar -->
+            <div class="status-bar">
+                <div class="status-item">
+                    <i class="fas fa-circle status-online"></i>
+                    <span>MCP Server Online</span>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-robot"></i>
+                    <span>AI Integration Active</span>
+                </div>
+                <div class="status-item">
+                    <i class="fas fa-tools"></i>
+                    <span>1 Tool Available</span>
+                </div>
+            </div>
+
+            <!-- Widget Grid -->
+            <div class="widget-grid">
+                <!-- Next Action AI Widget (Active) -->
+                <div class="widget active-widget">
+                    <div class="widget-header">
+                        <h3><i class="fas fa-brain"></i> Next Action AI</h3>
+                        <span class="widget-status active">LIVE</span>
+                    </div>
+                    <div class="widget-content">
+                        <p>Generate AI-powered recommendations for mortgage partner management</p>
+                        <form id="nextActionForm" class="tool-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="partnerId">Partner ID (Optional)</label>
+                                    <input type="text" id="partnerId" placeholder="e.g., PARTNER_001">
+                                </div>
+                                <div class="form-group">
+                                    <label for="timeframe">Timeframe</label>
+                                    <select id="timeframe">
+                                        <option value="this_week">This Week</option>
+                                        <option value="immediate">Immediate</option>
+                                        <option value="this_month">This Month</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="priority">Priority Level</label>
+                                    <select id="priority">
+                                        <option value="">All Priorities</option>
+                                        <option value="urgent">Urgent</option>
+                                        <option value="high">High</option>
+                                        <option value="medium">Medium</option>
+                                        <option value="low">Low</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="category">Category</label>
+                                    <select id="category">
+                                        <option value="">All Categories</option>
+                                        <option value="follow_up">Follow Up</option>
+                                        <option value="risk_mitigation">Risk Mitigation</option>
+                                        <option value="opportunity">Opportunity</option>
+                                        <option value="compliance">Compliance</option>
+                                        <option value="performance">Performance</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="limit">Max Recommendations</label>
+                                <input type="number" id="limit" min="1" max="20" value="10">
+                            </div>
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-magic"></i> Generate Recommendations
+                            </button>
+                        </form>
+                        <div id="nextActionResults" class="results-container"></div>
+                    </div>
+                </div>
+
+                <!-- Coming Soon Widgets -->
+                <div class="widget coming-soon-widget">
+                    <div class="widget-header">
+                        <h3><i class="fas fa-chart-line"></i> Competitor Tracker</h3>
+                        <span class="widget-status coming-soon">COMING SOON</span>
+                    </div>
+                    <div class="widget-content">
+                        <p>Real-time competitive analysis and market positioning insights</p>
+                        <div class="coming-soon-overlay">
+                            <i class="fas fa-clock"></i>
+                            <span>In Development</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="widget coming-soon-widget">
+                    <div class="widget-header">
+                        <h3><i class="fas fa-chart-bar"></i> Analytics Module</h3>
+                        <span class="widget-status coming-soon">COMING SOON</span>
+                    </div>
+                    <div class="widget-content">
+                        <p>Advanced performance analytics and trend analysis</p>
+                        <div class="coming-soon-overlay">
+                            <i class="fas fa-clock"></i>
+                            <span>In Development</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="widget coming-soon-widget">
+                    <div class="widget-header">
+                        <h3><i class="fas fa-exclamation-triangle"></i> License Alert</h3>
+                        <span class="widget-status coming-soon">COMING SOON</span>
+                    </div>
+                    <div class="widget-content">
+                        <p>Automated license expiration monitoring and alerts</p>
+                        <div class="coming-soon-overlay">
+                            <i class="fas fa-clock"></i>
+                            <span>In Development</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="widget coming-soon-widget">
+                    <div class="widget-header">
+                        <h3><i class="fas fa-envelope"></i> Dynamic Email Generator</h3>
+                        <span class="widget-status coming-soon">COMING SOON</span>
+                    </div>
+                    <div class="widget-content">
+                        <p>AI-powered personalized email campaigns and communications</p>
+                        <div class="coming-soon-overlay">
+                            <i class="fas fa-clock"></i>
+                            <span>In Development</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="widget coming-soon-widget">
+                    <div class="widget-header">
+                        <h3><i class="fas fa-passport"></i> Broker Passport</h3>
+                        <span class="widget-status coming-soon">COMING SOON</span>
+                    </div>
+                    <div class="widget-content">
+                        <p>One-time signup for automatic applications to all lender partners</p>
+                        <div class="coming-soon-overlay">
+                            <i class="fas fa-clock"></i>
+                            <span>In Development</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Section -->
+            <div class="info-section">
+                <div class="info-card">
+                    <h3><i class="fas fa-info-circle"></i> About Cosmos</h3>
+                    <p><strong>Cosmos</strong> is the codename for a suite of AI-powered mortgage partner management tools designed for Claude Desktop integration. These tools will be rolled out to partners as part of P360 enhancements. This web interface is provided as an additional secure point of access for development, demonstration, and ease of use.</p>
+                </div>
+                <div class="info-card">
+                    <h3><i class="fas fa-download"></i> Claude Desktop Integration</h3>
+                    <p>Connect your Claude Desktop to this hosted MCP server in 4 simple steps:</p>
+                    <ol class="integration-steps">
+                        <li>Open Claude Desktop settings</li>
+                        <li>Navigate to "MCP Servers" section</li>
+                        <li>Add new server named "cosmos"</li>
+                        <li>Use the configuration below (no installation required)</li>
+                    </ol>
+                    <details class="config-details">
+                        <summary>Show Configuration JSON</summary>
+                        <pre><code>{
+  "mcpServers": {
+    "cosmos": {
+      "command": "node",
+      "args": ["https://cosmos-mcp-server.replit.app/dist/index.js"]
+    }
+  }
+}</code></pre>
+                    </details>
+                </div>
+                <div class="info-card">
+                    <h3><i class="fas fa-headset"></i> Development Team Support</h3>
+                    <p>Need help with Cosmos? Contact our development team:</p>
+                    <p>📧 <a href="mailto:support+cosmos@p360platform.com">Email Support</a> | 📱 <a href="sms:+15551234567">Text Support Available</a></p>
+                </div>
+            </div>
+        </main>
+
+        <!-- Tutorial Modal -->
+        <div class="tutorial-modal" id="tutorialModal">
+            <div class="tutorial-content">
+                <div class="tutorial-step" data-step="1">
+                    <h2>Welcome to Cosmos!</h2>
+                    <p>Your AI-powered mortgage partner management platform</p>
+                    <div class="tutorial-visual">
+                        <i class="fas fa-rocket tutorial-icon"></i>
+                    </div>
+                </div>
+                <div class="tutorial-step" data-step="2" style="display: none;">
+                    <h2>Dashboard Overview</h2>
+                    <p>Access widgets for partner analysis, competitor tracking, and automated communications</p>
+                    <div class="tutorial-visual">
+                        <i class="fas fa-th-large tutorial-icon"></i>
+                    </div>
+                </div>
+                <div class="tutorial-step" data-step="3" style="display: none;">
+                    <h2>Next Action AI</h2>
+                    <p>Generate intelligent recommendations based on partner performance and compliance data</p>
+                    <div class="tutorial-visual">
+                        <i class="fas fa-brain tutorial-icon"></i>
+                    </div>
+                </div>
+                <div class="tutorial-controls">
+                    <button id="tutorialPrev" disabled>Previous</button>
+                    <button id="tutorialNext">Next</button>
+                    <button id="tutorialSkip">Skip Tutorial</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-spinner"></div>
+            <p>Generating recommendations...</p>
+        </div>
+    </div>
+
+    <script src="/script.js"></script>
+</body>
+</html>

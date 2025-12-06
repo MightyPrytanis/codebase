@@ -1,0 +1,31 @@
+{
+  "data_sources": {
+    "user_document": {
+      "type": "text_file",
+      "path": "user_test.txt",
+      "enabled": true
+    }
+  },
+  "processors": {
+    "keyword_matcher": {
+      "type": "keyword",
+      "config_path": "attached_assets/Projexts and Keywords_1753336389930.txt",
+      "enabled": true,
+      "case_sensitive": false
+    }
+  },
+  "outputs": {
+    "text_files": {
+      "type": "text_file",
+      "enabled": true,
+      "output_dir": "output"
+    }
+  },
+  "logging": {
+    "level": "INFO",
+    "console": true
+  },
+  "security": {
+    "prompt_delete_outputs": false
+  }
+}

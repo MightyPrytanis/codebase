@@ -10,18 +10,36 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, Send, RefreshCw, Sparkles, TrendingUp, Heart, Lightbulb } from "lucide-react";
-import { untoldEngine, JournalEntry, JournalFeedback } from "@/lib/untold-engine-api";
 import { showAIOfflineError } from "@/lib/ai-error-helper";
+import { executeCyranoTool } from "@/lib/cyrano-api";
 
 interface JournalingProps {
   userId?: string;
 }
 
+// Temporary interfaces - will be replaced when backend is fully integrated
+interface JournalEntry {
+  id?: string;
+  content: string;
+  timestamp?: string;
+  tags?: string[];
+  mood?: string;
+}
+
+interface JournalFeedback {
+  insights: string[];
+  patterns: string[];
+  suggestions: string[];
+  encouragement?: string;
+}
+
 /**
  * GoodCounsel Journaling Component
  * 
- * Integrates with Untold Engine for journaling with AI-powered feedback and insights.
+ * Wellness journaling with AI-powered feedback and insights.
  * Provides a safe space for attorneys to reflect, process, and receive supportive guidance.
+ * 
+ * NOTE: Currently stubbed - will be fully integrated with wellness_journal tool in Phase 4.
  */
 export function GoodCounselJournaling({ userId }: JournalingProps) {
   const [entry, setEntry] = useState("");
@@ -40,8 +58,25 @@ export function GoodCounselJournaling({ userId }: JournalingProps) {
   const loadRecentEntries = async () => {
     setIsLoadingEntries(true);
     try {
-      const entries = await untoldEngine.getEntries(5, 0);
-      setRecentEntries(entries);
+      // TODO: Replace with wellness_journal tool call
+      const userIdNum = userId ? parseInt(userId) : 1; // Default to 1 for now
+      const result = await executeCyranoTool('wellness_journal', {
+        action: 'get_entries',
+        userId: userIdNum,
+        limit: 5,
+        offset: 0,
+      });
+      
+      if (result.isError) {
+        console.error('Error loading journal entries:', result.content[0]?.text);
+        return;
+      }
+      
+      const entries = typeof result.content[0]?.text === 'string'
+        ? JSON.parse(result.content[0].text)
+        : result.content[0]?.text;
+      
+      setRecentEntries(entries || []);
     } catch (error) {
       console.error('Error loading journal entries:', error);
       // Don't show error to user - journaling should be non-intrusive
@@ -55,21 +90,32 @@ export function GoodCounselJournaling({ userId }: JournalingProps) {
 
     setIsSubmitting(true);
     try {
-      const newEntry: JournalEntry = {
+      const userIdNum = userId ? parseInt(userId) : 1; // Default to 1 for now
+      
+      // Create entry via wellness_journal tool
+      const result = await executeCyranoTool('wellness_journal', {
+        action: 'create_entry',
+        userId: userIdNum,
         content: entry.trim(),
         mood: mood.trim() || undefined,
         tags: tags,
-        context: 'goodcounsel',
-        timestamp: new Date().toISOString(),
-      };
-
-      const createdEntry = await untoldEngine.createEntry(newEntry);
+      });
+      
+      if (result.isError) {
+        throw new Error(result.content[0]?.text || 'Failed to create journal entry');
+      }
+      
+      const createdEntry = typeof result.content[0]?.text === 'string'
+        ? JSON.parse(result.content[0].text)
+        : result.content[0]?.text;
       
       // Add to recent entries
       setRecentEntries([createdEntry, ...recentEntries.slice(0, 4)]);
       
       // Get feedback
-      await getFeedback([createdEntry.id!]);
+      if (createdEntry.id) {
+        await getFeedback([createdEntry.id]);
+      }
       
       // Clear form
       setEntry("");
@@ -84,9 +130,26 @@ export function GoodCounselJournaling({ userId }: JournalingProps) {
   };
 
   const getFeedback = async (entryIds?: string[]) => {
+    if (!entryIds || entryIds.length === 0) return;
+    
     setIsLoadingFeedback(true);
     try {
-      const feedbackData = await untoldEngine.getFeedback(entryIds);
+      // Get feedback for the first entry ID
+      const result = await executeCyranoTool('wellness_journal', {
+        action: 'get_feedback',
+        userId: userId ? parseInt(userId) : 1,
+        entryId: entryIds[0],
+      });
+      
+      if (result.isError) {
+        console.error('Error getting feedback:', result.content[0]?.text);
+        return;
+      }
+      
+      const feedbackData = typeof result.content[0]?.text === 'string'
+        ? JSON.parse(result.content[0].text)
+        : result.content[0]?.text;
+      
       setFeedback(feedbackData);
     } catch (error) {
       console.error('Error getting feedback:', error);

@@ -14,6 +14,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { Link as RouterLink } from "wouter";
+import { useTheme } from "@/components/theme/theme-provider";
+import { ThemeName } from "@/lib/theme";
 
 export default function SettingsPage() {
   const [profileData, setProfileData] = useState({
@@ -21,11 +23,11 @@ export default function SettingsPage() {
     email: "",
     specialization: "",
   });
+  const { theme, setTheme } = useTheme();
   const [preferences, setPreferences] = useState({
     emailNotifications: true,
     desktopNotifications: false,
     weeklyReports: true,
-    theme: "dark",
     timeZone: "America/Detroit",
   });
 
@@ -262,16 +264,14 @@ export default function SettingsPage() {
 
                 <div>
                   <Label className="text-slate-300">Theme</Label>
-                  <Select value={preferences.theme} onValueChange={(value) => 
-                    setPreferences(prev => ({ ...prev, theme: value }))
-                  }>
+                  <Select value={theme} onValueChange={(value) => setTheme(value as ThemeName)}>
                     <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent className="bg-slate-800 border-slate-600">
-                      <SelectItem value="dark" className="text-white">Dark Theme</SelectItem>
-                      <SelectItem value="light" className="text-white">Light Theme</SelectItem>
-                      <SelectItem value="auto" className="text-white">System Default</SelectItem>
+                      <SelectItem value="light" className="text-white">Light</SelectItem>
+                      <SelectItem value="control-room" className="text-white">Control Room</SelectItem>
+                      <SelectItem value="ad-astra" className="text-white">Ad Astra (LCARS)</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

@@ -1,0 +1,276 @@
+/*
+ * Copyright 2025 Cognisint LLC
+ * Licensed under the Apache License, Version 2.0
+ * See LICENSE.md for full license text
+ */
+
+/**
+ * Ad Astra Theme - LCARS-inspired Star Trek aesthetic
+ * 
+ * Characteristics:
+ * - Black backgrounds (#000000)
+ * - Orange/yellow accents (#FF9900, #FFCC00)
+ * - Rounded panel corners (distinctive LCARS style)
+ * - Information-dense layouts
+ * - Distinctive button and panel styling
+ */
+
+[data-theme="ad-astra"] {
+  /* LCARS Color Palette */
+  --lcars-black: #000000;
+  --lcars-dark-gray: #1a1a1a;
+  --lcars-orange: #FF9900;
+  --lcars-yellow: #FFCC00;
+  --lcars-red: #FF3300;
+  --lcars-blue: #0099FF;
+  --lcars-green: #00FF99;
+  --lcars-purple: #9966FF;
+  --lcars-amber: #996633;
+
+  /* Background Colors */
+  --background: var(--lcars-black);
+  --foreground: var(--lcars-yellow);
+  --muted: var(--lcars-dark-gray);
+  --muted-foreground: var(--lcars-amber);
+  
+  /* Panel Colors */
+  --card: rgba(255, 153, 0, 0.1);
+  --card-foreground: var(--lcars-yellow);
+  --popover: rgba(255, 153, 0, 0.15);
+  --popover-foreground: var(--lcars-yellow);
+  
+  /* Border Colors */
+  --border: var(--lcars-orange);
+  --input: rgba(255, 153, 0, 0.2);
+  
+  /* Primary Colors */
+  --primary: var(--lcars-orange);
+  --primary-foreground: var(--lcars-black);
+  --secondary: var(--lcars-dark-gray);
+  --secondary-foreground: var(--lcars-yellow);
+  
+  /* Accent Colors */
+  --accent: var(--lcars-yellow);
+  --accent-foreground: var(--lcars-black);
+  
+  /* Status Colors */
+  --destructive: var(--lcars-red);
+  --destructive-foreground: var(--lcars-yellow);
+  --ring: var(--lcars-orange);
+  
+  /* Status-specific */
+  --status-success: var(--lcars-green);
+  --status-warning: var(--lcars-yellow);
+  --status-critical: var(--lcars-red);
+  --status-processing: var(--lcars-blue);
+  
+  /* Border Radius - LCARS uses rounded corners */
+  --radius: 1rem;
+  
+  /* Panel Glass Effect - minimal for LCARS */
+  --panel-glass: rgba(255, 153, 0, 0.1);
+  --panel-border: var(--lcars-orange);
+}
+
+[data-theme="ad-astra"] body {
+  background-color: var(--lcars-black);
+  color: var(--lcars-yellow);
+  font-family: 'Helvetica Neue', 'Arial Narrow', 'Arial', sans-serif;
+}
+
+/* LCARS Panel Styling */
+[data-theme="ad-astra"] .bg-panel-glass {
+  background: rgba(255, 153, 0, 0.1);
+  border: 2px solid var(--lcars-orange);
+  border-radius: 1rem 0 1rem 0; /* Distinctive LCARS corner style */
+  box-shadow: 0 0 10px rgba(255, 153, 0, 0.3);
+}
+
+[data-theme="ad-astra"] .border-panel-border {
+  border-color: var(--lcars-orange);
+}
+
+/* LCARS Button Styling */
+[data-theme="ad-astra"] button {
+  border-radius: 0.5rem 0 0.5rem 0; /* LCARS button style */
+  border: 2px solid var(--lcars-orange);
+  background: rgba(255, 153, 0, 0.1);
+  color: var(--lcars-yellow);
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+[data-theme="ad-astra"] button:hover {
+  background: rgba(255, 153, 0, 0.2);
+  box-shadow: 0 0 15px rgba(255, 153, 0, 0.5);
+}
+
+[data-theme="ad-astra"] button:active {
+  background: rgba(255, 153, 0, 0.3);
+}
+
+/* LCARS Badge Styling */
+[data-theme="ad-astra"] .badge {
+  border-radius: 0.5rem 0 0.5rem 0;
+  border: 1px solid var(--lcars-orange);
+  background: rgba(255, 153, 0, 0.15);
+  color: var(--lcars-yellow);
+  font-weight: 600;
+}
+
+/* LCARS Card Styling */
+[data-theme="ad-astra"] .card {
+  background: rgba(255, 153, 0, 0.1);
+  border: 2px solid var(--lcars-orange);
+  border-radius: 1rem 0 1rem 0;
+  color: var(--lcars-yellow);
+}
+
+/* LCARS Input Styling */
+[data-theme="ad-astra"] input,
+[data-theme="ad-astra"] textarea,
+[data-theme="ad-astra"] select {
+  background: rgba(255, 153, 0, 0.1);
+  border: 2px solid var(--lcars-orange);
+  border-radius: 0.5rem 0 0.5rem 0;
+  color: var(--lcars-yellow);
+}
+
+[data-theme="ad-astra"] input:focus,
+[data-theme="ad-astra"] textarea:focus,
+[data-theme="ad-astra"] select:focus {
+  outline: none;
+  border-color: var(--lcars-yellow);
+  box-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+}
+
+/* LCARS Workflow Status Panels */
+[data-theme="ad-astra"] .workflow-status-panel {
+  background: rgba(255, 153, 0, 0.1);
+  border: 3px solid var(--lcars-orange);
+  border-radius: 1.5rem 0 1.5rem 0;
+  box-shadow: 0 0 20px rgba(255, 153, 0, 0.4);
+}
+
+[data-theme="ad-astra"] .workflow-status-panel h3 {
+  color: var(--lcars-yellow);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* LCARS Alert/Status Colors */
+[data-theme="ad-astra"] .text-success {
+  color: var(--lcars-green);
+}
+
+[data-theme="ad-astra"] .text-warning {
+  color: var(--lcars-yellow);
+}
+
+[data-theme="ad-astra"] .text-critical {
+  color: var(--lcars-red);
+}
+
+[data-theme="ad-astra"] .text-info {
+  color: var(--lcars-blue);
+}
+
+/* LCARS Header Styling */
+[data-theme="ad-astra"] .header {
+  background: rgba(255, 153, 0, 0.15);
+  border-bottom: 3px solid var(--lcars-orange);
+  box-shadow: 0 4px 20px rgba(255, 153, 0, 0.3);
+}
+
+/* LCARS Widget Styling */
+[data-theme="ad-astra"] .widget {
+  background: rgba(255, 153, 0, 0.1);
+  border: 2px solid var(--lcars-orange);
+  border-radius: 1rem 0 1rem 0;
+  box-shadow: 0 0 15px rgba(255, 153, 0, 0.3);
+}
+
+[data-theme="ad-astra"] .widget-header {
+  border-bottom: 2px solid var(--lcars-orange);
+  padding: 0.75rem 1rem;
+}
+
+[data-theme="ad-astra"] .widget-title {
+  color: var(--lcars-yellow);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* LCARS Compact HUD */
+[data-theme="ad-astra"] .compact-hud {
+  background: rgba(255, 153, 0, 0.15);
+  border-bottom: 3px solid var(--lcars-orange);
+  box-shadow: 0 4px 20px rgba(255, 153, 0, 0.3);
+}
+
+/* LCARS Scrollbar Styling */
+[data-theme="ad-astra"] ::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+[data-theme="ad-astra"] ::-webkit-scrollbar-track {
+  background: var(--lcars-black);
+  border: 1px solid var(--lcars-orange);
+}
+
+[data-theme="ad-astra"] ::-webkit-scrollbar-thumb {
+  background: var(--lcars-orange);
+  border-radius: 0.5rem 0 0.5rem 0;
+}
+
+[data-theme="ad-astra"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--lcars-yellow);
+}
+
+/* LCARS Link Styling */
+[data-theme="ad-astra"] a {
+  color: var(--lcars-yellow);
+  text-decoration: underline;
+}
+
+[data-theme="ad-astra"] a:hover {
+  color: var(--lcars-orange);
+  text-shadow: 0 0 10px rgba(255, 204, 0, 0.5);
+}
+
+/* LCARS Glow Effects */
+[data-theme="ad-astra"] .lcars-glow {
+  box-shadow: 0 0 20px rgba(255, 153, 0, 0.5);
+}
+
+[data-theme="ad-astra"] .lcars-glow-strong {
+  box-shadow: 0 0 30px rgba(255, 153, 0, 0.7);
+}
+
+/* LCARS Panel Indicator (the distinctive LCARS corner element) */
+[data-theme="ad-astra"] .lcars-indicator {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background: var(--lcars-orange);
+  border-radius: 0 0 0 20px;
+  top: 0;
+  left: 0;
+}
+
+/* LCARS Typography Enhancements */
+[data-theme="ad-astra"] h1,
+[data-theme="ad-astra"] h2,
+[data-theme="ad-astra"] h3,
+[data-theme="ad-astra"] h4,
+[data-theme="ad-astra"] h5,
+[data-theme="ad-astra"] h6 {
+  font-family: 'Helvetica Neue Condensed', 'Arial Narrow', 'Helvetica', sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--lcars-yellow);
+}
+

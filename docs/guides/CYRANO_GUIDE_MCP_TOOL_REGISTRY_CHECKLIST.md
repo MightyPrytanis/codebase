@@ -90,7 +90,7 @@ Status: Active
 | Tool Name | Status | Schema | Error Handling | Tests | Notes |
 |-----------|--------|--------|----------------|-------|-------|
 | `ai_orchestrator` | 🔨 | ✅ | ✅ | ❌ | In ai-orchestrator.ts |
-| `tool_enhancer` | 🔨 | ✅ | ✅ | ❌ | In tool-enhancer.ts |
+| `tool_enhancer` | 🔨 | ✅ | ✅ | ❌ | Menlo Park |
 
 ---
 
@@ -311,7 +311,7 @@ Tools exposed via HTTP bridge for UI integration:
 1. Clio integration (OAuth flow)
 2. GoodCounsel integration
 3. AI orchestrator
-4. Tool enhancer
+4. Menlo Park
 
 ### Phase 5: Utilities (Week 5)
 1. System status

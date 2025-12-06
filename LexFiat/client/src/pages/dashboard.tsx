@@ -17,6 +17,7 @@ import DraftPrepPanel from "@/components/dashboard/draft-prep-panel";
 import AttorneyReviewPanel from "@/components/dashboard/attorney-review-panel";
 import HelpChatPanel from "@/components/dashboard/help-chat-panel";
 import WorkflowStageItem from "@/components/dashboard/workflow-stage-item";
+import { WorkflowStatusPanels } from "@/components/dashboard/workflow-status-panels";
 import "@/styles/dashboard-html.css";
 import { 
   DocumentIntakeIcon, 
@@ -32,6 +33,7 @@ import {
   BetaTestingIcon
 } from "@cyrano/shared-assets/icon-components";
 import { SearchCheck, Send, MessageSquare, TrendingUp } from "lucide-react";
+import { executeCyranoTool } from "@/lib/cyrano-api";
 
 export default function Dashboard() {
   const [currentTickerIndex, setCurrentTickerIndex] = useState(0);
@@ -112,8 +114,36 @@ export default function Dashboard() {
   };
 
   const openTrackingCard = async (itemId: string) => {
-    // TODO: Fetch tracking data from API
-    setTrackingCardData({ id: itemId, title: 'Item Tracking' });
+    try {
+      const result = await executeCyranoTool('clio_integration', {
+        action: 'get_item_tracking',
+        item_id: itemId,
+      });
+      
+      if (result.isError) {
+        // Fallback to basic data if API fails
+        setTrackingCardData({ 
+          id: itemId, 
+          title: 'Item Tracking',
+          error: result.content[0]?.text || 'Unable to fetch tracking data'
+        });
+      } else {
+        const trackingData = typeof result.content[0]?.text === 'string'
+          ? JSON.parse(result.content[0].text)
+          : result.content[0]?.text;
+        setTrackingCardData({ 
+          id: itemId, 
+          title: trackingData.title || 'Item Tracking',
+          ...trackingData
+        });
+      }
+    } catch (error) {
+      setTrackingCardData({ 
+        id: itemId, 
+        title: 'Item Tracking',
+        error: 'Failed to load tracking data'
+      });
+    }
     setTrackingCardOpen(true);
   };
 
@@ -158,9 +188,27 @@ export default function Dashboard() {
     setDraggedStage(targetStageId);
   };
 
-  const handleDragEnd = () => {
+  const handleDragEnd = async () => {
     setDraggedStage(null);
-    // TODO: Save workflow order to backend
+    // Save workflow order to backend
+    try {
+      const customStages = workflowStages.map((stage, index) => ({
+        id: stage.id,
+        name: stage.title,
+        agent: stage.id, // Map stage ID to agent name
+        description: stage.description,
+        order: index,
+      }));
+      
+      await executeCyranoTool('workflow_manager', {
+        action: 'customize',
+        workflow_type: 'custom',
+        custom_stages: customStages,
+      });
+    } catch (error) {
+      console.error('Failed to save workflow order:', error);
+      // Silently fail - order is still saved in local state
+    }
   };
 
   const toggleWidgetMenu = () => {
@@ -266,85 +314,26 @@ export default function Dashboard() {
           {/* Beta Testing Widget removed - now using slide-out sidebar */}
         </div>
 
-        {/* Workflow Area */}
-        <div className="workflow-area">
-          <div className="workflow-header">
-            <h2 className="workflow-title">Workflow</h2>
-            <div className="widget-controls">
-              <button className="control-btn add-widget" onClick={toggleWidgetMenu} title="Add/Remove Workflow Widgets">
-                <span className="control-icon">+</span>
-                <span className="control-text">Widgets</span>
-              </button>
-            </div>
-          </div>
-          
-          {/* Widget Menu */}
-          {widgetMenuOpen && (
-            <div className="widget-menu" id="widget-menu">
-              <div className="widget-menu-header">
-                <h3>Customize Workflow</h3>
-                <button className="close-menu" onClick={toggleWidgetMenu}>×</button>
-              </div>
-              <div className="widget-menu-content">
-                <div className="available-widgets">
-                  <h4>Available Widgets</h4>
-                  <div className="widget-option" data-widget="final-review">
-                    <SearchCheck className="widget-icon" size={20} />
-                    <span className="widget-name">Final Review</span>
-                    <span className="widget-desc">Final quality check</span>
-                  </div>
-                  <div className="widget-option" data-widget="file-serve">
-                    <Send className="widget-icon" size={20} />
-                    <span className="widget-name">File and Serve</span>
-                    <span className="widget-desc">Document filing</span>
-                  </div>
-                  <div className="widget-option" data-widget="client-update">
-                    <MessageSquare className="widget-icon" size={20} />
-                    <span className="widget-name">Client Update</span>
-                    <span className="widget-desc">Client communication</span>
-                  </div>
-                  <div className="widget-option" data-widget="progress-summary">
-                    <TrendingUp className="widget-icon" size={20} />
-                    <span className="widget-name">Progress Summary</span>
-                    <span className="widget-desc">Case progress tracking</span>
-                  </div>
-                </div>
-                <div className="current-widgets">
-                  <h4>Current Workflow</h4>
-                  <div id="current-widgets-list">
-                    {/* Dynamically populated */}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-          
-          <div className="workflow-pipeline" id="workflow-pipeline">
-            {workflowStages.map((stage, index) => (
-              <React.Fragment key={stage.id}>
-                <WorkflowStageItem
-                  stageId={stage.id}
-                  title={stage.title}
-                  description={stage.description}
-                  metrics={stage.metrics}
-                  isDragging={draggedStage === stage.id}
-                  onDragStart={() => handleDragStart(stage.id)}
-                  onDragOver={(e) => handleDragOver(e, stage.id)}
-                  onDragEnd={handleDragEnd}
-                  onClick={() => expandPanel(stage.id)}
-                  onExpand={(e) => { e.stopPropagation(); expandPanel(stage.id); }}
-                  onRemove={(e) => { e.stopPropagation(); }}
-                />
-                {index < workflowStages.length - 1 && (
-                  <>
-                    <div className="connector-line" style={{ left: `${332 + (index * 352)}px`, width: '40px' }}></div>
-                    <div className="connector-arrow" style={{ left: `${368 + (index * 352)}px` }}>→</div>
-                  </>
-                )}
-              </React.Fragment>
-            ))}
-          </div>
-        </div>
+        {/* Workflow Status Panels - Three Large Panels */}
+        <WorkflowStatusPanels
+          onActionClick={(action, type) => {
+            // Handle panel clicks - can expand to specific panels or filter views
+            if (type === "incoming") {
+              if (action === "respond") expandPanel("intake");
+              else if (action === "review_for_response" || action === "review_and_fwd") expandPanel("analysis");
+              else if (action === "read_fyi") expandPanel("intake");
+              else expandPanel("intake");
+            } else if (type === "in_progress") {
+              if (action === "drafts_in_progress") expandPanel("draft-prep");
+              else if (action === "items_waiting_review") expandPanel("attorney-review");
+              else expandPanel("draft-prep");
+            } else if (type === "ready") {
+              if (action === "drafts_ready") expandPanel("draft-prep");
+              else if (action === "reviews_pending") expandPanel("attorney-review");
+              else expandPanel("draft-prep");
+            }
+          }}
+        />
       </div>
 
       {/* Testing Sidebar */}

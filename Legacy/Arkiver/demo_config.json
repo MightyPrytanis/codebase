@@ -1,0 +1,40 @@
+{
+  "version": "2.0.0",
+  "data_sources": {
+    "conversations": {
+      "type": "conversation_json",
+      "path": "attached_assets/reformatted_conversations_1753336339888.json",
+      "enabled": true
+    },
+    "test_document": {
+      "type": "text_file",
+      "path": "test_document.txt",
+      "enabled": true
+    }
+  },
+  "processors": {
+    "keyword_matcher": {
+      "type": "keyword",
+      "config_path": "attached_assets/Projexts and Keywords_1753336389930.txt",
+      "enabled": true,
+      "case_sensitive": false
+    }
+  },
+  "outputs": {
+    "text_files": {
+      "type": "text_file",
+      "enabled": true,
+      "output_dir": "output",
+      "include_uncategorized": true,
+      "include_context": true
+    }
+  },
+  "logging": {
+    "level": "INFO",
+    "console": true,
+    "file": null
+  },
+  "security": {
+    "prompt_delete_outputs": true
+  }
+}

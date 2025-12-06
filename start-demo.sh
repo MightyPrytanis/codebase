@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# Start Demo Script for LexFiat + Cyrano
-# This script starts both the Cyrano MCP HTTP bridge and LexFiat frontend
+# Start Demo Script for LexFiat + Arkiver + Cyrano
+# This script starts the Cyrano MCP HTTP bridge and both frontend apps
 
-echo "🚀 Starting LexFiat Demo..."
+echo "🚀 Starting Demo (LexFiat + Arkiver + Cyrano)..."
 echo "================================"
 
 # Colors
@@ -67,6 +67,29 @@ start_lexfiat() {
     fi
 }
 
+# Start Arkiver Frontend
+start_arkiver() {
+    echo -e "${YELLOW}📦 Starting Arkiver Frontend...${NC}"
+    cd /Users/davidtowne/Desktop/Coding/codebase/apps/arkiver/frontend
+    
+    # Find an available port starting from 4173
+    ARKIVER_PORT=4173
+    while ! check_port $ARKIVER_PORT; do
+        ARKIVER_PORT=$((ARKIVER_PORT + 1))
+    done
+    
+    npm run preview -- --port $ARKIVER_PORT > /tmp/arkiver.log 2>&1 &
+    ARKIVER_PID=$!
+    echo $ARKIVER_PID > /tmp/arkiver.pid
+    echo $ARKIVER_PORT > /tmp/arkiver.port
+    echo -e "${GREEN}✅ Arkiver started (PID: $ARKIVER_PID)${NC}"
+    echo "   Logs: /tmp/arkiver.log"
+    
+    # Wait a bit for Vite to start
+    sleep 2
+    echo -e "${GREEN}✅ Arkiver should be available at http://localhost:$ARKIVER_PORT${NC}"
+}
+
 # Cleanup function
 cleanup() {
     echo ""
@@ -83,15 +106,25 @@ cleanup() {
         echo "   Stopped LexFiat (PID: $LEXFIAT_PID)"
         rm /tmp/lexfiat.pid
     fi
+    if [ -f /tmp/arkiver.pid ]; then
+        ARKIVER_PID=$(cat /tmp/arkiver.pid)
+        kill $ARKIVER_PID 2>/dev/null
+        echo "   Stopped Arkiver (PID: $ARKIVER_PID)"
+        rm /tmp/arkiver.pid
+        rm /tmp/arkiver.port 2>/dev/null
+    fi
     exit 0
 }
 
 # Trap Ctrl+C
 trap cleanup INT TERM
 
-# Start both servers
+# Start all servers
 start_cyrano
 start_lexfiat
+start_arkiver
+
+ARKIVER_PORT=$(cat /tmp/arkiver.port 2>/dev/null || echo "4173")
 
 echo ""
 echo "================================"
@@ -99,13 +132,14 @@ echo -e "${GREEN}🎉 Demo is running!${NC}"
 echo ""
 echo "📍 URLs:"
 echo "   LexFiat:  http://localhost:5173"
+echo "   Arkiver:  http://localhost:$ARKIVER_PORT"
 echo "   Cyrano:   http://localhost:5002"
 echo ""
 echo "📊 Check status:"
 echo "   Cyrano health:  curl http://localhost:5002/health"
 echo "   Cyrano tools:   curl http://localhost:5002/mcp/tools"
 echo ""
-echo "🛑 Press Ctrl+C to stop both servers"
+echo "🛑 Press Ctrl+C to stop all servers"
 echo ""
 
 # Wait for user interrupt

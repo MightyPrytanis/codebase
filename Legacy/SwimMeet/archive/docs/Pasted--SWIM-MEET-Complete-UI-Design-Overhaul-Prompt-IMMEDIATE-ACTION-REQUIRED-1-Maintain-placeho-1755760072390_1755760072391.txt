@@ -1,0 +1,304 @@
+# SWIM MEET: Complete UI Design Overhaul Prompt
+
+## IMMEDIATE ACTION REQUIRED
+
+1. **Maintain placeholder sans-serif brand banner/header** until wordmark is developed
+1. **Implement graceful degradation** throughout all UI components
+1. **Apply core design principles** to every design decision
+
+## CORE DESIGN PRINCIPLES (MANDATORY)
+
+### 1. Simple Over Complex
+
+- Clean, geometric layouts with minimal UI elements
+- Direct functionality without unnecessary ornamental features
+- Streamlined user flows that prioritize essential actions
+
+### 2. Minimize End-User Costs
+
+- Use free cloud storage (iCloud, Google Drive, Dropbox) - NO paid storage solutions
+- Optimize for minimal data usage and bandwidth consumption
+- Efficient processing that doesn’t strain user devices
+- No premium dependencies that create ongoing costs
+- Luxurious appearance achieved through precision and simplicity, not resource-heavy effects
+
+### 3. Full Portability & Interoperability
+
+- Works seamlessly across devices and platforms
+- Standard technologies only (no proprietary dependencies)
+- Export capabilities to multiple formats
+- Compatible with existing enterprise workflows
+
+### 4. Quality-First Decision Making
+
+- When principles conflict, user decides the tradeoffs
+- Never sacrifice core functionality for aesthetic preferences
+- Performance and reliability take precedence over visual effects
+
+### 5. Graceful Degradation
+
+- Core functionality works even when advanced features fail
+- Progressive enhancement: basic features first, enhanced features layered on
+- Fallback options for every interactive element
+- Clear status indicators when features are unavailable
+
+## AESTHETIC VISION: MODERNIST PRECISION
+
+### Visual Language
+
+**Structure IS Ornament**: Clean geometric forms, precise panel arrangements, and functional elements create visual interest without superfluous decoration.
+
+**Microsoft Metro/MDL Influence**: Similar clean typography and layout principles, but with:
+
+- More sophisticated color palette (see below)
+- Aquatic photography integration
+- Glass/metal panel metaphor instead of flat tiles
+
+### Layout Architecture
+
+```
+┌─────────────────────────────────────┐
+│  [Sharp-edged navigation panels]    │
+├─────────────────────────────────────┤
+│  [Glass panel: DIVE/TURN/WORK]     │
+│  [Precise geometric spacing]        │
+├─────────────────────────────────────┤
+│  [Underwater photo background]     │
+│  [Angular response containers]      │
+└─────────────────────────────────────┘
+```
+
+**SHARP GEOMETRIC PRECISION**
+
+- Primary UI elements use sharp, precise edges
+- Panels fit together like engineered glass/metal components
+- Curvilinear elements reserved for naturalistic forms: waves, swim strokes, medal shapes, AI logos/favicons
+- Consistent angular geometry for functional interface components
+
+### Color Palette: Carefully Curated Aquatic
+
+```css
+Primary Colors:
+- Deep Pool Blue: #1B4B73 (trust, depth)
+- Chrome Silver: #C5D1D8 (precision, clarity) 
+- Lane Line White: #F8FAFB (clean, professional)
+
+Accent Colors:
+- Competitive Gold: #B8860B (awards, excellence)
+- Underwater Teal: #4A8B8B (aquatic depth)
+- Surface Blue: #87CEEB (interface highlights)
+
+Error/Warning:
+- Poolside Red: #C53030 (clear, not alarming)
+- Caution Amber: #D69E2E (system status)
+```
+
+### Typography: Clean & Professional
+
+- **Headers**: Sharp, sans-serif fonts (Roboto, Inter, or system defaults)
+- **Body**: High legibility, sufficient contrast
+- **Weights**: Use font weight variation for hierarchy, not decorative fonts
+- **Spacing**: Generous but precise - follow 8px grid system
+
+## AQUATIC PHOTOGRAPHY INTEGRATION
+
+### “Splash” Elements (Video/Photo)
+
+**Acceptable Imagery**:
+
+- Underwater lane lines (precision, competition)
+- Pool surface from below (depth, clarity)
+- Swimming pool architecture (clean geometric lines)
+- Abstract water movement (fluid, dynamic)
+- Close-up bubbles/water texture (detail, immersion)
+
+**Implementation**:
+
+- Video elements should be subtle background enhancements
+- Photos should support function, not distract from it
+- All imagery must load progressively (graceful degradation)
+- Fallback to solid colors if media fails to load
+
+### Integration Strategy
+
+```html
+<!-- Example: Hero section with graceful degradation -->
+<section class="hero-panel" 
+         style="background: linear-gradient(to bottom, #1B4B73, #4A8B8B)">
+  <video autoplay muted loop class="background-video" 
+         poster="underwater-lanes-static.jpg">
+    <source src="underwater-lanes.mp4" type="video/mp4">
+    <!-- Graceful degradation: video fails, poster image shows -->
+  </video>
+  <!-- If both fail, CSS gradient background remains -->
+</section>
+```
+
+## FUNCTIONAL DESIGN ELEMENTS
+
+### Panel System: Glass/Metal Metaphor
+
+```css
+.swim-panel {
+  background: rgba(245, 247, 250, 0.95);
+  border: 1px solid #C5D1D8;
+  box-shadow: 
+    0 2px 8px rgba(27, 75, 115, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  /* Sharp edges only - NO border-radius */
+}
+
+.swim-panel-active {
+  border-color: #4A8B8B;
+  box-shadow: 
+    0 4px 16px rgba(27, 75, 115, 0.15),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+```
+
+### Navigation: Precision Engineering
+
+- **Mode Selection** (DIVE/TURN/WORK): Large, distinct panels that interlock visually
+- **AI Model Selection**: Clean grid with clear availability indicators
+- **Award System**: Geometric medal representations, not cutesy icons
+
+### Response Display: Structured Clarity
+
+```
+┌─── AI Model Name ─────────────────┐
+│ ■ [Status indicator]              │
+├───────────────────────────────────┤
+│                                   │
+│ [Response content in clean,       │
+│  readable typography]             │
+│                                   │
+├───────────────────────────────────┤
+│ [Award buttons: geometric shapes] │
+└───────────────────────────────────┘
+```
+
+## GRACEFUL DEGRADATION IMPLEMENTATION
+
+### Progressive Enhancement Layers
+
+**Layer 1: Core Functionality** (Always works)
+
+- Basic HTML forms and buttons
+- Essential text content
+- Solid color backgrounds
+- Standard system fonts
+
+**Layer 2: Enhanced Interface** (Loads if supported)
+
+- CSS glass/metal effects
+- Custom typography
+- Subtle animations
+- Background imagery
+
+**Layer 3: Rich Media** (Premium experience)
+
+- Video backgrounds
+- Advanced transitions
+- Interactive hover effects
+- High-resolution photography
+
+### Fallback Strategy
+
+```css
+/* Graceful degradation example */
+.hero-section {
+  /* Layer 1: Always works */
+  background: #1B4B73;
+  color: #F8FAFB;
+  
+  /* Layer 2: Enhanced if CSS3 supported */
+  background: linear-gradient(135deg, #1B4B73 0%, #4A8B8B 100%);
+  
+  /* Layer 3: Rich media if video supported */
+  background-image: url('underwater-fallback.jpg');
+}
+
+.hero-section video {
+  /* Only loads if video supported */
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+}
+```
+
+## MODERNIST IMPLEMENTATION GUIDELINES
+
+### Form Follows Function Examples
+
+**AI Response Cards**:
+
+- Function: Display AI output clearly
+- Form: Clean typography in geometric containers
+- Ornament: Subtle water texture or lane-line accents that don’t interfere with readability
+
+**Award System**:
+
+- Function: Quick visual feedback on response quality
+- Form: Geometric shapes (squares, diamonds) in medal colors
+- Ornament: Minimal metallic effects that reinforce the award metaphor
+
+**Navigation**:
+
+- Function: Switch between DIVE/TURN/WORK modes
+- Form: Large, clearly labeled panels with sharp transitions
+- Ornament: Abstract linear elements evocative of pool architecture (not literal lane dividers)
+
+### Technical Implementation Notes
+
+**Performance First**:
+
+- All visual effects must degrade gracefully on slower devices
+- Critical path rendering prioritizes functionality over aesthetics
+- Lazy-load non-essential imagery and videos
+
+**Accessibility**:
+
+- High contrast ratios (4.5:1 minimum)
+- Clear focus indicators for keyboard navigation
+- Screen reader compatible structure
+- Alternative text for all imagery
+
+**Cross-Platform Consistency**:
+
+- Test on mobile, tablet, desktop
+- Ensure touch targets meet minimum size requirements
+- Adapt panel layouts for different screen sizes
+- Maintain visual hierarchy across breakpoints
+
+## ANTI-PATTERNS TO AVOID
+
+❌ **Sharp corners everywhere** - Use geometric precision selectively
+❌ **Literal lane divider imagery** - Use abstract evocations instead
+❌ **Resource-heavy luxury effects** - Achieve premium feel through simplicity and precision
+❌ **Decorative fonts or script typography**
+❌ **Cute or playful iconography**
+❌ **Proprietary storage solutions that cost users money**
+❌ **Complex animations that slow down core functionality**
+❌ **Overwhelming visual effects that distract from AI responses**
+❌ **Non-functional decorative elements**
+
+## SUCCESS CRITERIA
+
+✅ **Professional appearance** - Looks appropriate for enterprise deployment
+✅ **Clear functionality** - Every visual element serves the user’s workflow
+✅ **Graceful degradation** - Works on all devices and connection speeds
+✅ **Cost consciousness** - No hidden fees or premium dependencies
+✅ **Aquatic precision** - Swimming metaphor enhances rather than distracts
+✅ **Modernist clarity** - Structure creates visual interest without ornamentation
+
+## IMPLEMENTATION PRIORITY
+
+1. **Foundation**: Apply core design principles and graceful degradation
+1. **Structure**: Implement glass/metal panel system with sharp geometries
+1. **Typography**: Clean, readable text hierarchy
+1. **Color**: Apply curated aquatic palette consistently
+1. **Enhancement**: Add photography/video elements progressively
+1. **Polish**: Subtle effects that support function
+
+Remember: Every design decision should serve the user’s need to collaborate effectively with AI while maintaining the sophisticated, engineering-precise aesthetic that reflects SWIM MEET’s institutional quality.

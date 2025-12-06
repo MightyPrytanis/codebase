@@ -1,0 +1,478 @@
+/* Industrial Cement/Asphalt Design System */
+
+:root {
+  /* Industrial Color Palette - Refined */
+  --cement-gray: #D4D4D4; /* Balanced cement gray - darker than Karl the Fog */
+  --asphalt-gray: #737373; /* Lighter asphalt gray for better contrast */
+  --concrete-background: #8B9DC3; /* Main background color */
+  
+  /* Mode-specific aquatic colors */
+  --dive-blue: #2563EB; /* Distinctive blue for DIVE mode */
+  --turn-purple: #7C3AED; /* Distinctive purple for TURN mode */
+  --work-teal: #DAA520; /* Gold accent for WORK mode */
+  --stats-orange: #EA580C; /* Stats button color */
+  --admin-indigo: #4F46E5; /* Admin button color */
+  --settings-amber: #D97706; /* Settings button color */
+  --logout-red: #DC2626; /* Logout button color */
+  
+  /* Override existing colors with industrial scheme */
+  --background: var(--cement-gray);
+  --card: var(--cement-gray);
+  --popover: var(--cement-gray);
+  --input: var(--cement-gray);
+  --sidebar: var(--cement-gray);
+  --muted: var(--asphalt-gray);
+  
+  /* Remove all rounded corners and shadows */
+  --radius: 0px;
+  --border-radius: 0px;
+  --shadow: none;
+  --shadow-sm: none;
+  --shadow-md: none;
+  --shadow-lg: none;
+  --shadow-xl: none;
+  --box-shadow: none;
+}
+
+/* Override all rounded corners globally */
+* {
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  text-shadow: none !important; /* No text shadows */
+}
+
+/* Modern readable typography */
+body, .swim-button, button, input, textarea, select {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI Variable Display', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  font-weight: 400 !important;
+  color: #171717 !important;
+  letter-spacing: -0.01em !important; /* Contemporary tightening */
+  font-size: 16px !important;
+  line-height: 1.5 !important;
+}
+
+/* Enhanced text contrast and size for better legibility */
+.swim-caption, .swim-mode-description, .mode-explanation {
+  color: #262626 !important; /* Darker text for better contrast */
+  font-weight: 400 !important;
+  font-size: 15px !important; /* Readable size */
+  line-height: 1.4 !important;
+  letter-spacing: -0.005em !important; /* Subtle refinement */
+}
+
+/* Aggressive modern typography targeting */
+h1, h2, h3, h4, h5, h6, 
+.panel-heading, .swim-subtitle, .swim-mode-title,
+.swim-section h3,
+/* Target specific classes used in the component */
+.bg-blue-600, .bg-purple-600, .bg-teal-600,
+.dive-panel, .turn-panel, .work-panel,
+.mode-explanation strong,
+/* All text elements */
+span, div, p, strong, b {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI Variable Display', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  font-weight: 300 !important; /* Ultra-light */
+  letter-spacing: -0.025em !important; /* Significant tightening */
+  line-height: 1.1 !important;
+}
+
+/* Specific targeting for mode titles */
+.swim-mode-title,
+.swim-mode-title div,
+.dive-panel .swim-mode-title,
+.turn-panel .swim-mode-title, 
+.work-panel .swim-mode-title {
+  font-weight: 300 !important;
+  font-size: 20px !important;
+  letter-spacing: -0.03em !important;
+}
+
+/* Section headings */
+.panel-heading,
+.swim-subtitle,
+h3.panel-heading,
+h3.swim-subtitle {
+  font-weight: 300 !important;
+  font-size: 22px !important;
+  letter-spacing: -0.025em !important;
+}
+
+/* Mode tab styling with distinctive colors */
+.dive-panel {
+  background: var(--dive-blue) !important;
+  color: white !important;
+}
+
+.turn-panel {
+  background: var(--turn-purple) !important;
+  color: white !important;
+}
+
+.work-panel {
+  background: var(--work-teal) !important;
+  color: white !important;
+}
+
+/* Active mode styling */
+.dive-panel.swim-mode-panel--active,
+.turn-panel.swim-mode-panel--active,
+.work-panel.swim-mode-panel--active {
+  opacity: 1 !important;
+}
+
+/* Inactive mode styling */
+.dive-panel:not(.swim-mode-panel--active) {
+  background: var(--cement-gray) !important;
+  color: var(--dive-blue) !important;
+}
+
+.turn-panel:not(.swim-mode-panel--active) {
+  background: var(--cement-gray) !important;
+  color: var(--turn-purple) !important;
+}
+
+.work-panel:not(.swim-mode-panel--active) {
+  background: var(--cement-gray) !important;
+  color: var(--work-teal) !important;
+}
+
+/* Navigation buttons with distinctive colors */
+button[data-testid*="stats"] {
+  background: var(--stats-orange) !important;
+  color: white !important;
+}
+
+button[data-testid*="admin"] {
+  background: var(--admin-indigo) !important;
+  color: white !important;
+}
+
+button[data-testid*="settings"] {
+  background: var(--settings-amber) !important;
+  color: white !important;
+}
+
+button[data-testid*="logout"] {
+  background: var(--logout-red) !important;
+  color: white !important;
+}
+
+/* Industrial Body with luxe background */
+body {
+  background: linear-gradient(135deg, var(--concrete-background) 0%, #9CA3AF 100%) !important;
+  min-height: 100vh;
+  font-feature-settings: "kern" 1, "liga" 1 !important; /* Typography refinement */
+}
+
+/* Industrial Panels with luxe sophistication */
+.swim-panel,
+.glass-panel,
+.glass-panel-large,
+.provider-card,
+.consistent-provider-card,
+.swim-mode-panel {
+  background: var(--cement-gray) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  margin: 5px 0 !important; /* Reduced vertical spacing */
+  position: relative !important;
+}
+
+/* Add subtle sophistication with minimal 3D effect */
+.swim-panel:hover,
+.provider-card:hover,
+.consistent-provider-card:hover {
+  background: var(--asphalt-gray) !important;
+  color: white !important;
+  transform: translateY(-1px) !important; /* Minimal 3D lift */
+  transition: all 0.2s ease !important;
+}
+
+/* AI Provider selection boxes - reduced spacing */
+.provider-grid {
+  gap: 6px !important; /* Reduced horizontal spacing */
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)) !important; /* Tighter columns */
+}
+
+.provider-grid > * {
+  margin: 3px !important; /* Reduced margins around provider cards */
+}
+
+/* Reduce spacing in provider cards */
+.provider-card,
+.consistent-provider-card {
+  padding: 12px !important; /* Reduced internal padding */
+}
+
+.provider-card .swim-provider-name,
+.consistent-provider-card .swim-provider-name {
+  margin-bottom: 6px !important; /* Reduced bottom margin */
+}
+
+/* Industrial Buttons with luxe sophistication */
+.swim-button,
+button {
+  background: var(--cement-gray) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  margin: 2px !important; /* Transparent spacing */
+  position: relative !important;
+  overflow: hidden !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.005em !important;
+  transition: all 0.15s ease !important;
+}
+
+/* Add subtle luxury hover effects */
+.swim-button:hover,
+button:hover {
+  background: var(--asphalt-gray) !important;
+  color: white !important;
+  transform: translateY(-0.5px) !important; /* Minimal lift */
+}
+
+/* Modern button typography */
+.swim-button,
+button {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI Variable Display', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  line-height: 1.2 !important;
+}
+
+/* Active states use asphalt gray */
+.swim-button:hover,
+.swim-panel--active,
+.swim-mode-panel--active,
+.provider-selected {
+  background: var(--asphalt-gray) !important;
+  color: white !important;
+}
+
+/* Industrial Input Fields */
+input,
+textarea,
+select {
+  background: var(--cement-gray) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  margin: 2px !important;
+}
+
+/* Industrial Cards and Containers */
+.mode-themed-container,
+.swim-section,
+.swim-grid {
+  background: transparent !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  gap: 10px !important; /* Transparent spacing */
+}
+
+/* Remove all borders and add transparent spacing */
+.swim-mode-selector > *,
+.provider-grid > *,
+.swim-grid > * {
+  margin: 10px !important;
+  border: none !important;
+  gap: 10px !important;
+}
+
+/* Header styling with luxe sophistication */
+header {
+  background: var(--cement-gray) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  margin-bottom: 10px !important;
+  position: relative !important;
+}
+
+/* Add subtle bottom accent for header */
+header::after {
+  content: '' !important;
+  position: absolute !important;
+  bottom: 0 !important;
+  left: 20px !important;
+  right: 20px !important;
+  height: 2px !important;
+  background: linear-gradient(90deg, var(--dive-blue) 0%, var(--turn-purple) 50%, var(--work-teal) 100%) !important;
+}
+
+/* Logo styling with luxe sophistication */
+.logo-container {
+  background: var(--cement-gray) !important;
+  border: 3px solid var(--asphalt-gray) !important; /* Refined border thickness */
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  position: relative !important;
+}
+
+/* Add subtle gradient overlay for luxury */
+.logo-container::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.02) 50%, rgba(0,0,0,0.05) 100%) !important;
+  pointer-events: none !important;
+}
+
+/* Response containers */
+.ai-response-container,
+.response-card {
+  background: var(--cement-gray) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  margin: 10px 0 !important;
+}
+
+/* Mode explanation boxes with enhanced sophistication */
+.mode-explanation {
+  background: var(--asphalt-gray) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  margin: 10px 0 !important;
+  padding: 18px !important; /* Slightly more generous padding */
+  position: relative !important;
+}
+
+/* Add subtle accent line for sophistication */
+.mode-explanation::before {
+  content: '' !important;
+  position: absolute !important;
+  left: 0 !important;
+  top: 0 !important;
+  bottom: 0 !important;
+  width: 4px !important;
+  background: var(--dive-blue) !important; /* Default accent */
+}
+
+.dive-explanation::before {
+  background: var(--dive-blue) !important;
+}
+
+.turn-explanation::before {
+  background: var(--turn-purple) !important;
+}
+
+.work-explanation::before {
+  background: var(--work-teal) !important;
+}
+
+/* File upload areas */
+.file-upload-area,
+.drag-drop-zone {
+  background: var(--cement-gray) !important;
+  border: 2px dashed var(--asphalt-gray) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Workflow builder styling */
+.workflow-builder-container {
+  background: var(--cement-gray) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Settings panels */
+.cloud-storage-panel,
+.admin-panel {
+  background: var(--cement-gray) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Statistics panels */
+.stats-panel {
+  background: var(--cement-gray) !important;
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Override any white backgrounds that might remain */
+.bg-white,
+[style*="background: white"],
+[style*="background-color: white"],
+[style*="background: #fff"],
+[style*="background-color: #fff"] {
+  background: var(--cement-gray) !important;
+}
+
+/* Override any gray backgrounds with asphalt gray */
+.bg-gray-50,
+.bg-gray-100,
+.bg-gray-200,
+[style*="background: #f8f9fa"],
+[style*="background: #e9ecef"],
+[style*="background: #dee2e6"] {
+  background: var(--asphalt-gray) !important;
+}
+
+/* Remove any remaining rounded corners */
+.rounded,
+.rounded-sm,
+.rounded-md,
+.rounded-lg,
+.rounded-xl,
+[class*="rounded"] {
+  border-radius: 0 !important;
+}
+
+/* Remove any remaining shadows */
+.shadow,
+.shadow-sm,
+.shadow-md,
+.shadow-lg,
+.shadow-xl,
+[class*="shadow"] {
+  box-shadow: none !important;
+}
+
+/* Sophisticated selection states */
+.provider-selected,
+.swim-panel--active {
+  background: var(--asphalt-gray) !important;
+  color: white !important;
+  transform: translateY(-1px) !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Add subtle texture overlay for luxury panels */
+.swim-panel,
+.provider-card,
+.consistent-provider-card {
+  background-image: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 50%, rgba(0,0,0,0.02) 100%) !important;
+}
+
+/* Enhanced focus states for accessibility and luxury */
+button:focus,
+input:focus,
+textarea:focus,
+select:focus {
+  outline: 2px solid var(--dive-blue) !important;
+  outline-offset: 2px !important;
+  background: var(--cement-gray) !important;
+}
+
+/* Refined spacing for professional appearance */
+.provider-grid {
+  padding: 12px !important; /* More generous outer padding */
+}
+
+.swim-section {
+  padding: 16px !important; /* Refined section padding */
+}

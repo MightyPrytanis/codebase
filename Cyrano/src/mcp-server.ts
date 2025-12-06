@@ -84,6 +84,15 @@ import { redFlagFinder } from './tools/red-flag-finder.js';
 import { clioIntegration } from './tools/clio-integration.js';
 import { timeValueBilling } from './tools/time-value-billing.js';
 import { DocumentDrafterTool } from './tools/document-drafter.js';
+import { workflowStatusTool } from './tools/workflow-status.js';
+import {
+  getGoodCounselPromptsTool,
+  dismissGoodCounselPromptTool,
+  snoozeGoodCounselPromptTypeTool,
+  getGoodCounselPromptHistoryTool,
+  evaluateGoodCounselContextTool,
+} from './tools/goodcounsel-prompts.js';
+import { wellnessJournalTool } from './tools/wellness-journal.js';
 import {
   legalEmailDrafter,
   refineEmailTone,
@@ -192,6 +201,16 @@ class CyranoMCPServer {
           legalEmailDrafter.getToolDefinition(),
           refineEmailTone.getToolDefinition(),
           validateLegalLanguage.getToolDefinition(),
+          // Workflow Status
+          workflowStatusTool.getToolDefinition(),
+          // GoodCounsel Prompts
+          getGoodCounselPromptsTool.getToolDefinition(),
+          dismissGoodCounselPromptTool.getToolDefinition(),
+          snoozeGoodCounselPromptTypeTool.getToolDefinition(),
+          getGoodCounselPromptHistoryTool.getToolDefinition(),
+          evaluateGoodCounselContextTool.getToolDefinition(),
+          // Wellness Journaling
+          wellnessJournalTool.getToolDefinition(),
         ],
       };
     });
@@ -392,6 +411,27 @@ class CyranoMCPServer {
             break;
           case 'validate_legal_language':
             result = await validateLegalLanguage.execute(args);
+            break;
+          case 'workflow_status':
+            result = await workflowStatusTool.execute(args);
+            break;
+          case 'get_goodcounsel_prompts':
+            result = await getGoodCounselPromptsTool.execute(args);
+            break;
+          case 'dismiss_goodcounsel_prompt':
+            result = await dismissGoodCounselPromptTool.execute(args);
+            break;
+          case 'snooze_goodcounsel_prompt_type':
+            result = await snoozeGoodCounselPromptTypeTool.execute(args);
+            break;
+          case 'get_goodcounsel_prompt_history':
+            result = await getGoodCounselPromptHistoryTool.execute(args);
+            break;
+          case 'evaluate_goodcounsel_context':
+            result = await evaluateGoodCounselContextTool.execute(args);
+            break;
+          case 'wellness_journal':
+            result = await wellnessJournalTool.execute(args);
             break;
           default:
             throw new Error(`Unknown tool: ${name}`);

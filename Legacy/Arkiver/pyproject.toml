@@ -1,0 +1,15 @@
+[project]
+name = "arkiver"
+version = "2.0.0"
+description = "Universal Data Extraction System - Merging Arkiver and NewArkiver concepts"
+authors = ["MightyPrytanis <219587333+MightyPrytanis@users.noreply.github.com>"]
+requires-python = ">=3.8"
+dependencies = []
+
+[project.scripts]
+arkiver = "newarkiver:main"
+newarkiver = "newarkiver:main"
+
+[project.urls]
+Homepage = "https://github.com/MightyPrytanis/Arkiver"
+Repository = "https://github.com/MightyPrytanis/Arkiver"

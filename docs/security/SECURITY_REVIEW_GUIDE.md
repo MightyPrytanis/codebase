@@ -1,14 +1,15 @@
 ---
 Document ID: SECURITY-REVIEW-GUIDE
-Title: Security Review Guide for Snyk + OWASP ZAP
-Subject(s): Security | Review | Snyk | OWASP ZAP
+Title: Security Review Guide - Snyk + OWASP ZAP
+Subject(s): Security | Review | Snyk | OWASP ZAP | Configuration
 Project: Cyrano
-Version: v548
-Created: 2025-01-07 (2025-W01)
-Last Substantive Revision: 2025-01-07 (2025-W01)
+Version: v549
+Created: 2025-11-29 (2025-W48)
+Last Substantive Revision: 2025-12-06 (2025-W49)
+Last Format Update: 2025-12-06 (2025-W49)
 Owner: David W Towne / Cognisint LLC
 Copyright: © 2025 Cognisint LLC
-Summary: Comprehensive guide for conducting security review using Snyk and OWASP ZAP for pre-beta release.
+Summary: Comprehensive guide for conducting security review using Snyk and OWASP ZAP, including setup, configuration, and testing procedures.
 Status: Active
 ---
 
@@ -16,8 +17,9 @@ Status: Active
 
 **Purpose:** Guide for conducting comprehensive security review using Snyk and OWASP ZAP  
 **Target Audience:** Security reviewers, developers, QA team  
-**Last Updated:** 2025-01-07  
-**Status:** Active
+**Last Updated:** 2025-12-06  
+**Status:** Active  
+**Project Status:** Codebase uploaded to GitHub monorepo (Step 13: 35% complete). Ready for security review.
 
 ---
 
@@ -112,21 +114,96 @@ cd /Users/davidtowne/Desktop/Coding/codebase/apps/arkiver/frontend
 snyk test
 ```
 
+### Project Configuration
+
+**Monorepo Structure:**
+- **Package Managers:** npm
+- **Languages:** TypeScript, JavaScript
+- **Frameworks:** React, Express, Node.js
+
+**Dependencies to Monitor:**
+- All npm packages in:
+  - `Cyrano/package.json`
+  - `LexFiat/package.json`
+  - `apps/arkiver/frontend/package.json`
+
+**Critical Dependencies:**
+- `@anthropic-ai/sdk` - Anthropic API client
+- `openai` - OpenAI API client
+- `@modelcontextprotocol/sdk` - MCP SDK
+- `express` - Web framework
+- `react` - Frontend framework
+- `@tanstack/react-query` - Data fetching
+
+### Snyk Configuration File
+
+Create `.snyk` file in project root to configure policies:
+
+```yaml
+# .snyk policy file
+version: v1.22.0
+ignore: {}
+patch: {}
+```
+
 ### Continuous Monitoring
 
 1. **Connect Repository to Snyk**
    - Go to Snyk dashboard
    - Add project → Import from Git
-   - Connect GitHub repository: `MightyPrytanis/codebase`
+   - Connect GitHub repository: `MightyPrytanis/codebase` (monorepo)
+   - **Note:** Codebase has been uploaded to GitHub monorepo (Step 13: 35% complete)
    - Select projects to monitor:
      - `Cyrano/`
-     - `LexFiat/`
+     - `LexFiat/client/`
      - `apps/arkiver/frontend/`
 
 2. **Configure Snyk for CI/CD**
    - Set up Snyk GitHub Action (if using GitHub Actions)
    - Configure PR checks
    - Set up alerting
+
+### GitHub Integration
+
+1. **Connect Repository**
+   - Go to Snyk dashboard
+   - Add project → Import from Git
+   - Connect: `MightyPrytanis/codebase`
+
+2. **Configure Projects**
+   - Select: `Cyrano/`
+   - Select: `LexFiat/`
+   - Select: `apps/arkiver/frontend/`
+
+3. **Set Up PR Checks**
+   - Enable Snyk GitHub Action
+   - Configure PR checks
+   - Set up alerting
+
+### CI/CD Integration
+
+#### GitHub Actions Example
+
+```yaml
+name: Snyk Security Scan
+on:
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 0 * * *'  # Daily
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+```
 
 ### SAST (Static Application Security Testing)
 
@@ -136,35 +213,6 @@ If using Snyk Code:
 ```bash
 snyk code test
 ```
-
-### Key Areas to Review
-
-1. **Dependencies**
-   - All `package.json` files
-   - Check for known CVEs
-   - Review transitive dependencies
-
-2. **Environment Variables**
-   - `.env` files (should be in `.gitignore`)
-   - API key handling
-   - Secret management
-
-3. **Authentication/Authorization**
-   - `Cyrano/src/services/auth-service.ts`
-   - `Cyrano/auth-server/`
-   - Session management
-   - JWT handling
-
-4. **API Security**
-   - `Cyrano/src/http-bridge.ts`
-   - CORS configuration
-   - Rate limiting
-   - Input validation
-
-5. **Data Handling**
-   - Database queries (SQL injection risks)
-   - File upload handling
-   - PII data processing
 
 ### Expected Output
 
@@ -199,6 +247,62 @@ Snyk will generate reports showing:
    - Choose "I want to persist this session" (recommended)
    - Select "Automated Scan" mode
 
+### Application Endpoints
+
+#### LexFiat Client
+
+**Development:**
+- **URL:** `http://localhost:5173`
+- **Type:** Single Page Application (SPA)
+- **Framework:** React + Vite
+
+**Production Preview:**
+- **URL:** `http://localhost:4173`
+- **Type:** Single Page Application (SPA)
+
+**Key Endpoints:**
+- `/` - Dashboard
+- `/dashboard` - Dashboard
+- `/settings` - Settings
+- `/mae-workflows` - MAE Workflow Management
+- `/performance` - Performance page
+- `/research` - Research page
+
+#### Arkiver Frontend
+
+**Development:**
+- **URL:** `http://localhost:5174`
+- **Type:** Single Page Application (SPA)
+- **Framework:** React + Vite
+
+**Production Preview:**
+- **URL:** `http://localhost:4174`
+- **Type:** Single Page Application (SPA)
+
+**Key Endpoints:**
+- `/` - Home/Dashboard
+- `/dashboard` - Dashboard
+- `/extractor` - File Extractor
+- `/insights` - Insights
+- `/visualizations` - Visualizations
+- `/ai-assistant` - AI Assistant
+- `/ai-integrity` - AI Integrity
+- `/settings` - Settings
+
+#### Cyrano MCP HTTP Bridge
+
+**Base URL:** `http://localhost:5001` (or configured port)
+
+**Key Endpoints:**
+- `GET /mcp/tools` - List available tools
+- `POST /mcp/execute` - Execute a tool
+- `GET /mcp/tools/info` - Get tool information
+- `GET /health` - Health check (if exists)
+
+**Authentication:**
+- May require API key or session-based auth
+- Check `Cyrano/src/http-bridge.ts` for auth configuration
+
 ### Configuration
 
 #### 1. Configure Target Application
@@ -228,16 +332,42 @@ Snyk will generate reports showing:
    - Test authentication
 
 3. **Configure Spider**
-   - Set max depth (recommended: 5)
-   - Set max children (recommended: 100)
-   - Enable AJAX spider for SPAs
+
+**For SPAs (LexFiat, Arkiver):**
+- **Max Depth:** 5
+- **Max Children:** 100
+- **Enable AJAX Spider:** Yes
+- **AJAX Max Duration:** 10 minutes
+- **AJAX Max Crawl Depth:** 10
+
+**For API (Cyrano):**
+- **Max Depth:** 3
+- **Max Children:** 50
+- **Enable AJAX Spider:** No
+
+4. **Configure Active Scan**
+
+**Policy:** Default
+**Strength:** Medium (recommended for first scan)
+**Attack Mode:** Standard
+
+**Customize Policy:**
+- Enable all relevant attack types
+- Focus on:
+  - SQL Injection
+  - XSS (Cross-Site Scripting)
+  - CSRF (Cross-Site Request Forgery)
+  - Authentication bypass
+  - Session management
+  - Sensitive data exposure
 
 ### Running Scans
 
-#### Quick Scan
-1. Enter target URL
+#### Quick Scan (Recommended for First Run)
+1. Enter target URL in address bar
 2. Click "Attack" → "Quick Start"
-3. Review results
+3. Wait for scan to complete
+4. Review results in Alerts tab
 
 #### Full Scan
 1. Right-click target URL in Sites tree
@@ -277,6 +407,62 @@ OWASP ZAP will test for:
    - Authentication bypass
    - Session management issues
    - Sensitive data exposure
+   - Missing security headers
+   - CORS misconfiguration
+
+### Application Details
+
+**LexFiat:**
+- **Type:** React SPA
+- **API Backend:** Cyrano MCP (port 5001)
+- **CORS:** Configured in `Cyrano/src/http-bridge.ts`
+- **Authentication:** May use session-based or API key
+
+**Arkiver:**
+- **Type:** React SPA
+- **API Backend:** Cyrano MCP (port 5001)
+- **CORS:** Configured in `Cyrano/src/http-bridge.ts`
+- **Authentication:** May use session-based or API key
+
+**Cyrano API:**
+- **Type:** REST API (Express)
+- **Framework:** Node.js + Express
+- **CORS:** Configured in `Cyrano/src/http-bridge.ts`
+- **Authentication:** Check `Cyrano/src/http-bridge.ts`
+
+### Security Headers to Check
+
+ZAP should verify presence of:
+- `Content-Security-Policy`
+- `X-Frame-Options`
+- `X-Content-Type-Options`
+- `Strict-Transport-Security`
+- `X-XSS-Protection`
+- `Referrer-Policy`
+
+### Common Vulnerabilities to Test
+
+1. **OWASP Top 10 (2021)**
+   - A01: Broken Access Control
+   - A02: Cryptographic Failures
+   - A03: Injection
+   - A04: Insecure Design
+   - A05: Security Misconfiguration
+   - A06: Vulnerable Components
+   - A07: Authentication Failures
+   - A08: Software Integrity Failures
+   - A09: Logging Failures
+   - A10: SSRF
+
+2. **API-Specific**
+   - Missing rate limiting
+   - Insufficient input validation
+   - Information disclosure
+   - Insecure direct object references
+
+3. **SPA-Specific**
+   - XSS vulnerabilities
+   - CSRF vulnerabilities
    - Missing security headers
    - CORS misconfiguration
 
@@ -326,6 +512,30 @@ Common issues to look for:
    - Missing rate limiting
    - Insufficient input validation
    - Information disclosure
+
+### Automation
+
+#### ZAP Baseline Scan
+
+```bash
+# Install ZAP CLI
+docker pull owasp/zap2docker-stable
+
+# Run baseline scan
+docker run -t owasp/zap-baseline-scan.py \
+  -t http://localhost:5173 \
+  -J zap-report.json \
+  -r zap-report.html
+```
+
+#### ZAP Full Scan
+
+```bash
+docker run -t owasp/zap-full-scan.py \
+  -t http://localhost:5173 \
+  -J zap-report.json \
+  -r zap-report.html
+```
 
 ### Action Items
 
@@ -399,6 +609,35 @@ Common issues to look for:
 - [ ] `.env` files in `.gitignore`
 - [ ] Secure default configurations
 - [ ] Production vs development configuration separation
+
+### Key Areas to Review
+
+1. **Dependencies**
+   - All `package.json` files
+   - Check for known CVEs
+   - Review transitive dependencies
+
+2. **Environment Variables**
+   - `.env` files (should be in `.gitignore`)
+   - API key handling
+   - Secret management
+
+3. **Authentication/Authorization**
+   - `Cyrano/src/services/auth-service.ts`
+   - `Cyrano/auth-server/`
+   - Session management
+   - JWT handling
+
+4. **API Security**
+   - `Cyrano/src/http-bridge.ts`
+   - CORS configuration
+   - Rate limiting
+   - Input validation
+
+5. **Data Handling**
+   - Database queries (SQL injection risks)
+   - File upload handling
+   - PII data processing
 
 ---
 
@@ -491,12 +730,12 @@ app.use(cors({
 
 - **Snyk Documentation:** https://docs.snyk.io
 - **OWASP ZAP Documentation:** https://www.zaproxy.org/docs/
+- **OWASP ZAP API:** https://www.zaproxy.org/docs/api/
+- **OWASP ZAP Docker:** https://www.zaproxy.org/docs/docker/
 - **OWASP Top 10:** https://owasp.org/www-project-top-ten/
 - **Security Headers:** https://securityheaders.com
 
 ---
 
 **Document Owner:** David W Towne / Cognisint LLC  
-**Last Updated:** 2025-01-07
-
-
+**Last Updated:** 2025-12-06

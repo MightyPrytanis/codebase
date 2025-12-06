@@ -111,6 +111,6 @@ src/tools/tool-enhancer.ts
 # END PROTECTED IP SECTION
 # ===========================================
 
-# IP Directory - Keep secret
-IP/Legacy/
+# IP Directory - Keep secret (entire IP/ directory)
+IP/
 Document Archive/

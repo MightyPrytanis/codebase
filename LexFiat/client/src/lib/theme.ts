@@ -9,7 +9,7 @@
  * Supports multiple themes with consistent token-based styling
  */
 
-export type ThemeName = 'light' | 'control-room';
+export type ThemeName = 'light' | 'control-room' | 'ad-astra';
 
 export interface ThemeTokens {
   // Colors
@@ -293,11 +293,104 @@ export const controlRoomTheme: ThemeTokens = {
 };
 
 /**
+ * Ad Astra Theme - LCARS-inspired Star Trek aesthetic
+ * Black backgrounds, orange accents, distinctive rounded panels
+ */
+export const adAstraTheme: ThemeTokens = {
+  colors: {
+    primary: {
+      light: '#1a1a1a',
+      dark: '#000000',
+      mid: '#333333',
+    },
+    secondary: '#666666',
+    accent: {
+      gold: '#FFCC00',
+      blue: '#0099FF',
+      green: '#00FF99',
+      orange: '#FF9900',
+      purple: '#9966FF',
+    },
+    status: {
+      success: '#00FF99',
+      warning: '#FFCC00',
+      critical: '#FF3300',
+      processing: '#0099FF',
+    },
+    background: {
+      base: '#000000',
+      panel: 'rgba(255, 153, 0, 0.1)',
+      overlay: 'rgba(0, 0, 0, 0.9)',
+    },
+    text: {
+      primary: '#FFCC00',
+      secondary: '#FF9900',
+      muted: '#996633',
+    },
+    border: {
+      default: '#FF9900',
+      panel: '#FFCC00',
+      accent: '#FFCC00',
+    },
+  },
+  glass: {
+    blur: 'blur(10px) saturate(100%)',
+    saturation: '100%',
+    opacity: {
+      panel: '0.1',
+      overlay: '0.9',
+    },
+  },
+  typography: {
+    fontFamily: {
+      primary: "'Helvetica Neue', 'Arial Narrow', 'Arial', sans-serif",
+      heading: "'Helvetica Neue Condensed', 'Arial Narrow', 'Helvetica', sans-serif",
+    },
+    fontSize: {
+      xs: '0.75rem',
+      sm: '0.875rem',
+      base: '1rem',
+      lg: '1.125rem',
+      xl: '1.25rem',
+      '2xl': '1.5rem',
+      '3xl': '2rem',
+    },
+    fontWeight: {
+      normal: 400,
+      medium: 500,
+      semibold: 600,
+      bold: 700,
+    },
+  },
+  spacing: {
+    xs: '0.25rem',
+    sm: '0.5rem',
+    md: '1rem',
+    lg: '1.5rem',
+    xl: '2rem',
+    '2xl': '3rem',
+  },
+  borderRadius: {
+    none: '0',
+    sm: '0.5rem',
+    md: '1rem',
+    lg: '2rem',
+  },
+  shadows: {
+    sm: '0 2px 4px rgba(255, 153, 0, 0.3)',
+    md: '0 4px 20px rgba(255, 153, 0, 0.4)',
+    lg: '0 10px 30px rgba(255, 153, 0, 0.5)',
+    xl: '0 20px 40px rgba(255, 153, 0, 0.6)',
+  },
+};
+
+/**
  * Theme registry
  */
 export const themes: Record<ThemeName, ThemeTokens> = {
   light: lightTheme,
   'control-room': controlRoomTheme,
+  'ad-astra': adAstraTheme,
 };
 
 /**
@@ -346,4 +439,7 @@ export function getThemeCSSVariables(theme: ThemeTokens): string {
     --theme-radius-lg: ${theme.borderRadius.lg};
   `.trim();
 }
+
+
+
 

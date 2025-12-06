@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { AIIcon as SharedAIIcon } from '../../../../Cyrano/shared-assets/ai-icon';
+import { AIIcon as SharedAIIcon } from '../../../../../Cyrano/shared-assets/ai-icon';
 
 interface AIIconProps {
   className?: string;

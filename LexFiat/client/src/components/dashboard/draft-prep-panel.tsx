@@ -6,6 +6,7 @@
 
 import ExpandedPanel from "./expanded-panel";
 import { DraftPreparationIcon } from "@cyrano/shared-assets/icon-components";
+import { DraftingModeSelector } from "./drafting-mode-selector";
 
 interface DraftPrepPanelProps {
   isOpen: boolean;
@@ -25,6 +26,20 @@ export default function DraftPrepPanel({ isOpen, onClose }: DraftPrepPanelProps)
       className="max-w-5xl"
     >
       <div className="space-y-6">
+        {/* Drafting Mode Selector */}
+        <DraftingModeSelector
+          documentId={undefined}
+          matterId={undefined}
+          documentType={undefined}
+          currentMode="auto-draft"
+          onModeChange={(mode) => {
+            console.log('Drafting mode changed:', mode);
+          }}
+          onExecute={(mode) => {
+            console.log('Executing mode:', mode);
+          }}
+        />
+
         <div className="stat-row">
           <span className="stat-label">Drafts Ready</span>
           <span className="stat-value">{draftsReady}</span>

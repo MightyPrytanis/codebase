@@ -4,7 +4,7 @@
  * See LICENSE.md for full license text
  */
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,9 +17,9 @@ import { executeCyranoTool } from "@/lib/cyrano-api";
 import { showAIOfflineError } from "@/lib/ai-error-helper";
 import ExpandedPanel from "./expanded-panel";
 import { GoodCounselJournaling } from "./goodcounsel-journaling";
+import { GoodCounselMeditation } from "./goodcounsel-meditation";
 import { GuidedSetup, GoodCounselSetupData } from "./goodcounsel-guided-setup";
 import { PrivacyAssurance } from "./goodcounsel-privacy-assurance";
-import { useState, useEffect } from "react";
 
 interface GoodCounselEnhancedProps {
   isOpen: boolean;
@@ -42,6 +42,7 @@ export function GoodCounselEnhanced({
   const [showGuidedSetup, setShowGuidedSetup] = useState(false);
   const [setupComplete, setSetupComplete] = useState(false);
   const [setupData, setSetupData] = useState<GoodCounselSetupData | null>(null);
+  const [showMeditation, setShowMeditation] = useState(false);
 
   // Check if setup is complete on mount
   useEffect(() => {
@@ -178,7 +179,7 @@ export function GoodCounselEnhanced({
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 bg-card-light">
+          <TabsList className="grid w-full grid-cols-6 bg-card-light">
             <TabsTrigger value="counsel" className="flex items-center gap-2">
               <Brain className="w-4 h-4" />
               Get Counsel
@@ -194,6 +195,10 @@ export function GoodCounselEnhanced({
             <TabsTrigger value="wellness" className="flex items-center gap-2">
               <Heart className="w-4 h-4" />
               Wellness
+            </TabsTrigger>
+            <TabsTrigger value="meditation" className="flex items-center gap-2">
+              <Heart className="w-4 h-4" />
+              Meditation
             </TabsTrigger>
             <TabsTrigger value="settings" className="flex items-center gap-2">
               <Settings className="w-4 h-4" />
@@ -384,6 +389,41 @@ export function GoodCounselEnhanced({
           {/* Journal Tab */}
           <TabsContent value="journal" className="space-y-4 mt-6">
             <GoodCounselJournaling />
+          </TabsContent>
+
+          {/* Meditation Tab */}
+          <TabsContent value="meditation" className="space-y-4 mt-6">
+            {showMeditation ? (
+              <GoodCounselMeditation
+                onClose={() => setShowMeditation(false)}
+                onComplete={() => {
+                  setShowMeditation(false);
+                  setActiveTab('journal'); // Switch to journal after meditation
+                }}
+              />
+            ) : (
+              <Card className="bg-card-dark border-border-gray">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-primary">
+                    <Heart className="w-5 h-5 text-accent-gold" />
+                    Centering & Reflection
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-secondary">
+                    Take a moment to center yourself with a guided breathing exercise. 
+                    This meditation feature helps reduce stress and improve focus.
+                  </p>
+                  <Button
+                    onClick={() => setShowMeditation(true)}
+                    className="w-full bg-accent-gold hover:bg-accent-gold/90 text-slate-900 font-semibold"
+                  >
+                    <Heart className="w-4 h-4 mr-2" />
+                    Start Meditation Session
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
 
           {/* Ethics Tab - Moved to Settings */}

@@ -8,6 +8,7 @@ import React, { useState, useEffect } from "react";
 import { Mail, Scale, Calendar, BookOpen, Settings, HelpCircle, User } from "lucide-react";
 import { AIIcon } from "@/components/ui/ai-icon";
 import { isDemoMode } from "@/lib/demo-service";
+import { ThemeSelector } from "@/components/theme/theme-selector";
 import "@/styles/dashboard-html.css";
 
 interface HeaderProps {
@@ -112,6 +113,7 @@ export default function Header({ attorney }: HeaderProps) {
           </div>
 
           <div className="action-buttons">
+            <ThemeSelector />
             <button className="action-btn" onClick={openHelpChat}>
               <HelpCircle size={16} />
               <span>Help</span>

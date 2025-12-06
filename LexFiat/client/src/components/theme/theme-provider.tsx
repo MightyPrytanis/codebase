@@ -37,6 +37,9 @@ export function ThemeProvider({ children, defaultTheme = 'control-room' }: { chi
     }
     
     document.head.appendChild(style);
+    
+    // Set data-theme attribute for CSS selectors
+    document.documentElement.setAttribute('data-theme', theme);
   }, [theme, tokens]);
 
   return (
@@ -53,4 +56,7 @@ export function useTheme() {
   }
   return context;
 }
+
+
+
 

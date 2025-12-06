@@ -1,0 +1,254 @@
+/* Piquette Theme Adapter
+   Scoped, non-destructive composition of LexFiat tokens + SwimMeet glass ocean + assembly-line motif
+   Usage:
+     - Include this stylesheet
+     - Wrap the target page/app with <div class="piquette-theme"> ... </div>
+     - Optionally add <div class="piquette-overlay"></div> as a child for visual overlays (not required)
+*/
+
+/* 1) LexFiat tokens scoped to the theme wrapper (no global changes) */
+.piquette-theme {
+  /* Base palette (from lexfiat_technical_appendix.css) */
+  --legal-navy: #1a2332;
+  --panel-dark: #2a3441;
+  --panel-border: #3a4451;
+
+  --warning-amber: #f59e0b;
+  --success-green: #10b981;
+  --urgent-red: #ef4444;
+  --info-blue: #3b82f6;
+  --gold-accent: #fbbf24;
+
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-accent: var(--warning-amber);
+
+  --panel-radius: 0px;          /* sharp edges */
+  --button-radius: 2px;         /* minimal rounding for buttons only */
+  --spacing-unit: 8px;
+  --border-width: 1px;
+
+  --glass-light: rgba(255,255,255,0.10);
+  --glass-medium: rgba(255,255,255,0.15);
+  --glass-heavy: rgba(255,255,255,0.20);
+  --steel-light: rgba(148,163,184,0.10);
+  --steel-medium: rgba(148,163,184,0.20);
+
+  --shadow-minimal: 0 1px 3px rgba(0,0,0,0.10);
+  --shadow-standard: 0 2px 8px rgba(0,0,0,0.15);
+  --shadow-elevated: 0 4px 16px rgba(0,0,0,0.20);
+  --shadow-floating: 0 8px 32px rgba(0,0,0,0.25);
+
+  /* Piquette-specific accents */
+  --piq-bg-mid: #1E3A5F;        /* swimmeet mid ocean */
+  --piq-bg-steel: #2C5282;      /* steel blue */
+  --piq-accent: #60A5FA;        /* glass-blue for highlights */
+  --piq-track: rgba(173,216,230,0.12); /* assembly-line tracks */
+  --piq-node: rgba(147,197,253,0.22);  /* assembly-line nodes */
+}
+
+/* 2) Background and overlays (scoped) */
+.piquette-theme {
+  position: relative;
+  min-height: 100%;
+  color: var(--text-primary);
+  background: linear-gradient(180deg, var(--legal-navy) 0%, var(--piq-bg-mid) 60%, var(--piq-bg-steel) 100%);
+  overflow: clip;
+}
+
+/* Assembly-line overlay (tracks + nodes) */
+.piquette-theme::before {
+  content: "";
+  position: absolute; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    /* diagonal tracks */
+    repeating-linear-gradient(60deg, var(--piq-track) 0 2px, transparent 2px 28px),
+    repeating-linear-gradient(-60deg, var(--piq-track) 0 2px, transparent 2px 28px),
+    /* scattered nodes */
+    radial-gradient(circle at 12% 24%, var(--piq-node) 0 2px, transparent 3px),
+    radial-gradient(circle at 44% 62%, var(--piq-node) 0 2px, transparent 3px),
+    radial-gradient(circle at 78% 36%, var(--piq-node) 0 2px, transparent 3px);
+  opacity: 0.08;
+  mix-blend-mode: overlay;
+}
+
+/* Optional: additional overlay element for future effects */
+.piquette-theme .piquette-overlay { position: absolute; inset: 0; pointer-events: none; z-index: 1; }
+
+/* 3) Sharp geometry by default (scoped) */
+.piquette-theme * { border-radius: var(--panel-radius) !important; }
+
+/* 4) Panels (compose glass + steel; selective depth) */
+.piquette-theme .swim-panel,
+.piquette-theme .analysis-section,
+.piquette-theme .stat-card,
+.piquette-theme .mode-card,
+.piquette-theme .consistent-provider-card,
+.piquette-theme .response-card {
+  position: relative;
+  background: linear-gradient(135deg, var(--glass-medium), var(--glass-light)) !important;
+  border: var(--border-width) solid rgba(255,255,255,0.12) !important;
+  backdrop-filter: blur(8px) saturate(115%) !important;
+  -webkit-backdrop-filter: blur(8px) saturate(115%) !important;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.18) !important;
+  z-index: 1;
+}
+
+/* 5) Header block (denser glass, crisp divider) */
+.piquette-theme .header {
+  background: linear-gradient(135deg, rgba(44,82,130,0.92), rgba(30,58,95,0.97)) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.14) !important;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35) !important;
+}
+
+/* 6) Mode tiles as stations; active gets neon bottom line */
+.piquette-theme .swim-mode-panel { position: relative; }
+.piquette-theme .swim-mode-panel--active::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px;
+  background: linear-gradient(90deg, transparent, var(--piq-accent), transparent);
+  opacity: 0.95;
+}
+
+/* 7) Provider cards: faint edge + slightly darker fill */
+.piquette-theme .provider-grid > * {
+  background: rgba(20,35,58,0.35) !important;
+  border: var(--border-width) solid rgba(255,255,255,0.10) !important;
+}
+
+/* 8) Buttons: rectangular, precise, mild lift */
+.piquette-theme .swim-button,
+.piquette-theme button,
+.piquette-theme .good-counsel-button {
+  background: linear-gradient(135deg, var(--piq-accent) 0%, rgba(96,165,250,0.85) 100%) !important;
+  border: var(--border-width) solid var(--piq-accent) !important;
+  color: #ffffff !important;
+  border-radius: var(--button-radius) !important; /* minimal rounding only here */
+  transition: transform 0.2s ease;
+}
+.piquette-theme .swim-button:hover,
+.piquette-theme button:hover,
+.piquette-theme .good-counsel-button:hover { transform: translateY(-2px); }
+
+/* 9) Status chips */
+.piquette-theme .status-indicator { font-size: 0.7rem; letter-spacing: 0.06em; opacity: 0.95; }
+
+/* 10) Typography refinements */
+.piquette-theme h1,
+.piquette-theme h2,
+.piquette-theme h3,
+.piquette-theme .panel-heading,
+.piquette-theme .swim-mode-title {
+  font-family: 'Inter','Roboto',system-ui,sans-serif !important;
+  font-weight: 300 !important; /* lighter visual weight */
+  letter-spacing: 0.02em !important;
+  color: var(--text-primary) !important;
+}
+.piquette-theme .cyrano-body,
+.piquette-theme .swim-body { color: var(--text-primary); }
+.piquette-theme .panel-text-secondary,
+.piquette-theme .swim-mode-description,
+.piquette-theme .mode-explanation { color: var(--text-secondary) !important; }
+
+/* 11) Re-expose LexFiat structural classes within scope (panels/stations/widgets) */
+.piquette-theme .cyrano-panel {
+  border-radius: var(--panel-radius);
+  border: var(--border-width) solid var(--panel-border);
+  background: var(--panel-dark);
+  box-shadow: var(--shadow-standard), inset 0 1px 0 var(--glass-light);
+  transition: all 0.3s ease;
+}
+.piquette-theme .cyrano-panel-active {
+  border-color: var(--warning-amber);
+  box-shadow: var(--shadow-elevated), inset 0 1px 0 var(--glass-medium), 0 0 0 1px var(--warning-amber);
+}
+.piquette-theme .cyrano-panel-glass {
+  background: linear-gradient(145deg, var(--glass-medium) 0%, var(--glass-light) 100%);
+  backdrop-filter: blur(20px);
+  border: var(--border-width) solid var(--glass-medium);
+}
+
+/* Assembly line layout (stations) */
+.piquette-theme .assembly-line-container {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: calc(var(--spacing-unit) * 3);
+  padding: calc(var(--spacing-unit) * 4);
+  background: transparent; /* background handled by wrapper */
+  min-height: 100vh;
+}
+.piquette-theme .assembly-stage {
+  background: var(--panel-dark);
+  border: var(--border-width) solid var(--panel-border);
+  border-radius: var(--panel-radius);
+  padding: calc(var(--spacing-unit) * 3);
+  box-shadow: var(--shadow-standard);
+}
+.piquette-theme .assembly-stage-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: calc(var(--spacing-unit) * 3);
+  padding-bottom: calc(var(--spacing-unit) * 2);
+  border-bottom: var(--border-width) solid var(--panel-border);
+}
+.piquette-theme .assembly-stage-title {
+  font-size: 1.125rem; font-weight: 700; color: var(--text-primary);
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.piquette-theme .assembly-stage-count {
+  background: var(--warning-amber); color: var(--legal-navy);
+  padding: calc(var(--spacing-unit)/2) var(--spacing-unit);
+  border-radius: var(--button-radius); font-size: 0.75rem; font-weight: 700;
+}
+
+/* Widgets (draggable) */
+.piquette-theme .widget {
+  background: var(--panel-dark);
+  border: var(--border-width) solid var(--panel-border);
+  border-radius: var(--panel-radius);
+  padding: calc(var(--spacing-unit) * 2);
+  margin-bottom: calc(var(--spacing-unit) * 2);
+  box-shadow: var(--shadow-minimal);
+  cursor: grab; transition: all 0.3s ease;
+}
+.piquette-theme .widget:hover { border-color: var(--warning-amber); box-shadow: var(--shadow-standard); transform: translateY(-2px); }
+.piquette-theme .widget.dragging { cursor: grabbing; opacity: 0.8; transform: rotate(2deg); box-shadow: var(--shadow-floating); }
+.piquette-theme .widget-title { font-size: 0.875rem; font-weight: 600; color: var(--text-primary); }
+.piquette-theme .widget-status { width: 8px; height: 8px; border-radius: 50%; background: var(--success-green); }
+.piquette-theme .widget-status.warning { background: var(--warning-amber); }
+.piquette-theme .widget-status.error { background: var(--urgent-red); }
+
+/* Case cards */
+.piquette-theme .case-card {
+  background: var(--panel-dark);
+  border: var(--border-width) solid var(--panel-border);
+  border-radius: var(--panel-radius);
+  padding: calc(var(--spacing-unit) * 2);
+  margin-bottom: calc(var(--spacing-unit) * 2);
+  box-shadow: var(--shadow-minimal);
+  transition: all 0.3s ease;
+}
+.piquette-theme .case-card:hover { border-color: var(--info-blue); box-shadow: var(--shadow-standard); }
+
+/* AI verification */
+.piquette-theme .ai-verification-panel {
+  background: var(--panel-dark);
+  border: var(--border-width) solid var(--panel-border);
+  border-radius: var(--panel-radius);
+  padding: calc(var(--spacing-unit) * 3);
+  box-shadow: var(--shadow-standard);
+}
+.piquette-theme .mode-button {
+  padding: calc(var(--spacing-unit) * 1) calc(var(--spacing-unit) * 2);
+  border: var(--border-width) solid var(--panel-border);
+  border-radius: var(--button-radius);
+  background: var(--panel-dark); color: var(--text-secondary);
+  font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease;
+}
+.piquette-theme .mode-button.active { background: var(--warning-amber); border-color: var(--warning-amber); color: var(--legal-navy); }
+.piquette-theme .mode-button:not(.active):hover { border-color: var(--warning-amber); color: var(--text-primary); }
+
+/* 12) Small animations (reuse) */
+@keyframes piq-fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes piq-slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes piq-scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+.piquette-theme .fade-in { animation: piq-fadeIn 0.5s ease-out; }
+.piquette-theme .slide-up { animation: piq-slideUp 0.4s ease-out; }
+.piquette-theme .scale-in { animation: piq-scaleIn 0.3s ease-out; }

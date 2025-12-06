@@ -34,6 +34,7 @@ import {
   Square,
 } from 'lucide-react';
 import { BiSwim } from 'react-icons/bi';
+import { Icon } from '@iconify/react';
 import { AIIcon } from './ai-icon';
 import { AIInsightsIcon } from './ai-insights-icon';
 import { AIAnalysisIcon } from './ai-analysis-icon';
@@ -63,25 +64,20 @@ export function ResearchIcon({ className = '', size = 24, style, color }: IconPr
 }
 
 /**
- * GoodCounsel Icon - Scale with Heart overlay (both from lucide-react)
- * Heart is MUCH LARGER in relation to the scales
+ * GoodCounsel Icon - TEMPORARY: Using mdi:hand-heart-outline from Material Design Icons
+ * TODO: Replace with permanent icon design
  */
 export function GoodCounselIcon({ className = '', size = 24, style, color }: IconProps) {
   const iconColor = color || (style?.color as string) || 'currentColor';
   
   return (
-    <div className={className} style={{ position: 'relative', display: 'inline-block', ...style }}>
-      <Scale size={size} color={iconColor} strokeWidth={2} />
-      {/* Heart from lucide-react - MUCH LARGER in center of scale beam */}
-      <div style={{
-        position: 'absolute',
-        left: '50%',
-        top: '35%',
-        transform: 'translate(-50%, -50%)',
-      }}>
-        <Heart size={size * 0.9} color={iconColor} strokeWidth={2} fill={iconColor} fillOpacity={0.7} />
-      </div>
-    </div>
+    <Icon
+      icon="mdi:hand-heart-outline"
+      className={className}
+      width={size}
+      height={size}
+      style={{ color: iconColor, ...style }}
+    />
   );
 }
 

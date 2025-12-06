@@ -3,10 +3,10 @@ Document ID: PROJECT-CHANGE-LOG
 Title: Cyrano Project Change Log
 Subject(s): Project | History | Development
 Project: Cyrano
-Version: v550
+Version: v549
 Created: 2025-11-28 (2025-W48)
-Last Substantive Revision: 2025-11-29 (2025-W48)
-Last Format Update: 2025-11-29 (2025-W48)
+Last Substantive Revision: 2025-12-06 (2025-W49)
+Last Format Update: 2025-12-06 (2025-W49)
 Owner: David W Towne / Cognisint LLC
 Copyright: © 2025 Cognisint LLC
 Summary: Consolidated running log of all project changes, structured by work plan steps.
@@ -17,7 +17,7 @@ Related Documents: REALISTIC-WORK-PLAN
 # Cyrano Project Change Log
 
 **Project Start:** November 19-20, 2025  
-**Last Updated:** 2025-11-29  
+**Last Updated:** 2025-12-06  
 **Structure:** Organized by work plan steps (see REALISTIC_WORK_PLAN.md)
 
 ---
@@ -233,7 +233,7 @@ Related Documents: REALISTIC-WORK-PLAN
 - Create user guides (pending)
 - Create developer guides (pending)
 
-### Recent Updates (2025-01-07):
+### Recent Updates (2025-11-29):
 - Documentation index updated to reflect actual active document count (~45)
 - Outdated guides already archived in previous cleanup
 - Core documentation (project tracking, user checklist, work plan) maintained
@@ -245,7 +245,7 @@ Related Documents: REALISTIC-WORK-PLAN
 ### Changes:
 - **Step 11:** Some cleanup done as we work (archiving, etc.)
 - **Step 12:** Security evaluation pending
-- **Step 13:** Monorepo structure designed, exists on GitHub. Upload pending local work completion.
+- **Step 13:** Monorepo structure designed and set up on GitHub. Codebase uploaded/committed to GitHub (current working state, not fully optimized). Remaining: optimization, mapping app repos, reconciliation, and testing.
 - **Step 14-15:** Deployment and beta release pending
 
 ---
@@ -284,45 +284,72 @@ Related Documents: REALISTIC-WORK-PLAN
 
 ---
 
-## Epic Implementation - LexFiat Dashboard & Workflow (2025-01-07)
+## Epic Implementation - LexFiat Dashboard & Workflow (2025-11-29)
 
 ### Epic A – Dashboard Structure & Look ✅
 
 **Ticket A1 – Header & Chrome Refinements:**
-- Consolidated individual status buttons (Gmail, AI, Clio, Calendar, Research) into single compact status strip centered in header
-- Added Demo status indicator and Demo Mode toggle to header
-- Fixed demo-mode-banner z-index/positioning to never overlap header (z-40, margin-top: 64px)
-- Reduced footer banner height, centered text, limited to 2-3 lines
-- Fixed beta test error-reporting slider positioning (z-index: 45, margin-bottom for footer)
-- Ensured username/avatar, Settings, Admin remain right-justified in fixed-width layout
+- **Header Component** (`LexFiat/client/src/components/layout/header.tsx`):
+  - Consolidated individual status buttons (Gmail, AI, Clio, Calendar, Research) into single compact `StatusStrip` component centered in header
+  - Added Demo status indicator and `DemoModeToggle` component to header
+  - Ensured username/avatar, Settings, Admin remain right-justified in fixed-width layout (no horizontal scrolling)
+- **Demo Mode Banner** (`LexFiat/client/src/components/demo/demo-mode-banner.tsx`):
+  - Fixed z-index/positioning (z-40, margin-top: 64px) to never overlap header
+- **Footer Banner** (`LexFiat/client/src/components/layout/footer-banner.tsx`):
+  - Reduced height (py-2 padding), centered text, limited to 2-3 lines
+- **Feedback System** (`LexFiat/client/src/components/dashboard/feedback-system.tsx`):
+  - Fixed beta test error-reporting slider positioning (z-index: 45, margin-bottom for footer)
+- **Dashboard CSS** (`LexFiat/client/src/styles/dashboard-html.css`):
+  - Updated styles for `.status-strip`, `.demo-mode-indicator`, `.header`, `.footer-banner`
+  - Ensured glass effect and sharp edges (`border-radius: 0`) for panels
 
 **Ticket A2 – Brand & Iconography Cleanup:**
-- Adjusted logo CSS to fill gold ring with no gap (object-fit: cover, padding: 2px)
-- Restored red-dot active indicator to AI icon (using AIIcon component)
-- Replaced placeholder SVG icons with semantic lucide-react icons:
-  - Final Review: SearchCheck
-  - File & Serve: Send
-  - Client Update: MessageSquare
-  - Progress Summary: TrendingUp
-  - GoodCounsel: GoodCounselIcon component
-  - Beta Testing: BetaTestingIcon component
+- **Logo Component** (`LexFiat/client/src/components/ui/logo.tsx`):
+  - Adjusted logo SVG/viewBox to fill gold ring with no gap (object-fit: cover, padding: 2px)
+- **AI Icon Component** (`LexFiat/client/src/components/ui/ai-icon.tsx`):
+  - Restored red-dot "active" indicator to AI icon (fill="#DC2626" center circle)
+  - Uses shared component from `Cyrano/shared-assets/ai-icon.tsx`
+- **Dashboard Icons** (`LexFiat/client/src/pages/dashboard.tsx`):
+  - Replaced placeholder SVG icons with semantic `lucide-react` icons:
+    - GoodCounsel: `GoodCounselIcon` component
+    - Beta Testing: `BetaTestingIcon` component
+    - Final Review: `SearchCheck`
+    - File & Serve: `Send`
+    - Client Update: `MessageSquare`
+    - Progress Summary: `TrendingUp`
+- **Testing Sidebar** (`LexFiat/client/src/components/dashboard/testing-sidebar-html.tsx`):
+  - Replaced placeholder SVG with `BetaTestingIcon` component
+- Maintained "instrument panel" look while making icons semantically meaningful
 
-**Ticket A3 – Theme Support:**
-- Created theme token system (`LexFiat/client/src/lib/theme.ts`) with:
-  - Default: lighter, modern theme (light)
-  - Alternate: dark, saturated "control room" skin (control-room)
-- Moved colors/blur/typography into theme tokens
-- Created ThemeProvider component for dynamic theme switching
-- Ensured `border-radius: 0` for primary panels in all themes
-- Integrated ThemeProvider into App.tsx
+**Ticket A3 – Theme Support (Light + Control-Room Skin):**
+- **Theme System** (`LexFiat/client/src/lib/theme.ts`):
+  - Created theme token system with colors, blur, and typography tokens
+  - Default: lighter, modern theme (`light`) - similar to Arkiver direction
+  - Alternate: dark, saturated "control room" skin (`control-room`)
+  - All themes maintain glass effect and sharp panel edges (`border-radius: 0`)
+- **Theme Provider** (`LexFiat/client/src/components/theme/theme-provider.tsx`):
+  - Created React context provider for dynamic theme switching
+  - Persists theme preference in localStorage
+  - Applies theme variables to document root
+- **App Integration** (`LexFiat/client/src/App.tsx`):
+  - Wrapped application with `ThemeProvider` for global theme support
+- **CSS Variables** (`LexFiat/client/src/index.css`):
+  - Defined `--piq-*` variables mapped to Tailwind compatibility variables
+  - Enforced `border-radius: 0` for primary panels and widgets in all themes
 
-### Epic B – Widgets, Panels, and Entity Drill-Downs
+### Epic B – Widgets, Panels, and Entity Drill-Downs ✅
 
 **Ticket B1 – Reconfigurable Widgets:**
-- Created widget configuration system (`LexFiat/client/src/lib/widget-config.ts`)
-- Implemented per-user show/hide widget preferences with localStorage persistence
-- Connected widget configuration to workflow configuration with warning system
-- Enhanced existing drag-and-drop functionality for workflow stages
+- **Widget Configuration System** (`LexFiat/client/src/lib/widget-config.ts`):
+  - Created `WidgetConfig` interface for widget state management
+  - Implemented `getWidgetConfig()`, `saveWidgetConfig()`, `updateWidgetVisibility()` functions
+  - Per-user show/hide widget preferences with localStorage persistence
+  - Connected widget configuration to workflow configuration with warning system
+- **Dashboard Integration** (`LexFiat/client/src/pages/dashboard.tsx`):
+  - Enhanced existing drag-and-drop functionality for workflow stages
+  - Integrated widget visibility logic with `getWidgetConfig()` and `saveWidgetConfig()`
+- **Workflow Stage Item** (`LexFiat/client/src/components/dashboard/workflow-stage-item.tsx`):
+  - Updated to support drag-and-drop events (`draggable`, `onDragStart`, `onDragOver`, `onDragEnd`)
 
 ### Epic C – Workflow Engine Options and Drafting Modes
 
@@ -347,10 +374,138 @@ Related Documents: REALISTIC-WORK-PLAN
 - Ensured visual design feels humane and calm, not gamified
 
 **Ticket E3 – Untold Integration Health & Setup:**
-- Created Untold health check system (`LexFiat/client/src/lib/untold-health-check.ts`)
-- Implemented test connection method for GoodCounsel to call at startup
-- Verified Untold integration uses real API credentials from environment variables (VITE_UNTOLD_API_URL, VITE_UNTOLD_API_KEY)
-- Health check surfaces clear status (configured, reachable, error messages)
+- ~~REMOVED: Fake Untold API integration removed. Replaced with real wellness journaling system.~~
+
+**Ticket B2 – Standard Entity Summary Drawers:**
+- **Summary Drawer Component** (`LexFiat/client/src/components/dashboard/summary-drawer.tsx`):
+  - Created reusable Summary Drawer component that opens from right side
+  - Implemented entity-specific drawers for:
+    - Matter/Case: Pulled from Clio, includes key metadata and "Open in Clio Matter" action
+    - Event: Pulled from calendar, includes date, time, court/location, and "Open in Calendar" action
+    - Document: Shows type (motion, pleading, notice, etc.), status, and "Open in Word/Editor" action
+    - Communication: Email support (phone/IM later), shows parties, subject, key excerpts, "Open in Email Client"
+  - Made all visible case names, events, documents, and communication references clickable
+  - Clicking drawer header deep-links into source systems (Clio, Calendar, Word, Email)
+  - Created `useSummaryDrawer` hook for managing drawer state
+  - Uses Radix UI Sheet component for slide-in drawer animation
+
+**Ticket B3 – Full-Panel Layout Standardization:**
+- **Standard Panel Layout** (`LexFiat/client/src/components/dashboard/standard-panel-layout.tsx`):
+  - Created standard 3-column panel layout template for full panels/pages
+  - Layout structure:
+    - Left column: Entity overview and timeline
+    - Center column: Current work surface (AI suggestions, actions, history, controls)
+    - Right column: GoodCounsel card + red-flag/ethics alerts
+  - Integrated red-flag alerts display in right column
+  - Maintains glass + sharp edges aesthetic consistent with main dashboard
+  - Typography and spacing consistent with main dashboard
+  - Refactored existing panels (GoodCounsel panel, "What's Happening?" panel, error-reporting) to use shared layout
+
+**Ticket C3 – Implement Two Reference Modes End-to-End:**
+- Implemented Mode A: Auto-draft for review (`Cyrano/src/engines/workflow/drafting-mode-executor.ts`)
+  - Full workflow: ingested → classified → analysis → draft generation → attorney review
+  - Automatically generates draft response and surfaces in dashboard
+- Implemented Mode B: Summarize → discuss → draft
+  - Generates structured summary first
+  - Allows interactive Q&A phase
+  - Generates draft on user command using same pipeline as Mode A
+- Both modes use shared state machine and audit logging
+
+**Ticket D1 – Compact HUD / Menu-Bar View:**
+- **Compact HUD Component** (`LexFiat/client/src/components/dashboard/compact-hud.tsx`):
+  - Created compact mode component that can render as small strip (top or side)
+  - Candidate for future menu-bar/tray window implementation
+  - Displays:
+    - Today's key deadlines and urgent items
+    - Counts of items waiting on user action at key gates (drafts ready, reviews pending)
+    - Subtle GoodCounsel badge when there are pending reflections or ethics nudges
+  - Clicking any number or badge opens relevant full dashboard panel
+  - Non-blocking, subtle design that fits into lawyer's day
+  - Uses React Query for data fetching with auto-refresh
+
+**Ad Astra Theme – LCARS-Inspired Star Trek Aesthetic:**
+- **Theme System Enhancement** (`LexFiat/client/src/lib/theme.ts`):
+  - Added `ad-astra` theme option to ThemeName type
+  - Created `adAstraTheme` with LCARS-inspired color palette:
+    - Black backgrounds (#000000)
+    - Orange/yellow accents (#FF9900, #FFCC00)
+    - Distinctive rounded panel corners (LCARS style)
+    - Information-dense layout support
+  - Theme registry updated to include Ad Astra option
+- **LCARS CSS Styling** (`LexFiat/client/src/styles/ad-astra.css`):
+  - Created comprehensive LCARS-style CSS with `[data-theme="ad-astra"]` selectors
+  - Distinctive panel styling with rounded corners (1rem 0 1rem 0 pattern)
+  - LCARS button styling with rounded corners
+  - LCARS badge, card, and input styling
+  - Custom scrollbar styling
+  - Glow effects and panel indicators
+  - Typography enhancements for LCARS aesthetic
+- **Theme Selector Component** (`LexFiat/client/src/components/theme/theme-selector.tsx`):
+  - Created dropdown menu component for theme switching
+  - Shows all available themes (Light, Control Room, Ad Astra)
+  - Visual indicators for current theme selection
+  - Integrated into header for easy access
+- **Theme Provider Update** (`LexFiat/client/src/components/theme/theme-provider.tsx`):
+  - Added `data-theme` attribute to document root for CSS selector targeting
+  - Enables theme-specific styling via CSS attribute selectors
+- **Settings Page Integration** (`LexFiat/client/src/pages/settings.tsx`):
+  - Updated theme selector to use new theme system
+  - Replaced old theme options with new theme names (light, control-room, ad-astra)
+- **Header Integration** (`LexFiat/client/src/components/layout/header.tsx`):
+  - Added ThemeSelector component to header action buttons
+  - Provides quick theme switching from header
+
+**Ticket D2 – High-Level Workflow Status Signals:**
+- **Workflow Status Service** (`LexFiat/client/src/lib/workflow-status-service.ts`):
+  - Created service to aggregate high-level workflow status signals for compact HUD
+  - Provides `getWorkflowStatus()` function that returns summarized status object
+  - Status includes action-oriented incoming statuses: `incoming_respond`, `incoming_review_for_response`, `incoming_review_and_fwd`, `incoming_read_fyi`
+  - Also includes: `drafts_in_progress`, `items_waiting_for_review`, `active_goodcounsel_prompts`, `urgent_items`, `drafts_ready`, `reviews_pending`
+  - Auto-refreshes every 30 seconds via React Query
+  - Works regardless of drafting mode (cares about "work in motion," not how it was produced)
+- **Backend Tool** (`Cyrano/src/tools/workflow-status.ts`):
+  - Implemented MCP tool to provide summarized status object
+  - Returns action-oriented incoming statuses (replacing generic `incoming_motions` with specific action types)
+  - Exposes simple API for HUD to read status periodically
+- **Workflow Status Panels** (`LexFiat/client/src/components/dashboard/workflow-status-panels.tsx`):
+  - Created three large panels replacing assembly-line workflow stages
+  - Panel 1: "Incoming" - Shows action-oriented incoming items (respond, review for response, review & forward, read FYI)
+  - Panel 2: "In Progress" - Shows active work (drafts in progress, items waiting for review)
+  - Panel 3: "Ready" - Shows completed items awaiting next step (drafts ready, reviews pending)
+  - Information-dense, organized presentation with clear action-oriented labels
+  - Each status item is clickable and routes to appropriate workflow panels
+  - Uses existing Piquette design system (glass effect, sharp edges, proper color tokens)
+- **Dashboard Layout Update** (`LexFiat/client/src/pages/dashboard.tsx`):
+  - Replaced assembly-line workflow pipeline with three-panel layout
+  - Panels appear below GoodCounsel and Today's Focus widgets
+  - Maintains existing alert bar at top
+- **CompactHUD Enhancement** (`LexFiat/client/src/components/dashboard/compact-hud.tsx`):
+  - Added "Incoming" badge showing total incoming items count
+  - Surfaces incoming statuses in compact HUD for quick visibility
+  - Positioned before urgent deadlines for priority visibility
+
+**Ticket E2 – Event-Driven GoodCounsel Prompts:**
+- **Event-Driven Prompt System** (`Cyrano/src/engines/goodcounsel/event-driven-prompts.ts`):
+  - Implemented logic to detect events from workflow stream
+  - Created prompt rules for:
+    - Long uninterrupted focus sessions (wellness nudge)
+    - Long gaps in client contact on active matters (client-care nudge)
+    - Frequent emergency filings or red-flag alerts (ethics review prompt)
+    - Workflow state changes triggering contextual prompts
+  - Implemented user controls: `snoozePrompt()`, prompt dismissal, history tracking
+  - Functions: `processWorkflowEvent()`, `getActiveGoodCounselPrompts()`, `getGoodCounselHistory()`
+- **GoodCounsel Prompt Manager UI** (`LexFiat/client/src/components/dashboard/goodcounsel-prompt-manager.tsx`):
+  - Created React component to display and manage event-driven GoodCounsel prompts
+  - Shows active prompts with type indicators (wellness, ethics, client-care, workflow)
+  - Displays urgency levels (low, medium, high) with badges
+  - Provides action buttons for prompt actions (e.g., "Take a 5-min break", "Draft client update")
+  - Toggle between active prompts and prompt history
+  - User controls: snooze prompts (X button), view history (History icon)
+  - Uses React Query for data fetching with 15-second refresh interval
+  - Prompts surface in right-rail (full dashboard) and compact HUD
+- **Backend MCP Tools** (`Cyrano/src/tools/goodcounsel-prompts.ts`):
+  - Registered MCP tools: `get_goodcounsel_prompts`, `dismiss_goodcounsel_prompt`, `snooze_goodcounsel_prompt_type`, `get_goodcounsel_prompt_history`, `evaluate_goodcounsel_context`
+  - Integrated with MCP server (`Cyrano/src/mcp-server.ts`)
 
 ---
 

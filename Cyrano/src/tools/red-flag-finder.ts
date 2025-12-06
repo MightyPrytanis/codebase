@@ -365,7 +365,7 @@ Format the response as JSON with a "red_flags" array containing objects with: de
     return null;
   }
 
-  public async performRedFlagAnalysis(content: string, documentType: string | undefined, urgencyThreshold: string, provider: 'anthropic' | 'openai' | 'perplexity' = 'perplexity') {
+  public async performRedFlagAnalysis(content: string, documentType: string | undefined, urgencyThreshold: string, provider: AIProvider = 'perplexity') {
     const prompt = this.buildRedFlagPrompt(content, documentType, urgencyThreshold);
     const aiService = new AIService();
     

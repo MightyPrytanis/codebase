@@ -16,6 +16,9 @@ const GoodCounselInputSchema = z.object({
     'execute_workflow',
     'list_workflows',
     'wellness_check',
+    'wellness_journal',
+    'wellness_trends',
+    'burnout_check',
     'ethics_review',
     'client_recommendations',
     'crisis_support',
@@ -216,6 +219,46 @@ export class GoodcounselEngine extends BaseEngine {
             userId: parsed.userId,
             ...(parsed.input && typeof parsed.input === 'object' ? parsed.input : {}),
           });
+
+        case 'wellness_journal':
+          // Route to wellness journal tool
+          const { wellnessJournalTool } = await import('../tools/wellness-journal.js');
+          return await wellnessJournalTool.execute({
+            ...parsed.input,
+            userId: parsed.userId ? parseInt(parsed.userId.toString()) : undefined,
+          });
+
+        case 'wellness_trends':
+          // Get wellness trends
+          const { wellness } = await import('../services/wellness-service.js');
+          const userIdNum = parsed.userId ? parseInt(parsed.userId.toString()) : undefined;
+          if (!userIdNum) {
+            return {
+              content: [{ type: 'text', text: 'Error: userId is required' }],
+              isError: true,
+            };
+          }
+          const period = parsed.input?.period || 'month';
+          const trends = await wellness.getWellnessTrends(userIdNum, period);
+          return {
+            content: [{ type: 'text', text: JSON.stringify(trends, null, 2) }],
+          };
+
+        case 'burnout_check':
+          // Check burnout risk
+          const { wellness: wellnessService } = await import('../services/wellness-service.js');
+          const userIdForBurnout = parsed.userId ? parseInt(parsed.userId.toString()) : undefined;
+          if (!userIdForBurnout) {
+            return {
+              content: [{ type: 'text', text: 'Error: userId is required' }],
+              isError: true,
+            };
+          }
+          const timeframe = parsed.input?.timeframe || 'month';
+          const burnoutAnalysis = await wellnessService.detectBurnoutSignals(userIdForBurnout, timeframe);
+          return {
+            content: [{ type: 'text', text: JSON.stringify(burnoutAnalysis, null, 2) }],
+          };
 
         case 'ethics_review':
           // Use ethics reviewer tool directly for rule-based evaluation

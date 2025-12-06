@@ -3,28 +3,29 @@ Document ID: ACTIVE-DOCS-INDEX
 Title: Active Documentation Library Index
 Subject(s): Documentation | Index | Reference
 Project: Cyrano
-Version: v548
+Version: v549
 Created: 2025-11-28 (2025-W48)
-Last Substantive Revision: 2025-11-28 (2025-W48)
-Last Format Update: 2025-11-28 (2025-W48)
+Last Substantive Revision: 2025-12-06 (2025-W49)
+Last Format Update: 2025-12-06 (2025-W49)
 Owner: David W Towne / Cognisint LLC
 Copyright: © 2025 Cognisint LLC
-Summary: Complete index of all active documentation in the docs/ library, organized by category.
+Summary: Complete index of all active documentation in the docs/ library, organized by category. See ACTIVE_DOCUMENTATION_SUMMARY.md for consolidation plan.
 Status: Active
 ---
 
 # Active Documentation Library Index
- **Total Active Documents:** ~45 (reduced from 92, 51% reduction)  
+ **Total Active Documents:** 41 markdown files  
 **Location:** `/Users/davidtowne/Desktop/Coding/codebase/docs/`  
-**Archive Summary:** See `docs/archive/one-offs/2025-01-07-archive-cleanup/ARCHIVE_SUMMARY.md`
+**Last Updated:** 2025-12-06 (W49, v549)  
+**Summary:** See `docs/ACTIVE_DOCUMENTATION_SUMMARY.md` for complete list and consolidation plan  
+**Status:** All documents current - Ready for external review (AFTER security/audit) to prune to 12-15 essential documents
 
 ---
 
 ## Architecture (6 documents)
 
 1. `ARCHITECTURE_ARCHITECTURE_COPILOT_ARCHITECTURE_DECISIONS.md` - Copilot architecture decisions
-2. `ARCHITECTURE_ARCHITECTURE_DYNAMIC_TOOL_ENHANCER_TECHNICAL_ARCHITECTURE_IP_AN.md` - Dynamic Tool Enhancer architecture
-3. `ARCHITECTURE_ARCHITECTURE_ENGINE_ARCHITECTURE.md` - Engine layer architecture (Tools → Modules → Engines → Apps)
+2. `ARCHITECTURE_ARCHITECTURE_ENGINE_ARCHITECTURE.md` - Engine layer architecture (Tools → Modules → Engines → Apps)
 4. `ARCHITECTURE_ARCHITECTURE_MODULE_ARCHITECTURE.md` - Module layer architecture
 5. `ARCHITECTURE_ARCHITECTURE_RAG_PIPELINE_ARCHITECTURE.md` - RAG pipeline architecture
 6. `ARKIVER_ARCHITECTURE_GUIDE.md` - **Authoritative source for Arkiver architecture**
@@ -52,7 +53,7 @@ Status: Active
 1. `LEXFIAT_GUIDE_LEXFIAT_DEPLOYMENT_CHECKLIST.md` - LexFiat deployment
 2. `CYRANO_GUIDE_MCP_TOOL_REGISTRY_CHECKLIST.md` - MCP tool registry
 
-**Note:** Many guides have been archived. See `docs/archive/one-offs/2025-01-07-archive-cleanup/ARCHIVE_SUMMARY.md` for details.
+**Note:** Many guides have been archived. See `docs/archive/one-offs/2025-11-29-archive-cleanup/ARCHIVE_SUMMARY.md` for details.
 
 ---
 

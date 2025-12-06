@@ -17,3 +17,6 @@ export const users = pgTable('users', {
 
 // Export email drafts schema
 export * from './schema-email-drafts.js';
+
+// Export wellness schema
+export * from './schema-wellness.js';
