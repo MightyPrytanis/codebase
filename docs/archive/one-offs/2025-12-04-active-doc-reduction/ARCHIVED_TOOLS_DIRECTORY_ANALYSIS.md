@@ -10,7 +10,7 @@ Last Format Update: 2025-11-29 (2025-W48)
 Owner: David W Towne / Cognisint LLC
 Copyright: © 2025 Cognisint LLC
 Summary: Analysis of all tools directories in codebase to identify duplicates, lost tools, and consolidation opportunities.
-Status: Active
+Status: Archived (2025-12-04)
 ---
 
 # Tools Directory Analysis Report

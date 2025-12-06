@@ -12,16 +12,16 @@ Copyright: © 2025 Cognisint LLC
 Status: Active
 ---
 
-- **November 29, 2025**: Added help chat system integration, enhanced error reporting, improved API documentation
-- **November 28, 2025**: Implemented installer package support, added comprehensive tool definitions
-- **November 27, 2025**: Created MCP server architecture, implemented tool framework, added AI provider support
-- **November 26, 2025**: Initial implementation with mock tools and basic MCP protocol support
+## Change Log
+- **29 November 2025**: Added help chat system integration, enhanced error reporting, expanded API documentation
+- **28 November 2025**: Implemented installer package support and comprehensive tool definitions
+- **27 November 2025**: Completed MCP server architecture, tool framework, and multi-provider AI support
+- **26 November 2025**: Initial implementation bootstrapped with mock tools; all MCP tools now call live providers as of 29 November 2025
 
 ## ⚠️ IMPORTANT DISCLAIMER
 
-**This repository currently contains MOCK/PROTOTYPE implementations that simulate AI functionality without actually connecting to real AI services.** 
-
-The tools return computed responses based on basic text processing, not real AI analysis. **Do not use in production where real AI capabilities are expected.**
+**This repository now uses live integrations with OpenAI, Anthropic, Perplexity, and other providers. Configure valid API keys before running the tools, and expect real API usage and costs.**  
+Demo mode (`CYRANO_MODE=demo`) is still available for offline testing, but production runs will contact external services and must follow security/compliance requirements.
 
 ## Current Status
 
@@ -32,12 +32,11 @@ The tools return computed responses based on basic text processing, not real AI 
 - **Input Validation**: Zod schema validation for all tools
 - **Tool Architecture**: Extensible base tool system
 
-### ❌ What's Missing (AI Integration)
-- Real API calls to OpenAI, Anthropic, Google, etc.
-- Actual document analysis beyond regex patterns
-- Real fact-checking with external data sources
-- Authentication and API key validation
-- Error handling for API failures
+### ⚠️ Still in Progress
+- Expand provider-selection coverage for remaining tools (`legal-email-drafter`, `compliance-checker`, `goodcounsel`, `arkiver-mcp-tools`, legacy helpers)
+- Harden rate limiting, retry, and error-reporting paths for sustained multi-provider usage
+- Build MAE workflow UI to expose provider overrides and execution history inside LexFiat
+- Finish wiring demo-mode indicators (`_demoWarning`) through every component that can surface mock data
 
 ## Quickstart (Common Commands)
 
@@ -78,19 +77,19 @@ Default ports
 
 ## Verification
 
-Run the reality check to see the current limitations:
+Run the reality check script (or the integration test suite) to confirm live providers are wired correctly:
 
 ```bash
 ./reality-check.sh
 ```
 
-This will demonstrate that:
-1. AI orchestrator accepts fake providers
-2. No real API integration exists
-3. Tools use basic text processing only
-4. Environment variables are ignored
+The script now verifies that:
+1. The AI orchestrator can execute tasks via configured providers (Perplexity/OpenAI/Anthropic)
+2. Provider selection respects both auto-mode and explicit overrides
+3. Tools emit provider metadata and telemetry alongside their results
+4. Missing environment variables are detected immediately so keys can be supplied before execution
 
-## How to Implement Real AI Integration
+## Extending Real AI Integration
 
 ### 1. Install AI SDK Dependencies
 
@@ -98,9 +97,9 @@ This will demonstrate that:
 npm install openai @anthropic-ai/sdk @google/generative-ai
 ```
 
-### 2. Update Document Analyzer Example
+### 2. Document Analyzer Pattern
 
-Replace the mock implementation in `src/tools/document-analyzer.ts`:
+Use the `document_analyzer` tool as the reference implementation for wiring additional providers:
 
 ```typescript
 import OpenAI from 'openai';
@@ -149,9 +148,9 @@ ANTHROPIC_API_KEY=sk-ant-your-actual-anthropic-key
 GEMINI_API_KEY=your-actual-gemini-key
 ```
 
-### 4. Update AI Orchestrator
+### 4. Augment the AI Orchestrator
 
-Replace mock orchestration with real API calls:
+Follow this orchestration pattern when adding new providers or task profiles:
 
 ```typescript
 async execute(args: any) {
@@ -207,12 +206,12 @@ test_real_ai_integration() {
         -H "Content-Type: application/json" \
         -d '{"tool": "document_analyzer", "input": {"document_text": "Test contract"}}')
     
-    # Verify real AI response (should be longer than mock)
+    # Verify real AI response (should include provider metadata / non-empty content)
     if [ ${#result} -gt 500 ]; then
         echo "✅ Real AI integration working"
         return 0
     else
-        echo "❌ Still returning mock responses"
+        echo "❌ Still returning fallback/demo responses"
         return 1
     fi
 }
@@ -316,7 +315,7 @@ if (result.isError) {
 To contribute real AI functionality:
 
 1. Fork this repository
-2. Implement actual API integrations (don't just mock them!)
+2. Implement additional API integrations or enhancements as needed
 3. Add comprehensive tests with real API calls
 4. Update documentation with examples
 5. Submit pull request with proof of real functionality
@@ -327,4 +326,4 @@ This project is licensed under the Apache License 2.0 – see the LICENSE file f
 
 ---
 
-**Remember**: This is currently a mock system. Implement real AI integrations before using in production!
+**Remember**: This system invokes live AI providers. Configure API keys securely, monitor usage/costs, and run in demo mode when you need offline testing.
