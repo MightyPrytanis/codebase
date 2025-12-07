@@ -455,30 +455,42 @@ Related Documents: REALISTIC-WORK-PLAN
   - Added ThemeSelector component to header action buttons
   - Provides quick theme switching from header
 
-**Ticket D2 – High-Level Workflow Status Signals:**
+**Ticket D2 – Dashboard Overhaul - Full Stack Control Center:**
+- **Header Enhancement** (`LexFiat/client/src/components/layout/header.tsx`):
+  - Added border around integration status indicators for better visual separation
+  - Status strip now has border styling with rounded corners
+- **Priority Alerts Row** (`LexFiat/client/src/components/dashboard/priority-alerts-row.tsx`):
+  - Created full-width priority alerts row displaying red flags and approaching deadlines
+  - Shows client/matter/item information for each alert
+  - Clickable alerts with clickthrough functionality
+  - Fetches data from `red_flag_finder` and `workflow_status` tools
+  - Displays alerts in grid layout (responsive: 1 col mobile, 2 cols tablet, 3 cols desktop)
+  - Color-coded by priority (critical=red, high=orange, medium=yellow)
+  - Icons indicate alert type (deadline, red flag, calendar)
+- **Active WIP Row** (`LexFiat/client/src/components/dashboard/active-wip-row.tsx`):
+  - Created 4-column Active WIP layout replacing previous 3-panel design
+  - Column 1: Intake - All incoming email with stats and expandable list view
+  - Columns 2-3: Processing - Client/matter/item cards with progress bars and clock animations
+  - Column 4: Ready - Items ready for attorney review
+  - Expandable columns show detailed item lists when clicked
+  - Progress indicators show processing status with animated progress bars
+  - Clickable items route to appropriate workflow panels
+- **Dashboard Layout Restructure** (`LexFiat/client/src/pages/dashboard.tsx`):
+  - **Top Row:** Today's Focus (Cols 1-2) and GoodCounsel (Cols 3-4) - maintained existing widgets
+  - **Second Row:** Priority Alerts (full width) - replaces rotating ticker
+  - **Third Row:** Active WIP (4 columns: Intake | Processing | Processing | Ready)
+  - Removed old priority ticker widget
+  - Removed WorkflowStatusPanels component (replaced by ActiveWIPRow)
 - **Workflow Status Service** (`LexFiat/client/src/lib/workflow-status-service.ts`):
-  - Created service to aggregate high-level workflow status signals for compact HUD
+  - Created service to aggregate high-level workflow status signals
   - Provides `getWorkflowStatus()` function that returns summarized status object
   - Status includes action-oriented incoming statuses: `incoming_respond`, `incoming_review_for_response`, `incoming_review_and_fwd`, `incoming_read_fyi`
   - Also includes: `drafts_in_progress`, `items_waiting_for_review`, `active_goodcounsel_prompts`, `urgent_items`, `drafts_ready`, `reviews_pending`
   - Auto-refreshes every 30 seconds via React Query
-  - Works regardless of drafting mode (cares about "work in motion," not how it was produced)
 - **Backend Tool** (`Cyrano/src/tools/workflow-status.ts`):
   - Implemented MCP tool to provide summarized status object
   - Returns action-oriented incoming statuses (replacing generic `incoming_motions` with specific action types)
-  - Exposes simple API for HUD to read status periodically
-- **Workflow Status Panels** (`LexFiat/client/src/components/dashboard/workflow-status-panels.tsx`):
-  - Created three large panels replacing assembly-line workflow stages
-  - Panel 1: "Incoming" - Shows action-oriented incoming items (respond, review for response, review & forward, read FYI)
-  - Panel 2: "In Progress" - Shows active work (drafts in progress, items waiting for review)
-  - Panel 3: "Ready" - Shows completed items awaiting next step (drafts ready, reviews pending)
-  - Information-dense, organized presentation with clear action-oriented labels
-  - Each status item is clickable and routes to appropriate workflow panels
-  - Uses existing Piquette design system (glass effect, sharp edges, proper color tokens)
-- **Dashboard Layout Update** (`LexFiat/client/src/pages/dashboard.tsx`):
-  - Replaced assembly-line workflow pipeline with three-panel layout
-  - Panels appear below GoodCounsel and Today's Focus widgets
-  - Maintains existing alert bar at top
+  - Exposes simple API for dashboard to read status periodically
 - **CompactHUD Enhancement** (`LexFiat/client/src/components/dashboard/compact-hud.tsx`):
   - Added "Incoming" badge showing total incoming items count
   - Surfaces incoming statuses in compact HUD for quick visibility

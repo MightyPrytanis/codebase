@@ -3,10 +3,10 @@ Document ID: LEXFIAT-UI-SPEC
 Title: LexFiat UI Specification
 Subject(s): LexFiat | UI | Design System | Frontend
 Project: Cyrano
-Version: v548
+Version: v549
 Created: 2025-11-27 (2025-W48)
-Last Substantive Revision: 2025-11-27 (2025-W48)
-Last Format Update: 2025-11-28 (2025-W48)
+Last Substantive Revision: 2025-12-06 (2025-W49)
+Last Format Update: 2025-12-06 (2025-W49)
 Owner: David W Towne / Cognisint LLC
 Copyright: © 2025 Cognisint LLC
 Summary: Definitive reference for all LexFiat UI structure, styling, and behavior. Authoritative source for LexFiat UI/UX specifications. For architecture, see LEXFIAT-README.
@@ -101,6 +101,7 @@ LexFiat UI is a dark-themed, glass-morphism legal intelligence dashboard. The de
 - Clio (warning dot)
 - Calendar (success dot)
 - Research (warning dot)
+- **Styling:** Border around status strip with rounded corners for visual separation
 
 **Action Buttons:**
 - Help (💬)
@@ -112,9 +113,9 @@ LexFiat UI is a dark-themed, glass-morphism legal intelligence dashboard. The de
 **Location:** `LexFiat/client/src/pages/dashboard.tsx`
 
 **Structure:**
-- Priority ticker at top (rotating alerts)
-- Widget grid (Today's Focus, GoodCounsel, etc.)
-- Workflow pipeline (assembly line with stages)
+- **Top Row:** Today's Focus (Cols 1-2) and GoodCounsel (Cols 3-4)
+- **Second Row:** Priority Alerts (full width) - Red flags and approaching deadlines with client/matter/item clickthroughs
+- **Third Row:** Active WIP (4 columns: Intake | Processing | Processing | Ready)
 - Testing sidebar (slide-out from right)
 - Footer banner (slide-out from bottom)
 
@@ -126,12 +127,20 @@ LexFiat UI is a dark-themed, glass-morphism legal intelligence dashboard. The de
 - Draft Preparation - AI-generated draft responses
 - Attorney Review - Final review and approval
 
-**Workflow Pipeline:**
-- Horizontal assembly line layout
-- Stages connected with lines and arrows
-- Draggable stages
-- Metrics displayed per stage
-- Expand buttons to open full panels
+**Active WIP Row:**
+- **Column 1: Intake** - All incoming email with stats and expandable list view
+- **Columns 2-3: Processing** - Client/matter/item cards with progress bars and clock animations
+- **Column 4: Ready** - Items ready for attorney review
+- Expandable columns show detailed item lists when clicked
+- Progress indicators show processing status with animated progress bars
+- Clickable items route to appropriate workflow panels
+
+**Priority Alerts Row:**
+- Full-width row displaying red flags and approaching deadlines
+- Shows client/matter/item information for each alert
+- Clickable alerts with clickthrough functionality
+- Color-coded by priority (critical=red, high=orange, medium=yellow)
+- Icons indicate alert type (deadline, red flag, calendar)
 
 **Expanded Panels:**
 - Modal overlays with glass-morphism styling

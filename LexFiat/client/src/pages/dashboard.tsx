@@ -17,7 +17,8 @@ import DraftPrepPanel from "@/components/dashboard/draft-prep-panel";
 import AttorneyReviewPanel from "@/components/dashboard/attorney-review-panel";
 import HelpChatPanel from "@/components/dashboard/help-chat-panel";
 import WorkflowStageItem from "@/components/dashboard/workflow-stage-item";
-import { WorkflowStatusPanels } from "@/components/dashboard/workflow-status-panels";
+import { PriorityAlertsRow } from "@/components/dashboard/priority-alerts-row";
+import { ActiveWIPRow } from "@/components/dashboard/active-wip-row";
 import "@/styles/dashboard-html.css";
 import { 
   DocumentIntakeIcon, 
@@ -229,42 +230,10 @@ export default function Dashboard() {
       <Header attorney={{ name: "Mekel S. Miller", specialization: "Family Law" }} />
       
       <div className="main-content">
-        {/* Priority Status Ticker Widget */}
-        <div className="widget priority-ticker" id="priority-ticker-widget">
-          <div className="widget-header">
-            <div className="widget-indicator" style={{ background: '#ef4444' }}></div>
-            <h3 className="widget-title">
-              <svg className="ui-icon"><use href="#icon-priority"/></svg>
-              Priority Alerts
-            </h3>
-            <div className="widget-controls">
-              <button className="widget-toggle" title="Toggle widget">−</button>
-              <button className="widget-resize" title="Resize widget">⤢</button>
-            </div>
-          </div>
-          <div className="widget-content">
-            <div className="ticker-content" id="ticker-content">
-              {tickerItems.map((item, index) => (
-                <div
-                  key={item.id}
-                  className={`ticker-item ${item.priority} ${index === currentTickerIndex ? 'active' : ''}`}
-                  onClick={() => openTrackingCard(item.id)}
-                >
-                  <span className="alert-icon">
-                    <svg className="ui-icon"><use href="#icon-alert"/></svg>
-                  </span>
-                  <span className="alert-text">{item.text}</span>
-                  <span className="alert-time">{item.time}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Status Widgets - Above Workflow */}
-        <div className="widgets-grid">
-          {/* Today's Focus Widget - Left (wider) */}
-          <div className="widget focus" onClick={() => expandPanel('focus')}>
+        {/* Top Row: Today's Focus (Cols 1-2) and GoodCounsel (Cols 3-4) */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+          {/* Today's Focus Widget - Cols 1-2 */}
+          <div className="md:col-span-2 widget focus" onClick={() => expandPanel('focus')}>
             <div className="widget-header">
               <div className="widget-indicator" style={{ background: 'var(--electric-purple)' }}></div>
               <h3 className="widget-title">
@@ -284,8 +253,8 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* GoodCounsel Widget - Center (wider) - METALLIC GOLD */}
-          <div className="widget goodcounsel" onClick={() => expandPanel('goodcounsel')}>
+          {/* GoodCounsel Widget - Cols 3-4 */}
+          <div className="md:col-span-2 widget goodcounsel" onClick={() => expandPanel('goodcounsel')}>
             <div className="widget-header">
               <div className="widget-indicator" style={{ background: '#FFD700' }}></div>
               <h3 className="widget-title">
@@ -310,27 +279,32 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-
-          {/* Beta Testing Widget removed - now using slide-out sidebar */}
         </div>
 
-        {/* Workflow Status Panels - Three Large Panels */}
-        <WorkflowStatusPanels
-          onActionClick={(action, type) => {
-            // Handle panel clicks - can expand to specific panels or filter views
-            if (type === "incoming") {
-              if (action === "respond") expandPanel("intake");
-              else if (action === "review_for_response" || action === "review_and_fwd") expandPanel("analysis");
-              else if (action === "read_fyi") expandPanel("intake");
-              else expandPanel("intake");
-            } else if (type === "in_progress") {
-              if (action === "drafts_in_progress") expandPanel("draft-prep");
-              else if (action === "items_waiting_review") expandPanel("attorney-review");
-              else expandPanel("draft-prep");
-            } else if (type === "ready") {
-              if (action === "drafts_ready") expandPanel("draft-prep");
-              else if (action === "reviews_pending") expandPanel("attorney-review");
-              else expandPanel("draft-prep");
+        {/* Second Row: Priority Alerts (All columns) */}
+        <div className="mb-6">
+          <PriorityAlertsRow
+            onAlertClick={(alert) => {
+              // Handle alert click - open tracking card or navigate to item
+              openTrackingCard(alert.id);
+            }}
+          />
+        </div>
+
+        {/* Third Row: Active WIP (4 columns: Intake | Processing | Processing | Ready) */}
+        <ActiveWIPRow
+          onItemClick={(item, type) => {
+            // Handle item click - expand appropriate panel
+            if (type === 'intake') {
+              expandPanel('intake');
+            } else if (type === 'processing') {
+              if (item.status === 'drafting') {
+                expandPanel('draft-prep');
+              } else {
+                expandPanel('analysis');
+              }
+            } else if (type === 'ready') {
+              expandPanel('attorney-review');
             }
           }}
         />

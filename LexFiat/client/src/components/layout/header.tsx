@@ -85,7 +85,7 @@ export default function Header({ attorney }: HeaderProps) {
         
         <div className="header-right">
           {/* Compact Status Strip - Centered */}
-          <div className="status-strip">
+          <div className="status-strip" style={{ border: '1px solid var(--panel-border)', borderRadius: '6px', padding: '4px 8px' }}>
             <div className="status-item" onClick={() => expandPanel('gmail')} title="Gmail">
               <div className="status-dot success"></div>
               <Mail className="status-icon" size={14} />
