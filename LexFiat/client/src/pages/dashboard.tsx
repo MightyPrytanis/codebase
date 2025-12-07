@@ -5,6 +5,8 @@
  */
 
 import React, { useState, useEffect, useRef } from "react";
+import { Clock } from "lucide-react";
+import { LiaSwimmerSolid } from "react-icons/lia";
 import Header from "@/components/layout/header";
  import TestingSidebar from "@/components/dashboard/testing-sidebar-html";
 import FooterBanner from "@/components/layout/footer-banner-html";
@@ -16,6 +18,10 @@ import AnalysisPanel from "@/components/dashboard/analysis-panel";
 import DraftPrepPanel from "@/components/dashboard/draft-prep-panel";
 import AttorneyReviewPanel from "@/components/dashboard/attorney-review-panel";
 import HelpChatPanel from "@/components/dashboard/help-chat-panel";
+import AdminPanel from "@/components/dashboard/admin-panel";
+import SettingsPanel from "@/components/dashboard/settings-panel";
+import ProfilePanel from "@/components/dashboard/profile-panel";
+import { CalendarView } from "@/components/dashboard/calendar-view";
 import WorkflowStageItem from "@/components/dashboard/workflow-stage-item";
 import { PriorityAlertsRow } from "@/components/dashboard/priority-alerts-row";
 import { ActiveWIPRow } from "@/components/dashboard/active-wip-row";
@@ -79,6 +85,7 @@ export default function Dashboard() {
     },
   ]);
   const [draggedStage, setDraggedStage] = useState<string | null>(null);
+  const [selectedSummaryCard, setSelectedSummaryCard] = useState<{ type: string; id: string; data: any } | null>(null);
   const tickerIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -227,13 +234,49 @@ export default function Dashboard() {
 
   return (
     <>
-      <Header attorney={{ name: "Mekel S. Miller", specialization: "Family Law" }} />
+      <Header 
+        attorney={{ name: "Mekel S. Miller", specialization: "Family Law" }}
+        onHelpClick={() => setHelpChatOpen(true)}
+        onAdminClick={() => expandPanel('admin')}
+        onSettingsClick={() => expandPanel('settings')}
+        onProfileClick={() => expandPanel('profile')}
+      />
       
-      <div className="main-content">
-        {/* Top Row: Today's Focus (Cols 1-2) and GoodCounsel (Cols 3-4) */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+      <div className="main-content" style={{ paddingTop: '1.5rem', paddingBottom: '1.5rem' }}>
+        {/* Demo Mode Matter Cards */}
+        {isDemoMode() && (
+          <div style={{ width: '100%', marginBottom: '1.5rem' }}>
+            <DemoMatterCards
+              onMatterClick={(matterId) => {
+                const matter = DEMO_CASES.find((m) => m.id === matterId);
+                if (matter) {
+                  setSelectedSummaryCard({
+                    type: 'matter',
+                    id: matterId,
+                    data: matter,
+                  });
+                }
+              }}
+            />
+          </div>
+        )}
+
+        {/* First Row: Priority Alerts (Full width, compact) */}
+        <div style={{ width: '100%', marginBottom: '1.5rem' }}>
+          <PriorityAlertsRow
+            onAlertClick={(alert) => {
+              openTrackingCard(alert.id);
+            }}
+            onSummaryCardOpen={(type, id, data) => {
+              setSelectedSummaryCard({ type, id, data });
+            }}
+          />
+        </div>
+
+        {/* Second Row: Today's Focus (Cols 1-2) and GoodCounsel (Cols 3-4) */}
+        <div className="grid grid-cols-4 gap-6" style={{ display: 'grid', width: '100%', maxWidth: '100%', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', boxSizing: 'border-box', marginBottom: '1.5rem' }}>
           {/* Today's Focus Widget - Cols 1-2 */}
-          <div className="md:col-span-2 widget focus" onClick={() => expandPanel('focus')}>
+          <div className="col-span-2 widget focus" onClick={() => expandPanel('focus')}>
             <div className="widget-header">
               <div className="widget-indicator" style={{ background: 'var(--electric-purple)' }}></div>
               <h3 className="widget-title">
@@ -242,19 +285,63 @@ export default function Dashboard() {
               </h3>
             </div>
             <div className="widget-content">
-              <div className="insight-card critical">
+              <div 
+                className="insight-card critical cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const matter = DEMO_CASES.find(c => c.case_name === 'Johnson v Johnson');
+                  if (matter) {
+                    setSelectedSummaryCard({
+                      type: 'pleading',
+                      id: 'johnson-tro-response',
+                      data: {
+                        title: 'TRO Response',
+                        matter: matter.case_name,
+                        client: 'Johnson',
+                        court: matter.court,
+                        deadline: matter.deadline,
+                        description: 'Draft response to Temporary Restraining Order',
+                        _demo: true,
+                        _simulated: true,
+                      },
+                    });
+                  }
+                }}
+              >
                 <p className="insight-text"><strong>TRO Response - Johnson v Johnson</strong></p>
                 <p className="insight-subtext">Wayne County • Due 5 PM tomorrow</p>
               </div>
-              <div className="insight-card info">
+              <div 
+                className="insight-card info cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  const matter = DEMO_CASES.find(c => c.case_name.includes('Hartley') || c.case_name.includes('Estate'));
+                  if (matter) {
+                    setSelectedSummaryCard({
+                      type: 'pleading',
+                      id: 'hartley-discovery',
+                      data: {
+                        title: 'Discovery Response',
+                        matter: matter.case_name || 'Hartley Estate',
+                        client: 'Hartley',
+                        court: matter.court || 'Oakland County',
+                        deadline: matter.deadline,
+                        description: 'Discovery response document',
+                        _demo: true,
+                        _simulated: true,
+                      },
+                    });
+                  }
+                }}
+              >
                 <p className="insight-text">Discovery Response - Hartley Estate</p>
                 <p className="insight-subtext">Oakland County • Due Friday</p>
               </div>
             </div>
           </div>
 
-          {/* GoodCounsel Widget - Cols 3-4 */}
-          <div className="md:col-span-2 widget goodcounsel" onClick={() => expandPanel('goodcounsel')}>
+          {/* GoodCounsel Widget - Cols 3-4 (no permanent raise/glow) */}
+          <div className="col-span-2 widget goodcounsel widget-spaced" onClick={() => expandPanel('goodcounsel')} style={{ boxShadow: 'none' }}>
             <div className="widget-header">
               <div className="widget-indicator" style={{ background: '#FFD700' }}></div>
               <h3 className="widget-title">
@@ -281,20 +368,9 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Second Row: Priority Alerts (All columns) */}
-        <div className="mb-6">
-          <PriorityAlertsRow
-            onAlertClick={(alert) => {
-              // Handle alert click - open tracking card or navigate to item
-              openTrackingCard(alert.id);
-            }}
-          />
-        </div>
-
-        {/* Third Row: Active WIP (4 columns: Intake | Processing | Processing | Ready) */}
+        {/* Third Row: Active WIP with tier labels */}
         <ActiveWIPRow
           onItemClick={(item, type) => {
-            // Handle item click - expand appropriate panel
             if (type === 'intake') {
               expandPanel('intake');
             } else if (type === 'processing') {
@@ -308,6 +384,36 @@ export default function Dashboard() {
             }
           }}
         />
+
+        {/* Bottom Row: Chronometric and MAE (glass overlay only) */}
+        <div className="grid grid-cols-4 gap-6" style={{ display: 'grid', width: '100%', maxWidth: '100%', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', boxSizing: 'border-box', marginTop: '1.5rem' }}>
+          <div className="col-span-2 widget background-widget" onClick={() => expandPanel('chronometric')}>
+            <div className="widget-header">
+              <h3 className="widget-title flex items-center gap-2" style={{ color: 'rgba(255, 255, 255, 0.9)', fontWeight: '600' }}>
+                <Clock className="widget-icon" style={{ width: '18px', height: '18px' }} />
+                <span className="ml-1">Chronometric</span>
+              </h3>
+            </div>
+            <div className="widget-content">
+              <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.875rem' }}>Time tracking and analytics</p>
+            </div>
+          </div>
+          <div className="col-span-2 widget background-widget" onClick={() => expandPanel('mae')}>
+            <div className="widget-header">
+              <h3 className="widget-title flex items-center gap-2" style={{ color: 'rgba(255, 255, 255, 0.9)', fontWeight: '600' }}>
+                <div className="multi-agent-icon-group" style={{ width: '18px', height: '18px', position: 'relative' }}>
+                  <LiaSwimmerSolid style={{ width: '14px', height: '14px', position: 'absolute', top: '0px', left: '0px', opacity: 0.5 }} />
+                  <LiaSwimmerSolid style={{ width: '14px', height: '14px', position: 'absolute', top: '4px', left: '4px', opacity: 0.7 }} />
+                  <LiaSwimmerSolid style={{ width: '14px', height: '14px', position: 'absolute', top: '8px', left: '8px', opacity: 0.9 }} />
+                </div>
+                <span className="ml-1">MAE (Multi-Agent Engine)</span>
+              </h3>
+            </div>
+            <div className="widget-content">
+              <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.875rem' }}>Agent coordination and execution</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Testing Sidebar */}
@@ -361,6 +467,56 @@ export default function Dashboard() {
         isOpen={panelOverlayOpen && currentPanel === 'attorney-review'} 
         onClose={closePanel}
       />
+      <AdminPanel 
+        isOpen={panelOverlayOpen && currentPanel === 'admin'} 
+        onClose={closePanel}
+      />
+      <SettingsPanel 
+        isOpen={panelOverlayOpen && currentPanel === 'settings'} 
+        onClose={closePanel}
+      />
+      <ProfilePanel 
+        isOpen={panelOverlayOpen && currentPanel === 'profile'} 
+        onClose={closePanel}
+        attorney={{ name: "Mekel S. Miller", specialization: "Family Law" }}
+      />
+      <CalendarView 
+        isOpen={panelOverlayOpen && currentPanel === 'calendar'} 
+        onClose={closePanel}
+      />
+
+      {/* Summary Card for clicked items */}
+      {selectedSummaryCard && (
+        <SummaryCard
+          type={selectedSummaryCard.type as 'client' | 'matter' | 'pleading' | 'event'}
+          id={selectedSummaryCard.id}
+          title={selectedSummaryCard.data.title || selectedSummaryCard.data.case_name || selectedSummaryCard.data.name || 'Item'}
+          subtitle={selectedSummaryCard.data.court || selectedSummaryCard.data.subtitle}
+          description={selectedSummaryCard.data.description}
+          metadata={{
+            ...selectedSummaryCard.data,
+            client: selectedSummaryCard.data.client,
+            matter: selectedSummaryCard.data.matter || selectedSummaryCard.data.case_name,
+            item: selectedSummaryCard.data.item,
+            jurisdiction: selectedSummaryCard.data.jurisdiction,
+            status: selectedSummaryCard.data.status,
+            priority: selectedSummaryCard.data.priority,
+            deadline: selectedSummaryCard.data.deadline,
+            date: selectedSummaryCard.data.date,
+          }}
+          onClose={() => setSelectedSummaryCard(null)}
+          onOpenInClio={() => {
+            const matterId = selectedSummaryCard.data.matter || selectedSummaryCard.data.case_name || selectedSummaryCard.id;
+            window.open(`https://app.clio.com/matters/${matterId}`, '_blank');
+          }}
+          onOpenInOutlook={() => {
+            console.log(`Opening ${selectedSummaryCard.type} ${selectedSummaryCard.id} in Outlook`);
+          }}
+          onOpenInCalendar={() => {
+            console.log(`Opening ${selectedSummaryCard.type} ${selectedSummaryCard.id} in Calendar`);
+          }}
+        />
+      )}
     </>
   );
 }

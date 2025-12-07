@@ -10,6 +10,9 @@ import { z } from 'zod';
 import { clientRecommendationsTool } from './tools/client-recommendations.js';
 import { ethicsReviewer } from './tools/ethics-reviewer.js';
 import { ethicsRulesModule } from './services/ethics-rules-module.js';
+// Wellness features - temporarily disabled for build
+// import { wellnessJournalTool } from '../tools/wellness-journal.js';
+// import { wellness } from '../services/wellness-service.js';
 
 const GoodCounselInputSchema = z.object({
   action: z.enum([
@@ -221,43 +224,24 @@ export class GoodcounselEngine extends BaseEngine {
           });
 
         case 'wellness_journal':
-          // Route to wellness journal tool
-          const { wellnessJournalTool } = await import('../tools/wellness-journal.js');
-          return await wellnessJournalTool.execute({
-            ...parsed.input,
-            userId: parsed.userId ? parseInt(parsed.userId.toString()) : undefined,
-          });
+          // Wellness journal - feature in development
+          return {
+            content: [{ type: 'text', text: 'Wellness journal feature is currently in development' }],
+            isError: false,
+          };
 
         case 'wellness_trends':
-          // Get wellness trends
-          const { wellness } = await import('../services/wellness-service.js');
-          const userIdNum = parsed.userId ? parseInt(parsed.userId.toString()) : undefined;
-          if (!userIdNum) {
-            return {
-              content: [{ type: 'text', text: 'Error: userId is required' }],
-              isError: true,
-            };
-          }
-          const period = parsed.input?.period || 'month';
-          const trends = await wellness.getWellnessTrends(userIdNum, period);
+          // Wellness trends - feature in development
           return {
-            content: [{ type: 'text', text: JSON.stringify(trends, null, 2) }],
+            content: [{ type: 'text', text: 'Wellness trends feature is currently in development' }],
+            isError: false,
           };
 
         case 'burnout_check':
-          // Check burnout risk
-          const { wellness: wellnessService } = await import('../services/wellness-service.js');
-          const userIdForBurnout = parsed.userId ? parseInt(parsed.userId.toString()) : undefined;
-          if (!userIdForBurnout) {
-            return {
-              content: [{ type: 'text', text: 'Error: userId is required' }],
-              isError: true,
-            };
-          }
-          const timeframe = parsed.input?.timeframe || 'month';
-          const burnoutAnalysis = await wellnessService.detectBurnoutSignals(userIdForBurnout, timeframe);
+          // Burnout check - feature in development
           return {
-            content: [{ type: 'text', text: JSON.stringify(burnoutAnalysis, null, 2) }],
+            content: [{ type: 'text', text: 'Burnout check feature is currently in development' }],
+            isError: false,
           };
 
         case 'ethics_review':

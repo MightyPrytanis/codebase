@@ -169,7 +169,7 @@ class HumeService {
         throw new Error(`Hume API error: ${submitResponse.status} ${submitResponse.statusText}. ${errorText}`);
       }
 
-      const jobData = await submitResponse.json();
+      const jobData = await submitResponse.json() as { job_id?: string; id?: string };
       const jobId = jobData.job_id || jobData.id;
 
       if (!jobId) {
@@ -210,7 +210,7 @@ class HumeService {
         throw new Error(`Failed to check job status: ${statusResponse.status} ${statusResponse.statusText}`);
       }
 
-      const statusData = await statusResponse.json();
+      const statusData = await statusResponse.json() as { state?: string; status?: string; results?: any; [key: string]: any };
       
       // Check job status
       const status = statusData.state || statusData.status;

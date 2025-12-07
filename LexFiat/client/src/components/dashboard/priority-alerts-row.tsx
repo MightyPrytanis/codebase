@@ -4,7 +4,7 @@
  * See LICENSE.md for full license text
  */
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { AlertTriangle, Clock, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useQuery } from "@tanstack/react-query";
@@ -36,6 +36,7 @@ interface PriorityAlertsRowProps {
  */
 export function PriorityAlertsRow({
   onAlertClick,
+  onSummaryCardOpen,
   className,
 }: PriorityAlertsRowProps) {
   // Fetch red flags and urgent deadlines
@@ -56,14 +57,29 @@ export function PriorityAlertsRow({
             const redFlags = JSON.parse(redFlagsResult.content[0].text);
             if (Array.isArray(redFlags)) {
               redFlags.forEach((flag: any) => {
+                const matter = flag.matter || flag.case_name || flag.matter_name;
+                const item = flag.item || flag.document_name;
+                const description = flag.description || flag.message || 'Red flag detected';
+                // Remove redundant matter/item info from title if already present
+                let title = description;
+                if (matter && title.includes(matter)) {
+                  title = title.replace(new RegExp(matter, 'gi'), '').trim();
+                }
+                if (item && title.includes(item)) {
+                  title = title.replace(new RegExp(item, 'gi'), '').trim();
+                }
+                // Clean up extra spaces and punctuation
+                title = title.replace(/\s+/g, ' ').replace(/^[,\-\s]+|[,\-\s]+$/g, '').trim();
+                if (!title) title = 'Red flag detected';
+                
                 alerts.push({
                   id: flag.id || `flag-${Date.now()}-${Math.random()}`,
                   type: 'red_flag',
                   priority: flag.severity || flag.priority || 'high',
                   client: flag.client || flag.client_name,
-                  matter: flag.matter || flag.case_name || flag.matter_name,
-                  item: flag.item || flag.document_name,
-                  title: flag.description || flag.message || 'Red flag detected',
+                  matter,
+                  item,
+                  title,
                   date: flag.date || flag.timestamp,
                 });
               });
@@ -89,14 +105,27 @@ export function PriorityAlertsRow({
             const status = JSON.parse(deadlinesResult.content[0].text);
             if (status.urgentDeadlines && Array.isArray(status.urgentDeadlines)) {
               status.urgentDeadlines.forEach((deadline: any) => {
+                const matter = deadline.matter || deadline.matterId;
+                const item = deadline.title || deadline.item;
+                let title = deadline.title || 'Urgent deadline';
+                // Remove redundant matter/item info from title
+                if (matter && title.includes(matter)) {
+                  title = title.replace(new RegExp(matter, 'gi'), '').trim();
+                }
+                if (item && title.includes(item)) {
+                  title = title.replace(new RegExp(item, 'gi'), '').trim();
+                }
+                title = title.replace(/\s+/g, ' ').replace(/^[,\-\s]+|[,\-\s]+$/g, '').trim();
+                if (!title) title = 'Urgent deadline';
+                
                 alerts.push({
                   id: deadline.id || `deadline-${Date.now()}-${Math.random()}`,
                   type: 'deadline',
                   priority: 'critical',
                   client: deadline.client,
-                  matter: deadline.matter || deadline.matterId,
-                  item: deadline.title,
-                  title: deadline.title || 'Urgent deadline',
+                  matter,
+                  item,
+                  title,
                   deadline: deadline.time || deadline.deadline,
                 });
               });
@@ -111,7 +140,7 @@ export function PriorityAlertsRow({
                 client: 'Johnson',
                 matter: 'Johnson v Johnson',
                 item: 'TRO Response',
-                title: 'TRO Response - Due 5 PM tomorrow',
+                title: 'Due 5 PM tomorrow',
                 deadline: '2025-12-07T17:00:00',
               });
             }
@@ -128,7 +157,7 @@ export function PriorityAlertsRow({
               client: 'Johnson',
               matter: 'Johnson v Johnson',
               item: 'TRO Response',
-              title: 'TRO Response - Due 5 PM tomorrow',
+              title: 'Due 5 PM tomorrow',
               deadline: '2025-12-07T17:00:00',
             },
             {
@@ -147,36 +176,42 @@ export function PriorityAlertsRow({
         return alerts;
       } catch (error) {
         console.error('Error fetching priority alerts:', error);
-        return [];
+        // Fail gracefully - return empty array but log transparently
+        return [
+          {
+            id: 'error-alert',
+            type: 'urgent' as const,
+            priority: 'medium' as const,
+            title: 'Service temporarily unavailable. Some alerts may not be displayed.',
+            date: new Date().toISOString(),
+          },
+        ];
       }
     },
     refetchInterval: 30000,
   });
 
-  if (isLoading) {
-    return (
-      <div className={cn("bg-panel-glass rounded-lg p-6 border border-panel-border animate-pulse", className)}>
-        <div className="h-6 bg-muted/20 rounded w-1/4 mb-4"></div>
-        <div className="space-y-2">
-          <div className="h-4 bg-muted/20 rounded w-full"></div>
-          <div className="h-4 bg-muted/20 rounded w-3/4"></div>
-        </div>
-      </div>
-    );
-  }
+  // CRITICAL: ALL hooks must be called BEFORE any early returns
+  // This ensures hooks are always called in the same order on every render
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  if (alerts.length === 0) {
-    return null;
-  }
+  useEffect(() => {
+    if (alerts.length === 0) return;
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % alerts.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [alerts.length]);
 
+  // Helper functions (not hooks, safe to call conditionally)
   const getPriorityColor = (priority: string) => {
     switch (priority) {
       case 'critical':
-        return 'text-red-400 border-red-400 bg-red-400/10';
+        return 'text-white border-white bg-[#B56C6C]';
       case 'high':
-        return 'text-orange-400 border-orange-400 bg-orange-400/10';
+        return 'text-white border-white bg-[#B56C6C]';
       default:
-        return 'text-yellow-400 border-yellow-400 bg-yellow-400/10';
+        return 'text-white border-white bg-[#B56C6C]';
     }
   };
 
@@ -191,60 +226,116 @@ export function PriorityAlertsRow({
     }
   };
 
+  // Early returns AFTER all hooks are called
+  if (isLoading) {
+    return (
+      <div className={cn("bg-panel-glass rounded-lg p-6 border border-panel-border animate-pulse", className)}>
+        <div className="h-6 bg-muted/20 rounded w-1/4 mb-4"></div>
+        <div className="space-y-2">
+          <div className="h-4 bg-muted/20 rounded w-full"></div>
+          <div className="h-4 bg-muted/20 rounded w-3/4"></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!alerts || alerts.length === 0) {
+    return null;
+  }
+
+  // Ensure currentIndex is within bounds
+  const safeIndex = currentIndex >= 0 && currentIndex < alerts.length ? currentIndex : 0;
+  const currentAlert = alerts[safeIndex];
+  
+  if (!currentAlert) {
+    return null;
+  }
+
   return (
-    <div className={cn("bg-panel-glass rounded-lg p-6 border border-panel-border", className)}>
-      <div className="flex items-center gap-2 mb-4">
-        <AlertTriangle className="h-5 w-5 text-red-400" />
-        <h3 className="text-lg font-semibold text-foreground">Priority Alerts</h3>
+    <div className={cn("priority-ticker rounded-lg p-4", className)} style={{ 
+      background: '#B35C5C',
+      border: '4px solid #9E4B4B',
+      borderLeft: '8px solid #8F3F3F',
+      borderRadius: '0',
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
+      <div className="flex items-center gap-2 mb-3">
+        <AlertTriangle className="h-5 w-5 text-white" />
+        <h3 className="text-lg font-semibold text-white">Priority Alerts</h3>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {alerts.slice(0, 6).map((alert) => (
-          <div
-            key={alert.id}
-            className={cn(
-              "p-4 rounded-lg border cursor-pointer hover:opacity-80 transition-opacity",
-              getPriorityColor(alert.priority)
-            )}
-            onClick={() => onAlertClick?.(alert)}
-          >
-            <div className="flex items-start gap-3">
-              <div className="mt-0.5">
-                {getPriorityIcon(alert.type)}
+      <div className="ticker-content" style={{ minHeight: '80px' }}>
+        <div
+          key={currentAlert.id}
+          className="ticker-item active cursor-pointer"
+          onClick={() => {
+            onAlertClick?.(currentAlert);
+            // Open summary card for the alert
+            if (currentAlert.matter || currentAlert.client || currentAlert.item) {
+              const itemType = currentAlert.item ? 'pleading' : currentAlert.matter ? 'matter' : 'client';
+              onSummaryCardOpen?.(itemType, currentAlert.id, {
+                title: currentAlert.title,
+                client: currentAlert.client,
+                matter: currentAlert.matter,
+                item: currentAlert.item,
+                type: currentAlert.type,
+                priority: currentAlert.priority,
+                deadline: currentAlert.deadline,
+                date: currentAlert.date,
+                _demo: true,
+                _simulated: true,
+              });
+            }
+          }}
+          style={{
+            background: '#B56C6C',
+            borderLeft: '4px solid #9E4B4B',
+            padding: '0.75rem',
+            borderRadius: '4px'
+          }}
+        >
+          <div className="flex items-center gap-4 w-full">
+            <div className="flex-shrink-0">
+              {getPriorityIcon(currentAlert.type)}
+            </div>
+            <div className="flex-1 min-w-0 flex items-center gap-3">
+              <div className="text-sm text-white truncate">
+                {currentAlert.title.includes(':') ? (
+                  <>
+                    <span className="font-bold">{currentAlert.title.split(':')[0]}</span>
+                    <span className="font-normal">: {currentAlert.title.split(':').slice(1).join(':')}</span>
+                  </>
+                ) : (
+                  <span className="font-bold">{currentAlert.title}</span>
+                )}
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-medium text-sm mb-1 truncate">
-                  {alert.title}
+              {(currentAlert.client || currentAlert.matter || currentAlert.item) && (
+                <div className="text-xs text-white/80 flex items-center gap-2 flex-shrink-0">
+                  {currentAlert.client && <span>{currentAlert.client}</span>}
+                  {currentAlert.matter && <span>• {currentAlert.matter}</span>}
+                  {currentAlert.item && <span>• {currentAlert.item}</span>}
                 </div>
-                {(alert.client || alert.matter || alert.item) && (
-                  <div className="text-xs opacity-80 space-y-0.5">
-                    {alert.client && (
-                      <div><strong>Client:</strong> {alert.client}</div>
-                    )}
-                    {alert.matter && (
-                      <div><strong>Matter:</strong> {alert.matter}</div>
-                    )}
-                    {alert.item && (
-                      <div><strong>Item:</strong> {alert.item}</div>
-                    )}
-                  </div>
-                )}
-                {(alert.date || alert.deadline) && (
-                  <div className="text-xs opacity-70 mt-2 flex items-center gap-1">
-                    <Calendar className="h-3 w-3" />
-                    {alert.deadline
-                      ? new Date(alert.deadline).toLocaleDateString()
-                      : alert.date
-                      ? new Date(alert.date).toLocaleDateString()
-                      : ''}
-                  </div>
-                )}
-              </div>
+              )}
+              {(currentAlert.date || currentAlert.deadline) && (
+                <div className="text-xs text-white/70 flex items-center gap-1 flex-shrink-0">
+                  <Calendar className="h-3 w-3" />
+                  {currentAlert.deadline
+                    ? new Date(currentAlert.deadline).toLocaleDateString()
+                    : currentAlert.date
+                    ? new Date(currentAlert.date).toLocaleDateString()
+                    : ''}
+                </div>
+              )}
+            </div>
+            <div className="text-xs text-white/70 flex-shrink-0">
+              {currentIndex + 1} / {alerts.length}
             </div>
           </div>
-        ))}
+        </div>
       </div>
     </div>
   );
 }
+
 

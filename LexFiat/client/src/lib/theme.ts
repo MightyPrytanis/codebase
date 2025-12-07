@@ -9,7 +9,7 @@
  * Supports multiple themes with consistent token-based styling
  */
 
-export type ThemeName = 'light' | 'control-room' | 'ad-astra';
+export type ThemeName = 'light' | 'control-room' | 'ad-astra'; // ad-astra reserved for future release
 
 export interface ThemeTokens {
   // Colors
@@ -111,19 +111,20 @@ export interface ThemeTokens {
 }
 
 /**
- * Light Theme - Modern, lighter aesthetic
+ * Light Theme - Professional light aesthetic (inspired by Arkiver but distinct)
+ * Light gray backgrounds, white cards, professional color palette
  */
 export const lightTheme: ThemeTokens = {
   colors: {
     primary: {
-      light: '#F8FAFC',
-      dark: '#1E293B',
+      light: '#F5F5F5', // Light gray background (similar to Arkiver)
+      dark: '#2C3E50', // Dark blue-gray (similar to Arkiver)
       mid: '#475569',
     },
     secondary: '#64748B',
     accent: {
-      gold: '#D4AF37',
-      blue: '#3B82F6',
+      gold: '#D4AF37', // Keep gold accent
+      blue: '#3B82F6', // Professional blue (different from Arkiver's teal)
       green: '#10B981',
       orange: '#F59E0B',
       purple: '#A855F7',
@@ -135,18 +136,18 @@ export const lightTheme: ThemeTokens = {
       processing: '#3B82F6',
     },
     background: {
-      base: '#F8FAFC',
-      panel: 'rgba(255, 255, 255, 0.7)',
-      overlay: 'rgba(0, 0, 0, 0.3)',
+      base: '#F5F5F5', // Light gray (like Arkiver)
+      panel: 'rgba(255, 255, 255, 0.95)', // White cards (like Arkiver)
+      overlay: 'rgba(0, 0, 0, 0.4)',
     },
     text: {
-      primary: '#1E293B',
-      secondary: '#475569',
+      primary: '#2C3E50', // Dark blue-gray (like Arkiver)
+      secondary: '#475569', // Medium gray
       muted: '#94A3B8',
     },
     border: {
-      default: 'rgba(148, 163, 184, 0.3)',
-      panel: 'rgba(148, 163, 184, 0.2)',
+      default: '#E0E0E0', // Light gray borders (like Arkiver)
+      panel: '#E0E0E0',
       accent: 'rgba(212, 175, 55, 0.4)',
     },
   },
@@ -160,8 +161,8 @@ export const lightTheme: ThemeTokens = {
   },
   typography: {
     fontFamily: {
-      primary: "'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif",
-      heading: "'DIN Next', 'DINNext LT Pro', 'DINNextLTPro', 'DIN 2014', 'D-DIN', 'DIN', 'Helvetica Neue', Arial, sans-serif",
+      primary: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif",
+      heading: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif",
     },
     fontSize: {
       xs: '0.75rem',
@@ -189,12 +190,12 @@ export const lightTheme: ThemeTokens = {
   },
   borderRadius: {
     none: '0',
-    sm: '0.25rem',
+    sm: '0.5rem', // Rounded corners like Arkiver
     md: '0.5rem',
     lg: '1rem',
   },
   shadows: {
-    sm: '0 1px 2px rgba(0, 0, 0, 0.05)',
+    sm: '0 1px 3px rgba(0, 0, 0, 0.1)', // Subtle shadows like Arkiver
     md: '0 4px 6px rgba(0, 0, 0, 0.1)',
     lg: '0 10px 15px rgba(0, 0, 0, 0.1)',
     xl: '0 20px 25px rgba(0, 0, 0, 0.15)',

@@ -46,15 +46,17 @@ export async function executeTool(
     });
 
     if (!response || !response.ok) {
-      // Return graceful error without throwing
+      // Return graceful error without throwing - be transparent
+      const statusText = response ? `${response.status} ${response.statusText}` : 'Connection failed';
       return {
         content: [
           {
             type: 'text',
-            text: `Service unavailable. Please ensure the Cyrano MCP server is running.`,
+            text: `Service unavailable (${statusText}). Please ensure the Cyrano MCP server is running and accessible.`,
           },
         ],
         isError: true,
+        _serviceUnavailable: true,
       };
     }
 
@@ -63,26 +65,29 @@ export async function executeTool(
   } catch (error) {
     // Only log unexpected errors, not network/permission errors
     if (error instanceof TypeError && error.message.includes('fetch')) {
-      // Network error - return gracefully
+      // Network error - return gracefully but transparently
       return {
         content: [
           {
             type: 'text',
-            text: `Service unavailable. Please ensure the Cyrano MCP server is running.`,
+            text: `Network error: Unable to reach Cyrano MCP server. Please check your connection and ensure the server is running at ${API_URL}.`,
           },
         ],
         isError: true,
+        _networkError: true,
       };
     }
     console.error(`Error executing tool ${tool}:`, error);
+    // Be transparent about errors while failing gracefully
     return {
       content: [
         {
           type: 'text',
-          text: `Error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          text: `Error executing ${tool}: ${error instanceof Error ? error.message : 'Unknown error occurred'}`,
         },
       ],
       isError: true,
+      _executionError: true,
     };
   }
 }

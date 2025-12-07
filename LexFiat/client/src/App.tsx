@@ -7,11 +7,26 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { IconSprite } from "@/components/ui/icon-sprite";
 import { DemoModeBanner } from "@/components/demo/demo-mode-banner";
 import { ThemeProvider } from "@/components/theme/theme-provider";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { Loader2 } from "lucide-react";
 import "@/styles/ad-astra.css";
 
-// Lazy load pages for code splitting
-const Dashboard = lazy(() => import("@/pages/dashboard"));
+// Lazy load pages for code splitting with error handling
+const Dashboard = lazy(() => 
+  import("@/pages/dashboard").catch((error) => {
+    console.error("Failed to load Dashboard:", error);
+    // Return a fallback component
+    return {
+      default: () => (
+        <div style={{ padding: "20px", color: "white" }}>
+          <h1>Failed to load dashboard</h1>
+          <p>{error.message}</p>
+          <button onClick={() => window.location.reload()}>Reload</button>
+        </div>
+      ),
+    };
+  })
+);
 const Settings = lazy(() => import("@/pages/settings"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 const PerformancePage = lazy(() => import("@/pages/performance"));
@@ -57,18 +72,22 @@ function Router() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="control-room">
-        <TooltipProvider>
-          <div className="piquette-theme dark min-h-screen">
-            <IconSprite />
-            <DemoModeBanner />
-            <Toaster />
-            <Router />
-          </div>
-        </TooltipProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider defaultTheme="control-room">
+          <TooltipProvider>
+            <div className="piquette-theme dark min-h-screen">
+              <IconSprite />
+              <DemoModeBanner />
+              <Toaster />
+              <ErrorBoundary>
+                <Router />
+              </ErrorBoundary>
+            </div>
+          </TooltipProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

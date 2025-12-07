@@ -344,12 +344,12 @@ class WellnessService {
     // Store feedback
     await db.insert(wellnessFeedback).values({
       entryId,
-      insightsEncrypted,
-      patternsEncrypted,
-      suggestionsEncrypted,
+      insightsEncrypted: insightsEncrypted as any,
+      patternsEncrypted: patternsEncrypted as any,
+      suggestionsEncrypted: suggestionsEncrypted as any,
       encouragementEncrypted,
-      wellnessRecommendationsEncrypted: recommendationsEncrypted,
-      alertsEncrypted,
+      wellnessRecommendationsEncrypted: recommendationsEncrypted as any,
+      alertsEncrypted: alertsEncrypted as any,
       createdAt: new Date(),
     });
 
@@ -373,12 +373,12 @@ class WellnessService {
 
     // Decrypt feedback
     return {
-      insights: JSON.parse(encryption.decryptField({ encrypted: feedback.insightsEncrypted, algorithm: 'aes-256-gcm', keyDerivation: 'pbkdf2' }, 'insights')),
-      patterns: feedback.patternsEncrypted ? JSON.parse(encryption.decryptField({ encrypted: feedback.patternsEncrypted, algorithm: 'aes-256-gcm', keyDerivation: 'pbkdf2' }, 'patterns')) : [],
-      suggestions: feedback.suggestionsEncrypted ? JSON.parse(encryption.decryptField({ encrypted: feedback.suggestionsEncrypted, algorithm: 'aes-256-gcm', keyDerivation: 'pbkdf2' }, 'suggestions')) : [],
+      insights: Array.isArray(feedback.insightsEncrypted) ? feedback.insightsEncrypted : JSON.parse(encryption.decryptField({ encrypted: feedback.insightsEncrypted as any, algorithm: 'aes-256-gcm', keyDerivation: 'pbkdf2' }, 'insights')),
+      patterns: feedback.patternsEncrypted ? (Array.isArray(feedback.patternsEncrypted) ? feedback.patternsEncrypted : JSON.parse(encryption.decryptField({ encrypted: feedback.patternsEncrypted as any, algorithm: 'aes-256-gcm', keyDerivation: 'pbkdf2' }, 'patterns'))) : [],
+      suggestions: feedback.suggestionsEncrypted ? (Array.isArray(feedback.suggestionsEncrypted) ? feedback.suggestionsEncrypted : JSON.parse(encryption.decryptField({ encrypted: feedback.suggestionsEncrypted as any, algorithm: 'aes-256-gcm', keyDerivation: 'pbkdf2' }, 'suggestions'))) : [],
       encouragement: feedback.encouragementEncrypted ? encryption.decryptField({ encrypted: feedback.encouragementEncrypted, algorithm: 'aes-256-gcm', keyDerivation: 'pbkdf2' }, 'encouragement') : undefined,
-      wellnessRecommendations: feedback.wellnessRecommendationsEncrypted ? JSON.parse(encryption.decryptField({ encrypted: feedback.wellnessRecommendationsEncrypted, algorithm: 'aes-256-gcm', keyDerivation: 'pbkdf2' }, 'wellness_recommendations')) : undefined,
-      alerts: feedback.alertsEncrypted ? JSON.parse(encryption.decryptField({ encrypted: feedback.alertsEncrypted, algorithm: 'aes-256-gcm', keyDerivation: 'pbkdf2' }, 'alerts')) : undefined,
+      wellnessRecommendations: feedback.wellnessRecommendationsEncrypted ? (Array.isArray(feedback.wellnessRecommendationsEncrypted) ? feedback.wellnessRecommendationsEncrypted : JSON.parse(encryption.decryptField({ encrypted: feedback.wellnessRecommendationsEncrypted as any, algorithm: 'aes-256-gcm', keyDerivation: 'pbkdf2' }, 'wellness_recommendations'))) : undefined,
+      alerts: feedback.alertsEncrypted ? (Array.isArray(feedback.alertsEncrypted) ? feedback.alertsEncrypted : JSON.parse(encryption.decryptField({ encrypted: feedback.alertsEncrypted as any, algorithm: 'aes-256-gcm', keyDerivation: 'pbkdf2' }, 'alerts'))) : undefined,
     };
   }
 

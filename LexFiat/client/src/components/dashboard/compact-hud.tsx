@@ -37,7 +37,7 @@ export function CompactHUD({
   onItemClick,
   className,
 }: CompactHUDProps) {
-  const { status, isLoading } = useWorkflowStatus();
+  const { data: status, isLoading } = useWorkflowStatus();
 
   if (isLoading) {
     return (

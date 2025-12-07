@@ -16,18 +16,21 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Palette, Sun, Moon, Rocket } from "lucide-react";
 
-const themeLabels: Record<ThemeName, { label: string; icon: React.ReactNode }> = {
+const themeLabels: Record<ThemeName, { label: string; icon: React.ReactNode; available?: boolean }> = {
   light: {
     label: "Light",
     icon: <Sun className="h-4 w-4" />,
+    available: true,
   },
   "control-room": {
     label: "Control Room",
     icon: <Moon className="h-4 w-4" />,
+    available: true,
   },
   "ad-astra": {
-    label: "Ad Astra",
+    label: "Ad Astra (Coming Soon)",
     icon: <Rocket className="h-4 w-4" />,
+    available: false,
   },
 };
 
@@ -47,21 +50,38 @@ export function ThemeSelector() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
-        {(Object.keys(themeLabels) as ThemeName[]).map((themeName) => (
-          <DropdownMenuItem
-            key={themeName}
-            onClick={() => setTheme(themeName)}
-            className={theme === themeName ? "bg-muted" : ""}
-          >
-            <div className="flex items-center gap-2 w-full">
-              {themeLabels[themeName].icon}
-              <span>{themeLabels[themeName].label}</span>
-              {theme === themeName && (
-                <span className="ml-auto text-xs">✓</span>
-              )}
-            </div>
-          </DropdownMenuItem>
-        ))}
+        {(Object.keys(themeLabels) as ThemeName[]).map((themeName) => {
+          const themeInfo = themeLabels[themeName];
+          if (!themeInfo.available) {
+            return (
+              <DropdownMenuItem
+                key={themeName}
+                disabled
+                className="opacity-50 cursor-not-allowed"
+              >
+                <div className="flex items-center gap-2 w-full">
+                  {themeInfo.icon}
+                  <span>{themeInfo.label}</span>
+                </div>
+              </DropdownMenuItem>
+            );
+          }
+          return (
+            <DropdownMenuItem
+              key={themeName}
+              onClick={() => setTheme(themeName)}
+              className={theme === themeName ? "bg-muted" : ""}
+            >
+              <div className="flex items-center gap-2 w-full">
+                {themeInfo.icon}
+                <span>{themeInfo.label}</span>
+                {theme === themeName && (
+                  <span className="ml-auto text-xs">✓</span>
+                )}
+              </div>
+            </DropdownMenuItem>
+          );
+        })}
       </DropdownMenuContent>
     </DropdownMenu>
   );

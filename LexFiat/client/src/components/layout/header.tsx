@@ -5,7 +5,8 @@
  */
 
 import React, { useState, useEffect } from "react";
-import { Mail, Scale, Calendar, BookOpen, Settings, HelpCircle, User } from "lucide-react";
+import { Mail, Briefcase, Calendar, BookOpen, Settings, HelpCircle, User, CheckCircle2, AlertTriangle, X, Clock, Network, Menu } from "lucide-react";
+import { LiaSwimmerSolid } from "react-icons/lia";
 import { AIIcon } from "@/components/ui/ai-icon";
 import { isDemoMode } from "@/lib/demo-service";
 import { ThemeSelector } from "@/components/theme/theme-selector";
@@ -16,11 +17,17 @@ interface HeaderProps {
     name: string;
     specialization?: string;
   };
+  onHelpClick?: () => void;
+  onAdminClick?: () => void;
+  onSettingsClick?: () => void;
+  onProfileClick?: () => void;
 }
 
-export default function Header({ attorney }: HeaderProps) {
+export default function Header({ attorney, onHelpClick, onAdminClick, onSettingsClick, onProfileClick }: HeaderProps) {
   const [currentSlogan, setCurrentSlogan] = useState("The Power of Clarity");
   const [demoMode, setDemoMode] = useState(false);
+  const [statusMenuOpen, setStatusMenuOpen] = useState(false);
+  const [menuPanelOpen, setMenuPanelOpen] = useState(false);
   
   const slogans = [
     'The Power of Clarity',
@@ -51,13 +58,17 @@ export default function Header({ attorney }: HeaderProps) {
   }, []);
 
   const expandPanel = (panelType: string) => {
-    // TODO: Implement panel expansion
-    console.log('Expand panel:', panelType);
+    const event = new CustomEvent('expand-panel', { detail: { panelType } });
+    window.dispatchEvent(event);
   };
 
   const openHelpChat = () => {
-    // TODO: Implement help chat
-    console.log('Open help chat');
+    if (onHelpClick) {
+      onHelpClick();
+    } else {
+      const event = new CustomEvent('open-help-chat');
+      window.dispatchEvent(event);
+    }
   };
 
   const toggleDemoMode = () => {
@@ -84,52 +95,117 @@ export default function Header({ attorney }: HeaderProps) {
         </div>
         
         <div className="header-right">
-          {/* Compact Status Strip - Centered */}
-          <div className="status-strip" style={{ border: '1px solid var(--panel-border)', borderRadius: '6px', padding: '4px 8px' }}>
-            <div className="status-item" onClick={() => expandPanel('gmail')} title="Gmail">
-              <div className="status-dot success"></div>
-              <Mail className="status-icon" size={14} />
+          {/* Status Indicators - Always Visible */}
+          <div className="status-indicators-bar">
+            <div className="status-indicator" onClick={() => expandPanel('gmail')}>
+              <Mail className="status-icon" style={{ width: '18px', height: '18px' }} />
+              <div className="status-name">Gmail</div>
+              {demoMode ? (
+                <AlertTriangle className="status-indicator-icon" style={{ width: '12px', height: '12px', color: '#F59E0B' }} />
+              ) : (
+                <CheckCircle2 className="status-indicator-icon" style={{ width: '12px', height: '12px', color: '#10B981' }} />
+              )}
             </div>
-            <div className="status-item" onClick={() => expandPanel('ai-status')} title="AI Status">
-              <div className="status-dot processing"></div>
-              <AIIcon size={14} className="status-icon" color="rgba(255, 255, 255, 0.8)" />
+            <div className="status-indicator" onClick={() => expandPanel('ai-status')}>
+              <AIIcon size={18} className="status-icon" color="rgba(255, 255, 255, 0.9)" />
+              <div className="status-name">AI</div>
+              {demoMode ? (
+                <AlertTriangle className="status-indicator-icon" style={{ width: '12px', height: '12px', color: '#F59E0B' }} />
+              ) : (
+                <AlertTriangle className="status-indicator-icon" style={{ width: '12px', height: '12px', color: '#F59E0B' }} />
+              )}
             </div>
-            <div className="status-item" onClick={() => expandPanel('clio')} title="Clio">
-              <div className="status-dot warning"></div>
-              <Scale className="status-icon" size={14} />
+            <div className="status-indicator" onClick={() => expandPanel('multi-agent')}>
+              <div className="multi-agent-icon-group">
+                <LiaSwimmerSolid style={{ width: '14px', height: '14px', position: 'absolute', top: '0px', left: '0px', opacity: 0.5 }} />
+                <LiaSwimmerSolid style={{ width: '14px', height: '14px', position: 'absolute', top: '4px', left: '4px', opacity: 0.7 }} />
+                <LiaSwimmerSolid style={{ width: '14px', height: '14px', position: 'absolute', top: '8px', left: '8px', opacity: 0.9 }} />
+              </div>
+              <div className="status-name">Multi-agent</div>
+              {demoMode ? (
+                <AlertTriangle className="status-indicator-icon" style={{ width: '12px', height: '12px', color: '#F59E0B' }} />
+              ) : (
+                <CheckCircle2 className="status-indicator-icon" style={{ width: '12px', height: '12px', color: '#10B981' }} />
+              )}
             </div>
-            <div className="status-item" onClick={() => expandPanel('calendar')} title="Calendar">
-              <div className="status-dot success"></div>
-              <Calendar className="status-icon" size={14} />
+            <div className="status-indicator" onClick={() => expandPanel('clio')}>
+              <Briefcase className="status-icon" style={{ width: '18px', height: '18px' }} />
+              <div className="status-name">Clio</div>
+              {demoMode ? (
+                <AlertTriangle className="status-indicator-icon" style={{ width: '12px', height: '12px', color: '#F59E0B' }} />
+              ) : (
+                <AlertTriangle className="status-indicator-icon" style={{ width: '12px', height: '12px', color: '#F59E0B' }} />
+              )}
             </div>
-            <div className="status-item" onClick={() => expandPanel('research')} title="Research">
-              <div className="status-dot warning"></div>
-              <BookOpen className="status-icon" size={14} />
+            <div className="status-indicator" onClick={() => expandPanel('calendar')}>
+              <Calendar className="status-icon" style={{ width: '18px', height: '18px' }} />
+              <div className="status-name">Calendar</div>
+              {demoMode ? (
+                <AlertTriangle className="status-indicator-icon" style={{ width: '12px', height: '12px', color: '#F59E0B' }} />
+              ) : (
+                <CheckCircle2 className="status-indicator-icon" style={{ width: '12px', height: '12px', color: '#10B981' }} />
+              )}
             </div>
-            <div className="status-item demo-status" onClick={toggleDemoMode} title={demoMode ? "Demo Mode Active" : "Demo Mode"}>
-              <div className={`status-dot ${demoMode ? 'processing' : ''}`}></div>
+            <div className="status-indicator" onClick={() => expandPanel('research')}>
+              <BookOpen className="status-icon" style={{ width: '18px', height: '18px' }} />
+              <div className="status-name">Research</div>
+              {demoMode ? (
+                <AlertTriangle className="status-indicator-icon" style={{ width: '12px', height: '12px', color: '#F59E0B' }} />
+              ) : (
+                <AlertTriangle className="status-indicator-icon" style={{ width: '12px', height: '12px', color: '#F59E0B' }} />
+              )}
+            </div>
+            <div className="status-indicator demo-status" onClick={toggleDemoMode}>
               <span className="demo-label">{demoMode ? 'DEMO' : 'Demo'}</span>
+              <div className="status-name">Mode</div>
+              {demoMode ? (
+                <AlertTriangle className="status-indicator-icon" style={{ width: '12px', height: '12px', color: '#F59E0B' }} />
+              ) : (
+                <CheckCircle2 className="status-indicator-icon" style={{ width: '12px', height: '12px', color: '#10B981' }} />
+              )}
             </div>
           </div>
 
-          <div className="action-buttons">
-            <ThemeSelector />
-            <button className="action-btn" onClick={openHelpChat}>
-              <HelpCircle size={16} />
-              <span>Help</span>
+          {/* Menu Panel - Hamburger button with slide-out */}
+          <div className="menu-panel-container">
+            <button 
+              className="menu-panel-toggle"
+              onMouseEnter={() => setMenuPanelOpen(true)}
+              onMouseLeave={() => setMenuPanelOpen(false)}
+              onClick={() => setMenuPanelOpen(!menuPanelOpen)}
+            >
+              <Menu size={18} />
             </button>
-            <button className="action-btn admin" onClick={() => expandPanel('admin')}>
-              <Settings size={16} />
-              <span>Admin</span>
-            </button>
-            <button className="action-btn" onClick={() => expandPanel('settings')}>
-              <Settings size={16} />
-              <span>Settings</span>
-            </button>
+            <div 
+              className={`menu-panel-slideout ${menuPanelOpen ? 'open' : ''}`}
+              onMouseEnter={() => setMenuPanelOpen(true)}
+              onMouseLeave={() => setMenuPanelOpen(false)}
+            >
+              <div className="menu-panel-item" onClick={openHelpChat}>
+                <HelpCircle size={18} />
+                <span>Help</span>
+              </div>
+              <div className="menu-panel-item admin" onClick={() => { if (onAdminClick) onAdminClick(); else expandPanel('admin'); }}>
+                <Settings size={18} />
+                <span>Admin</span>
+              </div>
+              <div className="menu-panel-item" onClick={() => { if (onSettingsClick) onSettingsClick(); else expandPanel('settings'); }}>
+                <Settings size={18} />
+                <span>Settings</span>
+              </div>
+              <div className="menu-panel-item" onClick={() => { if (onProfileClick) onProfileClick(); else expandPanel('profile'); }}>
+                <User size={18} />
+                <span>Profile</span>
+              </div>
+              <div className="menu-panel-divider"></div>
+              <div className="menu-panel-item">
+                <ThemeSelector />
+              </div>
+            </div>
           </div>
 
           <div className="avatar-section">
-            <div className="avatar" onClick={() => expandPanel('profile')} title="Click to edit profile">
+            <div className="avatar" onClick={() => { if (onProfileClick) onProfileClick(); else expandPanel('profile'); }} title="Click to edit profile">
               <img 
                 src="/assets/avatars/mekel-miller.jpg" 
                 alt={attorney?.name || "Mekel S. Miller"}

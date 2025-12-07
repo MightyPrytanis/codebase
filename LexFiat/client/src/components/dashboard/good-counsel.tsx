@@ -53,7 +53,7 @@ export function GoodCounsel({ caseContext = "", timePressure = "medium" }: GoodC
     },
   });
 
-  const handleGetCounsel = () => {
+  const handleRequestGuidance = () => {
     if (!context.trim()) return;
 
     const ethicalConcernsArray = ethicalConcerns
@@ -80,7 +80,7 @@ export function GoodCounsel({ caseContext = "", timePressure = "medium" }: GoodC
           AI Legal Counsel
         </CardTitle>
         <p className="text-secondary text-sm">
-          Get AI-powered ethical guidance and workflow optimization for your legal practice
+          Request AI-powered ethical guidance and workflow optimization for your legal practice
         </p>
       </CardHeader>
 
@@ -161,19 +161,19 @@ export function GoodCounsel({ caseContext = "", timePressure = "medium" }: GoodC
 
         {/* Action Button */}
         <Button
-          onClick={handleGetCounsel}
+          onClick={handleRequestGuidance}
           disabled={!context.trim() || counselMutation.isPending}
           className="w-full bg-accent-gold hover:bg-accent-gold/90 text-slate-900 font-semibold"
         >
           {counselMutation.isPending ? (
             <>
               <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-              Getting AI Counsel...
+              Requesting Guidance...
             </>
           ) : (
             <>
               <Send className="w-4 h-4 mr-2" />
-              Get AI Counsel
+              Request Guidance
             </>
           )}
         </Button>
@@ -183,7 +183,7 @@ export function GoodCounsel({ caseContext = "", timePressure = "medium" }: GoodC
           <div className="p-4 bg-status-critical/20 border border-status-critical rounded-lg">
             <div className="flex items-center gap-2 text-status-critical">
               <AlertCircle className="w-4 h-4" />
-              <span className="font-medium">Error getting AI counsel</span>
+              <span className="font-medium">Error requesting guidance</span>
             </div>
             <p className="text-sm text-secondary mt-1">
               {counselMutation.error instanceof Error
