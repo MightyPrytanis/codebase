@@ -1,0 +1,20 @@
+# .gitmodules Template
+# This is a template file showing how to configure git submodules.
+# 
+# INSTRUCTIONS:
+# 1. After creating your private IP repository at git@github.com:MightyPrytanis/ip-private.git
+# 2. Run: git submodule add git@github.com:MightyPrytanis/ip-private.git IP
+# 3. Git will automatically create/update this file with the configuration below
+# 4. Commit and push: git commit -m "Add IP as submodule" && git push
+#
+# To clone a repository with submodules:
+#   git clone --recurse-submodules <repository-url>
+#
+# To update submodules in an existing clone:
+#   git submodule update --init --recursive
+#
+# TEMPLATE CONFIGURATION (will be created when you add the submodule):
+
+[submodule "IP"]
+	path = IP
+	url = git@github.com:MightyPrytanis/ip-private.git
