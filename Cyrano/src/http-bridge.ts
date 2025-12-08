@@ -113,6 +113,9 @@ import {
 const app = express();
 const port = process.env.PORT || 5002;
 
+// Disable X-Powered-By header to prevent information disclosure
+app.disable('x-powered-by');
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -739,7 +742,7 @@ app.get('/mcp/status', (req, res) => {
 app.get('/api/good-counsel/overview', async (req, res) => {
   try {
     const result = await goodCounsel.execute({});
-    const textContent = result.content[0]?.text;
+    const textContent = (result.content[0] && result.content[0].type === 'text' && 'text' in result.content[0]) ? result.content[0].text : '';
     if (textContent && typeof textContent === 'string') {
       try {
         const parsed = JSON.parse(textContent);

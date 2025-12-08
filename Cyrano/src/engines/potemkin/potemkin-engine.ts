@@ -438,11 +438,11 @@ export class PotemkinEngine extends BaseEngine {
           stepResult = {
             type: step.type,
             target: step.target,
-            error: stepExecutionResult.content[0]?.text || 'Unknown error',
+            error: (stepExecutionResult.content[0] && stepExecutionResult.content[0].type === 'text' && 'text' in stepExecutionResult.content[0]) ? stepExecutionResult.content[0].text : 'Unknown error',
             result: undefined,
           };
         } else {
-          const resultText = stepExecutionResult.content[0]?.text || '';
+          const resultText = (stepExecutionResult.content[0] && stepExecutionResult.content[0].type === 'text' && 'text' in stepExecutionResult.content[0]) ? stepExecutionResult.content[0].text : '';
           stepResult = {
             type: step.type,
             target: step.target,

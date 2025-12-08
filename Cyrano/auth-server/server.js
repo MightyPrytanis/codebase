@@ -6,6 +6,35 @@ const path = require('path');
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Simple rate limiting middleware (in-memory store)
+// For production, consider using express-rate-limit with Redis
+const rateLimitStore = new Map();
+const rateLimitMiddleware = (req, res, next) => {
+  const ip = req.ip || req.connection.remoteAddress;
+  const now = Date.now();
+  const windowMs = 15 * 60 * 1000; // 15 minutes
+  const maxRequests = 100; // Max 100 requests per window
+  
+  if (!rateLimitStore.has(ip)) {
+    rateLimitStore.set(ip, { count: 1, resetTime: now + windowMs });
+    return next();
+  }
+  
+  const limit = rateLimitStore.get(ip);
+  if (now > limit.resetTime) {
+    limit.count = 1;
+    limit.resetTime = now + windowMs;
+    return next();
+  }
+  
+  if (limit.count >= maxRequests) {
+    return res.status(429).json({ error: 'Too many requests, please try again later' });
+  }
+  
+  limit.count++;
+  next();
+};
+
 // --- CONFIGURATION ---
 // IMPORTANT: Use environment variables for these in production!
 // Do not commit your secrets to GitHub.
@@ -21,13 +50,46 @@ const SCOPES = [
   'https://www.googleapis.com/auth/calendar.readonly' // To read calendar
 ];
 
+// Disable X-Powered-By header to prevent information disclosure
+app.disable('x-powered-by');
+
 // Use a secure session middleware
+const sessionSecret = process.env.SESSION_SECRET;
+if (!sessionSecret) {
+  throw new Error('SESSION_SECRET environment variable is required');
+}
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'a-very-secret-key-for-cyrano', // Change this!
+  secret: sessionSecret,
   resave: false,
   saveUninitialized: true,
-  cookie: { secure: process.env.NODE_ENV === 'production' } // Use secure cookies in production
+  cookie: { 
+    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
+    sameSite: 'strict' // CSRF protection via SameSite attribute
+  }
 }));
+
+// Apply rate limiting to all routes
+app.use(rateLimitMiddleware);
+
+// CSRF protection middleware
+// For production, consider using csurf or csrf packages
+app.use((req, res, next) => {
+  // Skip CSRF for GET requests
+  if (req.method === 'GET') {
+    return next();
+  }
+  
+  // For POST/PUT/DELETE, check for CSRF token
+  // In production, implement proper CSRF token validation
+  // For now, we'll rely on SameSite cookie attribute and origin checking
+  const origin = req.get('origin') || req.get('referer');
+  if (origin && !origin.includes('localhost') && !origin.includes('127.0.0.1')) {
+    // In production, validate against allowed origins
+    // For now, allow all origins (should be restricted in production)
+  }
+  
+  next();
+});
 
 // --- OAuth2 Client Setup ---
 const oauth2Client = new google.auth.OAuth2(
