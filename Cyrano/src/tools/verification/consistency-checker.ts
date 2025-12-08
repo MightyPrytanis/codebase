@@ -16,7 +16,7 @@ import nlp from 'compromise';
 import { z } from 'zod';
 import { BaseTool } from '../base-tool.js';
 import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
-import type { ExtractedClaim } from './claim-extractor';
+import type { ExtractedClaim } from './claim-extractor.js';
 
 /**
  * Consistency issue types

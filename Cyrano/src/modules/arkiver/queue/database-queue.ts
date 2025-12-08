@@ -12,8 +12,8 @@
  * See LICENSE.md for full license text
  */
 
-import { db } from '../../../db';
-import { arkiverJobs, type ArkiverJob, type NewArkiverJob } from '../schema';
+import { db } from '../../../db.js';
+import { arkiverJobs, type ArkiverJob, type NewArkiverJob } from '../schema.js';
 import { eq, and, or, lt, isNull } from 'drizzle-orm';
 
 /**
