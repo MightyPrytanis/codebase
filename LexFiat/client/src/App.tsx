@@ -39,6 +39,7 @@ const CitationToolsPage = lazy(() => import("@/pages/citation-tools"));
 const DocumentComparisonPage = lazy(() => import("@/pages/document-comparison"));
 const IconPreviewPage = lazy(() => import("@/pages/icon-preview"));
 const MaeWorkflowsPage = lazy(() => import("@/pages/mae-workflows"));
+const WorkflowLibraryPage = lazy(() => import("@/pages/workflow-library"));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -64,6 +65,8 @@ function Router() {
         <Route path="/compare" component={DocumentComparisonPage} />
         <Route path="/icon-preview" component={IconPreviewPage} />
         <Route path="/mae-workflows" component={MaeWorkflowsPage} />
+        <Route path="/workflows" component={WorkflowLibraryPage} />
+        <Route path="/workflow-library" component={WorkflowLibraryPage} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
