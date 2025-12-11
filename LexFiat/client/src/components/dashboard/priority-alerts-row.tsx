@@ -25,6 +25,7 @@ interface PriorityAlert {
 
 interface PriorityAlertsRowProps {
   onAlertClick?: (alert: PriorityAlert) => void;
+  onSummaryCardOpen?: (type: 'client' | 'matter' | 'pleading' | 'event', id: string, data: any) => void;
   className?: string;
 }
 
@@ -60,16 +61,24 @@ export function PriorityAlertsRow({
                 const matter = flag.matter || flag.case_name || flag.matter_name;
                 const item = flag.item || flag.document_name;
                 const description = flag.description || flag.message || 'Red flag detected';
-                // Remove redundant matter/item info from title if already present
+                // Remove redundant matter/item/client info from title if already present
                 let title = description;
-                if (matter && title.includes(matter)) {
-                  title = title.replace(new RegExp(matter, 'gi'), '').trim();
+                // Remove matter name if it appears in title
+                if (matter && title.toLowerCase().includes(matter.toLowerCase())) {
+                  title = title.replace(new RegExp(matter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), '').trim();
                 }
-                if (item && title.includes(item)) {
-                  title = title.replace(new RegExp(item, 'gi'), '').trim();
+                // Remove item/document name if it appears in title
+                if (item && title.toLowerCase().includes(item.toLowerCase())) {
+                  title = title.replace(new RegExp(item.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), '').trim();
                 }
-                // Clean up extra spaces and punctuation
-                title = title.replace(/\s+/g, ' ').replace(/^[,\-\s]+|[,\-\s]+$/g, '').trim();
+                // Remove client name if it appears in title
+                if (flag.client && title.toLowerCase().includes(flag.client.toLowerCase())) {
+                  title = title.replace(new RegExp(flag.client.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), '').trim();
+                }
+                // Remove common patterns like "Notice received -", "Hearing on", etc. if matter/item follows
+                title = title.replace(/^(Notice received|Hearing on|Deadline for|Response due|Motion for|Document|File|Case)\s*[-:•]\s*/i, '').trim();
+                // Clean up extra spaces, punctuation, and separators
+                title = title.replace(/\s+/g, ' ').replace(/^[,\-\s•:]+|[,\-\s•:]+$/g, '').trim();
                 if (!title) title = 'Red flag detected';
                 
                 alerts.push({
@@ -108,14 +117,20 @@ export function PriorityAlertsRow({
                 const matter = deadline.matter || deadline.matterId;
                 const item = deadline.title || deadline.item;
                 let title = deadline.title || 'Urgent deadline';
-                // Remove redundant matter/item info from title
-                if (matter && title.includes(matter)) {
-                  title = title.replace(new RegExp(matter, 'gi'), '').trim();
+                // Remove redundant matter/item/client info from title
+                if (matter && title.toLowerCase().includes(matter.toLowerCase())) {
+                  title = title.replace(new RegExp(matter.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), '').trim();
                 }
-                if (item && title.includes(item)) {
-                  title = title.replace(new RegExp(item, 'gi'), '').trim();
+                if (item && title.toLowerCase().includes(item.toLowerCase())) {
+                  title = title.replace(new RegExp(item.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), '').trim();
                 }
-                title = title.replace(/\s+/g, ' ').replace(/^[,\-\s]+|[,\-\s]+$/g, '').trim();
+                if (deadline.client && title.toLowerCase().includes(deadline.client.toLowerCase())) {
+                  title = title.replace(new RegExp(deadline.client.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), '').trim();
+                }
+                // Remove common patterns like "Notice received -", "Hearing on", etc. if matter/item follows
+                title = title.replace(/^(Notice received|Hearing on|Deadline for|Response due|Motion for|Document|File|Case)\s*[-:•]\s*/i, '').trim();
+                // Clean up extra spaces, punctuation, and separators
+                title = title.replace(/\s+/g, ' ').replace(/^[,\-\s•:]+|[,\-\s•:]+$/g, '').trim();
                 if (!title) title = 'Urgent deadline';
                 
                 alerts.push({
@@ -226,33 +241,72 @@ export function PriorityAlertsRow({
     }
   };
 
-  // Early returns AFTER all hooks are called
+  // Always show the alert bar structure, even when loading
   if (isLoading) {
     return (
-      <div className={cn("bg-panel-glass rounded-lg p-6 border border-panel-border animate-pulse", className)}>
-        <div className="h-6 bg-muted/20 rounded w-1/4 mb-4"></div>
-        <div className="space-y-2">
-          <div className="h-4 bg-muted/20 rounded w-full"></div>
-          <div className="h-4 bg-muted/20 rounded w-3/4"></div>
+      <div className={cn("priority-ticker p-4", className)} style={{ 
+        background: '#B35C5C',
+        border: '4px solid #9E4B4B',
+        borderLeft: '8px solid #8F3F3F',
+        borderRadius: '0',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <div className="flex items-center gap-2 mb-3">
+          <AlertTriangle className="h-5 w-5 text-white" />
+          <h3 className="text-lg font-semibold text-white">Priority Alerts</h3>
+        </div>
+        <div className="ticker-content" style={{ minHeight: '80px' }}>
+          <div className="ticker-item active animate-pulse" style={{
+            background: '#B56C6C',
+            borderLeft: '4px solid #9E4B4B',
+            padding: '0.75rem',
+            borderRadius: '4px',
+            color: '#FFFFFF'
+          }}>
+            <div className="text-sm text-white">Loading alerts...</div>
+          </div>
         </div>
       </div>
     );
   }
 
-  if (!alerts || alerts.length === 0) {
-    return null;
-  }
-
   // Ensure currentIndex is within bounds
-  const safeIndex = currentIndex >= 0 && currentIndex < alerts.length ? currentIndex : 0;
-  const currentAlert = alerts[safeIndex];
+  const safeIndex = alerts.length > 0 && currentIndex >= 0 && currentIndex < alerts.length ? currentIndex : 0;
+  const currentAlert = alerts.length > 0 ? alerts[safeIndex] : null;
   
-  if (!currentAlert) {
-    return null;
+  // Always show the alert bar, even if empty
+  if (!alerts || alerts.length === 0 || !currentAlert) {
+    return (
+      <div className={cn("priority-ticker p-4", className)} style={{ 
+        background: '#B35C5C',
+        border: '4px solid #9E4B4B',
+        borderLeft: '8px solid #8F3F3F',
+        borderRadius: '0',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <div className="flex items-center gap-2 mb-3">
+          <AlertTriangle className="h-5 w-5 text-white" />
+          <h3 className="text-lg font-semibold text-white">Priority Alerts</h3>
+        </div>
+        <div className="ticker-content" style={{ minHeight: '80px' }}>
+          <div className="ticker-item active" style={{
+            background: '#B56C6C',
+            borderLeft: '4px solid #9E4B4B',
+            padding: '0.75rem',
+            borderRadius: '4px',
+            color: '#FFFFFF'
+          }}>
+            <div className="text-sm text-white">No alerts at this time</div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className={cn("priority-ticker rounded-lg p-4", className)} style={{ 
+    <div className={cn("priority-ticker p-4", className)} style={{ 
       background: '#B35C5C',
       border: '4px solid #9E4B4B',
       borderLeft: '8px solid #8F3F3F',
@@ -310,11 +364,11 @@ export function PriorityAlertsRow({
                   <span className="font-bold">{currentAlert.title}</span>
                 )}
               </div>
-              {(currentAlert.client || currentAlert.matter || currentAlert.item) && (
+              {(currentAlert.client || (currentAlert.matter && !currentAlert.title.toLowerCase().includes(currentAlert.matter.toLowerCase())) || (currentAlert.item && !currentAlert.title.toLowerCase().includes(currentAlert.item.toLowerCase()))) && (
                 <div className="text-xs text-white/80 flex items-center gap-2 flex-shrink-0">
-                  {currentAlert.client && <span>{currentAlert.client}</span>}
-                  {currentAlert.matter && <span>• {currentAlert.matter}</span>}
-                  {currentAlert.item && <span>• {currentAlert.item}</span>}
+                  {currentAlert.client && !currentAlert.title.toLowerCase().includes(currentAlert.client.toLowerCase()) && <span>{currentAlert.client}</span>}
+                  {currentAlert.matter && !currentAlert.title.toLowerCase().includes(currentAlert.matter.toLowerCase()) && <span>• {currentAlert.matter}</span>}
+                  {currentAlert.item && !currentAlert.title.toLowerCase().includes(currentAlert.item.toLowerCase()) && <span>• {currentAlert.item}</span>}
                 </div>
               )}
               {(currentAlert.date || currentAlert.deadline) && (

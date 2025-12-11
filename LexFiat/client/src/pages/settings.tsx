@@ -31,6 +31,19 @@ export default function SettingsPage() {
     timeZone: "America/Detroit",
   });
 
+  // Load preferences from localStorage or backend on mount
+  useEffect(() => {
+    const savedPrefs = localStorage.getItem('lexfiat-preferences');
+    if (savedPrefs) {
+      try {
+        const parsed = JSON.parse(savedPrefs);
+        setPreferences(prev => ({ ...prev, ...parsed }));
+      } catch (e) {
+        // Ignore parse errors
+      }
+    }
+  }, []);
+
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -276,7 +289,42 @@ export default function SettingsPage() {
                   </Select>
                 </div>
 
-                <Button className="w-full bg-gold hover:bg-gold/90 text-slate-900">
+                <Button 
+                  className="w-full bg-gold hover:bg-gold/90 text-slate-900"
+                  onClick={async () => {
+                    try {
+                      // Save preferences to backend
+                      const response = await fetch(`/api/attorneys/${attorney?.id}/preferences`, {
+                        method: "PATCH",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({
+                          preferences: {
+                            emailNotifications: preferences.emailNotifications,
+                            desktopNotifications: preferences.desktopNotifications,
+                            weeklyReports: preferences.weeklyReports,
+                            timeZone: preferences.timeZone,
+                            theme: theme,
+                          },
+                        }),
+                      });
+                      if (!response.ok) throw new Error("Failed to save preferences");
+                      toast({
+                        title: "Preferences Saved",
+                        description: "Your preferences have been saved successfully.",
+                      });
+                    } catch (error) {
+                      // Fallback: save to localStorage if backend unavailable
+                      localStorage.setItem('lexfiat-preferences', JSON.stringify({
+                        ...preferences,
+                        theme: theme,
+                      }));
+                      toast({
+                        title: "Preferences Saved",
+                        description: "Your preferences have been saved locally.",
+                      });
+                    }
+                  }}
+                >
                   Save Preferences
                 </Button>
               </CardContent>

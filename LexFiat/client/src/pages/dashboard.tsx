@@ -25,6 +25,11 @@ import { CalendarView } from "@/components/dashboard/calendar-view";
 import WorkflowStageItem from "@/components/dashboard/workflow-stage-item";
 import { PriorityAlertsRow } from "@/components/dashboard/priority-alerts-row";
 import { ActiveWIPRow } from "@/components/dashboard/active-wip-row";
+import { DemoMatterCards } from "@/components/dashboard/demo-matter-cards";
+import { SummaryCard } from "@/components/dashboard/summary-card";
+import { isDemoMode } from "@/lib/demo-service";
+import { DEMO_CASES } from "@/lib/demo-data";
+import { openInClio, openInEmail, openInCalendar } from "@/lib/deep-links";
 import "@/styles/dashboard-html.css";
 import { 
   DocumentIntakeIcon, 
@@ -261,8 +266,10 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* First Row: Priority Alerts (Full width, compact) */}
-        <div style={{ width: '100%', marginBottom: '1.5rem' }}>
+        {/* First Row: Priority Alerts (Full width, compact) with Urgent label */}
+        <div style={{ width: '100%', marginBottom: '1.5rem', display: 'grid', gridTemplateColumns: '60px 1fr', gap: '1rem', alignItems: 'stretch' }}>
+          <div className="tier-label tier-urgent" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>Urgent</div>
+          <div>
           <PriorityAlertsRow
             onAlertClick={(alert) => {
               openTrackingCard(alert.id);
@@ -271,17 +278,20 @@ export default function Dashboard() {
               setSelectedSummaryCard({ type, id, data });
             }}
           />
+          </div>
         </div>
 
-        {/* Second Row: Today's Focus (Cols 1-2) and GoodCounsel (Cols 3-4) */}
-        <div className="grid grid-cols-4 gap-6" style={{ display: 'grid', width: '100%', maxWidth: '100%', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', boxSizing: 'border-box', marginBottom: '1.5rem' }}>
+        {/* Second Row: Today's Focus (Cols 1-2) and GoodCounsel (Cols 3-4) with Spotlight label */}
+        <div style={{ width: '100%', marginBottom: '1.5rem', display: 'grid', gridTemplateColumns: '60px 1fr', gap: '1rem', alignItems: 'stretch' }}>
+          <div className="tier-label tier-spotlight" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>Spotlight</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '1.5rem', width: '100%' }}>
           {/* Today's Focus Widget - Cols 1-2 */}
           <div className="col-span-2 widget focus" onClick={() => expandPanel('focus')}>
             <div className="widget-header">
               <div className="widget-indicator" style={{ background: 'var(--electric-purple)' }}></div>
               <h3 className="widget-title">
                 <svg className="ui-icon"><use href="#icon-focus"/></svg>
-                Today's Focus
+                <span className="ml-1">Today's Focus</span>
               </h3>
             </div>
             <div className="widget-content">
@@ -346,7 +356,7 @@ export default function Dashboard() {
               <div className="widget-indicator" style={{ background: '#FFD700' }}></div>
               <h3 className="widget-title">
                 <GoodCounselIcon size={20} className="ui-icon" />
-                GoodCounsel
+                <span className="ml-1">GoodCounsel</span>
               </h3>
             </div>
             <div className="widget-content">
@@ -366,9 +376,13 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+          </div>
         </div>
 
-        {/* Third Row: Active WIP with tier labels */}
+        {/* Third Row: Active WIP with All WIP label */}
+        <div style={{ width: '100%', marginBottom: '1.5rem', display: 'grid', gridTemplateColumns: '60px 1fr', gap: '1rem', alignItems: 'stretch' }}>
+          <div className="tier-label tier-all-wip" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>All WIP</div>
+          <div>
         <ActiveWIPRow
           onItemClick={(item, type) => {
             if (type === 'intake') {
@@ -383,10 +397,17 @@ export default function Dashboard() {
               expandPanel('attorney-review');
             }
           }}
+          onSummaryCardOpen={(type, id, data) => {
+            setSelectedSummaryCard({ type, id, data });
+          }}
         />
+          </div>
+        </div>
 
         {/* Bottom Row: Chronometric and MAE (glass overlay only) */}
-        <div className="grid grid-cols-4 gap-6" style={{ display: 'grid', width: '100%', maxWidth: '100%', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', boxSizing: 'border-box', marginTop: '1.5rem' }}>
+        <div style={{ width: '100%', marginTop: '1.5rem', display: 'grid', gridTemplateColumns: '60px 1fr', gap: '1rem', alignItems: 'stretch' }}>
+          <div style={{ width: '100%', height: '100%' }}></div>
+          <div className="grid grid-cols-4 gap-6" style={{ display: 'grid', width: '100%', maxWidth: '100%', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', boxSizing: 'border-box' }}>
           <div className="col-span-2 widget background-widget" onClick={() => expandPanel('chronometric')}>
             <div className="widget-header">
               <h3 className="widget-title flex items-center gap-2" style={{ color: 'rgba(255, 255, 255, 0.9)', fontWeight: '600' }}>
@@ -412,6 +433,7 @@ export default function Dashboard() {
             <div className="widget-content">
               <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.875rem' }}>Agent coordination and execution</p>
             </div>
+          </div>
           </div>
         </div>
       </div>
@@ -507,13 +529,15 @@ export default function Dashboard() {
           onClose={() => setSelectedSummaryCard(null)}
           onOpenInClio={() => {
             const matterId = selectedSummaryCard.data.matter || selectedSummaryCard.data.case_name || selectedSummaryCard.id;
-            window.open(`https://app.clio.com/matters/${matterId}`, '_blank');
+            openInClio(matterId);
           }}
           onOpenInOutlook={() => {
-            console.log(`Opening ${selectedSummaryCard.type} ${selectedSummaryCard.id} in Outlook`);
+            const messageId = selectedSummaryCard.id;
+            openInEmail(messageId, 'outlook');
           }}
           onOpenInCalendar={() => {
-            console.log(`Opening ${selectedSummaryCard.type} ${selectedSummaryCard.id} in Calendar`);
+            const eventId = selectedSummaryCard.id;
+            openInCalendar(eventId, 'google');
           }}
         />
       )}
