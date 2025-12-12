@@ -35,6 +35,9 @@ This engine uses the following components:
   - `client-recommendations` - Client relationship analysis and recommendations
   - `ethics-reviewer` - Ethics rules compliance checking and guidance
   - `wellness-journal` - Wellness journaling with HIPAA-compliant encryption (text and voice)
+    - **Note:** Wellness journaling tool is available via MCP server (`wellness_journal` tool)
+    - **Note:** Direct engine integration temporarily disabled for build (see `goodcounsel-engine.ts` lines 13-15)
+    - **Status:** Tool fully functional via MCP, engine integration pending
 
 - **Services:**
   - `client-analyzer` - Analyzes client relationships and identifies opportunities

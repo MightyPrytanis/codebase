@@ -9,6 +9,9 @@ Last Substantive Revision: 2025-01-07 (2025-W01)
 Owner: David W Towne / Cognisint LLC
 Copyright: © 2025 Cognisint LLC
 Status: Archived
+
+**Note:** Dates in this document (2025-01-07) are prior to Project Cyrano's inception in July 2025 and are likely in error. Project Cyrano began in July 2025. This document is preserved as a historical archive record.
+
 ---
 
 # Archive Summary - 2025-01-07 Cleanup

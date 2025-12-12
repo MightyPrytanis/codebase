@@ -1,3 +1,7 @@
+**Note:** Dates in this document (2025-01-27) are prior to Project Cyrano's inception in July 2025 and are likely in error. Project Cyrano began in July 2025. This document is preserved as a historical archive record.
+
+---
+
 # Shared Tools Strategy: Potemkin & Arkiver
 **Date:** 2025-01-27  
 **Purpose:** Avoid duplication between Potemkin and Arkiver tool requirements
