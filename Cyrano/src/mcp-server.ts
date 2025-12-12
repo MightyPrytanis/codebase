@@ -76,7 +76,7 @@ import { caseManager } from './tools/case-manager.js';
 import { documentProcessor } from './tools/document-processor.js';
 import { aiOrchestrator } from './tools/ai-orchestrator.js';
 import { systemStatus } from './tools/system-status.js';
-import { statusIndicator } from './tools/status-indicator.js';
+// status-indicator tool archived - see Cyrano/archive/broken-tools/
 import { ragQuery } from './tools/rag-query.js';
 import { authTool } from './tools/auth.js';  // Add auth tool import
 import { syncManager } from './tools/sync-manager.js';
@@ -145,7 +145,7 @@ class CyranoMCPServer {
           documentProcessor.getToolDefinition(),
           aiOrchestrator.getToolDefinition(),
           systemStatus.getToolDefinition(),
-          statusIndicator.getToolDefinition(),
+          // status-indicator tool archived - see Cyrano/archive/broken-tools/
           syncManager.getToolDefinition(),
           redFlagFinder.getToolDefinition(),
           clioIntegration.getToolDefinition(),
@@ -262,9 +262,7 @@ class CyranoMCPServer {
           case 'system_status':
             result = await systemStatus.execute(args);
             break;
-          case 'status_indicator':
-            result = await statusIndicator.execute(args);
-            break;
+          // status-indicator tool archived - see Cyrano/archive/broken-tools/
         case 'sync_manager':
           result = await syncManager.execute(args);
           break;

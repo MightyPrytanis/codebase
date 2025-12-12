@@ -39,7 +39,7 @@ export default function ProfilePanel({ isOpen, onClose, attorney }: ProfilePanel
     firmName: "",
   });
 
-  const { data: attorneyData } = useQuery({
+  const { data: attorneyData, isLoading: isLoadingAttorney } = useQuery({
     queryKey: ["/api/attorneys/current"],
   });
 
@@ -60,7 +60,11 @@ export default function ProfilePanel({ isOpen, onClose, attorney }: ProfilePanel
 
   const updateProfile = useMutation({
     mutationFn: async (data: any) => {
-      const response = await fetch(`/api/attorneys/${attorneyData?.id}`, {
+      // Validate attorney ID exists before making request
+      if (!attorneyData?.id) {
+        throw new Error("Attorney data not loaded. Please wait and try again.");
+      }
+      const response = await fetch(`/api/attorneys/${attorneyData.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
@@ -86,6 +90,15 @@ export default function ProfilePanel({ isOpen, onClose, attorney }: ProfilePanel
   });
 
   const handleSave = () => {
+    // Validate attorney ID exists before saving
+    if (!attorneyData?.id) {
+      toast({
+        title: "Error",
+        description: "Attorney data not loaded. Please wait and try again.",
+        variant: "destructive",
+      });
+      return;
+    }
     updateProfile.mutate({
       ...contactData,
       ...practiceData,
@@ -118,7 +131,12 @@ export default function ProfilePanel({ isOpen, onClose, attorney }: ProfilePanel
               <h3 className="font-semibold">Contact Information</h3>
             </div>
             {!isEditing && (
-              <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)}>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setIsEditing(true)}
+                disabled={isLoadingAttorney || !attorneyData?.id}
+              >
                 <Edit className="h-4 w-4 mr-2" />
                 Edit
               </Button>
@@ -176,7 +194,12 @@ export default function ProfilePanel({ isOpen, onClose, attorney }: ProfilePanel
               <h3 className="font-semibold">Practice Details</h3>
             </div>
             {!isEditing && (
-              <Button variant="ghost" size="sm" onClick={() => setIsEditing(true)}>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setIsEditing(true)}
+                disabled={isLoadingAttorney || !attorneyData?.id}
+              >
                 <Edit className="h-4 w-4 mr-2" />
                 Edit
               </Button>
@@ -271,7 +294,6 @@ export default function ProfilePanel({ isOpen, onClose, attorney }: ProfilePanel
     </ExpandedPanel>
   );
 }
-
 
 
 

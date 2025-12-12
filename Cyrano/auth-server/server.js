@@ -79,13 +79,42 @@ app.use((req, res, next) => {
     return next();
   }
   
-  // For POST/PUT/DELETE, check for CSRF token
-  // In production, implement proper CSRF token validation
-  // For now, we'll rely on SameSite cookie attribute and origin checking
-  const origin = req.get('origin') || req.get('referer');
-  if (origin && !origin.includes('localhost') && !origin.includes('127.0.0.1')) {
-    // In production, validate against allowed origins
-    // For now, allow all origins (should be restricted in production)
+  // For POST/PUT/DELETE, validate origin header
+  // This provides basic CSRF protection by ensuring requests come from expected origins
+  const origin = req.get('origin');
+  const referer = req.get('referer');
+  
+  // Define allowed origins (whitelist)
+  const allowedOrigins = [
+    'http://localhost:5173',  // LexFiat dev
+    'http://localhost:5174',  // Arkiver dev
+    'http://127.0.0.1:5173',
+    'http://127.0.0.1:5174',
+  ];
+  
+  // In production, add your actual domain(s) here
+  if (process.env.NODE_ENV === 'production') {
+    const productionOrigins = process.env.ALLOWED_ORIGINS?.split(',') || [];
+    allowedOrigins.push(...productionOrigins);
+  }
+  
+  // Extract origin from referer if origin header is missing
+  let requestOrigin = origin;
+  if (!requestOrigin && referer) {
+    try {
+      const refererUrl = new URL(referer);
+      requestOrigin = refererUrl.origin;
+    } catch (e) {
+      // Invalid referer URL, will be rejected below
+    }
+  }
+  
+  // Reject requests without origin/referer or from non-whitelisted origins
+  if (!requestOrigin || !allowedOrigins.includes(requestOrigin)) {
+    return res.status(403).json({ 
+      error: 'CSRF protection: Request origin not allowed',
+      allowedOrigins: process.env.NODE_ENV === 'development' ? allowedOrigins : undefined
+    });
   }
   
   next();

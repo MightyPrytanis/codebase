@@ -134,9 +134,10 @@ const toolTests: Array<{
     category: 'System',
   },
   {
-    name: 'status_indicator',
-    importPath: './src/tools/status-indicator.js',
-    exportName: 'statusIndicator',
+    // status-indicator tool archived - see Cyrano/archive/broken-tools/
+    // name: 'status_indicator',
+    // importPath: './src/tools/status-indicator.js',
+    // exportName: 'statusIndicator',
     testArgs: { context: 'beta-release' },
     category: 'System',
   },
