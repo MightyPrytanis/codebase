@@ -12,7 +12,7 @@
  */
 
 import { pgTable, uuid, text, integer, timestamp, jsonb, real, boolean } from 'drizzle-orm/pg-core';
-import { users } from '../../schema';
+import { users } from '../../schema.js';
 
 /**
  * Uploaded files table

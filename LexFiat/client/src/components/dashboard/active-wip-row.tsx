@@ -28,6 +28,8 @@ interface WorkItem {
   status: string;
   progress?: number;
   type: 'intake' | 'processing' | 'ready';
+  priority?: string;
+  deadline?: string;
 }
 
 interface ActiveWIPRowProps {
@@ -186,13 +188,7 @@ export function ActiveWIPRow({
 
   return (
     <div className={cn("workflow-wip-group", className)} style={{ position: 'relative', width: '100%' }}>
-      {/* Tier Labels - Vertical on left */}
-      <div className="tier-labels">
-        <div className="tier-label tier-urgent">Urgent</div>
-        <div className="tier-label tier-spotlight">Spotlight</div>
-        <div className="tier-label tier-all-wip">All WIP</div>
-      </div>
-      <div className="grid grid-cols-4 gap-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', width: '100%', maxWidth: '100%', boxSizing: 'border-box', position: 'relative', marginLeft: '80px' }}>
+      <div className="grid grid-cols-4 gap-6" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', width: '100%', maxWidth: '100%', boxSizing: 'border-box', position: 'relative' }}>
         {/* Visual connector line for workflow grouping */}
         <div className="workflow-connector-line"></div>
         {/* Column 1: Intake */}

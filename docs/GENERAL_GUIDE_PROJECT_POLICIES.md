@@ -117,14 +117,29 @@ If you need to document something, use these options **in order of preference**:
 ❌ **DO NOT** create "analysis reports" or "review summaries" unless requested  
 ❌ **DO NOT** create duplicate documentation for information already documented elsewhere
 
-### Exceptions
+### CRITICAL RULE: NO NEW DOCUMENTS
 
-The only exception is when the user **explicitly requests** a new document:
-- "Create a document about X"
-- "Write documentation for Y"
-- "Document this feature"
+**MANDATORY POLICY - EFFECTIVE IMMEDIATELY:**
 
-Even then, **confirm the document name, location, and scope before creating**.
+**Under no circumstances whatsoever, for the duration of this project, is Cursor to create another new document. Absolutely none, ever, for the rest of the project. Period. Full Stop.**
+
+**Allowed Actions:**
+- ✅ Amend existing documents
+- ✅ Repurpose existing documents by changing their name and content
+- ❌ **NEVER create new documents**
+
+**This rule supersedes all previous exceptions and guidelines. There are NO exceptions to this rule.**
+
+### Exceptions (DEPRECATED - NO LONGER APPLICABLE)
+
+~~The only exception is when the user **explicitly requests** a new document:~~
+- ~~"Create a document about X"~~
+- ~~"Write documentation for Y"~~
+- ~~"Document this feature"~~
+
+~~Even then, **confirm the document name, location, and scope before creating**.~~
+
+**NOTE:** The above exceptions are **DEPRECATED**. The new mandatory rule is: **NO NEW DOCUMENTS. EVER.**
 
 ### Rationale
 
