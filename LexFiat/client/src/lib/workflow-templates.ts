@@ -10,7 +10,7 @@
  */
 
 export type WorkflowCategory = 
-  | 'c-suite' 
+  | 'c-workflows'  // C workflows: Compare, Critique, Collaborate, etc. (adapted from SwimMeet Dive/Turn/Work)
   | 'document-review' 
   | 'litigation' 
   | 'transactional' 
@@ -63,133 +63,300 @@ export interface WorkflowTemplate {
   useCases: string[];
   tags: string[];
   isDefault?: boolean;
-  isCSuite?: boolean; // C-Suite executive workflows
+  isCWorkflow?: boolean; // C workflows: Compare, Critique, Collaborate, etc. (adapted from SwimMeet)
 }
 
 /**
  * Standard Workflow Templates Library
  */
 export const workflowTemplates: WorkflowTemplate[] = [
-  // ========== C-SUITE WORKFLOWS ==========
+  // ========== C WORKFLOWS ==========
+  // Adapted from SwimMeet's Dive/Turn/Work workflows
+  // These are workflows that start with "C": Compare, Critique, Collaborate, etc.
   {
-    id: 'csuite-case-overview',
-    name: 'Executive Case Overview',
-    category: 'c-suite',
-    description: 'High-level case status and risk assessment for executive review',
-    isCSuite: true,
+    id: 'compare',
+    name: 'Compare',
+    category: 'c-workflows',
+    description: 'Multi-agent document comparison and analysis workflow (adapted from SwimMeet Dive)',
+    isCWorkflow: true,
     steps: [
       {
-        id: 'collect-case-data',
-        name: 'Collect Case Data',
+        id: 'document-ingestion',
+        name: 'Document Ingestion',
         type: 'module',
-        tool: 'case_data_collector',
-        description: 'Aggregate all case information, documents, deadlines, and status',
+        tool: 'document_processor',
+        description: 'Process and extract text from multiple documents',
       },
       {
-        id: 'risk-analysis',
-        name: 'Risk Analysis',
+        id: 'document-analysis',
+        name: 'Document Analysis',
         type: 'ai',
-        agent: 'risk_analyst',
-        description: 'AI-powered risk assessment and exposure analysis',
+        agent: 'document_analyzer',
+        description: 'Analyze each document structure and content',
       },
       {
-        id: 'financial-summary',
-        name: 'Financial Summary',
-        type: 'module',
-        tool: 'financial_aggregator',
-        description: 'Calculate fees, costs, and potential outcomes',
+        id: 'comparative-analysis',
+        name: 'Comparative Analysis',
+        type: 'ai',
+        agent: 'legal_comparator',
+        description: 'Compare documents side-by-side, identify differences and similarities',
       },
       {
-        id: 'executive-dashboard',
-        name: 'Executive Dashboard',
-        type: 'module',
-        tool: 'executive_dashboard_generator',
-        description: 'Generate executive-level summary dashboard',
+        id: 'fact-verification',
+        name: 'Fact Verification',
+        type: 'ai',
+        agent: 'fact_checker',
+        description: 'Verify facts and cross-reference information across documents',
+      },
+      {
+        id: 'comparison-report',
+        name: 'Comparison Report',
+        type: 'ai',
+        agent: 'report_generator',
+        description: 'Generate comprehensive comparison report with findings',
       },
     ],
-    estimatedTime: '3-5 minutes',
-    useCases: ['Weekly case reviews', 'Client reporting', 'Strategic planning'],
-    tags: ['executive', 'reporting', 'risk', 'dashboard'],
+    estimatedTime: '5-10 minutes',
+    useCases: ['Contract comparison', 'Pleading comparison', 'Document version comparison', 'Due diligence'],
+    tags: ['compare', 'comparison', 'documents', 'analysis', 'swimmeet'],
+    isDefault: true,
   },
   {
-    id: 'csuite-portfolio-analysis',
-    name: 'Portfolio Analysis',
-    category: 'c-suite',
-    description: 'Comprehensive analysis of entire case portfolio',
-    isCSuite: true,
+    id: 'critique',
+    name: 'Critique',
+    category: 'c-workflows',
+    description: 'Legal document review and critique workflow (adapted from SwimMeet Turn)',
+    isCWorkflow: true,
     steps: [
       {
-        id: 'portfolio-collection',
-        name: 'Portfolio Collection',
+        id: 'document-review',
+        name: 'Document Review',
+        type: 'ai',
+        agent: 'document_analyzer',
+        description: 'Comprehensive analysis of document structure and content',
+      },
+      {
+        id: 'legal-review',
+        name: 'Legal Review',
+        type: 'ai',
+        agent: 'legal_reviewer',
+        description: 'Review legal compliance, identify legal issues and risks',
+      },
+      {
+        id: 'compliance-check',
+        name: 'Compliance Check',
+        type: 'ai',
+        agent: 'compliance_checker',
+        description: 'Check against applicable regulations and standards',
+      },
+      {
+        id: 'quality-assessment',
+        name: 'Quality Assessment',
+        type: 'ai',
+        agent: 'quality_assessor',
+        description: 'Assess document quality, identify improvements and recommendations',
+      },
+      {
+        id: 'critique-report',
+        name: 'Critique Report',
+        type: 'ai',
+        agent: 'report_generator',
+        description: 'Generate detailed critique report with findings and recommendations',
+      },
+    ],
+    estimatedTime: '8-15 minutes',
+    useCases: ['Document review', 'Contract critique', 'Pleading review', 'Quality assurance'],
+    tags: ['critique', 'review', 'quality', 'compliance', 'swimmeet'],
+    isDefault: true,
+  },
+  {
+    id: 'collaborate',
+    name: 'Collaborate',
+    category: 'c-workflows',
+    description: 'Multi-party collaboration workflow (adapted from SwimMeet Work)',
+    isCWorkflow: true,
+    steps: [
+      {
+        id: 'collaboration-setup',
+        name: 'Collaboration Setup',
         type: 'module',
-        tool: 'portfolio_collector',
-        description: 'Gather data from all active cases',
+        tool: 'collaboration_manager',
+        description: 'Set up collaboration session and identify participants',
       },
       {
-        id: 'trend-analysis',
-        name: 'Trend Analysis',
+        id: 'task-distribution',
+        name: 'Task Distribution',
         type: 'ai',
-        agent: 'trend_analyst',
-        description: 'Identify patterns, trends, and anomalies across portfolio',
+        agent: 'task_manager',
+        description: 'Distribute tasks and coordinate work among participants',
       },
       {
-        id: 'resource-allocation',
-        name: 'Resource Allocation Analysis',
+        id: 'coordination',
+        name: 'Coordination',
         type: 'ai',
-        agent: 'resource_optimizer',
-        description: 'Analyze resource utilization and recommend optimization',
+        agent: 'collaboration_coordinator',
+        description: 'Coordinate multi-agent collaboration and information sharing',
       },
       {
-        id: 'strategic-recommendations',
-        name: 'Strategic Recommendations',
+        id: 'communication-facilitation',
+        name: 'Communication Facilitation',
         type: 'ai',
-        agent: 'strategic_advisor',
-        description: 'Generate strategic recommendations for portfolio management',
+        agent: 'communication_facilitator',
+        description: 'Facilitate communication and consensus building',
+      },
+      {
+        id: 'synthesis',
+        name: 'Synthesis',
+        type: 'ai',
+        agent: 'synthesis_agent',
+        description: 'Synthesize contributions from all participants into final output',
+      },
+    ],
+    estimatedTime: '10-20 minutes',
+    useCases: ['Multi-party document review', 'Team collaboration', 'Consensus building', 'Joint analysis'],
+    tags: ['collaborate', 'collaboration', 'multi-party', 'team', 'swimmeet'],
+    isDefault: true,
+  },
+  {
+    id: 'compose',
+    name: 'Compose',
+    category: 'c-workflows',
+    description: 'AI-assisted document composition workflow',
+    isCWorkflow: true,
+    steps: [
+      {
+        id: 'requirements-analysis',
+        name: 'Requirements Analysis',
+        type: 'ai',
+        agent: 'requirements_analyzer',
+        description: 'Analyze document requirements and objectives',
+      },
+      {
+        id: 'content-generation',
+        name: 'Content Generation',
+        type: 'ai',
+        agent: 'draft_generator',
+        description: 'Generate initial document content',
+      },
+      {
+        id: 'structure-optimization',
+        name: 'Structure Optimization',
+        type: 'ai',
+        agent: 'structure_optimizer',
+        description: 'Optimize document structure and organization',
+      },
+      {
+        id: 'refinement',
+        name: 'Refinement',
+        type: 'ai',
+        agent: 'refinement_agent',
+        description: 'Refine and polish document content',
+      },
+      {
+        id: 'quality-check',
+        name: 'Quality Check',
+        type: 'ai',
+        agent: 'quality_checker',
+        description: 'Final quality check and validation',
       },
     ],
     estimatedTime: '10-15 minutes',
-    useCases: ['Monthly portfolio reviews', 'Resource planning', 'Strategic decisions'],
-    tags: ['executive', 'portfolio', 'strategy', 'analytics'],
+    useCases: ['Document drafting', 'Brief writing', 'Memo composition', 'Report generation'],
+    tags: ['compose', 'drafting', 'writing', 'generation'],
   },
   {
-    id: 'csuite-client-relationship',
-    name: 'Client Relationship Management',
-    category: 'c-suite',
-    description: 'Comprehensive client relationship analysis and recommendations',
-    isCSuite: true,
+    id: 'check',
+    name: 'Check',
+    category: 'c-workflows',
+    description: 'Comprehensive document checking and validation workflow',
+    isCWorkflow: true,
     steps: [
       {
-        id: 'client-data-aggregation',
-        name: 'Client Data Aggregation',
+        id: 'format-check',
+        name: 'Format Check',
         type: 'module',
-        tool: 'client_data_aggregator',
-        description: 'Collect all client interaction data',
+        tool: 'format_checker',
+        description: 'Check document formatting and style compliance',
       },
       {
-        id: 'relationship-analysis',
-        name: 'Relationship Analysis',
+        id: 'citation-check',
+        name: 'Citation Check',
         type: 'ai',
-        agent: 'relationship_analyst',
-        description: 'Analyze client satisfaction, engagement, and risk factors',
+        agent: 'citation_checker',
+        description: 'Verify citations and references',
       },
       {
-        id: 'retention-strategy',
-        name: 'Retention Strategy',
+        id: 'fact-check',
+        name: 'Fact Check',
         type: 'ai',
-        agent: 'retention_advisor',
-        description: 'Generate client retention and growth strategies',
+        agent: 'fact_checker',
+        description: 'Verify factual claims and statements',
       },
       {
-        id: 'executive-briefing',
-        name: 'Executive Briefing',
+        id: 'legal-check',
+        name: 'Legal Check',
+        type: 'ai',
+        agent: 'legal_reviewer',
+        description: 'Check legal accuracy and compliance',
+      },
+      {
+        id: 'consistency-check',
+        name: 'Consistency Check',
+        type: 'ai',
+        agent: 'consistency_checker',
+        description: 'Check for internal consistency and coherence',
+      },
+    ],
+    estimatedTime: '5-10 minutes',
+    useCases: ['Document validation', 'Quality assurance', 'Pre-filing checks', 'Final review'],
+    tags: ['check', 'validation', 'quality', 'verification'],
+  },
+  {
+    id: 'calculate',
+    name: 'Calculate',
+    category: 'c-workflows',
+    description: 'Financial and numerical calculation workflow',
+    isCWorkflow: true,
+    steps: [
+      {
+        id: 'data-extraction',
+        name: 'Data Extraction',
+        type: 'ai',
+        agent: 'data_extractor',
+        description: 'Extract numerical and financial data from documents',
+      },
+      {
+        id: 'calculation-setup',
+        name: 'Calculation Setup',
         type: 'module',
-        tool: 'briefing_generator',
-        description: 'Create executive briefing document',
+        tool: 'calculation_engine',
+        description: 'Set up calculation formulas and parameters',
+      },
+      {
+        id: 'financial-analysis',
+        name: 'Financial Analysis',
+        type: 'ai',
+        agent: 'financial_analyst',
+        description: 'Perform financial calculations and analysis',
+      },
+      {
+        id: 'validation',
+        name: 'Validation',
+        type: 'ai',
+        agent: 'validation_agent',
+        description: 'Validate calculations and results',
+      },
+      {
+        id: 'report-generation',
+        name: 'Report Generation',
+        type: 'ai',
+        agent: 'report_generator',
+        description: 'Generate calculation report with results',
       },
     ],
     estimatedTime: '5-8 minutes',
-    useCases: ['Client reviews', 'Retention planning', 'Business development'],
-    tags: ['executive', 'client', 'relationship', 'retention'],
+    useCases: ['Fee calculations', 'Damage calculations', 'Financial analysis', 'Settlement calculations'],
+    tags: ['calculate', 'financial', 'numbers', 'analysis'],
   },
 
   // ========== DOCUMENT REVIEW WORKFLOWS ==========
@@ -630,10 +797,10 @@ export function getWorkflowsByCategory(category: WorkflowCategory): WorkflowTemp
 }
 
 /**
- * Get C-Suite workflows
+ * Get C workflows (Compare, Critique, Collaborate, etc.)
  */
-export function getCSuiteWorkflows(): WorkflowTemplate[] {
-  return workflowTemplates.filter(w => w.isCSuite === true);
+export function getCWorkflows(): WorkflowTemplate[] {
+  return workflowTemplates.filter(w => w.isCWorkflow === true);
 }
 
 /**

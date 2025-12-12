@@ -32,7 +32,7 @@ import {
 import { 
   workflowTemplates, 
   getWorkflowsByCategory, 
-  getCSuiteWorkflows,
+  getCWorkflows,
   searchWorkflows,
   WorkflowCategory,
   WorkflowTemplate
@@ -42,7 +42,7 @@ import { executeCyranoTool } from "@/lib/cyrano-api";
 import { useToast } from "@/hooks/use-toast";
 
 const CATEGORY_ICONS: Record<WorkflowCategory, typeof FileText> = {
-  'c-suite': Crown,
+  'c-workflows': Crown,  // C workflows: Compare, Critique, Collaborate, etc.
   'document-review': FileText,
   'litigation': Gavel,
   'transactional': Briefcase,
@@ -53,7 +53,7 @@ const CATEGORY_ICONS: Record<WorkflowCategory, typeof FileText> = {
 };
 
 const CATEGORY_COLORS: Record<WorkflowCategory, string> = {
-  'c-suite': 'bg-yellow-500/20 border-yellow-500/50 text-yellow-400',
+  'c-workflows': 'bg-yellow-500/20 border-yellow-500/50 text-yellow-400',  // C workflows
   'document-review': 'bg-blue-500/20 border-blue-500/50 text-blue-400',
   'litigation': 'bg-red-500/20 border-red-500/50 text-red-400',
   'transactional': 'bg-green-500/20 border-green-500/50 text-green-400',
@@ -154,7 +154,7 @@ export default function WorkflowLibraryPage() {
     }
   };
 
-  const cSuiteWorkflows = getCSuiteWorkflows();
+  const cWorkflows = getCWorkflows();
 
   return (
     <div className="min-h-screen bg-primary-dark">
@@ -188,18 +188,22 @@ export default function WorkflowLibraryPage() {
           </Button>
         </div>
 
-        {/* C-Suite Workflows Section */}
-        {selectedCategory === 'all' || selectedCategory === 'c-suite' ? (
+        {/* C Workflows Section */}
+        {/* C workflows: Compare, Critique, Collaborate, etc. (adapted from SwimMeet Dive/Turn/Work) */}
+        {selectedCategory === 'all' || selectedCategory === 'c-workflows' ? (
           <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
               <Crown className="w-6 h-6 text-yellow-400" />
-              <h2 className="text-2xl font-bold text-white">C-Suite Workflows</h2>
+              <h2 className="text-2xl font-bold text-white">C Workflows</h2>
               <Badge variant="outline" className="border-yellow-500/50 text-yellow-400">
-                Executive
+                Compare • Critique • Collaborate
+              </Badge>
+              <Badge variant="outline" className="border-slate-600 text-slate-400 text-xs">
+                Adapted from SwimMeet
               </Badge>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {cSuiteWorkflows.map((workflow) => (
+              {cWorkflows.map((workflow) => (
                 <WorkflowCard
                   key={workflow.id}
                   workflow={workflow}
@@ -225,7 +229,7 @@ export default function WorkflowLibraryPage() {
                 className="data-[state=active]:bg-slate-700"
               >
                 <Icon className="w-4 h-4 mr-2" />
-                {category.replace('-', ' ')}
+                {category === 'c-workflows' ? 'C Workflows' : category.replace('-', ' ')}
               </TabsTrigger>
             ))}
           </TabsList>
@@ -281,15 +285,15 @@ function WorkflowCard({ workflow, onExecute, onEdit, isExecuting }: WorkflowCard
   const colorClass = CATEGORY_COLORS[workflow.category];
 
   return (
-    <Card className={`bg-slate-800 border-slate-700 hover:border-gold/50 transition-all ${workflow.isCSuite ? 'ring-2 ring-yellow-500/30' : ''}`}>
+    <Card className={`bg-slate-800 border-slate-700 hover:border-gold/50 transition-all ${workflow.isCWorkflow ? 'ring-2 ring-yellow-500/30' : ''}`}>
       <CardHeader>
         <div className="flex items-start justify-between mb-2">
           <div className={`w-12 h-12 ${colorClass} rounded-lg flex items-center justify-center border`}>
             <Icon className="w-6 h-6" />
           </div>
-          {workflow.isCSuite && (
+          {workflow.isCWorkflow && (
             <Badge variant="outline" className="border-yellow-500/50 text-yellow-400">
-              C-Suite
+              C Workflow
             </Badge>
           )}
         </div>

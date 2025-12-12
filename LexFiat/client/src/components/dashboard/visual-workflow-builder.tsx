@@ -193,7 +193,7 @@ export default function VisualWorkflowBuilder({
       estimatedTime: '5-20 minutes',
       useCases: [],
       tags: [],
-      isCSuite: workflowCategory === 'c-suite',
+      isCWorkflow: workflowCategory === 'c-workflows',
     };
 
     onSave(savedWorkflow);
@@ -261,7 +261,7 @@ export default function VisualWorkflowBuilder({
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent className="bg-slate-800 border-slate-600">
-                    <SelectItem value="c-suite">C-Suite</SelectItem>
+                    <SelectItem value="c-workflows">C Workflows</SelectItem>
                     <SelectItem value="document-review">Document Review</SelectItem>
                     <SelectItem value="litigation">Litigation</SelectItem>
                     <SelectItem value="transactional">Transactional</SelectItem>

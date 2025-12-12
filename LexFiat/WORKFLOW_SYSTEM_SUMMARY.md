@@ -10,10 +10,13 @@ This document summarizes the comprehensive workflow system built for LexFiat, in
 
 Created a comprehensive library of standard workflow templates organized by category:
 
-#### C-Suite Workflows (Executive-Level)
-- **Executive Case Overview**: High-level case status and risk assessment for executive review
-- **Portfolio Analysis**: Comprehensive analysis of entire case portfolio with trend analysis
-- **Client Relationship Management**: Client relationship analysis and retention strategies
+#### C Workflows (Adapted from SwimMeet Dive/Turn/Work)
+- **Compare**: Multi-agent document comparison and analysis workflow (adapted from SwimMeet Dive)
+- **Critique**: Legal document review and critique workflow (adapted from SwimMeet Turn)
+- **Collaborate**: Multi-party collaboration workflow (adapted from SwimMeet Work)
+- **Compose**: AI-assisted document composition workflow
+- **Check**: Comprehensive document checking and validation workflow
+- **Calculate**: Financial and numerical calculation workflow
 
 #### Document Review Workflows
 - **Standard Document Review**: Comprehensive document review with red flag detection
@@ -116,7 +119,7 @@ All workflows integrate with the Multi-Agent Engine (MAE) for:
 ### What We've Implemented (Similar to Vincent AI)
 
 1. **Standard Workflow Templates**: Comprehensive library of standard legal workflows
-2. **C-Suite/Executive Workflows**: High-level workflows for executive decision-making
+2. **C Workflows**: Compare, Critique, Collaborate, and other C workflows (adapted from SwimMeet's Dive/Turn/Work)
 3. **Visual Process Builder**: Drag-and-drop workflow creation
 4. **Workflow Library**: Browseable, searchable workflow templates
 5. **Category Organization**: Workflows organized by practice area
@@ -134,7 +137,7 @@ All workflows integrate with the Multi-Agent Engine (MAE) for:
 
 ### Previously Missing Components
 
-1. **C-Suite Workflows**: These were not built out - now fully implemented
+1. **C Workflows**: Compare, Critique, Collaborate workflows were not fully built out - now fully implemented with proper MAE integration
 2. **Visual Process Builder**: No visual editor existed - now fully built
 3. **Standard Workflow Library**: Limited workflow templates - now comprehensive library
 4. **Workflow Customization**: Limited customization options - now full customization support
@@ -160,13 +163,15 @@ Navigate to `/workflows` or `/workflow-library` in the application.
 3. Click "Execute" to run a workflow
 4. Click "Edit" to customize a workflow
 
-### C-Suite Workflows
+### C Workflows
 
-C-Suite workflows are highlighted in the library and provide:
-- Executive-level case overviews
-- Portfolio analysis
-- Client relationship management
-- Strategic recommendations
+C workflows are highlighted in the library and include:
+- **Compare**: Document comparison and analysis (adapted from SwimMeet Dive)
+- **Critique**: Document review and critique (adapted from SwimMeet Turn)
+- **Collaborate**: Multi-party collaboration (adapted from SwimMeet Work)
+- **Compose**: Document composition and drafting
+- **Check**: Document validation and checking
+- **Calculate**: Financial and numerical calculations
 
 ## Technical Implementation
 
