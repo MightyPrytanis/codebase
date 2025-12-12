@@ -101,6 +101,26 @@ Related Documents: REALISTIC-WORK-PLAN
   - Converts insights to claims format for consistency checking
   - Uses shared `consistency_checker` tool from verification module
   - Enabled by default for 'deep' extraction mode
+- **Hybrid Approach Implementation (2025-12-12)**: Implemented hybrid approach for Potemkin engine integration
+  - **Rationale**: Balance flexibility, performance, and access to advanced features
+  - **Arkiver Integration**:
+    - Created `arkiver_integrity_test` tool that uses Potemkin engine for complex workflows
+    - Uses Potemkin engine for: opinion drift testing, bias detection, honesty assessment, ten rules compliance, fact checking
+    - Continues using tools directly for: claim extraction, citation checking, source verification, consistency checking
+    - Updated AI Integrity page to use new integrity test tool
+  - **LexFiat Integration**:
+    - Added Potemkin engine document verification to document analyzer
+    - Users can verify documents before submission using comprehensive verification workflow
+    - Continues using `citation_checker` tool directly for simple citation validation
+  - **Benefits**:
+    - Flexibility: Use tools directly for custom workflows, use engine for standardized processes
+    - Performance: Minimal overhead for simple operations, orchestrated workflows for complex tasks
+    - Cost Efficiency: Only call what's needed - no unnecessary AI calls for simple verification
+    - Consistency: Standardized workflows ensure consistent verification quality across apps
+    - Advanced Features: Access to Potemkin-specific capabilities like opinion drift and bias detection
+  - Converts insights to claims format for consistency checking
+  - Uses shared `consistency_checker` tool from verification module
+  - Enabled by default for 'deep' extraction mode
   - Results included in pipeline output
 - **Shared Tools Strategy**: Completed integration of all four shared verification tools
   - Claim Extractor: Used in PDF/DOCX extractors ✅

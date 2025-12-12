@@ -5,8 +5,8 @@ Subject(s): General
 Project: Cyrano
 Version: v549
 Created: 2025-11-28 (2025-W48)
-Last Substantive Revision: 2025-01-07 (2025-W01)
-Last Format Update: 2025-01-07 (2025-W01)
+Last Substantive Revision: 2025-12-12 (2025-W50)
+Last Format Update: 2025-12-12 (2025-W50)
 Owner: David W Towne / Cognisint LLC
 Copyright: © 2025 Cognisint LLC
 Status: Active

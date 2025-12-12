@@ -246,19 +246,39 @@ See `schema.ts` for complete database schema including:
 ## Integration
 
 Arkiver integrates with:
-- **Potemkin Engine**: Uses shared verification tools (claim extractor, citation checker, source verifier, consistency checker)
+- **Potemkin Engine**: Uses Potemkin engine workflows for complex integrity testing (opinion drift, bias detection, honesty assessment)
+- **Shared Verification Tools**: Uses tools directly for simple operations (claim extraction, citation checking, source verification, consistency checking)
 - **MCP Server**: All tools registered and accessible via MCP
 - **HTTP Bridge**: REST API endpoints for file upload and processing
 
-### Shared Verification Tools
+### Hybrid Approach: Potemkin Engine + Direct Tools
 
-Arkiver now uses all four shared verification tools:
-1. **Claim Extractor**: Extracts claims from documents (used in PDF/DOCX extractors)
-2. **Citation Checker**: Validates and verifies citations (used in PDF/DOCX extractors)
-3. **Source Verifier**: Verifies sources and citations in insights (used in insight processor)
-4. **Consistency Checker**: Checks consistency across insights (used in processor pipeline)
+Arkiver implements a hybrid approach that balances flexibility, performance, and access to advanced features:
 
-This integration ensures consistency with Potemkin and reduces code duplication.
+#### Using Potemkin Engine (Complex Workflows)
+- **AI Integrity Testing** (`arkiver_integrity_test`): Uses Potemkin engine for:
+  - Opinion drift testing: Detects changes in AI opinions over time
+  - Bias detection: Identifies potential biases in AI responses
+  - Honesty assessment: Evaluates truthfulness and accuracy
+  - Ten rules compliance: Checks adherence to ethical guidelines
+  - Fact checking: Comprehensive document verification
+
+These workflows combine multiple verification steps with AI analysis, providing structured reports and recommendations.
+
+#### Using Tools Directly (Simple Operations)
+- **Claim Extractor**: Extracts claims from documents (used in PDF/DOCX extractors)
+- **Citation Checker**: Validates and verifies citations (used in PDF/DOCX extractors)
+- **Source Verifier**: Verifies sources and citations in insights (used in insight processor)
+- **Consistency Checker**: Checks consistency across insights (used in processor pipeline)
+
+Direct tool usage provides fine-grained control, better performance, and lower cost for simple operations.
+
+### Benefits of Hybrid Approach
+- **Flexibility**: Use tools directly for custom workflows, use engine for standardized processes
+- **Performance**: Minimal overhead for simple operations, orchestrated workflows for complex tasks
+- **Cost Efficiency**: Only call what's needed - no unnecessary AI calls for simple verification
+- **Consistency**: Standardized workflows ensure consistent verification quality across apps
+- **Advanced Features**: Access to Potemkin-specific capabilities like opinion drift and bias detection
 
 ## MCP Tools
 
@@ -267,6 +287,7 @@ The following MCP tools are available for Arkiver functionality:
 ### File Processing Tools (`arkiver-mcp-tools.ts`)
 - `arkiver_process_file` - Initiates file processing (supports PDF, DOCX, TXT, MD, JSON conversations)
 - `arkiver_job_status` - Check processing job status
+- `arkiver_integrity_test` - Run AI integrity tests using Potemkin engine workflows (opinion drift, bias detection, honesty assessment, ten rules compliance, fact checking)
 
 ### Data Extraction Tools (`arkiver-tools.ts`)
 - `extract_conversations` - Extract and parse LLM conversation data from JSON files

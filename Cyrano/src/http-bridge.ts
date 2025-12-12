@@ -101,6 +101,7 @@ import { citationFormatter } from './tools/verification/citation-formatter.js';
 import { sourceVerifier } from './tools/verification/source-verifier.js';
 import { consistencyChecker } from './tools/verification/consistency-checker.js';
 import { arkiverProcessFileTool, arkiverJobStatusTool } from './tools/arkiver-mcp-tools.js';
+import { arkiverIntegrityTestTool } from './tools/arkiver-integrity-test.js';
 // Import Potemkin-specific tools
 import {
   historyRetriever,
@@ -361,6 +362,9 @@ mcpServer.setRequestHandler(CallToolRequestSchema, async (request) => {
             break;
           case 'arkiver_job_status':
             result = await arkiverJobStatusTool.execute(args);
+            break;
+          case 'arkiver_integrity_test':
+            result = await arkiverIntegrityTestTool.execute(args);
             break;
           case 'arkiver_process_text':
             result = await arkiverTextProcessor.execute(args);
@@ -654,6 +658,9 @@ app.post('/mcp/execute', async (req, res) => {
         break;
       case 'arkiver_job_status':
         result = await arkiverJobStatusTool.execute(toolInput);
+        break;
+      case 'arkiver_integrity_test':
+        result = await arkiverIntegrityTestTool.execute(toolInput);
         break;
       case 'arkiver_process_text':
         result = await arkiverTextProcessor.execute(toolInput);
