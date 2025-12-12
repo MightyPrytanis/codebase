@@ -5,8 +5,8 @@ Subject(s): Project | History | Development
 Project: Cyrano
 Version: v550
 Created: 2025-11-28 (2025-W48)
-Last Substantive Revision: 2025-01-07 (2025-W01)
-Last Format Update: 2025-01-07 (2025-W01)
+Last Substantive Revision: 2025-12-12 (2025-W50)
+Last Format Update: 2025-12-12 (2025-W50)
 Owner: David W Towne / Cognisint LLC
 Copyright: © 2025 Cognisint LLC
 Summary: Consolidated running log of all project changes, structured by work plan steps.
@@ -16,8 +16,8 @@ Related Documents: REALISTIC-WORK-PLAN
 
 # Cyrano Project Change Log
 
-**Project Start:** November 19-20, 2025  
-**Last Updated:** 2025-12-06  
+**Project Start:** July 2025  
+**Last Updated:** 2025-12-12  
 **Structure:** Organized by work plan steps (see REALISTIC_WORK_PLAN.md)
 
 ---
@@ -87,6 +87,27 @@ Related Documents: REALISTIC-WORK-PLAN
 ### Status:
 - **UI:** ✅ Complete and functional
 - **Remaining:** LLM extraction capabilities from base44 version (content enhancement, not UI)
+
+### Recent Enhancements (2025-12-12):
+- **Source Verification Integration**: Added source verification to insight extraction
+  - Insight processor now automatically verifies sources and citations found in insights
+  - Checks accessibility of URLs and legal citations
+  - Assesses reliability of sources (high/medium/low)
+  - Attaches verification results to insights
+  - Uses shared `source_verifier` tool from verification module
+- **Consistency Checking Integration**: Added consistency checking to processor pipeline
+  - Processor pipeline now performs cross-reference validation on extracted insights
+  - Checks for contradictions, inconsistencies, ambiguities, and temporal issues
+  - Converts insights to claims format for consistency checking
+  - Uses shared `consistency_checker` tool from verification module
+  - Enabled by default for 'deep' extraction mode
+  - Results included in pipeline output
+- **Shared Tools Strategy**: Completed integration of all four shared verification tools
+  - Claim Extractor: Used in PDF/DOCX extractors ✅
+  - Citation Checker: Used in PDF/DOCX extractors ✅
+  - Source Verifier: Used in insight processor ✅ (NEW)
+  - Consistency Checker: Used in processor pipeline ✅ (NEW)
+  - Ensures consistency with Potemkin engine and reduces code duplication
 
 ---
 
@@ -521,7 +542,7 @@ Related Documents: REALISTIC-WORK-PLAN
 
 ---
 
-## GoodCounsel Wellness System Implementation (2025-01-07)
+## GoodCounsel Wellness System Implementation (2025-12-12)
 
 **Status:** ✅ COMPLETE
 

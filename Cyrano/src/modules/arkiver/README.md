@@ -106,6 +106,10 @@ The processors analyze extracted text and generate insights:
 - Detects patterns and anomalies
 - Identifies trends and relationships
 - Extracts claims and assertions
+- **Source Verification**: Automatically verifies sources and citations found in insights
+  - Checks accessibility of URLs and legal citations
+  - Assesses reliability of sources
+  - Attaches verification results to insights
 
 ### Entity Processor
 - Named entity recognition (people, organizations, locations)
@@ -191,8 +195,22 @@ const result = await processorPipeline.process({
     extractTimeline: true,
     extractCitations: true,
     jurisdiction: Jurisdiction.MICHIGAN,
+    checkConsistency: true, // Enable consistency checking (default: true for deep mode)
+    consistencyCheckTypes: ['contradiction', 'inconsistency'], // Types of checks to perform
   },
 });
+
+// Access verification results
+if (result.consistencyCheck) {
+  console.log(`Consistency Score: ${result.consistencyCheck.consistencyScore}`);
+  console.log(`Issues Found: ${result.consistencyCheck.summary.totalIssues}`);
+}
+
+// Access source verification in insights
+if (result.insights?.sourceVerification) {
+  console.log(`Sources Verified: ${result.insights.sourceVerification.summary.total}`);
+  console.log(`High Reliability: ${result.insights.sourceVerification.summary.highReliability}`);
+}
 ```
 
 ### Citation Formatting
@@ -228,9 +246,19 @@ See `schema.ts` for complete database schema including:
 ## Integration
 
 Arkiver integrates with:
-- **Potemkin Engine**: Uses shared verification tools (claim extractor, citation checker)
+- **Potemkin Engine**: Uses shared verification tools (claim extractor, citation checker, source verifier, consistency checker)
 - **MCP Server**: All tools registered and accessible via MCP
 - **HTTP Bridge**: REST API endpoints for file upload and processing
+
+### Shared Verification Tools
+
+Arkiver now uses all four shared verification tools:
+1. **Claim Extractor**: Extracts claims from documents (used in PDF/DOCX extractors)
+2. **Citation Checker**: Validates and verifies citations (used in PDF/DOCX extractors)
+3. **Source Verifier**: Verifies sources and citations in insights (used in insight processor)
+4. **Consistency Checker**: Checks consistency across insights (used in processor pipeline)
+
+This integration ensures consistency with Potemkin and reduces code duplication.
 
 ## MCP Tools
 
