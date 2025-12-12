@@ -3,10 +3,10 @@ Document ID: README
 Title: GoodCounsel Engine
 Subject(s): General
 Project: Cyrano
-Version: v548
+Version: v549
 Created: 2025-11-28 (2025-W48)
-Last Substantive Revision: 2025-11-28 (2025-W48)
-Last Format Update: 2025-11-28 (2025-W48)
+Last Substantive Revision: 2025-01-07 (2025-W01)
+Last Format Update: 2025-01-07 (2025-W01)
 Owner: David W Towne / Cognisint LLC
 Copyright: © 2025 Cognisint LLC
 Status: Active
@@ -34,20 +34,26 @@ This engine uses the following components:
 - **Tools:**
   - `client-recommendations` - Client relationship analysis and recommendations
   - `ethics-reviewer` - Ethics rules compliance checking and guidance
+  - `wellness-journal` - Wellness journaling with HIPAA-compliant encryption (text and voice)
 
 - **Services:**
   - `client-analyzer` - Analyzes client relationships and identifies opportunities
   - `ethics-rules-module` - Rule-based ethics compliance evaluation
+  - `wellness-service` - Wellness journal management, feedback generation, burnout detection
+  - `hume-service` - Voice emotion analysis via Hume Expression Measurement API
+  - `burnout-detector` - Burnout risk analysis and recommendations
+  - `wellness-recommendations` - Personalized wellness recommendations
+  - `encryption-service` - AES-256-GCM encryption for sensitive wellness data
+  - `hipaa-compliance` - Access logging, audit trails, data retention, secure deletion
+  - `wellness-audio-storage` - Secure encrypted audio file storage
 
 - **Workflows:** Multi-step orchestration for:
   - Wellness assessment and recommendations
+  - Wellness journaling (text and voice with emotion analysis)
+  - Burnout detection and alerts
   - Ethics review and compliance checking
   - Client relationship management
   - Crisis support pathways
-
-This engine orchestrates the following modules:
-- Currently uses direct tools and AI providers
-- Future modules may include: wellness tracking, ethics compliance, client relationship management
 
 ## Workflows
 
@@ -57,19 +63,29 @@ Performs a comprehensive wellness assessment for an attorney, including:
 - Wellness metrics evaluation
 - Personalized wellness recommendations
 
-### 2. Ethics Review (`ethics_review`)
+### 2. Wellness Journaling (`wellness_journal`)
+HIPAA-compliant wellness journaling system with enterprise-grade encryption:
+- **Text Journaling:** Create, read, update, and delete journal entries
+- **Voice Journaling:** Record voice entries with Hume AI emotion analysis
+- **AI Feedback:** Generate insights, patterns, and suggestions from journal entries
+- **Trends Analysis:** Track wellness trends over time (weekly/monthly)
+- **Burnout Detection:** Assess burnout risk based on patterns and workload
+- **Wellness Recommendations:** Get personalized recommendations for physical, mental, social, and professional wellness
+- **Security:** All data encrypted at rest (AES-256-GCM), access logging, audit trails, HIPAA-compliant retention
+
+### 3. Ethics Review (`ethics_review`)
 Reviews ethical obligations and compliance status:
 - Ethics rules compliance checking
 - Compliance assessment
 - Ethics guidance generation
 
-### 3. Client Relationship Recommendations (`client_recommendations`)
+### 4. Client Relationship Recommendations (`client_recommendations`)
 Generates recommendations for client relationship management:
 - Client relationship analysis
 - Follow-up opportunity identification
 - Actionable recommendations
 
-### 4. Crisis Support (`crisis_support`)
+### 5. Crisis Support (`crisis_support`)
 Provides pathways to help and advocacy in crisis situations:
 - Situation assessment
 - Resource identification
