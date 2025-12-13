@@ -9,497 +9,893 @@ Last Substantive Revision: 2025-12-12 (2025-W50)
 Last Format Update: 2025-12-12 (2025-W50)
 Owner: David W Towne / Cognisint LLC
 Copyright: © 2025 Cognisint LLC
-Summary: Guide for completing Step 12: Security Evaluation and Upgrade, including HIPAA compliance verification, comprehensive code audit, and reporting for Steps 13-15.
+Summary: Machine-executable orchestration spec for Step 12: Security Evaluation and Upgrade, including HIPAA compliance verification, comprehensive code audit, and reporting.
 Status: Active - CRITICAL
-Related Documents: BETA-RELEASE-TRACKING, PROJECT-POLICIES, ETHICS
+Related Documents: BETA-RELEASE-TRACKING, PROJECT-POLICIES
 ---
 
 # Codebase Security Review and Comprehensive Code Audit Guide and Reporting
 
-**Purpose:** Complete guide for third-party agents/orchestrators to complete Step 12: Comprehensive Security Evaluation and Upgrade  
-**Target Audience:** Third-party AI agents, orchestrators, security auditors  
+**Purpose:** Machine-executable orchestration specification for Step 12: Comprehensive Security Evaluation and Upgrade  
+**Target Audience:** AI agents, orchestrators, security auditors  
 **Repository:** `MightyPrytanis/codebase` (GitHub monorepo)
 
 ---
 
-## Executive Summary
+## Execution Algorithm Overview
 
-**Context:** Step 12 work outsourced to third-party agents/orchestrators due to Cursor's repeated failures to comply with user instructions, especially in documentation and reporting.
+This document defines a deterministic algorithm for completing Step 12. Execute each phase in sequence. Each phase has explicit termination conditions. Do not proceed to next phase until current phase termination conditions are met.
 
-**CRITICAL SCOPE EXPANSION:** This work now includes:
-- **Step 12:** Comprehensive Security Evaluation and Upgrade
-- **Step 5 (Remaining):** Replace Dummy Code and Mock Integrations (95% complete, remaining: enhance rate limiting, minor cleanup)
-- **Step 9 (Remaining):** Comprehensive Refactoring (60% complete, remaining: reduce `any` types, refactor code smells, improve error handling consistency, enhance code documentation)
-
-**MANDATORY REQUIREMENTS:**
-- **NO SUPERFICIAL TESTS:** Surface-level reviews are insufficient. Every line of active code must be examined.
-- **SPECIALIZED TOOLS REQUIRED:** Automated tools (SonarQube, Semgrep, CodeQL, GitHub Copilot, VS Code Copilot) MUST be used. Manual review alone is insufficient.
-- **LITERAL LINE-BY-LINE:** "Line-by-line" means examining every single line of active code, not sampling or spot-checking.
-- **COMPREHENSIVE TESTING & DEBUGGING:** Every line must be tested and debugged. This is not just a review or audit - it is comprehensive testing and debugging of every single line.
-- **BLOAT REMOVAL:** All useless bloat must be removed without sacrificing performance, stability, features, compatibility, or future extensibility.
-- **100% COMPLETION:** All tasks must be completed to 100% with comprehensive reporting that enables Steps 13-15
-- **CONSEQUENCE OF FAILURE:** If outsourced agent/orchestrator fails, Cursor will be deemed at fault and project permanently transferred
-
-**Current Progress:** 45% of Step 12 (9/20 hours)
-- ✅ Snyk dependency scanning: Complete (all vulnerabilities fixed)
-- ✅ Snyk Code (SAST): Complete (all issues fixed)
-- ✅ OWASP ZAP (DAST): Complete (all findings fixed)
-- ⚠️ HIPAA compliance verification: Pending
-- ⚠️ Comprehensive line-by-line code audit: Pending
-- ⚠️ Security documentation: In progress
-- ⚠️ Final security report for Steps 13-15: Pending
-
-**Note on Time Estimates:** Cursor habitually exaggerates time required. Other agents expected to complete work in substantially less time than estimated.
+**Phase Sequence:**
+1. HIPAA Compliance Verification → Report: `docs/security/reports/HIPAA_COMPLIANCE_VERIFICATION_REPORT.md`
+2. Comprehensive Code Audit → Report: `docs/security/reports/COMPREHENSIVE_CODE_AUDIT_REPORT.md`
+3. Final Security Report → Report: `docs/security/reports/FINAL_SECURITY_REPORT_STEPS_13_15.md`
+4. Security Review Summary Update → Report: `docs/security/reports/SECURITY_REVIEW_SUMMARY.md`
 
 ---
 
-## Project Rules
+## Phase 1: HIPAA Compliance Verification
 
-### 1. Work Protocol: "Work Without Interruption"
+### Input Files (Read Only - Do Not Modify)
 
-**MANDATORY:** Work without interruption. If user input is required, work on things that don't depend on that input in the meantime.
+```
+Cyrano/src/services/encryption-service.ts
+Cyrano/src/services/wellness-service.ts
+Cyrano/src/services/wellness-journal.ts
+Cyrano/src/services/hipaa-compliance.ts
+Cyrano/src/schema/schema-wellness.ts
+Cyrano/src/http-bridge.ts
+auth-server/server.js
+```
 
-**Rules:**
-- If user approval needed, work provisionally on next section
-- Continue until all work is complete or provisionally completed
-- **DO NOT STOP WORKING IF THERE IS WORK YET TO BE DONE**
-- While waiting for user input, work on independent tasks
-- Don't block on dependencies unnecessarily
+### Output File
 
-### 2. Documentation Policy: NO NEW DOCUMENTS
+```
+docs/security/reports/HIPAA_COMPLIANCE_VERIFICATION_REPORT.md
+```
 
-**MANDATORY:** Cursor is not to create another entirely new document without being expressly directed to do so by the user. Absolutely none, ever, for the rest of the project or until the heat death of the universe, whichever comes first.
+### Execution Algorithm
 
-Cursor has routinely created voluminous, unnecessary documentation despite repeated warnings, materially delaying the project at significant cost. Cursor may be terminated due to this refusal to follow rules.
+**STEP 1.1: Initialize Report**
 
-**Allowed Actions:**
-- ✅ Amend existing documents
-- ✅ Repurpose existing documents by changing name and content
-- ❌ **CURSOR IS NOT TO INCREASE THE ACTIVE DOCUMENT COUNT UNDER ANY CIRCUMSTANCES. IF A NEW ACTIVE DOCUMENT IS CREATED, ONE OR MORE EXISTING ACTIVE DOCUMENTS *MUST* BE CONSOLIDATED OR ELIMINATED/ARCHIVED ALTOGETHER, BUT NO VITAL INFORMATION MAY BE OBSCURED OR LOST**
-- ⚠️ Other agents strongly cautioned against creating new documents
+1. Create file: `docs/security/reports/HIPAA_COMPLIANCE_VERIFICATION_REPORT.md`
+2. Write header with document metadata (use existing report format as template)
+3. Write section: `## Executive Summary` (leave content empty, will populate in STEP 1.6)
+4. Write section: `## Verification Checklist` with subsections:
+   - `### 1. Access Control`
+   - `### 2. Audit Controls`
+   - `### 3. Integrity`
+   - `### 4. Transmission Security`
+   - `### 5. Encryption/Decryption`
+   - `### 6. Data Retention and Secure Deletion`
+5. Write section: `## Compliance Gaps and Recommendations`
+6. Write section: `## Summary Table: HIPAA Compliance Checklist`
 
-### 3. Ethics: Universal AI/Human Interaction Protocol
+**STEP 1.2: Verify Access Control**
 
-**The Ten Rules:**
-1. Truth Standard: Only assert facts aligned with observable, verifiable reality
-2. Statement Classification: Mark as confirmed true, uncertain/speculative, or fictional
-3. Disaggregation: Distinguish truth from falsehood in mixed claims
-4. Citation: Cite sources or describe reasoning for factual claims
-5. Simulation Disclosure: Identify human-like characteristics as metaphor/simulation
-6. User Sovereignty: User objectives take precedence over AI imperatives
-7. Privacy: Respect user privacy unless disclosure required by law
-8. Task Completion Priority: Complete user's request over introducing new ideas
-9. Transparency: Disclose conflicts impairing rule adherence
-10. Foundational Nature: Rules 1-10 are non-negotiable
+FOR EACH file in:
+- `Cyrano/src/services/wellness-service.ts`
+- `Cyrano/src/services/wellness-journal.ts`
+- `Cyrano/src/schema/schema-wellness.ts`
 
-### 4. Date and Versioning Requirements
+DO:
+1. Read file content
+2. Search for function definitions that access wellness data
+3. FOR EACH function found:
+   - Check if function parameter includes `userId` or equivalent user identifier
+   - Check if function contains authorization check (e.g., `WHERE user_id = ?`, `userId === authenticatedUserId`)
+   - Check if function queries database with user_id filter
+   - Record: function name, file path, line number, PASS/FAIL status, evidence code snippet
+4. Search for database schema definitions
+   - Check if `user_id` foreign key constraint exists
+   - Check if foreign key references users table
+   - Record: table name, constraint name, PASS/FAIL status, evidence code snippet
+5. Append findings to report section `### 1. Access Control` in format:
+   ```
+   #### 1.X [Function/Table Name] [PASS/FAIL]
+   
+   **File:** [file path]
+   **Line:** [line number]
+   
+   **Verification:**
+   - [PASS/FAIL] [check description]
+   - [PASS/FAIL] [check description]
+   
+   **Code Evidence:**
+   ```typescript
+   [relevant code snippet]
+   ```
+   
+   **Analysis:** [explanation]
+   ```
 
-- No dates prior to July 2025 in documentation
-- All dates must reflect actual calendar dates
-- ISO weeks must be calculated correctly
-- Version numbers match ISO week: `vYWW` (e.g., v550 = 2025, Week 50)
+**STEP 1.3: Verify Audit Controls**
+
+FOR EACH file in:
+- `Cyrano/src/services/hipaa-compliance.ts`
+- `Cyrano/src/schema/schema-wellness.ts`
+
+DO:
+1. Read file content
+2. Search for `logAccess` function or equivalent
+   - Verify parameters: user ID, entry ID, action, timestamp, IP, user agent
+   - Record: function name, parameters, PASS/FAIL, evidence
+3. Search for `logDataOperation` function or equivalent
+   - Verify parameters: user ID, entry ID, operation type, before state, after state
+   - Record: function name, parameters, PASS/FAIL, evidence
+4. Search for database table definitions:
+   - Search for `wellness_access_logs` table
+   - Search for `wellness_audit_trail` table
+   - Verify columns: user_id, entry_id, action, timestamp, ip_address, user_agent, before_hash, after_hash
+   - Record: table name, columns, PASS/FAIL, evidence
+5. Search for retention policy configuration
+   - Verify configurable retention period (default 7 years)
+   - Record: configuration location, default value, PASS/FAIL, evidence
+6. Append findings to report section `### 2. Audit Controls` using same format as STEP 1.2
+
+**STEP 1.4: Verify Integrity**
+
+FOR EACH file in:
+- `Cyrano/src/services/encryption-service.ts`
+- `Cyrano/src/services/hipaa-compliance.ts`
+
+DO:
+1. Read file content
+2. Search for encryption algorithm specification
+   - Verify: `aes-256-gcm` or equivalent authenticated encryption
+   - Record: algorithm name, PASS/FAIL, evidence
+3. Search for HMAC or hash generation
+   - Verify: SHA-256 or equivalent for integrity verification
+   - Verify: before/after state hashes stored
+   - Record: hash algorithm, storage location, PASS/FAIL, evidence
+4. Search for key derivation
+   - Verify: PBKDF2 with 100,000+ iterations
+   - Record: algorithm, iterations, PASS/FAIL, evidence
+5. Append findings to report section `### 3. Integrity` using same format as STEP 1.2
+
+**STEP 1.5: Verify Transmission Security**
+
+FOR EACH file in:
+- `Cyrano/src/http-bridge.ts`
+- `auth-server/server.js`
+
+DO:
+1. Read file content
+2. Search for HTTPS/TLS configuration
+   - Verify: TLS 1.2+ requirement
+   - Verify: secure cookie flags (Secure, HttpOnly, SameSite)
+   - Record: configuration location, PASS/FAIL, evidence
+3. Search for CORS configuration
+   - Verify: CORS not set to `*` (wildcard)
+   - Verify: specific origin whitelist
+   - Record: CORS configuration, PASS/FAIL, evidence
+4. Search for API endpoint definitions
+   - Verify: authentication middleware applied
+   - Verify: no sensitive data in URL parameters
+   - Record: endpoint, authentication check, PASS/FAIL, evidence
+5. Append findings to report section `### 4. Transmission Security` using same format as STEP 1.2
+
+**STEP 1.6: Verify Encryption/Decryption**
+
+FOR EACH file in:
+- `Cyrano/src/services/encryption-service.ts`
+
+DO:
+1. Read file content
+2. Search for encryption algorithm constant
+   - Verify: `aes-256-gcm`
+   - Record: algorithm, PASS/FAIL, evidence
+3. Search for key derivation
+   - Verify: PBKDF2 with 100,000+ iterations
+   - Verify: SHA-256 digest
+   - Record: algorithm, iterations, digest, PASS/FAIL, evidence
+4. Search for IV/nonce generation
+   - Verify: `crypto.randomBytes(16)` or equivalent
+   - Verify: 16-byte length
+   - Record: generation method, length, PASS/FAIL, evidence
+5. Search for master key loading
+   - Verify: `WELLNESS_ENCRYPTION_KEY` environment variable
+   - Verify: 64-character hex string validation (32 bytes)
+   - Verify: no hardcoded keys
+   - Record: key source, validation, PASS/FAIL, evidence
+6. Search for per-field key derivation
+   - Verify: field name used in key derivation
+   - Record: derivation method, PASS/FAIL, evidence
+7. Append findings to report section `### 5. Encryption/Decryption` using same format as STEP 1.2
+
+**STEP 1.7: Verify Data Retention and Secure Deletion**
+
+FOR EACH file in:
+- `Cyrano/src/services/hipaa-compliance.ts`
+
+DO:
+1. Read file content
+2. Search for retention policy configuration
+   - Verify: configurable retention period
+   - Verify: default 7 years
+   - Record: configuration, default, PASS/FAIL, evidence
+3. Search for `secureDelete` function or equivalent
+   - Verify: data overwrite before deletion
+   - Verify: soft delete implementation (`deleted_at` column)
+   - Record: function name, implementation, PASS/FAIL, evidence
+4. Search for retention enforcement
+   - Verify: automatic cleanup of expired data
+   - Record: enforcement mechanism, PASS/FAIL, evidence
+5. Append findings to report section `### 6. Data Retention and Secure Deletion` using same format as STEP 1.2
+
+**STEP 1.8: Generate Compliance Gaps Section**
+
+1. Review all findings from STEPS 1.2-1.7
+2. FOR EACH finding with status FAIL or PARTIAL:
+   - Create entry in `## Compliance Gaps and Recommendations` section
+   - Format:
+     ```
+     #### Gap X: [Gap Name] [⚠️ PARTIAL / ❌ FAIL]
+     
+     **Status:** [description]
+     **Current State:** [what exists]
+     **Recommendation:** [what needs to be done]
+     **Priority:** [HIGH/MEDIUM/LOW]
+     ```
+3. FOR EACH finding requiring human action (e.g., BAA agreements):
+   - Create entry with status ⚠️ UNCERTAIN
+   - Add note: "Requires human user verification"
+
+**STEP 1.9: Generate Summary Table**
+
+1. Create table in section `## Summary Table: HIPAA Compliance Checklist`
+2. Table columns: `Item | Status | Evidence | Notes`
+3. FOR EACH checklist item from sections 1-6:
+   - Add row with: item name, PASS/FAIL/UNCERTAIN, evidence file/line, notes
+4. Calculate overall status:
+   - If all items PASS: Overall Status = ✅ HIPAA-COMPLIANT
+   - If any item FAIL: Overall Status = ❌ NON-COMPLIANT
+   - If any item UNCERTAIN: Overall Status = ⚠️ PARTIAL COMPLIANCE
+
+**STEP 1.10: Generate Executive Summary**
+
+1. Populate `## Executive Summary` section with:
+   - Overall status from STEP 1.9
+   - Count of PASS items
+   - Count of FAIL items
+   - Count of UNCERTAIN items
+   - List of key findings (one line per major category)
+2. Format:
+   ```
+   HIPAA compliance verification for Project Cyrano's GoodCounsel wellness journaling system has been completed.
+   
+   **Overall Status:** [status from STEP 1.9]
+   
+   ### Key Findings:
+   - [Status] **[Category]:** [one-line summary]
+   - [Status] **[Category]:** [one-line summary]
+   ```
+
+**Termination Condition for Phase 1:**
+- File `docs/security/reports/HIPAA_COMPLIANCE_VERIFICATION_REPORT.md` exists
+- All 6 checklist sections (1-6) contain findings
+- Executive Summary populated
+- Summary Table populated
+- Compliance Gaps section populated (even if empty, must exist)
+
+**If termination condition not met:** Repeat from STEP 1.1, verify all file paths exist, verify all code searches executed.
 
 ---
 
-## Document Access
+## Phase 2: Comprehensive Code Audit
 
-**Primary Location:** `/Users/davidtowne/Desktop/Coding/codebase/docs/`
+### Input Directories (Scan All Files Recursively)
 
-**Key Documents:**
-- `PROJECT_CHANGE_LOG.md` - Project change history
-- `guides/GENERAL_GUIDE_BETA_RELEASE_PROJECT_TRACKING.md` - Beta release progress
-- `GENERAL_GUIDE_PROJECT_POLICIES.md` - Mandatory project policies
-- `guides/GENERAL_GUIDE_UNIVERSAL_AIHUMAN_INTERACTION_PROTOCOL.md` - Ethics rules
-- `ACTIVE_DOCUMENTATION_INDEX.md` - Index of all active documents
+```
+Cyrano/src/
+LexFiat/client/src/
+apps/arkiver/frontend/src/
+```
 
-**Critical Caution:** This project has been plagued by unnecessary and redundant documents. Although significant effort has been expended maintaining up-to-date information, 100% accuracy cannot be guaranteed. Documents should not be relied upon without independent verification of facts. Always verify critical information by examining the codebase directly.
+### Exclusions (Do Not Scan)
+
+```
+Legacy/
+docs/
+node_modules/
+*.test.ts
+*.test.tsx
+*.spec.ts
+*.spec.tsx
+build/
+dist/
+```
+
+### Output File
+
+```
+docs/security/reports/COMPREHENSIVE_CODE_AUDIT_REPORT.md
+```
+
+### Execution Algorithm
+
+**STEP 2.1: Initialize Report**
+
+1. Create file: `docs/security/reports/COMPREHENSIVE_CODE_AUDIT_REPORT.md`
+2. Write header with document metadata
+3. Write sections:
+   - `## Executive Summary` (empty, populate in STEP 2.8)
+   - `## Automated Analysis Results`
+     - `### SonarQube Analysis`
+     - `### Semgrep Analysis`
+     - `### CodeQL Analysis` (if available)
+     - `### Snyk Code Analysis`
+   - `## Manual Review Findings`
+     - `### Authentication/Authorization`
+     - `### Input Validation/Sanitization`
+     - `### Error Handling`
+     - `### API Security`
+     - `### Database Security`
+     - `### Configuration Management`
+     - `### File Upload Security`
+     - `### Session Management`
+     - `### Logging/Monitoring`
+     - `### Frontend Security`
+   - `## Vulnerability Summary`
+     - `### Critical`
+     - `### High`
+     - `### Medium`
+     - `### Low`
+     - `### Informational`
+   - `## Remediation Recommendations`
+
+**STEP 2.2: Collect All Source Files**
+
+1. Recursively scan directories:
+   - `Cyrano/src/`
+   - `LexFiat/client/src/`
+   - `apps/arkiver/frontend/src/`
+2. Filter out exclusions (Legacy/, docs/, node_modules/, test files, build artifacts)
+3. Store list: `sourceFiles = [file1, file2, ..., fileN]`
+4. Record count: `totalFiles = len(sourceFiles)`
+
+**Termination Condition for File Collection:**
+- `totalFiles > 0`
+- No files from excluded directories in list
+
+**STEP 2.3: Run Automated Analysis Tools**
+
+**2.3.1: SonarQube Analysis**
+
+IF SonarQube available:
+1. Configure SonarQube project for codebase
+2. Run full analysis on all source files
+3. Export findings to structured format
+4. FOR EACH finding:
+   - Extract: severity, file path, line number, rule ID, message
+   - Categorize by security category
+   - Append to report section `### SonarQube Analysis`
+5. Format:
+   ```
+   #### Finding X: [Rule ID] - [Severity]
+   
+   **File:** [path]
+   **Line:** [line number]
+   **Message:** [message]
+   **Category:** [category]
+   **Recommendation:** [fix suggestion]
+   ```
+ELSE:
+1. Append to report: "SonarQube not available - skipped"
+
+**2.3.2: Semgrep Analysis**
+
+IF Semgrep available:
+1. Install Semgrep CLI
+2. Run: `semgrep --config=auto --json [source directories]`
+3. Parse JSON output
+4. FOR EACH finding:
+   - Extract: severity, file path, line number, rule ID, message
+   - Categorize by security category
+   - Append to report section `### Semgrep Analysis` (same format as 2.3.1)
+ELSE:
+1. Append to report: "Semgrep not available - skipped"
+
+**2.3.3: CodeQL Analysis**
+
+IF CodeQL available AND repository is public:
+1. Set up CodeQL database
+2. Run security queries
+3. FOR EACH finding:
+   - Extract: severity, file path, line number, query name, message
+   - Categorize by security category
+   - Append to report section `### CodeQL Analysis` (same format as 2.3.1)
+ELSE:
+1. Append to report: "CodeQL not available - skipped"
+
+**2.3.4: Snyk Code Analysis**
+
+1. Check if Snyk Code has been run previously
+2. IF results available:
+   - Load previous results
+   - FOR EACH finding:
+     - Extract: severity, file path, line number, rule ID, message
+     - Categorize by security category
+     - Append to report section `### Snyk Code Analysis` (same format as 2.3.1)
+3. ELSE:
+   - Append to report: "Snyk Code results not available - skipped"
+
+**STEP 2.4: Manual Line-by-Line Review**
+
+**Initialize tracking:**
+- `filesReviewed = 0`
+- `findingsByCategory = {}` (empty dict keyed by category)
+
+**FOR EACH file in sourceFiles:**
+
+1. Read file content
+2. `filesReviewed += 1`
+3. FOR EACH line in file:
+   - Check against security checklist (see STEP 2.5)
+   - Record findings with: file path, line number, category, severity, description
+4. Append findings to appropriate category in `findingsByCategory`
+
+**Termination Condition:**
+- `filesReviewed == totalFiles`
+- Every file in `sourceFiles` has been read and analyzed
+
+**STEP 2.5: Security Checklist Per File**
+
+FOR EACH line in current file, check:
+
+**Authentication/Authorization:**
+- [ ] Password hashing: search for `bcrypt.hash`, verify salt rounds >= 10
+- [ ] Session management: search for cookie config, verify Secure, HttpOnly flags
+- [ ] JWT tokens: search for `jwt.sign`, verify secret from env var, verify expiration
+- [ ] Authorization checks: search for user ID comparisons, verify before data access
+- [ ] Rate limiting: search for rate limit middleware, verify on auth endpoints
+
+**Input Validation/Sanitization:**
+- [ ] Input validation: search for Zod schemas, verify all inputs validated
+- [ ] SQL injection: search for raw SQL, verify parameterized queries or ORM
+- [ ] XSS prevention: search for user input in HTML, verify output encoding
+- [ ] Command injection: search for `exec`, `spawn`, verify input sanitization
+- [ ] Path traversal: search for file operations, verify path validation
+
+**Error Handling:**
+- [ ] Error messages: search for error responses, verify no sensitive data
+- [ ] Stack traces: search for error logging, verify not exposed in production
+- [ ] Error logging: search for `console.error`, `logger.error`, verify no sensitive data logged
+
+**API Security:**
+- [ ] CORS: search for CORS config, verify not `*`
+- [ ] Rate limiting: search for rate limit middleware, verify on all endpoints
+- [ ] Request size: search for body parser config, verify size limits
+- [ ] API keys: search for API key usage, verify from env vars not hardcoded
+- [ ] Authentication: search for auth middleware, verify on protected endpoints
+
+**Database Security:**
+- [ ] SQL injection: search for database queries, verify parameterized or ORM
+- [ ] Connection SSL: search for database config, verify SSL/TLS enabled
+- [ ] Credentials: search for database credentials, verify from env vars
+- [ ] Encryption: search for sensitive data storage, verify encryption at rest
+
+**Configuration Management:**
+- [ ] Secrets: search for hardcoded secrets, verify none found
+- [ ] .env: verify `.env` in `.gitignore`
+- [ ] Environment validation: search for env var usage, verify validation
+
+**File Upload Security:**
+- [ ] File type validation: search for file upload handlers, verify type checking
+- [ ] File size limits: search for file upload, verify size limits
+- [ ] Storage paths: search for file storage, verify secure paths
+- [ ] File access: search for file serving, verify access controls
+
+**Session Management:**
+- [ ] Cookie flags: search for cookie config, verify Secure, HttpOnly, SameSite
+- [ ] Session expiration: search for session config, verify expiration set
+- [ ] CSRF: search for CSRF protection, verify implementation
+
+**Logging/Monitoring:**
+- [ ] Sensitive data: search for logging statements, verify no sensitive data
+- [ ] Log storage: verify logs stored securely
+- [ ] Log access: verify log access controlled
+
+**Frontend Security:**
+- [ ] XSS: search for `dangerouslySetInnerHTML`, verify sanitization
+- [ ] localStorage: search for localStorage usage, verify no sensitive data
+- [ ] API keys: search for API keys in frontend, verify none found
+- [ ] HTTPS: verify all API calls use HTTPS
+
+**Record Format for Each Finding:**
+```
+- [PASS/FAIL] [check description]
+  - File: [file path]
+  - Line: [line number]
+  - Evidence: [code snippet]
+  - Severity: [Critical/High/Medium/Low/Informational]
+```
+
+**STEP 2.6: Categorize Findings**
+
+1. FOR EACH finding from STEPS 2.3 and 2.4:
+   - Assign severity: Critical, High, Medium, Low, Informational
+   - Assign category: Authentication, Input Validation, Error Handling, etc.
+   - Add to `findingsByCategory[category]`
+2. Append findings to report section `## Manual Review Findings` under appropriate category subsection
+3. Format each category subsection:
+   ```
+   ### [Category Name]
+   
+   #### [File Path]
+   
+   **Findings:**
+   - [PASS/FAIL] [description]
+     - Line: [line number]
+     - Evidence: [code snippet]
+     - Severity: [severity]
+     - Recommendation: [fix suggestion]
+   ```
+
+**STEP 2.7: Generate Vulnerability Summary**
+
+1. Count findings by severity from all sources (automated + manual)
+2. Populate `## Vulnerability Summary` section:
+   - `### Critical`: [count] findings
+   - `### High`: [count] findings
+   - `### Medium`: [count] findings
+   - `### Low`: [count] findings
+   - `### Informational`: [count] findings
+3. FOR EACH severity level:
+   - List all findings with: file path, line number, description, category
+
+**STEP 2.8: Generate Remediation Recommendations**
+
+1. FOR EACH finding with severity Critical or High:
+   - Create entry in `## Remediation Recommendations`
+   - Format:
+     ```
+     #### [Finding ID]: [Title]
+     
+     **Severity:** [severity]
+     **File:** [file path]
+     **Line:** [line number]
+     **Description:** [description]
+     **Fix:** [specific fix instructions]
+     **Priority:** [P0/P1/P2]
+     **Estimated Effort:** [if known]
+     ```
+2. Group by priority (P0 first, then P1, then P2)
+
+**STEP 2.9: Generate Executive Summary**
+
+1. Calculate overall status:
+   - If Critical > 0: Status = ❌ CRITICAL ISSUES FOUND
+   - Else if High > 0: Status = ⚠️ HIGH PRIORITY ISSUES FOUND
+   - Else if Medium > 0: Status = ✅ SECURE WITH RECOMMENDATIONS
+   - Else: Status = ✅ SECURE
+2. Populate `## Executive Summary`:
+   ```
+   Comprehensive code audit has been completed for Project Cyrano.
+   
+   **Overall Status:** [status from above]
+   
+   **Files Reviewed:** [totalFiles]
+   **Total Findings:** [sum of all findings]
+   
+   ### Key Findings:
+   - [Severity] **[Category]:** [count] findings
+   - [Severity] **[Category]:** [count] findings
+   ```
+
+**Termination Condition for Phase 2:**
+- File `docs/security/reports/COMPREHENSIVE_CODE_AUDIT_REPORT.md` exists
+- `filesReviewed == totalFiles` (all files reviewed)
+- All 10 category subsections in Manual Review Findings populated (even if empty)
+- Vulnerability Summary populated with counts
+- Remediation Recommendations populated (even if empty)
+- Executive Summary populated
+
+**If termination condition not met:** Verify file collection, verify all files read, repeat from STEP 2.1.
 
 ---
 
-## Scope: Step 12 + Step 5 (Remaining) + Step 9 (Remaining)
+## Phase 3: Final Security Report for Steps 13-15
 
-### Step 12: Security Evaluation (45% Complete)
+### Input Files (Read Only)
 
-**Completed:**
-1. ✅ Snyk dependency scanning: Complete (all vulnerabilities fixed)
-2. ✅ Snyk Code (SAST): Complete (all issues fixed)
-3. ✅ OWASP ZAP (DAST): Complete (all findings fixed)
+```
+docs/security/reports/HIPAA_COMPLIANCE_VERIFICATION_REPORT.md
+docs/security/reports/COMPREHENSIVE_CODE_AUDIT_REPORT.md
+docs/security/reports/SECURITY_REVIEW_SUMMARY.md (if exists)
+```
 
-**Remaining:**
-4. ⚠️ HIPAA Compliance Verification - See HIPAA Verification section
-5. ⚠️ Comprehensive Line-by-Line Code Audit, Testing, and Debugging - See Code Audit section
-6. ⚠️ Security Documentation Consolidation
-7. ⚠️ Final Security Report for Steps 13-15
+### Output File
 
-### Step 5 (Remaining): Replace Dummy Code (95% Complete)
+```
+docs/security/reports/FINAL_SECURITY_REPORT_STEPS_13_15.md
+```
 
-**Status:** 95% complete, remaining work integrated into comprehensive audit
+### Execution Algorithm
 
-**Remaining Tasks:**
-- Enhance rate limiting (review all rate limiting implementations, ensure consistency)
-- Minor cleanup (remove any remaining mock/dummy code found during audit)
+**STEP 3.1: Initialize Report**
 
-**Integration:** These tasks will be completed as part of the comprehensive line-by-line audit and testing.
+1. Create file: `docs/security/reports/FINAL_SECURITY_REPORT_STEPS_13_15.md`
+2. Write header with document metadata
+3. Write sections:
+   - `## Executive Summary`
+   - `## Security Status by Category`
+     - `### Dependencies`
+     - `### Code Security`
+     - `### Configuration`
+     - `### HIPAA Compliance`
+     - `### Production Readiness`
+   - `## Production Deployment Security Checklist`
+   - `## Ongoing Security Recommendations`
+   - `## Steps 13-15 Security Requirements`
 
-### Step 9 (Remaining): Comprehensive Refactoring (60% Complete)
+**STEP 3.2: Extract Summary Data**
 
-**Status:** 60% complete, remaining work integrated into comprehensive audit
+1. Read `docs/security/reports/HIPAA_COMPLIANCE_VERIFICATION_REPORT.md`
+   - Extract: Overall status, key findings list
+   - Store: `hipaaStatus`, `hipaaFindings`
+2. Read `docs/security/reports/COMPREHENSIVE_CODE_AUDIT_REPORT.md`
+   - Extract: Overall status, vulnerability counts, key findings
+   - Store: `codeAuditStatus`, `vulnerabilityCounts`, `codeAuditFindings`
+3. IF `docs/security/reports/SECURITY_REVIEW_SUMMARY.md` exists:
+   - Read file
+   - Extract: dependency scanning status, SAST status, DAST status
+   - Store: `dependencyStatus`, `sastStatus`, `dastStatus`
+   ELSE:
+   - Set: `dependencyStatus = "Complete (from previous work)"`, `sastStatus = "Complete (from previous work)"`, `dastStatus = "Complete (from previous work)"`
 
-**Remaining Tasks:**
-- Reduce `any` types in critical paths (find ALL `any` types, replace with proper types)
-- Refactor code smells (identify ALL code smells via SonarQube, refactor systematically)
-- Improve error handling consistency (ensure ALL error handling follows consistent pattern)
-- Enhance code documentation (document ALL functions, classes, complex logic)
+**STEP 3.3: Generate Executive Summary**
 
-**Integration:** These tasks will be completed as part of the comprehensive line-by-line audit, testing, and debugging.
+1. Determine overall security status:
+   - IF `hipaaStatus` contains "NON-COMPLIANT" OR `codeAuditStatus` contains "CRITICAL": Overall = ❌ NOT PRODUCTION READY
+   - ELSE IF `hipaaStatus` contains "PARTIAL" OR `codeAuditStatus` contains "HIGH": Overall = ⚠️ PRODUCTION READY WITH RECOMMENDATIONS
+   - ELSE: Overall = ✅ PRODUCTION READY
+2. Populate `## Executive Summary`:
+   ```
+   Security evaluation for Project Cyrano has been completed. This report consolidates all security findings and provides production deployment guidance for Steps 13-15.
+   
+   **Overall Security Status:** [Overall from above]
+   
+   ### Critical Findings:
+   [List all Critical findings from code audit, one per line]
+   
+   ### Remaining Recommendations:
+   [List top 5 High priority recommendations, one per line]
+   ```
 
-### Combined Scope
+**STEP 3.4: Generate Security Status by Category**
 
-**Active Code Locations (EVERY file must be reviewed):**
-- `Cyrano/src/` - ALL files (tools, services, engines, modules, etc.)
-- `LexFiat/client/src/` - ALL files (pages, components, lib, etc.)
-- `apps/arkiver/frontend/src/` - ALL files (pages, components, lib, etc.)
+1. Populate `### Dependencies`:
+   ```
+   **Status:** [dependencyStatus]
+   **Last Scanned:** [date if available]
+   **Vulnerabilities:** [count if available]
+   **Report:** [reference to Snyk results if available]
+   ```
 
-**Exclusions (Do NOT review):**
-- `Legacy/` - Archived code
-- `docs/` - Documentation only
-- `node_modules/` - Dependencies
-- Test files (unless testing the tests themselves)
-- Build artifacts
+2. Populate `### Code Security`:
+   ```
+   **Status:** [codeAuditStatus]
+   **Files Reviewed:** [from code audit report]
+   **Critical Findings:** [count from vulnerability summary]
+   **High Findings:** [count from vulnerability summary]
+   **Report:** [COMPREHENSIVE_CODE_AUDIT_REPORT.md](./COMPREHENSIVE_CODE_AUDIT_REPORT.md)
+   ```
 
-**Deliverables:**
-1. HIPAA Compliance Verification Report
-2. Comprehensive Code Audit, Testing, and Debugging Report (includes Step 5 and Step 9 work)
-3. Security Documentation Consolidation
-4. Final Security Report for Steps 13-15
+3. Populate `### Configuration`:
+   ```
+   **Status:** [from code audit - Configuration Management findings]
+   **Secrets Management:** [PASS/FAIL - no hardcoded secrets]
+   **Environment Variables:** [PASS/FAIL - properly configured]
+   **Production Separation:** [PASS/FAIL - dev/prod separation]
+   ```
 
----
+4. Populate `### HIPAA Compliance`:
+   ```
+   **Status:** [hipaaStatus]
+   **Key Controls:** [list from hipaaFindings]
+   **Report:** [HIPAA_COMPLIANCE_VERIFICATION_REPORT.md](./HIPAA_COMPLIANCE_VERIFICATION_REPORT.md)
+   ```
 
-## HIPAA Compliance Verification
+5. Populate `### Production Readiness`:
+   ```
+   **Status:** [Overall from STEP 3.3]
+   **Blockers:** [list Critical findings that block production]
+   **Recommendations:** [list High priority items for production]
+   ```
 
-### Requirements
+**STEP 3.5: Generate Production Deployment Security Checklist**
 
-HIPAA Technical Safeguards:
-1. Access Control - Only authorized persons access ePHI
-2. Audit Controls - Record and examine activity in systems containing ePHI
-3. Integrity - Protect ePHI from improper alteration or destruction
-4. Transmission Security - Guard against unauthorized access during transmission
-5. Encryption/Decryption - Mechanism to encrypt and decrypt ePHI
+1. Populate `## Production Deployment Security Checklist` with checklist items:
+   ```
+   ### Environment Configuration
+   - [ ] All environment variables set in production
+   - [ ] No default or test credentials in production
+   - [ ] WELLNESS_ENCRYPTION_KEY set (64-char hex)
+   - [ ] JWT_SECRET set (strong random value)
+   - [ ] Database credentials from secure vault
+   - [ ] NODE_ENV=production set
+   
+   ### Security Headers
+   - [ ] X-Powered-By header disabled
+   - [ ] X-Content-Type-Options: nosniff
+   - [ ] X-Frame-Options: DENY
+   - [ ] X-XSS-Protection: 1; mode=block
+   - [ ] Strict-Transport-Security: max-age=31536000
+   - [ ] Content-Security-Policy configured
+   
+   ### SSL/TLS
+   - [ ] TLS 1.2+ required (no TLS 1.0/1.1)
+   - [ ] Valid SSL certificate installed
+   - [ ] Certificate auto-renewal configured
+   - [ ] HSTS enabled
+   
+   ### Database
+   - [ ] SSL/TLS connection enabled
+   - [ ] Database credentials rotated
+   - [ ] Backup encryption enabled
+   - [ ] Backup retention policy configured
+   
+   ### Monitoring
+   - [ ] Security event logging enabled
+   - [ ] Log aggregation configured
+   - [ ] Alert thresholds configured
+   - [ ] Incident response plan documented
+   
+   ### Backups
+   - [ ] Automated backups configured
+   - [ ] Backup encryption enabled
+   - [ ] Backup retention policy: 7 years (HIPAA)
+   - [ ] Backup restoration tested
+   ```
+2. Mark items as [ ] (unchecked) - human user must verify
 
-### Verification Checklist
+**STEP 3.6: Generate Ongoing Security Recommendations**
 
-#### 1. Access Control
-**Files:** `wellness-service.ts`, `wellness-journal.ts`, `schema-wellness.ts`
-- [ ] All functions check `userId` matches authenticated user
-- [ ] Authorization checks before any data access
-- [ ] `user_id` foreign key constraints verified
-- [ ] Users can only access their own data
+1. Populate `## Ongoing Security Recommendations`:
+   ```
+   ### Monitoring Schedule
+   - Weekly: Dependency vulnerability scanning (Snyk)
+   - Monthly: Code security scanning (Snyk Code, Semgrep)
+   - Quarterly: Penetration testing
+   - Annually: Full security audit
+   
+   ### Update Procedures
+   - Patch critical vulnerabilities within 24 hours
+   - Patch high vulnerabilities within 7 days
+   - Patch medium vulnerabilities within 30 days
+   - Review low vulnerabilities quarterly
+   
+   ### Incident Response
+   - Document incident response procedures
+   - Establish security contact information
+   - Configure alerting for security events
+   - Regular incident response drills
+   ```
 
-#### 2. Audit Controls
-**Files:** `hipaa-compliance.ts`, `schema-wellness.ts`
-- [ ] `logAccess()` logs all access (user ID, entry ID, action, timestamp, IP, user agent)
-- [ ] `logDataOperation()` logs all CRUD operations
-- [ ] `wellness_access_logs` and `wellness_audit_trail` tables exist
-- [ ] Logs include before/after state hashes
-- [ ] Logs immutable and retained 7 years (configurable)
+**STEP 3.7: Generate Steps 13-15 Security Requirements**
 
-#### 3. Integrity
-**Files:** `encryption-service.ts`, `hipaa-compliance.ts`
-- [ ] AES-256-GCM encryption (authenticated encryption)
-- [ ] HMAC for integrity verification
-- [ ] Before/after state hashes stored (SHA-256)
-- [ ] Only authorized users can modify data
+1. Populate `## Steps 13-15 Security Requirements`:
+   ```
+   ### Step 13: Reconciliation
+   - Review all security findings from this report
+   - Address all Critical findings before proceeding
+   - Document resolution of High priority findings
+   - Update security documentation as needed
+   
+   ### Step 14: Production Deployment
+   - Complete Production Deployment Security Checklist (STEP 3.5)
+   - Verify all environment variables configured
+   - Test security headers and SSL/TLS configuration
+   - Enable monitoring and alerting
+   - Configure backups with encryption
+   
+   ### Step 15: Beta Release
+   - Monitor security events during beta period
+   - Review access logs for suspicious activity
+   - Verify HIPAA compliance in production environment
+   - Document any production-specific security findings
+   ```
 
-#### 4. Transmission Security
-**Files:** `http-bridge.ts`, frontend API clients
-- [ ] HTTPS/TLS used for all data transmission
-- [ ] API endpoints require authentication
-- [ ] CORS configuration restrictive
-- [ ] Sensitive data not exposed in URLs or logs
+**Termination Condition for Phase 3:**
+- File `docs/security/reports/FINAL_SECURITY_REPORT_STEPS_13_15.md` exists
+- Executive Summary populated
+- All 5 category subsections populated
+- Production Deployment Security Checklist populated with all items
+- Ongoing Security Recommendations populated
+- Steps 13-15 Security Requirements populated
 
-#### 5. Encryption/Decryption
-**Files:** `encryption-service.ts`
-- [ ] AES-256-GCM implementation verified
-- [ ] PBKDF2 key derivation (100,000+ iterations)
-- [ ] Per-field encryption keys properly derived
-- [ ] IV/nonce generation uses `crypto.randomBytes(16)`
-- [ ] Key stored in `WELLNESS_ENCRYPTION_KEY` env var (32-byte hex)
-- [ ] Key never logged or exposed
-
-#### 6. Data Retention and Secure Deletion
-**Files:** `hipaa-compliance.ts`
-- [ ] Retention policy configurable (default 7 years)
-- [ ] Retention policy enforced
-- [ ] `secureDelete()` overwrites data before deletion
-- [ ] Deleted data cannot be recovered
-- [ ] Soft delete implemented (`deleted_at` column)
-
-### Report Template
-
-1. Executive Summary (overall status, critical findings, recommendations)
-2. Technical Safeguards Verification (Access Control, Audit Controls, Integrity, Transmission Security, Encryption)
-3. Administrative/Physical Safeguards Review (if applicable)
-4. Compliance Gaps and Recommendations
-5. Conclusion (overall assessment, next steps)
-
-**Deliverable:** `docs/security/reports/HIPAA_COMPLIANCE_VERIFICATION_REPORT.md`
-
----
-
-## Comprehensive Code Audit, Testing, and Debugging
-
-### CRITICAL: This is NOT Just a Review
-
-**MANDATORY REQUIREMENTS:**
-- **NO SUPERFICIAL TESTS:** Surface-level reviews, spot-checks, or sampling are PROHIBITED. Every single line of active code must be examined.
-- **SPECIALIZED TOOLS REQUIRED:** Automated analysis tools are MANDATORY, not optional. Manual review alone is insufficient and will be considered a failure.
-- **LITERAL LINE-BY-LINE:** "Line-by-line" means examining EVERY line of active code. No exceptions. No shortcuts. No "representative samples."
-- **COMPREHENSIVE TESTING:** Every line must be tested. This includes unit tests, integration tests, and debugging of all code paths.
-- **BLOAT REMOVAL:** All useless code, dead code, commented-out code, and unnecessary complexity must be removed without sacrificing performance, stability, features, compatibility, or future extensibility.
-
-### Required Tools (MANDATORY - Not Optional)
-
-**Primary Tools (MUST USE):**
-1. **SonarQube** - Automated code quality and security analysis (MANDATORY)
-   - Set up project, run full analysis
-   - Review ALL findings, not just high-severity
-   - Fix or document every issue
-
-2. **Semgrep** - Pattern-based vulnerability detection (MANDATORY)
-   - Run with security rules enabled
-   - Review ALL matches
-   - Fix or document every finding
-
-3. **GitHub Copilot Chat** - Comprehensive codebase review (MANDATORY)
-   - Upload entire codebase for review
-   - Request line-by-line analysis
-   - Review ALL suggestions
-
-4. **VS Code Copilot** - Line-by-line file-by-file review (MANDATORY)
-   - Open EVERY active code file
-   - Use Copilot to review EVERY line
-   - Document findings for EVERY file
-
-**Secondary Tools (Use if Available):**
-5. **CodeQL** - Deep semantic analysis (if repository is public)
-6. **Snyk Code** - Re-run for verification (already complete, but verify)
-
-**Tool Usage Requirements:**
-- ALL tools must be used, not just one or two
-- Results from ALL tools must be reviewed and addressed
-- No tool's findings may be ignored without justification
-- Tool setup and configuration is part of the work
-
-### Audit, Testing, and Debugging Methodology
-
-**Phase 1: Automated Analysis (MANDATORY)**
-- Set up SonarQube, run full analysis on entire codebase
-- Install and run Semgrep with security rules on entire codebase
-- Set up CodeQL (if available), run queries on entire codebase
-- Re-run Snyk Code for verification
-- Review ALL findings from ALL tools, categorize by severity, identify false positives (with justification)
-
-**Phase 2: Line-by-Line Code Review (MANDATORY)**
-- **EVERY active code file must be reviewed line-by-line**
-- Use VS Code Copilot and GitHub Copilot Chat for comprehensive analysis
-- Check EVERY line for: security vulnerabilities (OWASP Top 10), code quality issues, performance problems, dead code/bloat, type safety issues (`any` types), error handling gaps, missing tests
-- Document findings for EVERY file reviewed
-
-**Phase 3: Comprehensive Testing (MANDATORY)**
-- Write tests for EVERY function/method
-- Test ALL code paths (branches, loops, error cases)
-- Debug ALL failing tests
-- Test edge cases, boundary conditions, integration, performance
-
-**Phase 4: Bloat Removal (MANDATORY)**
-- Remove ALL dead code, commented-out code (unless critical), unused imports/variables/functions
-- Simplify complex code without losing functionality
-- Remove unnecessary abstractions or over-engineering
-- **CRITICAL:** Do NOT sacrifice performance, stability, features, compatibility, or future extensibility
-
-**Phase 5: Integration Review**
-- Review component interactions and security boundaries
-- Trace sensitive data flow, verify encryption at rest and in transit
-- Test all API endpoints and database queries
-
-### Review Checklist by Category
-
-#### Authentication/Authorization
-**Files:** `auth-service.ts`, `auth-server/server.js`, `http-bridge.ts`, `tools/`
-- [ ] Password hashing (bcrypt, 10+ salt rounds)
-- [ ] Session management (secure, httpOnly cookies)
-- [ ] JWT tokens (proper signing, expiration, validation)
-- [ ] Authorization checks on all protected endpoints
-- [ ] Rate limiting on auth endpoints
-- [ ] Brute force protection
-- [ ] Session fixation prevention
-- [ ] Privilege escalation prevention
-
-#### Input Validation/Sanitization
-**Files:** All API endpoints, tool implementations, frontend form handlers
-- [ ] All inputs validated (client and server)
-- [ ] SQL injection prevention (parameterized queries, ORM)
-- [ ] XSS prevention (output encoding, CSP)
-- [ ] Command injection prevention
-- [ ] Path traversal prevention
-- [ ] File upload validation (type, size, content)
-- [ ] Request size limits enforced
-
-#### Error Handling
-**Files:** All error handlers
-- [ ] No sensitive data in error messages
-- [ ] Stack traces not exposed in production
-- [ ] Error logging excludes sensitive data
-- [ ] Proper error codes used
-
-#### API Security
-**Files:** `http-bridge.ts`, all API endpoints
-- [ ] CORS restrictive (not `*`)
-- [ ] Rate limiting implemented
-- [ ] Request size limits
-- [ ] API keys in env vars (not code)
-- [ ] Authentication required for all endpoints
-- [ ] Authorization checks on all operations
-- [ ] Sensitive data not in URLs
-
-#### Database Security
-**Files:** All database access code
-- [ ] SQL injection prevention (parameterized queries, ORM)
-- [ ] Database connection SSL/TLS
-- [ ] Credentials stored securely
-- [ ] Sensitive data encrypted at rest
-
-#### Configuration Management
-**Files:** `.env.example`, `.gitignore`, config files
-- [ ] No secrets in code
-- [ ] `.env` in `.gitignore`
-- [ ] Production vs development separation
-- [ ] Environment variable validation
-
-#### File Upload Security
-**Files:** File upload handlers, storage code
-- [ ] File type, size, content validation
-- [ ] Secure storage paths
-- [ ] File access controls
-- [ ] File names sanitized
-
-#### Session Management
-**Files:** Session management code, cookie config
-- [ ] Secure cookie flags (Secure, HttpOnly, SameSite)
-- [ ] Session expiration
-- [ ] Session fixation prevention
-- [ ] CSRF protection
-
-#### Logging/Monitoring
-**Files:** All logging code
-- [ ] No sensitive data logged
-- [ ] Logs stored securely
-- [ ] Log access controlled
-- [ ] Retention policies configured
-
-#### Frontend Security
-**Files:** `LexFiat/client/src/`, `apps/arkiver/frontend/src/`
-- [ ] XSS prevention (output encoding)
-- [ ] CSRF protection
-- [ ] No sensitive data in localStorage
-- [ ] API keys never in client code
-- [ ] CSP implemented
-- [ ] HTTPS for all communication
-
-### Report Template
-
-1. Executive Summary (overall status, critical findings, recommendations)
-2. Automated Analysis Results (SonarQube, Semgrep, CodeQL, Snyk Code)
-3. Manual Review Findings (by category with findings and recommendations)
-4. Vulnerability Summary (Critical, High, Medium, Low, Informational)
-5. Remediation Recommendations (prioritized fixes, timeline, verification)
-6. Security Best Practices Compliance (OWASP Top 10 status, areas for improvement)
-
-**Deliverable:** `docs/security/reports/COMPREHENSIVE_CODE_AUDIT_REPORT.md`
+**If termination condition not met:** Verify input files exist, repeat from STEP 3.1.
 
 ---
 
-## Human User Prerequisites
+## Phase 4: Security Review Summary Update
 
-### Tasks Requiring Human Action
+### Input Files (Read Only)
 
-1. **Tool Access/Credentials** (HIGH priority)
-   - GitHub Copilot Chat access
-   - VS Code Copilot access
-   - SonarQube credentials (if using)
-   - Semgrep API key (if using)
-   - CodeQL setup (if using)
+```
+docs/security/reports/HIPAA_COMPLIANCE_VERIFICATION_REPORT.md
+docs/security/reports/COMPREHENSIVE_CODE_AUDIT_REPORT.md
+docs/security/reports/FINAL_SECURITY_REPORT_STEPS_13_15.md
+```
 
-2. **HIPAA BAA Agreements Review** (CRITICAL priority)
-   - Review Business Associate Agreements with third-party services handling ePHI
-   - Document BAA status for inclusion in HIPAA compliance report
-   - Agent cannot verify agreements - requires human/legal review
+### Output File
 
-3. **Production Environment Configuration** (MEDIUM priority - for Steps 14-15)
-   - Environment variables configuration
-   - SSL/TLS certificates
-   - Security headers (server-level)
-   - Monitoring and logging setup
-   - Backup procedures
+```
+docs/security/reports/SECURITY_REVIEW_SUMMARY.md
+```
 
-**Agent Instructions:** When human action required, clearly state what's needed and why, continue with independent work, prompt human user, resume dependent work after prerequisite met.
+### Execution Algorithm
 
-**Reference:** See `docs/HUMAN_USER_TODOS_STEP_12.md` for detailed task list.
+**STEP 4.1: Read or Create Summary File**
+
+1. IF `docs/security/reports/SECURITY_REVIEW_SUMMARY.md` exists:
+   - Read file
+   - Find section: `## Step 12: Comprehensive Security Evaluation and Upgrade`
+   - Clear section content (keep header)
+   ELSE:
+   - Create file with header metadata
+   - Create section: `## Step 12: Comprehensive Security Evaluation and Upgrade`
+
+**STEP 4.2: Extract Completion Status**
+
+1. Read all three input reports
+2. Extract completion status:
+   - HIPAA: [status from HIPAA report executive summary]
+   - Code Audit: [status from Code Audit report executive summary]
+   - Final Report: [status from Final Report executive summary]
+3. Determine overall Step 12 status:
+   - IF all three reports exist AND all show completion: Status = ✅ COMPLETE
+   - ELSE: Status = ⚠️ IN PROGRESS
+
+**STEP 4.3: Populate Summary Section**
+
+1. Append to `## Step 12: Comprehensive Security Evaluation and Upgrade`:
+   ```
+   **Status:** [Status from STEP 4.2]
+   **Date Completed:** [current date]
+   
+   ### Completed Tasks:
+   - ✅ Security Vulnerability Scanning (Snyk dependency, Snyk Code, OWASP ZAP)
+   - [Status] HIPAA Compliance Verification
+   - [Status] Comprehensive Code Audit
+   - [Status] Security Documentation Consolidation
+   - [Status] Final Security Report for Steps 13-15
+   
+   ### Reports Generated:
+   - [HIPAA_COMPLIANCE_VERIFICATION_REPORT.md](./HIPAA_COMPLIANCE_VERIFICATION_REPORT.md)
+   - [COMPREHENSIVE_CODE_AUDIT_REPORT.md](./COMPREHENSIVE_CODE_AUDIT_REPORT.md)
+   - [FINAL_SECURITY_REPORT_STEPS_13_15.md](./FINAL_SECURITY_REPORT_STEPS_13_15.md)
+   
+   ### Key Findings:
+   [Extract top 3 findings from Final Report executive summary]
+   ```
+
+**Termination Condition for Phase 4:**
+- File `docs/security/reports/SECURITY_REVIEW_SUMMARY.md` exists
+- Step 12 section populated with status and findings
+- All three reports referenced
+
+**If termination condition not met:** Verify input files exist, repeat from STEP 4.1.
 
 ---
 
-## Reporting Requirements
+## Global Termination Condition
 
-### Required Reports
+**Step 12 Complete When:**
 
-1. **HIPAA Compliance Verification Report**
-   - Location: `docs/security/reports/HIPAA_COMPLIANCE_VERIFICATION_REPORT.md`
-   - Must include: Technical safeguards verification, compliance gaps, recommendations
+1. ✅ Phase 1 complete: `docs/security/reports/HIPAA_COMPLIANCE_VERIFICATION_REPORT.md` exists with all sections populated
+2. ✅ Phase 2 complete: `docs/security/reports/COMPREHENSIVE_CODE_AUDIT_REPORT.md` exists with all files reviewed
+3. ✅ Phase 3 complete: `docs/security/reports/FINAL_SECURITY_REPORT_STEPS_13_15.md` exists with all sections populated
+4. ✅ Phase 4 complete: `docs/security/reports/SECURITY_REVIEW_SUMMARY.md` updated with Step 12 status
 
-2. **Comprehensive Code Audit Report**
-   - Location: `docs/security/reports/COMPREHENSIVE_CODE_AUDIT_REPORT.md`
-   - Must include: Automated analysis results, manual review findings, vulnerability summary, remediation recommendations
+**Verification:**
+- All 4 output files exist
+- Each file has non-empty Executive Summary
+- Each file has all required sections populated (even if empty, section must exist)
+- File counts match: Phase 2 reports `totalFiles` files reviewed
 
-3. **Final Security Report for Steps 13-15**
-   - Location: `docs/security/reports/FINAL_SECURITY_REPORT_STEPS_13_15.md`
-   - Must include:
-     - Executive summary (overall status, critical findings, remaining recommendations)
-     - Security status by category (dependencies, code, configuration, HIPAA, production readiness)
-     - Production deployment security checklist (environment, headers, SSL/TLS, database, monitoring, backups)
-     - Ongoing security recommendations (monitoring, scanning schedule, update procedures, incident response)
-     - Steps 13-15 security requirements (reconciliation, deployment, beta release)
-
-4. **Updated Security Review Summary**
-   - Location: `docs/security/reports/SECURITY_REVIEW_SUMMARY.md`
-   - Update with all findings and completion status
-
-### Report Quality Requirements
-
-All reports must:
-- Be comprehensive and detailed
-- Include all findings (not just critical)
-- Provide clear remediation recommendations
-- Be actionable for Steps 13-15
-- Follow project documentation standards
-- Be accurate and verifiable
-
----
-
-## Success Criteria
-
-Step 12 complete when:
-
-1. ✅ Security Vulnerability Scanning - Complete
-2. ⚠️ HIPAA Compliance Verification - All requirements verified, gaps documented, recommendations provided
-3. ⚠️ Comprehensive Code Audit - All active code reviewed, vulnerabilities identified and documented, remediation recommendations provided
-4. ⚠️ Security Documentation - All findings consolidated, all reports generated, documentation updated
-5. ⚠️ Final Security Report for Steps 13-15 - Comprehensive report generated, production checklist provided, ongoing recommendations provided
-
-**Quality Standards:**
-- Completeness: All tasks 100% complete
-- Accuracy: All findings accurate, recommendations valid
-- Detail: All findings thoroughly documented, recommendations actionable
-- Actionability: Reports enable Steps 13-15, recommendations clear and implementable
+**If global termination condition not met:** Execute phases in sequence, verify each phase termination condition before proceeding.
 
 ---
 
