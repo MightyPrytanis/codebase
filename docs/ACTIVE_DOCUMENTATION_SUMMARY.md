@@ -3,10 +3,10 @@ Document ID: ACTIVE-DOCS-SUMMARY
 Title: Active Documentation Summary - Pre-Consolidation
 Subject(s): Documentation | Summary | Status
 Project: Cyrano
-Version: v549
+Version: v550
 Created: 2025-12-06 (2025-W49)
-Last Substantive Revision: 2025-12-06 (2025-W49)
-Last Format Update: 2025-12-06 (2025-W49)
+Last Substantive Revision: 2025-12-12 (2025-W50)
+Last Format Update: 2025-12-12 (2025-W50)
 Owner: David W Towne / Cognisint LLC
 Copyright: © 2025 Cognisint LLC
 Summary: Summary of all 41 active documentation files, prepared for external review and consolidation to 12-15 essential documents.
@@ -16,8 +16,8 @@ Status: Active
 # Active Documentation Summary - Pre-Consolidation
 
 **Total Active Documents:** 40 markdown files (Menlo Park architecture doc moved to IP/, not counted)  
-**Date:** 2025-12-06 (Week 49)  
-**Status:** All documents updated with current dates (v549)  
+**Date:** 2025-12-12 (Week 50)  
+**Status:** All documents updated with current dates (v550)  
 **Next Step:** External review (Perplexity/Gemini) to prune to 12-15 essential documents
 
 ---

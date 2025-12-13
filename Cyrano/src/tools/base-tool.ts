@@ -11,6 +11,20 @@ export abstract class BaseTool {
   abstract getToolDefinition(): any;
   abstract execute(args: any): Promise<CallToolResult>;
 
+  /**
+   * Helper function to safely extract text from CallToolResult content
+   */
+  getTextFromResult(result: CallToolResult, index: number = 0): string {
+    if (!result.content || result.content.length === 0) {
+      return '';
+    }
+    const item = result.content[index];
+    if (item && item.type === 'text' && 'text' in item) {
+      return item.text;
+    }
+    return '';
+  }
+
   createErrorResult(message: string, context?: string): CallToolResult {
     // Sanitize error message for production
     const sanitized = sanitizeErrorMessage(message, context);

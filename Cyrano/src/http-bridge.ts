@@ -43,7 +43,7 @@ import { caseManager } from './tools/case-manager.js';
 import { documentProcessor } from './tools/document-processor.js';
 import { aiOrchestrator } from './tools/ai-orchestrator.js';
 import { systemStatus } from './tools/system-status.js';
-import { statusIndicator } from './tools/status-indicator.js';
+// status-indicator tool archived - see Cyrano/archive/broken-tools/
 import { ragQuery } from './tools/rag-query.js';
 import { authTool } from './tools/auth.js';
 import { syncManager } from './tools/sync-manager.js';
@@ -101,6 +101,7 @@ import { citationFormatter } from './tools/verification/citation-formatter.js';
 import { sourceVerifier } from './tools/verification/source-verifier.js';
 import { consistencyChecker } from './tools/verification/consistency-checker.js';
 import { arkiverProcessFileTool, arkiverJobStatusTool } from './tools/arkiver-mcp-tools.js';
+import { arkiverIntegrityTestTool } from './tools/arkiver-integrity-test.js';
 // Import Potemkin-specific tools
 import {
   historyRetriever,
@@ -112,6 +113,9 @@ import {
 
 const app = express();
 const port = process.env.PORT || 5002;
+
+// Disable X-Powered-By header to prevent information disclosure
+app.disable('x-powered-by');
 
 // Middleware
 app.use(cors());
@@ -156,7 +160,7 @@ mcpServer.setRequestHandler(ListToolsRequestSchema, async () => {
       documentProcessor.getToolDefinition(),
       aiOrchestrator.getToolDefinition(),
       systemStatus.getToolDefinition(),
-      statusIndicator.getToolDefinition(),
+      // status-indicator tool archived - see Cyrano/archive/broken-tools/
       syncManager.getToolDefinition(),
       redFlagFinder.getToolDefinition(),
       clioIntegration.getToolDefinition(),
@@ -255,9 +259,7 @@ mcpServer.setRequestHandler(CallToolRequestSchema, async (request) => {
           case 'system_status':
             result = await systemStatus.execute(args);
             break;
-          case 'status_indicator':
-            result = await statusIndicator.execute(args);
-            break;
+          // status-indicator tool archived - see Cyrano/archive/broken-tools/
           case 'sync_manager':
             result = await syncManager.execute(args);
             break;
@@ -360,6 +362,9 @@ mcpServer.setRequestHandler(CallToolRequestSchema, async (request) => {
             break;
           case 'arkiver_job_status':
             result = await arkiverJobStatusTool.execute(args);
+            break;
+          case 'arkiver_integrity_test':
+            result = await arkiverIntegrityTestTool.execute(args);
             break;
           case 'arkiver_process_text':
             result = await arkiverTextProcessor.execute(args);
@@ -551,9 +556,7 @@ app.post('/mcp/execute', async (req, res) => {
       case 'system_status':
         result = await systemStatus.execute(toolInput);
         break;
-      case 'status_indicator':
-        result = await statusIndicator.execute(toolInput);
-        break;
+      // status-indicator tool archived - see Cyrano/archive/broken-tools/
       case 'sync_manager':
         result = await syncManager.execute(toolInput);
         break;
@@ -656,6 +659,9 @@ app.post('/mcp/execute', async (req, res) => {
       case 'arkiver_job_status':
         result = await arkiverJobStatusTool.execute(toolInput);
         break;
+      case 'arkiver_integrity_test':
+        result = await arkiverIntegrityTestTool.execute(toolInput);
+        break;
       case 'arkiver_process_text':
         result = await arkiverTextProcessor.execute(toolInput);
         break;
@@ -739,7 +745,7 @@ app.get('/mcp/status', (req, res) => {
 app.get('/api/good-counsel/overview', async (req, res) => {
   try {
     const result = await goodCounsel.execute({});
-    const textContent = result.content[0]?.text;
+    const textContent = (result.content[0] && result.content[0].type === 'text' && 'text' in result.content[0]) ? result.content[0].text : '';
     if (textContent && typeof textContent === 'string') {
       try {
         const parsed = JSON.parse(textContent);

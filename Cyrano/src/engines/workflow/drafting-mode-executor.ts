@@ -21,6 +21,7 @@ import { logStateTransition } from './state-transition-log.js';
 import { documentAnalyzer } from '../../tools/document-analyzer.js';
 import { DocumentDrafterTool } from '../../tools/document-drafter.js';
 import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
+import { getTextFromResult } from '../../utils/mcp-helpers.js';
 
 export interface DraftingContext {
   documentId: string;
@@ -91,7 +92,7 @@ export async function executeModeA(context: DraftingContext): Promise<DraftingRe
             success: false,
             documentId: context.documentId,
             currentState: 'analysis_pending',
-            error: `Analysis failed: ${analysisResult.content[0]?.text || 'Unknown error'}`,
+            error: `Analysis failed: ${getTextFromResult(analysisResult) || 'Unknown error'}`,
           };
         }
 
@@ -135,7 +136,7 @@ export async function executeModeA(context: DraftingContext): Promise<DraftingRe
           success: false,
           documentId: context.documentId,
           currentState: 'draft_pending',
-          error: `Draft generation failed: ${draftResult.content[0]?.text || 'Unknown error'}`,
+          error: `Draft generation failed: ${getTextFromResult(draftResult) || 'Unknown error'}`,
         };
       }
 
@@ -155,7 +156,7 @@ export async function executeModeA(context: DraftingContext): Promise<DraftingRe
         documentId: context.documentId,
         currentState: 'attorney_review_pending',
         result: {
-          draftContent: draftResult.content[0]?.text,
+          draftContent: getTextFromResult(draftResult),
           stateHistory,
         },
       };
@@ -232,11 +233,11 @@ export async function executeModeBSummary(context: DraftingContext): Promise<Dra
             success: false,
             documentId: context.documentId,
             currentState: 'analysis_pending',
-            error: `Summary generation failed: ${analysisResult.content[0]?.text || 'Unknown error'}`,
+            error: `Summary generation failed: ${getTextFromResult(analysisResult) || 'Unknown error'}`,
           };
         }
 
-        const summary = analysisResult.content[0]?.text || '';
+        const summary = getTextFromResult(analysisResult) || '';
 
         const transition2 = createTransition('analysis_pending', 'analysis_complete', context.userId, 'Summary generated');
         currentState = 'analysis_complete';
@@ -320,7 +321,7 @@ export async function executeModeBDraft(context: DraftingContext, summary: strin
           success: false,
           documentId: context.documentId,
           currentState: 'draft_pending',
-          error: `Draft generation failed: ${draftResult.content[0]?.text || 'Unknown error'}`,
+          error: `Draft generation failed: ${getTextFromResult(draftResult) || 'Unknown error'}`,
         };
       }
 
@@ -338,7 +339,7 @@ export async function executeModeBDraft(context: DraftingContext, summary: strin
         documentId: context.documentId,
         currentState: 'attorney_review_pending',
         result: {
-          draftContent: draftResult.content[0]?.text,
+          draftContent: getTextFromResult(draftResult),
         },
       };
     }
