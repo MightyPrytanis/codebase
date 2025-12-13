@@ -207,6 +207,8 @@ mcpServer.setRequestHandler(ListToolsRequestSchema, async () => {
       legalEmailDrafter.getToolDefinition(),
       refineEmailTone.getToolDefinition(),
       validateLegalLanguage.getToolDefinition(),
+      // Codename tool
+      menloPark.getToolDefinition(),
     ],
   };
 });
@@ -498,6 +500,8 @@ app.get('/mcp/tools', async (req, res) => {
       legalEmailDrafter.getToolDefinition(),
       refineEmailTone.getToolDefinition(),
       validateLegalLanguage.getToolDefinition(),
+      // Codename tool
+      menloPark.getToolDefinition(),
     ];
     
     res.json({ tools });

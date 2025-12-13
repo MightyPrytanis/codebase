@@ -56,7 +56,7 @@ Status: Active
 - `document-processor` - `/Users/davidtowne/Desktop/Coding/codebase/Cyrano/src/tools/document-processor.ts`
 - `workflow-manager` - `/Users/davidtowne/Desktop/Coding/codebase/Cyrano/src/tools/workflow-manager.ts`
 - `arkiver-tools` - `/Users/davidtowne/Desktop/Coding/codebase/Cyrano/src/tools/arkiver-tools.ts`
-- `tool-enhancer` - `/Users/davidtowne/Desktop/Coding/codebase/Cyrano/src/tools/tool-enhancer.ts`
+- `menlo-park` - `/Users/davidtowne/Desktop/Coding/codebase/Cyrano/src/tools/menlo-park.ts`
 - `sync-manager` - `/Users/davidtowne/Desktop/Coding/codebase/Cyrano/src/tools/sync-manager.ts`
 - `fact-checker` - `/Users/davidtowne/Desktop/Coding/codebase/Cyrano/src/tools/fact-checker.ts`
 - `system-status` - `/Users/davidtowne/Desktop/Coding/codebase/Cyrano/src/tools/system-status.ts`

@@ -88,24 +88,24 @@ jspm_packages/
 .vscode-test
 
 # ===========================================
-# DYNAMIC TOOL ENHANCER - PROTECTED IP
+# PROTECTED IP (CODENAME)
 # ===========================================
-# DO NOT COMMIT THESE FILES TO PUBLIC REPOSITORIES
-# These contain sensitive intellectual property
+# Do not commit sensitive IP artifacts.
+# Use codename-only references.
 
-DYNAMIC_TOOL_ENHANCER_LOG.md
-DYNAMIC_TOOL_ENHANCER_TECHNICAL_RUNDOWN.md
-DYNAMIC_TOOL_ENHANCER_IP_PROPOSAL.md
-DYNAMIC_TOOL_ENHANCER_INVESTOR_PROPOSAL.md
-DYNAMIC_TOOL_ENHANCER_PROTECTION_PROTOCOL.md
+# Protected documents (codename)
+MENLO_PARK_LOG.md
+MENLO_PARK_TECHNICAL_RUNDOWN.md
+MENLO_PARK_IP_PROPOSAL.md
+MENLO_PARK_INVESTOR_PROPOSAL.md
+MENLO_PARK_PROTECTION_PROTOCOL.md
 
-# Protected source files
-src/tools/tool-enhancer.ts
+# Protected source files (codename)
+src/tools/menlo-park.ts
 
-# Any files containing "tool-enhancer" or "dynamic_tool_enhancer"
-*tool-enhancer*
-*dynamic_tool_enhancer*
-*dynamic-tool-enhancer*
+# Any files containing the codename (conservative)
+*menlo-park*
+*menlo_park*
 
 # ===========================================
 # END PROTECTED IP SECTION

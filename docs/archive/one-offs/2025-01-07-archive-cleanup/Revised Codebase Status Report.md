@@ -53,7 +53,7 @@ The user's contributions to the effort, which had been enthusiastically received
 15. `red-flag-finder.ts` - Red flag detection
 16. `clio-integration.ts` - Clio integration
 17. `arkiver-tools.ts` - Arkiver data extraction (multiple tools)
-18. `tool-enhancer.ts` - Tool enhancement
+18. `menlo-park.ts` - Internal codename utility
 
 **Base Infrastructure:**
 - `base-tool.ts` - Abstract base class for all tools

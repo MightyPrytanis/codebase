@@ -92,7 +92,7 @@ Status: Active
 | Tool Name | Status | Schema | Error Handling | Tests | Notes |
 |-----------|--------|--------|----------------|-------|-------|
 | `ai_orchestrator` | 🔨 | ✅ | ✅ | ❌ | In ai-orchestrator.ts |
-| `tool_enhancer` | 🔨 | ✅ | ✅ | ❌ | In tool-enhancer.ts |
+| `menlo_park` | 🔨 | ✅ | ✅ | ❌ | In menlo-park.ts |
 
 ---
 

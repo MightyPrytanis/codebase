@@ -471,10 +471,10 @@ const toolTests: Array<{
     category: 'Document',
   },
   {
-    name: 'tool_enhancer',
-    importPath: './src/tools/tool-enhancer.js',
-    exportName: 'toolEnhancer',
-    testArgs: { tool_name: 'fact_checker', user_request: 'Enhance fact checking capabilities.' },
+    name: 'menlo_park',
+    importPath: './src/tools/menlo-park.js',
+    exportName: 'menloPark',
+    testArgs: { target_tool: 'fact_checker', user_goal: 'Enhance fact checking capabilities.' },
     category: 'Utility',
   },
 ];
