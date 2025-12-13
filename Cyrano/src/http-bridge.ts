@@ -53,7 +53,7 @@ import { timeValueBilling } from './tools/time-value-billing.js';
 import { tasksCollector } from './tools/tasks-collector.js';
 import { contactsCollector } from './tools/contacts-collector.js';
 import { DocumentDrafterTool } from './tools/document-drafter.js';
-import { toolEnhancer } from './tools/tool-enhancer.js';
+import { menloPark } from './tools/menlo-park.js';
 import { ethicsReviewer } from './engines/goodcounsel/tools/ethics-reviewer.js';
 import {
   arkiverTextProcessor,
@@ -382,8 +382,8 @@ mcpServer.setRequestHandler(CallToolRequestSchema, async (request) => {
           case 'document_drafter':
             result = await new DocumentDrafterTool().execute(args);
             break;
-          case 'tool_enhancer':
-            result = await toolEnhancer.execute(args);
+          case 'menlo_park':
+            result = await menloPark.execute(args);
             break;
           case 'source_verifier':
             result = await sourceVerifier.execute(args);
@@ -677,8 +677,8 @@ app.post('/mcp/execute', async (req, res) => {
       case 'document_drafter':
         result = await new DocumentDrafterTool().execute(toolInput);
         break;
-      case 'tool_enhancer':
-        result = await toolEnhancer.execute(toolInput);
+      case 'menlo_park':
+        result = await menloPark.execute(toolInput);
         break;
       case 'source_verifier':
         result = await sourceVerifier.execute(toolInput);
