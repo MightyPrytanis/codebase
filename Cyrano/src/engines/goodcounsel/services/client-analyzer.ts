@@ -316,8 +316,8 @@ export class ClientAnalyzer {
           parameters: {},
         });
         
-        if (!result.isError && result.content?.[0]?.text) {
-          const text = result.content[0].text;
+        const text = (result.content?.[0] && result.content[0].type === 'text' && 'text' in result.content[0]) ? result.content[0].text : '';
+        if (!result.isError && text) {
           if (typeof text === 'string') {
             const clientData = JSON.parse(text);
             return this.mapClioClientToClient(clientData);
@@ -345,8 +345,8 @@ export class ClientAnalyzer {
           } as Record<string, any>,
         });
         
-        if (!result.isError && result.content?.[0]?.text) {
-          const text = result.content[0].text;
+        const text = (result.content?.[0] && result.content[0].type === 'text' && 'text' in result.content[0]) ? result.content[0].text : '';
+        if (!result.isError && text) {
           if (typeof text === 'string') {
             const data = JSON.parse(text);
             const matters = data.matters || [];

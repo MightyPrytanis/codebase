@@ -1204,6 +1204,8 @@ This plan breaks down 15 high-level objectives into 150+ specific tasks with cle
 
 ---
 
+**Note:** Dates in this document (2025-01-27) are prior to Project Cyrano's inception in July 2025 and are likely in error. Project Cyrano began in July 2025. This document is preserved as a historical archive record.
+
 **Document Status:** Draft - Awaiting user review and approval  
 **Last Updated:** 2025-01-27
 

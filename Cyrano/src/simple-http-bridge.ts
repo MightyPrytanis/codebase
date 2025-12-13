@@ -15,6 +15,9 @@ import cors from 'cors';
 const app = express();
 const port = process.env.PORT || 5002;
 
+// Disable X-Powered-By header to prevent information disclosure
+app.disable('x-powered-by');
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -67,18 +70,29 @@ app.get('/mcp/tools', (req, res) => {
 app.post('/mcp/execute', (req, res) => {
   const { tool, input } = req.body;
   
+  // Validate input is an object
+  if (!input || typeof input !== 'object' || Array.isArray(input)) {
+    return res.status(400).json({
+      content: [{
+        type: 'text',
+        text: 'Invalid input: must be an object'
+      }],
+      isError: true
+    });
+  }
+  
   // Simple mock responses
   const responses = {
     document_analyzer: {
       content: [{
         type: 'text',
-        text: `Analyzed document: ${input.content?.substring(0, 100)}...`
+        text: `Analyzed document: ${(typeof input.content === 'string' ? input.content.substring(0, 100) : '')}...`
       }]
     },
     contract_comparator: {
       content: [{
         type: 'text',
-        text: `Compared ${input.documents?.length || 0} documents`
+        text: `Compared ${(Array.isArray(input.documents) ? input.documents.length : 0)} documents`
       }]
     },
     extract_conversations: {

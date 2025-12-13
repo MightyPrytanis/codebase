@@ -11,6 +11,8 @@
 
 import { z } from 'zod';
 import { AIService, AIProvider } from '../../../services/ai-service.js';
+import { sourceVerifier } from '../../../tools/verification/source-verifier.js';
+import type { SourceVerificationResult } from '../../../tools/verification/source-verifier.js';
 
 export const InsightProcessorSchema = z.object({
   data: z.any(),
@@ -21,6 +23,8 @@ export const InsightProcessorSchema = z.object({
   llmProvider: z.enum(['perplexity', 'anthropic', 'openai', 'google', 'xai', 'deepseek']).optional().describe('AI provider for LLM extraction'),
   insightType: z.enum(['general', 'legal', 'medical', 'business']).optional().default('general').describe('Type of insights to extract'),
   customPrompt: z.string().optional().describe('Custom prompt for LLM extraction'),
+  verifySources: z.boolean().default(true).describe('Verify sources and citations found in insights'),
+  sourceVerificationLevel: z.enum(['basic', 'comprehensive']).default('basic').describe('Level of source verification'),
 });
 
 export type InsightProcessorInput = z.infer<typeof InsightProcessorSchema>;
@@ -33,6 +37,15 @@ export interface Insight {
   evidence: string[];
   metadata: Record<string, any>;
   timestamp: string;
+  sourceVerification?: {
+    verified: boolean;
+    sources: Array<{
+      source: string;
+      accessible: boolean;
+      reliable: boolean;
+      reliabilityScore: number;
+    }>;
+  };
 }
 
 export interface InsightProcessorOutput {
@@ -42,10 +55,12 @@ export interface InsightProcessorOutput {
     byType: Record<string, number>;
     highConfidence: number;
   };
+  sourceVerification?: SourceVerificationResult;
   metadata: {
     processingTime: number;
     dataSize: number;
     threshold: number;
+    sourcesVerified: boolean;
   };
 }
 
@@ -80,6 +95,29 @@ export class InsightProcessor {
       insights = await this.extractWithPatterns(validated);
     }
 
+    // Extract sources/citations from insights for verification
+    let sourceVerificationResult: SourceVerificationResult | undefined;
+    if (validated.verifySources && insights.length > 0) {
+      try {
+        const sources = this.extractSourcesFromInsights(insights);
+        if (sources.length > 0) {
+          sourceVerificationResult = await sourceVerifier.verifySources({
+            sources,
+            verificationLevel: validated.sourceVerificationLevel,
+            checkAccessibility: validated.sourceVerificationLevel === 'comprehensive',
+            checkReliability: true,
+            timeout: 5000,
+          });
+
+          // Attach verification results to insights
+          insights = this.attachSourceVerificationToInsights(insights, sourceVerificationResult);
+        }
+      } catch (error) {
+        console.warn('Source verification failed:', error);
+        // Continue without source verification
+      }
+    }
+
     // Calculate summary
     const byType = insights.reduce((acc, insight) => {
       acc[insight.type] = (acc[insight.type] || 0) + 1;
@@ -97,10 +135,12 @@ export class InsightProcessor {
         byType,
         highConfidence,
       },
+      sourceVerification: sourceVerificationResult,
       metadata: {
         processingTime,
         dataSize: JSON.stringify(validated.data).length,
         threshold: validated.threshold,
+        sourcesVerified: validated.verifySources && sourceVerificationResult !== undefined,
       },
     };
   }
@@ -791,6 +831,110 @@ Focus on extracting ${settings.type} insights with a minimum confidence threshol
    */
   private generateId(): string {
     return `insight-${Date.now()}-${++this.insightCounter}`;
+  }
+
+  /**
+   * Extract sources/citations from insights
+   */
+  private extractSourcesFromInsights(insights: Insight[]): string[] {
+    const sources = new Set<string>();
+
+    for (const insight of insights) {
+      // Extract from metadata citations
+      if (insight.metadata?.citations && Array.isArray(insight.metadata.citations)) {
+        for (const citation of insight.metadata.citations) {
+          if (typeof citation === 'string' && citation.trim().length > 0) {
+            sources.add(citation.trim());
+          }
+        }
+      }
+
+      // Extract URLs from description and evidence
+      const textToSearch = `${insight.description} ${insight.evidence.join(' ')}`;
+      const urlPattern = /https?:\/\/[^\s]+/g;
+      const urls = textToSearch.match(urlPattern);
+      if (urls) {
+        urls.forEach(url => sources.add(url));
+      }
+
+      // Extract legal citations (e.g., "123 U.S. 456")
+      const legalCitationPattern = /\d+\s+[A-Z][a-z.]+(?:\s+\d+)?/g;
+      const citations = textToSearch.match(legalCitationPattern);
+      if (citations) {
+        citations.forEach(cite => {
+          if (cite.length > 5) { // Filter out short matches
+            sources.add(cite);
+          }
+        });
+      }
+    }
+
+    return Array.from(sources);
+  }
+
+  /**
+   * Attach source verification results to insights
+   */
+  private attachSourceVerificationToInsights(
+    insights: Insight[],
+    verificationResult: SourceVerificationResult
+  ): Insight[] {
+    // Create a map of sources to verification results
+    const sourceMap = new Map<string, SourceVerificationResult['verifications'][0]>();
+    for (const verification of verificationResult.verifications) {
+      sourceMap.set(verification.source.toLowerCase(), verification);
+    }
+
+    // Attach verification to insights that reference verified sources
+    return insights.map(insight => {
+      const verifiedSources: Insight['sourceVerification']['sources'] = [];
+      let hasVerifiedSource = false;
+
+      // Check metadata citations
+      if (insight.metadata?.citations && Array.isArray(insight.metadata.citations)) {
+        for (const citation of insight.metadata.citations) {
+          if (typeof citation === 'string') {
+            const verification = sourceMap.get(citation.toLowerCase());
+            if (verification) {
+              verifiedSources.push({
+                source: citation,
+                accessible: verification.accessibility === 'accessible',
+                reliable: verification.reliability === 'high' || verification.reliability === 'medium',
+                reliabilityScore: verification.reliabilityScore,
+              });
+              hasVerifiedSource = true;
+            }
+          }
+        }
+      }
+
+      // Check description and evidence for URLs
+      const textToSearch = `${insight.description} ${insight.evidence.join(' ')}`;
+      const urlPattern = /https?:\/\/[^\s]+/g;
+      const urls = textToSearch.match(urlPattern);
+      if (urls) {
+        for (const url of urls) {
+          const verification = sourceMap.get(url.toLowerCase());
+          if (verification && !verifiedSources.some(vs => vs.source === url)) {
+            verifiedSources.push({
+              source: url,
+              accessible: verification.accessibility === 'accessible',
+              reliable: verification.reliability === 'high' || verification.reliability === 'medium',
+              reliabilityScore: verification.reliabilityScore,
+            });
+            hasVerifiedSource = true;
+          }
+        }
+      }
+
+      return {
+        ...insight,
+        sourceVerification: hasVerifiedSource ? {
+          verified: true,
+          sources: verifiedSources,
+        } : undefined,
+      };
+    });
   }
 }
 

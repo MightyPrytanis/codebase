@@ -16,6 +16,10 @@ import { insightProcessor } from './processors/insight-processor.js';
 import { entityProcessor } from './processors/entity-processor.js';
 import { timelineProcessor } from './processors/timeline-processor.js';
 import { citationFormatter, Jurisdiction } from '../../tools/verification/citation-formatter.js';
+import { consistencyChecker } from '../../tools/verification/consistency-checker.js';
+import { claimExtractor, ClaimType, ClaimConfidence } from '../../tools/verification/claim-extractor.js';
+import type { ConsistencyCheckResult } from '../../tools/verification/consistency-checker.js';
+import type { ExtractedClaim } from '../../tools/verification/claim-extractor.js';
 import { AIProvider } from '../../services/ai-service.js';
 
 export interface ProcessorPipelineInput {
@@ -33,6 +37,8 @@ export interface ProcessorPipelineInput {
     llmProvider?: AIProvider; // AI provider for LLM extraction
     insightType?: 'general' | 'legal' | 'medical' | 'business'; // Type of insights to extract
     customPrompt?: string; // Custom prompt for LLM extraction
+    checkConsistency?: boolean; // Check consistency across insights (default: true for deep mode)
+    consistencyCheckTypes?: Array<'contradiction' | 'inconsistency' | 'ambiguity' | 'temporal' | 'missing_info'>; // Types of consistency checks
   };
 }
 
@@ -63,6 +69,7 @@ export interface ProcessorPipelineOutput {
     corrected: string;
     corrections: any[];
   };
+  consistencyCheck?: ConsistencyCheckResult;
   metadata: {
     processingTime: number;
     processorsUsed: string[];
@@ -112,8 +119,37 @@ export class ProcessorPipeline {
         llmProvider: input.extractionSettings.llmProvider,
         insightType: input.extractionSettings.insightType || 'general',
         customPrompt: input.extractionSettings.customPrompt,
+        verifySources: true, // Enable source verification
+        sourceVerificationLevel: input.extractionSettings.extractionMode === 'deep' ? 'comprehensive' : 'basic',
       });
       processorsUsed.push('insight');
+    }
+    
+    // Step 3.5: Consistency checking (if insights were extracted and consistency checking enabled)
+    let consistencyCheckResult: ConsistencyCheckResult | undefined;
+    const shouldCheckConsistency = 
+      insightsResult && 
+      (input.extractionSettings.checkConsistency ?? (input.extractionSettings.extractionMode === 'deep'));
+    
+    if (shouldCheckConsistency && insightsResult.insights.length > 1) {
+      try {
+        // Convert insights to claims format for consistency checking
+        const claims = await this.convertInsightsToClaims(insightsResult.insights, textResult.text);
+        
+        if (claims.length > 1) {
+          consistencyCheckResult = await consistencyChecker.checkConsistency({
+            claims,
+            documentContext: textResult.text,
+            checkTypes: input.extractionSettings.consistencyCheckTypes || ['contradiction', 'inconsistency'],
+            minConfidence: 0.6,
+            detectRelationships: true,
+          });
+          processorsUsed.push('consistency');
+        }
+      } catch (error) {
+        console.warn('Consistency checking failed:', error);
+        // Continue without consistency checking
+      }
     }
     
     // Step 4: Timeline extraction (if requested)
@@ -161,11 +197,91 @@ export class ProcessorPipeline {
       insights: insightsResult,
       timeline: timelineResult,
       citations: citationsResult,
+      consistencyCheck: consistencyCheckResult,
       metadata: {
         processingTime,
         processorsUsed,
       },
     };
+  }
+
+  /**
+   * Convert insights to claims format for consistency checking
+   */
+  private async convertInsightsToClaims(
+    insights: Array<{ id: string; description: string; confidence: number; type: string; metadata?: any }>,
+    documentContext: string
+  ): Promise<ExtractedClaim[]> {
+    // Extract claims from document context for better consistency checking
+    // We'll use the insight descriptions as claim text, but also extract actual claims
+    const claimExtractionResult = await claimExtractor.extractClaims({
+      content: documentContext,
+      extractionType: 'all',
+      minConfidence: 0.5,
+      includeEntities: false,
+      includeKeywords: false,
+    });
+
+    // Map insights to claims, matching with extracted claims where possible
+    const claims: ExtractedClaim[] = [];
+    
+    for (const insight of insights) {
+      // Try to find a matching extracted claim
+      const matchingClaim = claimExtractionResult.claims.find(
+        claim => claim.text.includes(insight.description.substring(0, 50)) ||
+                 insight.description.includes(claim.text.substring(0, 50))
+      );
+
+      if (matchingClaim) {
+        // Use the extracted claim (has better structure)
+        claims.push(matchingClaim);
+      } else {
+        // Create a claim from the insight
+        const confidenceLevel = this.getConfidenceLevel(insight.confidence);
+        claims.push({
+          id: insight.id,
+          text: insight.description,
+          type: this.mapInsightTypeToClaimType(insight.type),
+          confidence: insight.confidence,
+          confidenceLevel,
+          source: {
+            offset: 0,
+            length: insight.description.length,
+          },
+          metadata: insight.metadata || {},
+        });
+      }
+    }
+
+    return claims;
+  }
+
+  /**
+   * Map insight type to claim type
+   */
+  private mapInsightTypeToClaimType(insightType: string): ClaimType {
+    switch (insightType) {
+      case 'claim':
+        return ClaimType.FACTUAL;
+      case 'pattern':
+      case 'trend':
+        return ClaimType.FACTUAL;
+      case 'anomaly':
+        return ClaimType.FACTUAL;
+      case 'relationship':
+        return ClaimType.FACTUAL;
+      default:
+        return ClaimType.FACTUAL;
+    }
+  }
+
+  /**
+   * Get confidence level from confidence score
+   */
+  private getConfidenceLevel(confidence: number): ClaimConfidence {
+    if (confidence >= 0.8) return ClaimConfidence.HIGH;
+    if (confidence >= 0.5) return ClaimConfidence.MEDIUM;
+    return ClaimConfidence.LOW;
   }
   
   /**

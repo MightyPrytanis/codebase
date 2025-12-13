@@ -71,8 +71,8 @@ export const documentArtifactCollector = new (class extends BaseTool {
             },
           });
           
-          if (!clioResult.isError && clioResult.content?.[0]?.text) {
-            const text = clioResult.content[0].text;
+          const text = (clioResult.content?.[0] && clioResult.content[0].type === 'text' && 'text' in clioResult.content[0]) ? clioResult.content[0].text : '';
+          if (!clioResult.isError && text) {
             if (typeof text === 'string') {
               const parsed = JSON.parse(text);
               if (parsed.documents && Array.isArray(parsed.documents)) {

@@ -504,8 +504,8 @@ export class ChronometricModule extends BaseModule {
           text: JSON.stringify({
             report_type: 'chronometric_analysis',
             period: { start_date: input.start_date, end_date: input.end_date },
-            gaps: gaps.isError || gaps.content[0]?.type !== 'text' || !gaps.content[0]?.text ? null : JSON.parse(gaps.content[0].text),
-            artifacts: artifacts.isError || artifacts.content[0]?.type !== 'text' || !artifacts.content[0]?.text ? null : JSON.parse(artifacts.content[0].text),
+            gaps: gaps.isError || !gaps.content[0] || gaps.content[0].type !== 'text' || !('text' in gaps.content[0]) ? null : JSON.parse(gaps.content[0].text),
+            artifacts: artifacts.isError || !artifacts.content[0] || artifacts.content[0].type !== 'text' || !('text' in artifacts.content[0]) ? null : JSON.parse(artifacts.content[0].text),
             recommendations: [
               'Review identified gaps',
               'Examine collected artifacts',

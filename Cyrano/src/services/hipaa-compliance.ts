@@ -5,8 +5,8 @@
  */
 
 import { db } from '../db.js';
-import { wellnessAccessLogs, wellnessAuditTrail } from '../schema-wellness.js';
-import { eq, and, gte, lte } from 'drizzle-orm';
+import { wellnessAccessLogs, wellnessAuditTrail, wellnessJournalEntries } from '../schema-wellness.js';
+import { eq, and, gte, lte, lt, isNull } from 'drizzle-orm';
 import { encryption } from './encryption-service.js';
 import { createHash } from 'crypto';
 
@@ -94,10 +94,20 @@ class HIPAAComplianceService {
    */
   async checkRetentionPolicy(entryId: string): Promise<boolean> {
     try {
-      // In a full implementation, this would check wellness_data_retention table
-      // For now, we'll use a simple date-based check
-      // Entries older than retention period should be eligible for deletion
-      return true; // Always retain for now - implement retention logic as needed
+      const retentionCutoff = new Date();
+      retentionCutoff.setFullYear(retentionCutoff.getFullYear() - this.defaultRetentionYears);
+
+      const [entry] = await db
+        .select({ createdAt: wellnessJournalEntries.createdAt })
+        .from(wellnessJournalEntries)
+        .where(eq(wellnessJournalEntries.id, entryId))
+        .limit(1);
+
+      if (!entry || !entry.createdAt) {
+        return true;
+      }
+
+      return entry.createdAt >= retentionCutoff;
     } catch (error) {
       console.error('Failed to check retention policy:', error);
       return true; // Default to retaining if check fails
@@ -109,22 +119,54 @@ class HIPAAComplianceService {
    */
   async secureDelete(entryId: string): Promise<void> {
     try {
-      // 1. Overwrite encrypted data with random data (if possible)
-      // 2. Mark as deleted (soft delete)
-      // 3. Log deletion
-      // 4. Schedule permanent deletion after retention period
-      
-      // For now, we'll rely on soft delete in the database
-      // Full secure deletion would require:
-      // - Decrypting data
-      // - Overwriting with random data
-      // - Re-encrypting with random key
-      // - Then deleting
-      
+      // Overwrite sensitive fields and mark as deleted
+      const wipedContent = encryption.encryptField('deleted', 'content').encrypted;
+      const wipedTags = encryption.encryptField('[]', 'tags').encrypted;
+
+      await db
+        .update(wellnessJournalEntries)
+        .set({
+          contentEncrypted: wipedContent as any,
+          mood: null,
+          tags: wipedTags as any,
+          voiceAudioPath: null,
+          transcriptionEncrypted: null,
+          stressIndicators: null as any,
+          burnoutSignals: null as any,
+          deletedAt: new Date(),
+        })
+        .where(eq(wellnessJournalEntries.id, entryId));
+
       await this.logDataOperation(0, entryId, 'delete'); // userId 0 = system
     } catch (error) {
       console.error('Failed to securely delete entry:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Enforce retention policy for all entries
+   */
+  async enforceRetention(): Promise<void> {
+    try {
+      const retentionCutoff = new Date();
+      retentionCutoff.setFullYear(retentionCutoff.getFullYear() - this.defaultRetentionYears);
+
+      const expiredEntries = await db
+        .select({ id: wellnessJournalEntries.id })
+        .from(wellnessJournalEntries)
+        .where(
+          and(
+            lt(wellnessJournalEntries.createdAt, retentionCutoff),
+            isNull(wellnessJournalEntries.deletedAt)
+          )
+        );
+
+      for (const entry of expiredEntries) {
+        await this.secureDelete(entry.id);
+      }
+    } catch (error) {
+      console.error('Failed to enforce retention policy:', error);
     }
   }
 
@@ -269,5 +311,8 @@ export const hipaaCompliance = {
     const service = getHIPAAComplianceService();
     return service.getAuditTrail(entryId);
   },
+  enforceRetention: async () => {
+    const service = getHIPAAComplianceService();
+    return service.enforceRetention();
+  },
 };
-

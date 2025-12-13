@@ -300,7 +300,7 @@ export class MaeEngine extends BaseEngine {
             stepId,
             status: result.isError ? 'failed' : 'completed',
             result: result.isError ? undefined : result,
-            error: result.isError ? (typeof result.content[0]?.text === 'string' ? result.content[0].text : 'Unknown error') : undefined,
+            error: result.isError ? ((result.content[0] && result.content[0].type === 'text' && 'text' in result.content[0]) ? result.content[0].text : 'Unknown error') : undefined,
           });
 
           // If step failed and has onFailure, continue to failure path
