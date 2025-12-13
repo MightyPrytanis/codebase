@@ -122,7 +122,7 @@ class WellnessService {
       contentEncrypted,
       contentType,
       mood: moodEncrypted,
-      tags: tagsEncrypted ? JSON.parse(encryption.decryptField({ encrypted: tagsEncrypted, algorithm: 'aes-256-gcm', keyDerivation: 'pbkdf2' }, 'tags')) : [],
+      tags: tagsEncrypted,
       voiceAudioPath: voiceAudioPathEncrypted,
       transcriptionEncrypted,
       sentimentScore,
@@ -667,4 +667,3 @@ export const wellness = {
     return service.getWellnessTrends(userId, period);
   },
 };
-

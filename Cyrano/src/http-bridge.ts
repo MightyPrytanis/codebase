@@ -11,16 +11,12 @@
  */
 
 import express from 'express';
-import cors from 'cors';
+import cors, { CorsOptions } from 'cors';
 import dotenv from 'dotenv';
 import multer from 'multer';
 
 // Load environment variables
 dotenv.config();
-console.log('Environment variables loaded:');
-console.log('PERPLEXITY_API_KEY exists:', !!process.env.PERPLEXITY_API_KEY);
-console.log('OPENAI_API_KEY exists:', !!process.env.OPENAI_API_KEY);
-console.log('ANTHROPIC_API_KEY exists:', !!process.env.ANTHROPIC_API_KEY);
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
@@ -112,13 +108,27 @@ import {
 } from './engines/potemkin/tools/index.js';
 
 const app = express();
+app.enable('trust proxy');
 const port = process.env.PORT || 5002;
 
 // Disable X-Powered-By header to prevent information disclosure
 app.disable('x-powered-by');
 
 // Middleware
-app.use(cors());
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').map(o => o.trim()).filter(Boolean);
+const corsOptions: CorsOptions = allowedOrigins.length > 0
+  ? { origin: allowedOrigins, credentials: true }
+  : { origin: false }; // disallow if not configured
+
+app.use(cors(corsOptions));
+
+// Enforce HTTPS if behind proxy
+app.use((req, res, next) => {
+  if (process.env.FORCE_HTTPS === 'true' && req.protocol !== 'https') {
+    return res.redirect(301, `https://${req.headers.host}${req.url}`);
+  }
+  next();
+});
 app.use(express.json());
 app.use(express.raw({ type: 'application/octet-stream', limit: '100mb' }));
 
