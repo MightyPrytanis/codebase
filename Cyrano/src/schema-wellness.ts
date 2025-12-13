@@ -28,9 +28,9 @@ export const wellnessJournalEntries = pgTable('wellness_journal_entries', {
   transcriptionEncrypted: text('transcription_encrypted'), // Encrypted transcription
   
   // AI analysis
-  sentimentScore: real('sentiment_score'), // -1.0 to 1.0
-  stressIndicators: jsonb('stress_indicators').$type<string[]>(),
-  burnoutSignals: jsonb('burnout_signals').$type<string[]>(),
+  sentimentScore: real('sentiment_score'), // -1.0 to 1.0 (not PHI, no encryption needed)
+  stressIndicators: text('stress_indicators'), // Encrypted JSON string of stress indicators (PHI)
+  burnoutSignals: text('burnout_signals'), // Encrypted JSON string of burnout signals (PHI)
   
   // Timestamps
   createdAt: timestamp('created_at').defaultNow().notNull(),

@@ -116,17 +116,22 @@ class WellnessService {
     // Detect stress indicators
     const stressIndicators = this.detectStressIndicators(input.content);
 
+    // Encrypt stress indicators and burnout signals (PHI)
+    const stressIndicatorsEncrypted = stressIndicators.length > 0 
+      ? encryption.encryptField(JSON.stringify(stressIndicators), 'stress_indicators').encrypted 
+      : null;
+
     // Insert into database
     const [entry] = await db.insert(wellnessJournalEntries).values({
       userId,
       contentEncrypted,
       contentType,
       mood: moodEncrypted,
-      tags: tagsEncrypted ? JSON.parse(encryption.decryptField({ encrypted: tagsEncrypted, algorithm: 'aes-256-gcm', keyDerivation: 'pbkdf2' }, 'tags')) : [],
+      tags: tagsEncrypted,
       voiceAudioPath: voiceAudioPathEncrypted,
       transcriptionEncrypted,
       sentimentScore,
-      stressIndicators: stressIndicators.length > 0 ? stressIndicators : null,
+      stressIndicators: stressIndicatorsEncrypted,
       createdAt: new Date(),
       updatedAt: new Date(),
     }).returning();
@@ -237,7 +242,10 @@ class WellnessService {
     // Update sentiment if content changed
     if (updates.content !== undefined) {
       updateData.sentimentScore = await this.analyzeSentiment(updates.content);
-      updateData.stressIndicators = this.detectStressIndicators(updates.content);
+      const stressIndicators = this.detectStressIndicators(updates.content);
+      updateData.stressIndicators = stressIndicators.length > 0 
+        ? encryption.encryptField(JSON.stringify(stressIndicators), 'stress_indicators').encrypted 
+        : null;
     }
 
     const [updated] = await db
