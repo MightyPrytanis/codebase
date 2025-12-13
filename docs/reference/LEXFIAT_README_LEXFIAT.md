@@ -62,7 +62,14 @@ Visit `http://localhost:5173` (or port shown by Vite) to see LexFiat in action.
 ### AI-Powered Legal Analysis
 - **Multi-AI Support**: Uses Cyrano MCP tools for AI operations
 - **Document Intelligence**: Automated analysis via Cyrano tools
+- **Document Verification**: Potemkin engine integration for comprehensive document verification (facts, citations, claims)
 - **Red Flag Detection**: Intelligent identification of urgent legal matters
+
+### Document Verification (Hybrid Approach)
+LexFiat implements a hybrid approach for document verification:
+- **Potemkin Engine**: Used for comprehensive document verification workflows that combine multiple verification steps with AI analysis
+- **Direct Tools**: Used for simple operations like citation checking (via `citation_checker` tool)
+- **Benefits**: Flexibility for custom workflows, performance for simple operations, and access to advanced verification features
 - **Response Generation**: AI-drafted responses with attorney approval workflow
 
 ### Professional Legal Branding

@@ -15,6 +15,8 @@ Status: Archived
 
 **ARCHIVED:** This document is a one-off (status report, completion summary, handoff, etc.) and is no longer useful for active reference. Archived 2025-11-28.
 
+**Note:** Dates in this document (2025-01-27) are prior to Project Cyrano's inception in July 2025 and are likely in error. Project Cyrano began in July 2025. This document is preserved as a historical archive record.
+
 ---
 
 # Primary Agent Handoff Summary

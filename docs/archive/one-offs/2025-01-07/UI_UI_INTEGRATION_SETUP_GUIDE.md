@@ -16,6 +16,8 @@ Status: Active
 **Purpose:** Complete guide for setting up all integrations to make LexFiat 100% functional  
 **Status:** Required for Beta Testing
 
+**Note:** Example dates in this document (2025-01-01, 2025-01-31) are prior to Project Cyrano's inception in July 2025 and are likely in error. Project Cyrano began in July 2025. These are example JSON values and should be updated if used.
+
 ---
 
 ## Overview

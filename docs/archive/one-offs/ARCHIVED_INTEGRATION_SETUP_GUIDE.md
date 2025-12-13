@@ -15,6 +15,8 @@ Status: Archived
 
 **ARCHIVED:** This document has limited current utility and has been archived. Archived 2025-11-28.
 
+**Note:** Example dates in this document (2025-01-01, 2025-01-31) are prior to Project Cyrano's inception in July 2025 and are likely in error. Project Cyrano began in July 2025. These are example JSON values and should be updated if used.
+
 ---
 
 ---

@@ -4,6 +4,9 @@ import cors from 'cors';
 const app = express();
 const port = 5002;
 
+// Disable X-Powered-By header to prevent information disclosure
+app.disable('x-powered-by');
+
 app.use(cors());
 app.use(express.json());
 

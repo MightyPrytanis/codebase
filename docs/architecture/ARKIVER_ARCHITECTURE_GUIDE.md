@@ -3,10 +3,10 @@ Document ID: ARKIVER-ARCHITECTURE-GUIDE
 Title: Arkiver Architecture Guide
 Subject(s): Arkiver | Architecture | Base44 | History
 Project: Cyrano
-Version: v548
+Version: v550
 Created: 2025-11-26 (2025-W48)
-Last Substantive Revision: 2025-11-26 (2025-W48)
-Last Format Update: 2025-11-28 (2025-W48)
+Last Substantive Revision: 2025-12-12 (2025-W50)
+Last Format Update: 2025-12-12 (2025-W50)
 Owner: David W Towne / Cognisint LLC
 Copyright: © 2025 Cognisint LLC
 Summary: Clear, definitive explanation of Arkiver, ArkiverMJ, Base44, and project history. Authoritative source for Arkiver architecture and design decisions.
@@ -105,6 +105,9 @@ Tools → Modules → Engines → Apps → Suite
 - **LLM Conversation Extractors**: ChatGPT JSON, Claude format, plain text/markdown conversations
 - **Processing Pipeline**: Text, Entity, Insight, Timeline, Email processors
 - **Verification Tools**: Citation checking, claim extraction (shared with other modules)
+- **Source Verification**: Automatic verification of sources and citations in insights (2025-12-12)
+- **Consistency Checking**: Cross-reference validation for extracted insights (2025-12-12)
+- **Hybrid Potemkin Integration**: Uses Potemkin engine for complex workflows, tools directly for simple operations (2025-12-12)
 
 **Correct Structure:**
 ```

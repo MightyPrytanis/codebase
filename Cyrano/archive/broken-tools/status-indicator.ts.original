@@ -657,11 +657,14 @@ export const statusIndicator = new (class extends BaseTool {
   async getFormattedReport(): Promise<string> {
     const result = await this.execute({ detailed: true });
     if (result.isError) {
-      return (result.content[0]?.text || 'Error') as string;
+      const firstContent = result.content[0];
+      const errorText = (firstContent && firstContent.type === 'text' && 'text' in firstContent) ? firstContent.text : 'Error';
+      return errorText;
     }
 
-    const textContent = result.content[0]?.text || '{}';
-    const data = JSON.parse(textContent as string);
+    const firstContent = result.content[0];
+    const textContent = (firstContent && firstContent.type === 'text' && 'text' in firstContent) ? firstContent.text : '{}';
+    const data = JSON.parse(textContent);
     
     let report = `\n╔══════════════════════════════════════════════════════════════╗\n`;
     report += `║     STATUS INDICATOR - CODEBASE ANALYSIS REPORT          ║\n`;

@@ -40,6 +40,7 @@ import { citationFormatter } from './tools/verification/citation-formatter.js';
 import { sourceVerifier } from './tools/verification/source-verifier.js';
 import { consistencyChecker } from './tools/verification/consistency-checker.js';
 import { arkiverProcessFileTool, arkiverJobStatusTool } from './tools/arkiver-mcp-tools.js';
+import { arkiverIntegrityTestTool } from './tools/arkiver-integrity-test.js';
 import {
   arkiverTextProcessor,
   arkiverEmailProcessor,
@@ -76,7 +77,7 @@ import { caseManager } from './tools/case-manager.js';
 import { documentProcessor } from './tools/document-processor.js';
 import { aiOrchestrator } from './tools/ai-orchestrator.js';
 import { systemStatus } from './tools/system-status.js';
-import { statusIndicator } from './tools/status-indicator.js';
+// status-indicator tool archived - see Cyrano/archive/broken-tools/
 import { ragQuery } from './tools/rag-query.js';
 import { authTool } from './tools/auth.js';  // Add auth tool import
 import { syncManager } from './tools/sync-manager.js';
@@ -145,7 +146,7 @@ class CyranoMCPServer {
           documentProcessor.getToolDefinition(),
           aiOrchestrator.getToolDefinition(),
           systemStatus.getToolDefinition(),
-          statusIndicator.getToolDefinition(),
+          // status-indicator tool archived - see Cyrano/archive/broken-tools/
           syncManager.getToolDefinition(),
           redFlagFinder.getToolDefinition(),
           clioIntegration.getToolDefinition(),
@@ -193,6 +194,8 @@ class CyranoMCPServer {
           // Arkiver job tools
           arkiverProcessFileTool.getToolDefinition(),
           arkiverJobStatusTool.getToolDefinition(),
+          // Arkiver integrity testing (uses Potemkin engine)
+          arkiverIntegrityTestTool.getToolDefinition(),
           // RAG Pipeline
           ragQuery.getToolDefinition(),
           // Office/Acrobat Integration
@@ -262,9 +265,7 @@ class CyranoMCPServer {
           case 'system_status':
             result = await systemStatus.execute(args);
             break;
-          case 'status_indicator':
-            result = await statusIndicator.execute(args);
-            break;
+          // status-indicator tool archived - see Cyrano/archive/broken-tools/
         case 'sync_manager':
           result = await syncManager.execute(args);
           break;
@@ -361,6 +362,9 @@ class CyranoMCPServer {
             break;
           case 'arkiver_job_status':
             result = await arkiverJobStatusTool.execute(args);
+            break;
+          case 'arkiver_integrity_test':
+            result = await arkiverIntegrityTestTool.execute(args);
             break;
           case 'arkiver_process_text':
             result = await arkiverTextProcessor.execute(args);

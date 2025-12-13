@@ -11,6 +11,9 @@ Owner: David W Towne / Cognisint LLC
 Copyright: © 2025 Cognisint LLC
 Summary: Comprehensive review of all 331 documentation files in codebase (excluding Legacy), documenting disposition and reasons for each document.
 Status: Active
+
+**Note:** References to dates prior to July 2025 (e.g., 2025-01-27) in file paths or document references are likely in error. Project Cyrano began in July 2025.
+
 ---
 
 # Comprehensive Documentation Review Report

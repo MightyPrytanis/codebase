@@ -114,3 +114,6 @@ src/tools/tool-enhancer.ts
 # IP Directory - Keep secret (entire IP/ directory)
 IP/
 Document Archive/
+
+# Snyk Security Extension - AI Rules (auto-generated)
+.github/instructions/snyk_rules.instructions.md
