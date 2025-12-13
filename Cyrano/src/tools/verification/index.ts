@@ -12,7 +12,7 @@
  * See LICENSE.md for full license text
  */
 
-export * from './claim-extractor';
-export * from './citation-checker';
-export * from './source-verifier';
-export * from './consistency-checker';
+export * from './claim-extractor.js';
+export * from './citation-checker.js';
+export * from './source-verifier.js';
+export * from './consistency-checker.js';

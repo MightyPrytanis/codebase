@@ -8,7 +8,7 @@
  * See LICENSE.md for full license text
  */
 
-import { michiganCitationValidator, MichiganCitationFormat } from '../michigan-citations';
+import { michiganCitationValidator, MichiganCitationFormat } from '../michigan-citations.js';
 
 describe('Michigan Citation Validator', () => {
   describe('Traditional Case Citations', () => {

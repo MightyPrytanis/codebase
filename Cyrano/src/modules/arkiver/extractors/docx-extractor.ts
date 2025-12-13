@@ -13,8 +13,8 @@
  */
 
 import mammoth from 'mammoth';
-import { claimExtractor } from '../../../tools/verification/claim-extractor';
-import { citationChecker } from '../../../tools/verification/citation-checker';
+import { claimExtractor } from '../../../tools/verification/claim-extractor.js';
+import { citationChecker } from '../../../tools/verification/citation-checker.js';
 
 // ExtractionSettings type
 export interface ExtractionSettings {
