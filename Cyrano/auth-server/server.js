@@ -4,6 +4,7 @@ const session = require('express-session');
 const path = require('path');
 
 const app = express();
+app.enable('trust proxy');
 const port = process.env.PORT || 3000;
 
 // Simple rate limiting middleware (in-memory store)
@@ -63,10 +64,20 @@ app.use(session({
   resave: false,
   saveUninitialized: true,
   cookie: { 
-    secure: process.env.NODE_ENV === 'production', // Use secure cookies in production
-    sameSite: 'strict' // CSRF protection via SameSite attribute
+    secure: true, // Require TLS; set TRUST_PROXY for HTTPS behind proxy
+    sameSite: 'strict', // CSRF protection via SameSite attribute
+    httpOnly: true // Mitigate XSS session theft
   }
 }));
+
+// Enforce HTTPS
+app.use((req, res, next) => {
+  if (!req.secure) {
+    const host = req.headers.host || '';
+    return res.redirect(301, `https://${host}${req.url}`);
+  }
+  next();
+});
 
 // Apply rate limiting to all routes
 app.use(rateLimitMiddleware);
