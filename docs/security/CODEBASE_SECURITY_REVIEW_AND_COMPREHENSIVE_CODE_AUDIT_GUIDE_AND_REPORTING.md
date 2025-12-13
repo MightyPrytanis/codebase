@@ -26,12 +26,21 @@ Related Documents: BETA-RELEASE-TRACKING, PROJECT-POLICIES, ETHICS
 
 **Context:** Step 12 work outsourced to third-party agents/orchestrators due to Cursor's repeated failures to comply with user instructions, especially in documentation and reporting.
 
-**Critical Requirements:**
-- Complete all tasks to 100% with comprehensive reporting that enables Steps 13-15
-- If outsourced agent/orchestrator fails, Cursor will be deemed at fault and project permanently transferred
-- Cursor suspended as primary AI assistant effective upon completion
+**CRITICAL SCOPE EXPANSION:** This work now includes:
+- **Step 12:** Comprehensive Security Evaluation and Upgrade
+- **Step 5 (Remaining):** Replace Dummy Code and Mock Integrations (95% complete, remaining: enhance rate limiting, minor cleanup)
+- **Step 9 (Remaining):** Comprehensive Refactoring (60% complete, remaining: reduce `any` types, refactor code smells, improve error handling consistency, enhance code documentation)
 
-**Current Progress:** 45% (9/20 hours)
+**MANDATORY REQUIREMENTS:**
+- **NO SUPERFICIAL TESTS:** Surface-level reviews are insufficient. Every line of active code must be examined.
+- **SPECIALIZED TOOLS REQUIRED:** Automated tools (SonarQube, Semgrep, CodeQL, GitHub Copilot, VS Code Copilot) MUST be used. Manual review alone is insufficient.
+- **LITERAL LINE-BY-LINE:** "Line-by-line" means examining every single line of active code, not sampling or spot-checking.
+- **COMPREHENSIVE TESTING & DEBUGGING:** Every line must be tested and debugged. This is not just a review or audit - it is comprehensive testing and debugging of every single line.
+- **BLOAT REMOVAL:** All useless bloat must be removed without sacrificing performance, stability, features, compatibility, or future extensibility.
+- **100% COMPLETION:** All tasks must be completed to 100% with comprehensive reporting that enables Steps 13-15
+- **CONSEQUENCE OF FAILURE:** If outsourced agent/orchestrator fails, Cursor will be deemed at fault and project permanently transferred
+
+**Current Progress:** 45% of Step 12 (9/20 hours)
 - ✅ Snyk dependency scanning: Complete (all vulnerabilities fixed)
 - ✅ Snyk Code (SAST): Complete (all issues fixed)
 - ✅ OWASP ZAP (DAST): Complete (all findings fixed)
@@ -107,46 +116,62 @@ Cursor has routinely created voluminous, unnecessary documentation despite repea
 
 ---
 
-## Step 12 Requirements
+## Scope: Step 12 + Step 5 (Remaining) + Step 9 (Remaining)
 
-### Completed (45%)
+### Step 12: Security Evaluation (45% Complete)
 
-1. **Snyk Dependency Scanning** ✅
-   - Cyrano: 362 dependencies, 2 HIGH vulnerabilities fixed
-   - LexFiat: 174 dependencies, 0 vulnerabilities
-   - Arkiver: 11 dependencies, 0 vulnerabilities
-   - Reports: `docs/security/reports/snyk/cyrano-report.md`, `lexfiat-report.md`, `arkiver-report.md`
+**Completed:**
+1. ✅ Snyk dependency scanning: Complete (all vulnerabilities fixed)
+2. ✅ Snyk Code (SAST): Complete (all issues fixed)
+3. ✅ OWASP ZAP (DAST): Complete (all findings fixed)
 
-2. **Snyk Code (SAST)** ✅
-   - 2 HIGH (hardcoded secrets) - Fixed
-   - 5 MEDIUM (XSS, CSRF, headers, rate limiting, validation) - Fixed
-   - 1 LOW (cookie security) - Fixed
-   - Report: `docs/security/reports/snyk/snyk-code-report.md`
+**Remaining:**
+4. ⚠️ HIPAA Compliance Verification - See HIPAA Verification section
+5. ⚠️ Comprehensive Line-by-Line Code Audit, Testing, and Debugging - See Code Audit section
+6. ⚠️ Security Documentation Consolidation
+7. ⚠️ Final Security Report for Steps 13-15
 
-3. **OWASP ZAP (DAST)** ✅
-   - LexFiat & Arkiver scanned
-   - 3 MEDIUM issues fixed (CSP, X-Frame-Options, X-Content-Type-Options)
-   - Report: `docs/security/reports/owasp-zap/lexfiat-arkiver-zap-report-2025-12-08.html`
+### Step 5 (Remaining): Replace Dummy Code (95% Complete)
 
-### Remaining (55%)
+**Status:** 95% complete, remaining work integrated into comprehensive audit
 
-4. **HIPAA Compliance Verification** ⚠️ PENDING
-   - **Files:** `Cyrano/src/services/encryption-service.ts`, `hipaa-compliance.ts`, `wellness-service.ts`, `schema-wellness.ts`, `migrations/001_wellness_schema.sql`
-   - **Deliverable:** `docs/security/reports/HIPAA_COMPLIANCE_VERIFICATION_REPORT.md`
-   - **Requirements:** See HIPAA Verification section below
+**Remaining Tasks:**
+- Enhance rate limiting (review all rate limiting implementations, ensure consistency)
+- Minor cleanup (remove any remaining mock/dummy code found during audit)
 
-5. **Comprehensive Line-by-Line Code Audit** ⚠️ PENDING
-   - **Scope:** All active code paths in `Cyrano/src/`, `LexFiat/client/src/`, `apps/arkiver/frontend/src/`
-   - **Deliverable:** `docs/security/reports/COMPREHENSIVE_CODE_AUDIT_REPORT.md`
-   - **Requirements:** See Code Audit section below
+**Integration:** These tasks will be completed as part of the comprehensive line-by-line audit and testing.
 
-6. **Security Documentation Consolidation** ⚠️ IN PROGRESS
-   - Consolidate all findings into final report
-   - Update `docs/security/reports/SECURITY_REVIEW_SUMMARY.md`
+### Step 9 (Remaining): Comprehensive Refactoring (60% Complete)
 
-7. **Final Security Report for Steps 13-15** ⚠️ PENDING
-   - **Deliverable:** `docs/security/reports/FINAL_SECURITY_REPORT_STEPS_13_15.md`
-   - Must enable Steps 13-15 with production deployment checklist
+**Status:** 60% complete, remaining work integrated into comprehensive audit
+
+**Remaining Tasks:**
+- Reduce `any` types in critical paths (find ALL `any` types, replace with proper types)
+- Refactor code smells (identify ALL code smells via SonarQube, refactor systematically)
+- Improve error handling consistency (ensure ALL error handling follows consistent pattern)
+- Enhance code documentation (document ALL functions, classes, complex logic)
+
+**Integration:** These tasks will be completed as part of the comprehensive line-by-line audit, testing, and debugging.
+
+### Combined Scope
+
+**Active Code Locations (EVERY file must be reviewed):**
+- `Cyrano/src/` - ALL files (tools, services, engines, modules, etc.)
+- `LexFiat/client/src/` - ALL files (pages, components, lib, etc.)
+- `apps/arkiver/frontend/src/` - ALL files (pages, components, lib, etc.)
+
+**Exclusions (Do NOT review):**
+- `Legacy/` - Archived code
+- `docs/` - Documentation only
+- `node_modules/` - Dependencies
+- Test files (unless testing the tests themselves)
+- Build artifacts
+
+**Deliverables:**
+1. HIPAA Compliance Verification Report
+2. Comprehensive Code Audit, Testing, and Debugging Report (includes Step 5 and Step 9 work)
+3. Security Documentation Consolidation
+4. Final Security Report for Steps 13-15
 
 ---
 
@@ -221,35 +246,81 @@ HIPAA Technical Safeguards:
 
 ---
 
-## Comprehensive Code Audit
+## Comprehensive Code Audit, Testing, and Debugging
 
-### Recommended Tools (Priority Order)
+### CRITICAL: This is NOT Just a Review
 
-1. **GitHub Copilot Chat** - Comprehensive codebase review, architecture review
-2. **VS Code Copilot** - Line-by-line file-by-file review
-3. **SonarQube** - Automated vulnerability detection (free tier available)
-4. **Semgrep** - Pattern-based vulnerability detection (free tier available)
-5. **CodeQL** - Deep semantic analysis (free for public repos)
+**MANDATORY REQUIREMENTS:**
+- **NO SUPERFICIAL TESTS:** Surface-level reviews, spot-checks, or sampling are PROHIBITED. Every single line of active code must be examined.
+- **SPECIALIZED TOOLS REQUIRED:** Automated analysis tools are MANDATORY, not optional. Manual review alone is insufficient and will be considered a failure.
+- **LITERAL LINE-BY-LINE:** "Line-by-line" means examining EVERY line of active code. No exceptions. No shortcuts. No "representative samples."
+- **COMPREHENSIVE TESTING:** Every line must be tested. This includes unit tests, integration tests, and debugging of all code paths.
+- **BLOAT REMOVAL:** All useless code, dead code, commented-out code, and unnecessary complexity must be removed without sacrificing performance, stability, features, compatibility, or future extensibility.
 
-**Tool Combination:** Use GitHub Copilot Chat + VS Code Copilot for comprehensive review, SonarQube for automated analysis, Semgrep for pattern detection.
+### Required Tools (MANDATORY - Not Optional)
 
-### Audit Methodology
+**Primary Tools (MUST USE):**
+1. **SonarQube** - Automated code quality and security analysis (MANDATORY)
+   - Set up project, run full analysis
+   - Review ALL findings, not just high-severity
+   - Fix or document every issue
 
-**Phase 1: Automated Analysis**
-- Set up and run SonarQube, Semgrep, CodeQL (if available)
+2. **Semgrep** - Pattern-based vulnerability detection (MANDATORY)
+   - Run with security rules enabled
+   - Review ALL matches
+   - Fix or document every finding
+
+3. **GitHub Copilot Chat** - Comprehensive codebase review (MANDATORY)
+   - Upload entire codebase for review
+   - Request line-by-line analysis
+   - Review ALL suggestions
+
+4. **VS Code Copilot** - Line-by-line file-by-file review (MANDATORY)
+   - Open EVERY active code file
+   - Use Copilot to review EVERY line
+   - Document findings for EVERY file
+
+**Secondary Tools (Use if Available):**
+5. **CodeQL** - Deep semantic analysis (if repository is public)
+6. **Snyk Code** - Re-run for verification (already complete, but verify)
+
+**Tool Usage Requirements:**
+- ALL tools must be used, not just one or two
+- Results from ALL tools must be reviewed and addressed
+- No tool's findings may be ignored without justification
+- Tool setup and configuration is part of the work
+
+### Audit, Testing, and Debugging Methodology
+
+**Phase 1: Automated Analysis (MANDATORY)**
+- Set up SonarQube, run full analysis on entire codebase
+- Install and run Semgrep with security rules on entire codebase
+- Set up CodeQL (if available), run queries on entire codebase
 - Re-run Snyk Code for verification
-- Categorize findings by severity, identify false positives
+- Review ALL findings from ALL tools, categorize by severity, identify false positives (with justification)
 
-**Phase 2: Manual Code Review**
-- Review security-critical files line-by-line
-- Check for OWASP Top 10 vulnerabilities
-- Verify security best practices
-- Document findings
+**Phase 2: Line-by-Line Code Review (MANDATORY)**
+- **EVERY active code file must be reviewed line-by-line**
+- Use VS Code Copilot and GitHub Copilot Chat for comprehensive analysis
+- Check EVERY line for: security vulnerabilities (OWASP Top 10), code quality issues, performance problems, dead code/bloat, type safety issues (`any` types), error handling gaps, missing tests
+- Document findings for EVERY file reviewed
 
-**Phase 3: Integration Review**
+**Phase 3: Comprehensive Testing (MANDATORY)**
+- Write tests for EVERY function/method
+- Test ALL code paths (branches, loops, error cases)
+- Debug ALL failing tests
+- Test edge cases, boundary conditions, integration, performance
+
+**Phase 4: Bloat Removal (MANDATORY)**
+- Remove ALL dead code, commented-out code (unless critical), unused imports/variables/functions
+- Simplify complex code without losing functionality
+- Remove unnecessary abstractions or over-engineering
+- **CRITICAL:** Do NOT sacrifice performance, stability, features, compatibility, or future extensibility
+
+**Phase 5: Integration Review**
 - Review component interactions and security boundaries
-- Trace sensitive data flow
-- Verify encryption at rest and in transit
+- Trace sensitive data flow, verify encryption at rest and in transit
+- Test all API endpoints and database queries
 
 ### Review Checklist by Category
 
