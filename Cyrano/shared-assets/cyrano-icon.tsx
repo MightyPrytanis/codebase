@@ -43,19 +43,21 @@ export function CyranoIcon({
   // Red dot: radius 1.6
   
   // Helper to describe an arc path with a gap
-  // Circle will have a break from approximately 2:30 to 3:30 (clock positions)
-  // This creates the "C" shape opening on the right side
+  // Circle will have a break at 3 o'clock position (right side)
+  // This creates the "C" shape opening on the right
   const describeCircleWithGap = () => {
     const cx = 12;
     const cy = 12;
     const r = 4;
     
-    // Gap from ~60° to ~120° (using standard math angles where 0° is right/3 o'clock)
-    // In SVG terms: start at 120° and go counter-clockwise to 60° (the long way around)
-    const startAngle = 120; // Top of gap (2 o'clock position)
-    const endAngle = 60;   // Bottom of gap (4 o'clock position)
+    // Gap centered at 3 o'clock (0° in standard math, right side)
+    // Gap from -30° to +30° (or 330° to 30°)
+    // This means the arc goes from 30° all the way around to 330° (the long way - forming the C)
+    const startAngle = 30;   // Bottom of gap (4 o'clock position) 
+    const endAngle = 330;     // Top of gap (2 o'clock position)
     
     // Convert angles to radians and calculate points
+    // Note: In SVG, Y increases downward, so we adjust accordingly
     const startRad = (startAngle * Math.PI) / 180;
     const endRad = (endAngle * Math.PI) / 180;
     
@@ -64,7 +66,8 @@ export function CyranoIcon({
     const x2 = cx + r * Math.cos(endRad);
     const y2 = cy + r * Math.sin(endRad);
     
-    // Create arc going the long way (left side of circle)
+    // Create arc going the long way (forming the C - left side of circle)
+    // Large arc flag = 1 means take the longer arc
     return `M ${x1},${y1} A ${r},${r} 0 1,1 ${x2},${y2}`;
   };
   
