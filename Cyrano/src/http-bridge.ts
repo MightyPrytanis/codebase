@@ -113,6 +113,9 @@ import {
 } from './engines/potemkin/tools/index.js';
 import { cyranoPathfinder } from './tools/cyrano-pathfinder.js';
 
+// Import library routes
+import libraryRoutes from './routes/library.js';
+
 const app = express();
 app.enable('trust proxy');
 const port = process.env.PORT || 5002;
@@ -1046,6 +1049,9 @@ app.get('/api/arkiver/files/:fileId', async (req, res) => {
   }
 });
 
+// Mount library routes
+app.use('/api', libraryRoutes);
+
 // Start server
 // Export app for testing
 export { app };
@@ -1063,5 +1069,13 @@ if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith
     console.log(`  GET  /mcp/status - Server status`);
     console.log(`  POST /api/arkiver/upload - Upload file to Arkiver`);
     console.log(`  GET  /api/arkiver/files/:fileId - Get file status`);
+    console.log(`  POST /api/onboarding/practice-profile - Save practice profile`);
+    console.log(`  GET  /api/onboarding/practice-profile - Get practice profile`);
+    console.log(`  POST /api/library/locations - Add/update library location`);
+    console.log(`  GET  /api/library/locations - List library locations`);
+    console.log(`  GET  /api/library/items - List library items`);
+    console.log(`  POST /api/library/items/:id/pin - Toggle pin status`);
+    console.log(`  POST /api/library/items/:id/ingest - Enqueue for RAG ingestion`);
+    console.log(`  GET  /api/health/library - Library health status`);
   });
 }

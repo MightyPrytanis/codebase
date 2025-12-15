@@ -7,7 +7,7 @@
 import React, { useState } from "react";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import ExpandedPanel from "./expanded-panel";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 interface CalendarViewProps {
   isOpen: boolean;
@@ -80,12 +80,14 @@ export function CalendarView({ isOpen, onClose }: CalendarViewProps) {
   const days = getDaysForView();
 
   return (
-    <ExpandedPanel
-      title="Calendar View"
-      isOpen={isOpen}
-      onClose={onClose}
-      className="max-w-7xl"
-    >
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent 
+        side="right" 
+        className="w-full sm:max-w-7xl bg-charcoal border-gray-800 overflow-y-auto"
+      >
+        <SheetHeader>
+          <SheetTitle className="text-xl font-semibold text-white">Calendar View</SheetTitle>
+        </SheetHeader>
       <div className="calendar-view-container" style={{ padding: '1.5rem' }}>
         {/* Controls */}
         <div className="flex items-center justify-between mb-6">
@@ -192,8 +194,8 @@ export function CalendarView({ isOpen, onClose }: CalendarViewProps) {
             );
           })}
         </div>
-      </div>
-    </ExpandedPanel>
+      </SheetContent>
+    </Sheet>
   );
 }
 
