@@ -105,10 +105,6 @@ export function CyranoIcon({
     animation: 'cyrano-pulse 2.5s ease-in-out infinite'
   } : {};
   
-  const ringAnimation = state === 'active' ? {
-    animation: 'cyrano-highlight 1.75s linear infinite'
-  } : {};
-  
   const alertColor = state === 'alert' ? 'var(--cyrano-alert-amber)' : undefined;
   
   return (
@@ -131,11 +127,6 @@ export function CyranoIcon({
           @keyframes cyrano-pulse {
             0%, 100% { opacity: 0.6; }
             50% { opacity: 0.85; }
-          }
-          
-          @keyframes cyrano-highlight {
-            0% { stroke-dashoffset: 0; }
-            100% { stroke-dashoffset: ${ringOuterRadius * Math.PI * 2}; }
           }
         `}
       </style>
@@ -207,7 +198,6 @@ export function CyranoIcon({
               Z
             `}
             fill={alertColor || "var(--cyrano-organic-base)"}
-            style={ringAnimation}
           />
         </g>
         
@@ -221,7 +211,6 @@ export function CyranoIcon({
               Z
             `}
             fill={alertColor || "var(--cyrano-tech-base)"}
-            style={ringAnimation}
           />
         </g>
         

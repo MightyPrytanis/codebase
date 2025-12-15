@@ -254,9 +254,9 @@
             <div style="text-align: center;">
                 <div id="icon-interactive" style="display: inline-block;"></div>
                 <div class="state-buttons">
-                    <button class="state-button active" onclick="setState('idle')">Idle</button>
-                    <button class="state-button" onclick="setState('active')">Active</button>
-                    <button class="state-button" onclick="setState('alert')">Alert</button>
+                    <button class="state-button active" onclick="setState('idle', event)">Idle</button>
+                    <button class="state-button" onclick="setState('active', event)">Active</button>
+                    <button class="state-button" onclick="setState('alert', event)">Alert</button>
                 </div>
             </div>
         </div>
@@ -397,7 +397,7 @@
         document.getElementById('icon-interactive').innerHTML = createCyranoIcon(96, 'idle');
         
         let currentState = 'idle';
-        function setState(state) {
+        function setState(state, event) {
             currentState = state;
             document.getElementById('icon-interactive').innerHTML = createCyranoIcon(96, state);
             
@@ -405,7 +405,9 @@
             document.querySelectorAll('.state-button').forEach(btn => {
                 btn.classList.remove('active');
             });
-            event.target.classList.add('active');
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
         }
     </script>
 </body>
