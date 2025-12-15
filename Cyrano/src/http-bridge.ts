@@ -111,6 +111,7 @@ import {
   integrityMonitor,
   alertGenerator,
 } from './engines/potemkin/tools/index.js';
+import { cyranoPathfinder } from './tools/cyrano-pathfinder.js';
 
 const app = express();
 app.enable('trust proxy');
@@ -239,6 +240,8 @@ mcpServer.setRequestHandler(ListToolsRequestSchema, async () => {
       legalEmailDrafter.getToolDefinition(),
       refineEmailTone.getToolDefinition(),
       validateLegalLanguage.getToolDefinition(),
+      // Cyrano Pathfinder - Unified Chat Interface
+      cyranoPathfinder.getToolDefinition(),
     ],
   };
 });
@@ -454,6 +457,9 @@ mcpServer.setRequestHandler(CallToolRequestSchema, async (request) => {
           case 'validate_legal_language':
             result = await validateLegalLanguage.execute(args);
             break;
+          case 'cyrano_pathfinder':
+            result = await cyranoPathfinder.execute(args);
+            break;
           default:
             throw new Error(`Unknown tool: ${name}`);
         }
@@ -535,6 +541,8 @@ app.get('/mcp/tools', async (req, res) => {
       legalEmailDrafter.getToolDefinition(),
       refineEmailTone.getToolDefinition(),
       validateLegalLanguage.getToolDefinition(),
+      // Cyrano Pathfinder - Unified Chat Interface
+      cyranoPathfinder.getToolDefinition(),
     ];
     
     res.json({ tools });
@@ -744,6 +752,11 @@ app.post('/mcp/execute', async (req, res) => {
         break;
       case 'alert_generator':
         result = await alertGenerator.execute(toolInput);
+        break;
+      
+      // Cyrano Pathfinder
+      case 'cyrano_pathfinder':
+        result = await cyranoPathfinder.execute(toolInput);
         break;
         
       default:

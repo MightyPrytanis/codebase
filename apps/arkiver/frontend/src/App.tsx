@@ -17,6 +17,7 @@ import HomePage from './pages/HomePage';
 import { Upload, Lightbulb, Settings as SettingsIcon, BarChart3, Shield, Home } from 'lucide-react';
 import { AIIcon } from './components/AIIcon';
 import { ToastProvider } from './components/ui/toast';
+import { CyranoChatDrawer } from './components/CyranoChatDrawer';
 import arkiverLogo from './Arkiver Main.png';
 
 const queryClient = new QueryClient({
@@ -109,6 +110,7 @@ function App() {
               <Route path="/ai-integrity" element={<AiIntegrity />} />
             </Routes>
           </main>
+          <CyranoChatDrawer app="arkiver" />
         </div>
       </Router>
       </ToastProvider>
