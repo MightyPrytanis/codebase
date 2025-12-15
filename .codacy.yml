@@ -1,0 +1,21 @@
+---
+engines:
+  eslint: 
+    enabled: true
+  pmd:
+    enabled: false
+  pmd-legacy:
+    enabled: false
+  
+exclude_paths:
+  - "node_modules/**"
+  - "**/node_modules/**"
+  - "dist/**"
+  - "build/**"
+  - "**/*.test.ts"
+  - "**/*.test.tsx"
+  - "**/*.spec.ts"
+  - "**/*.spec.tsx"
+  - "Legacy/**"
+  - "archive/**"
+  - "**/archive/**"
