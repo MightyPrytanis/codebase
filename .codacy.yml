@@ -2,8 +2,22 @@
 engines:
   eslint:
     enabled: true
+    exclude_paths:
+      - 'Legacy/**'
+      - 'Cyrano/**'
+      - 'apps/**'
+      - 'LexFiat/**'
+      - 'docs/**'
+      - 'node_modules/**'
   eslint-typescript:
     enabled: true
+    exclude_paths:
+      - 'Legacy/**'
+      - 'Cyrano/**'
+      - 'apps/**'
+      - 'LexFiat/**'
+      - 'docs/**'
+      - 'node_modules/**'
   jest:
     enabled: true
   pmd: 
@@ -12,17 +26,18 @@ engines:
     enabled: false
 
 # Exclude common generated and vendor directories to reduce noise
-exclude:
-  - node_modules/**
-  - **/dist/**
-  - **/build/**
-  - **/coverage/**
-  - **/public/**
-  - Legacy/**
-  - Cyrano/**
-  - apps/**
-  - LexFiat/**
-  - docs/**
+exclude_paths:
+  - 'node_modules/**'
+  - '**/dist/**'
+  - '**/build/**'
+  - '**/coverage/**'
+  - '**/public/**'
+  - 'Legacy/**'
+  - 'Cyrano/**'
+  - 'apps/**'
+  - 'LexFiat/**'
+  - 'docs/**'
+  - 'Miscellaneous/**'
 
 # Patterns to skip for analysis
 patterns:

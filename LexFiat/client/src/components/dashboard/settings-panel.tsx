@@ -5,7 +5,7 @@
  */
 
 import React, { useState } from "react";
-import ExpandedPanel from "./expanded-panel";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Settings, Bell, Palette, Globe, Link as LinkIcon, Bot } from "lucide-react";
 import { useLocation } from "wouter";
 import { useTheme } from "@/components/theme/theme-provider";
@@ -27,12 +27,14 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   };
 
   return (
-    <ExpandedPanel
-      title="Settings"
-      isOpen={isOpen}
-      onClose={onClose}
-      className="max-w-4xl"
-    >
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent 
+        side="right" 
+        className="w-full sm:max-w-4xl bg-charcoal border-gray-800 overflow-y-auto"
+      >
+        <SheetHeader>
+          <SheetTitle className="text-xl font-semibold text-white">Settings</SheetTitle>
+        </SheetHeader>
       <div className="space-y-6">
         <div 
           className="insight-card info p-4 cursor-pointer hover:bg-black/40 transition-colors"
@@ -108,8 +110,8 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
             <p className="text-sm text-muted-foreground">Configure AI service providers and API keys</p>
           </div>
         </div>
-      </div>
-    </ExpandedPanel>
+      </SheetContent>
+    </Sheet>
   );
 }
 
