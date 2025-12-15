@@ -404,10 +404,10 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Bottom Row: Chronometric and MAE (glass overlay only) */}
+        {/* Bottom Row: Chronometric, MAE, and Library (glass overlay only) */}
         <div style={{ width: '100%', marginTop: '1.5rem', display: 'grid', gridTemplateColumns: '60px 1fr', gap: '1rem', alignItems: 'stretch' }}>
           <div style={{ width: '100%', height: '100%' }}></div>
-          <div className="grid grid-cols-4 gap-6" style={{ display: 'grid', width: '100%', maxWidth: '100%', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', boxSizing: 'border-box' }}>
+          <div className="grid grid-cols-6 gap-6" style={{ display: 'grid', width: '100%', maxWidth: '100%', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', boxSizing: 'border-box' }}>
           <div className="col-span-2 widget background-widget" onClick={() => expandPanel('chronometric')}>
             <div className="widget-header">
               <h3 className="widget-title flex items-center gap-2" style={{ color: 'rgba(255, 255, 255, 0.9)', fontWeight: '600' }}>
@@ -433,6 +433,22 @@ export default function Dashboard() {
             <div className="widget-content">
               <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.875rem' }}>Agent coordination and execution</p>
             </div>
+          </div>
+          <div className="col-span-2 widget background-widget">
+            <a href="/library" className="block">
+              <div className="widget-header">
+                <h3 className="widget-title flex items-center gap-2" style={{ color: 'rgba(255, 255, 255, 0.9)', fontWeight: '600' }}>
+                  <svg className="widget-icon" style={{ width: '18px', height: '18px' }} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+                  </svg>
+                  <span className="ml-1">Library</span>
+                </h3>
+              </div>
+              <div className="widget-content">
+                <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.875rem' }}>Rules, orders, templates, playbooks</p>
+              </div>
+            </a>
           </div>
           </div>
         </div>

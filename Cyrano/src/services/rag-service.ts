@@ -20,6 +20,26 @@ export interface Document {
     page?: number;
     uploadedAt?: Date;
     uploadedBy?: string;
+    // Library-specific metadata
+    libraryItemId?: string;
+    filename?: string;
+    filepath?: string;
+    title?: string;
+    description?: string;
+    jurisdiction?: string;
+    county?: string;
+    court?: string;
+    judgeReferee?: string;
+    issueTags?: string[];
+    practiceAreas?: string[];
+    effectiveFrom?: Date;
+    effectiveTo?: Date;
+    dateCreated?: Date;
+    dateModified?: Date;
+    pinned?: boolean;
+    superseded?: boolean;
+    supersededBy?: string;
+    [key: string]: any; // Allow additional metadata fields
   };
 }
 
@@ -54,6 +74,14 @@ export interface ChunkResult {
     page?: number;
     source?: string;
     sourceType?: string;
+    // Library-specific metadata
+    county?: string;
+    court?: string;
+    judgeReferee?: string;
+    issueTags?: string[];
+    effectiveFrom?: Date;
+    effectiveTo?: Date;
+    [key: string]: any; // Allow additional metadata fields
   };
 }
 
