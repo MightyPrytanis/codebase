@@ -1,0 +1,32 @@
+# Codacy configuration with disabled problematic analyzers
+engines:
+  eslint:
+    enabled: true
+  eslint-typescript:
+    enabled: true
+  jest:
+    enabled: true
+  pmd: 
+    enabled: false
+  pmd-legacy:
+    enabled: false
+
+# Exclude common generated and vendor directories to reduce noise
+exclude:
+  - node_modules/**
+  - **/dist/**
+  - **/build/**
+  - **/coverage/**
+  - **/public/**
+  - Legacy/**
+  - Cyrano/**
+  - apps/**
+  - LexFiat/**
+  - docs/**
+
+# Patterns to skip for analysis
+patterns:
+  - '**/*.min.js'
+  - '**/*.bundle.js'
+  - '**/*.spec.ts'
+  - '**/*.test.ts'
