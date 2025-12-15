@@ -49,7 +49,7 @@ import { timeValueBilling } from './tools/time-value-billing.js';
 import { tasksCollector } from './tools/tasks-collector.js';
 import { contactsCollector } from './tools/contacts-collector.js';
 import { DocumentDrafterTool } from './tools/document-drafter.js';
-import { toolEnhancer } from './tools/tool-enhancer.js';
+// import { toolEnhancer } from './tools/tool-enhancer.js'; // TODO: File doesn't exist
 import { ethicsReviewer } from './engines/goodcounsel/tools/ethics-reviewer.js';
 import {
   arkiverTextProcessor,
@@ -398,7 +398,11 @@ mcpServer.setRequestHandler(CallToolRequestSchema, async (request) => {
             result = await new DocumentDrafterTool().execute(args);
             break;
           case 'tool_enhancer':
-            result = await toolEnhancer.execute(args);
+            // TODO: tool_enhancer not implemented
+            result = {
+              content: [{ type: 'text', text: 'Tool enhancer not available' }],
+              isError: true,
+            };
             break;
           case 'source_verifier':
             result = await sourceVerifier.execute(args);
@@ -694,7 +698,11 @@ app.post('/mcp/execute', async (req, res) => {
         result = await new DocumentDrafterTool().execute(toolInput);
         break;
       case 'tool_enhancer':
-        result = await toolEnhancer.execute(toolInput);
+        // TODO: tool_enhancer not implemented
+        result = {
+          content: [{ type: 'text', text: 'Tool enhancer not available' }],
+          isError: true,
+        };
         break;
       case 'source_verifier':
         result = await sourceVerifier.execute(toolInput);
