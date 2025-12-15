@@ -228,6 +228,7 @@
                 const gapBottom = 14;
                 const rightX = rectX + rectWidth;
                 
+                // No Z command - open path with gap
                 return `
                     M ${rectX + rx},${rectY}
                     L ${rightX - rx},${rectY}
@@ -240,7 +241,6 @@
                     Q ${rectX},${rectY + rectHeight} ${rectX},${rectY + rectHeight - rx}
                     L ${rectX},${rectY + rx}
                     Q ${rectX},${rectY} ${rectX + rx},${rectY}
-                    Z
                 `;
             };
             

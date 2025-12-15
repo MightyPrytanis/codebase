@@ -87,6 +87,7 @@ export function CyranoIcon({
     const rightX = rectX + rectWidth;
     
     // Start from top-left, go clockwise, but skip the gap on the right side
+    // Note: No Z (close path) command at the end - we want an open path with the gap
     return `
       M ${rectX + rx},${rectY}
       L ${rightX - rx},${rectY}
@@ -99,7 +100,6 @@ export function CyranoIcon({
       Q ${rectX},${rectY + rectHeight} ${rectX},${rectY + rectHeight - rx}
       L ${rectX},${rectY + rx}
       Q ${rectX},${rectY} ${rectX + rx},${rectY}
-      Z
     `;
   };
   
