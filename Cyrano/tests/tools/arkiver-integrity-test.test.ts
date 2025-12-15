@@ -101,8 +101,8 @@ describe('ArkiverIntegrityTestTool', () => {
       ),
     };
     
-    // Use the get method instead of register
-    vi.spyOn(engineRegistry, 'get').mockReturnValue(mockPotemkinEngine as any);
+    // Mock the get method to return our mock engine
+    mockGetSpy = vi.spyOn(engineRegistry, 'get').mockReturnValue(mockPotemkinEngine as any);
 
     const result = await arkiverIntegrityTestTool.execute({
       testType: 'opinion_drift',
