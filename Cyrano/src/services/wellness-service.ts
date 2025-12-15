@@ -106,7 +106,10 @@ class WellnessService {
     // Encrypt sensitive fields
     const contentEncrypted = encryption.encryptField(input.content, 'content').encrypted;
     const moodEncrypted = input.mood ? encryption.encryptField(input.mood, 'mood').encrypted : null;
-    const tagsEncrypted = input.tags ? encryption.encryptField(JSON.stringify(input.tags), 'tags').encrypted : null;
+    // For tags, we need to encrypt each tag individually since schema expects string[]
+    const tagsEncrypted = input.tags 
+      ? input.tags.map(tag => encryption.encryptField(tag, 'tags').encrypted)
+      : [];
     const transcriptionEncrypted = transcription ? encryption.encryptField(transcription, 'transcription').encrypted : null;
     const voiceAudioPathEncrypted = voiceAudioPath ? encryption.encryptField(voiceAudioPath, 'voice_audio_path').encrypted : null;
 
