@@ -887,7 +887,12 @@ Focus on extracting ${settings.type} insights with a minimum confidence threshol
 
     // Attach verification to insights that reference verified sources
     return insights.map(insight => {
-      const verifiedSources: Insight['sourceVerification']['sources'] = [];
+      const verifiedSources: Array<{
+        source: string;
+        accessible: boolean;
+        reliable: boolean;
+        reliabilityScore: number;
+      }> = [];
       let hasVerifiedSource = false;
 
       // Check metadata citations
