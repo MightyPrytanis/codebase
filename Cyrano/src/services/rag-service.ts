@@ -31,6 +31,16 @@ export interface RAGOptions {
   expandQuery?: boolean;     // Enable query expansion
   rerank?: boolean;           // Enable reranking
   includeSourceInfo?: boolean; // Include data source information
+  // Library-specific filters
+  filterBySourceType?: string[];  // Filter by source type (rule, template, etc.)
+  filterByCounty?: string;        // Filter by county
+  filterByCourt?: string;         // Filter by court
+  filterByJudgeReferee?: string;  // Filter by judge/referee
+  filterByIssueTags?: string[];   // Filter by issue tags
+  filterByEffectiveDate?: {       // Filter by effective date range
+    from?: Date;
+    to?: Date;
+  };
 }
 
 export interface ChunkResult {
@@ -274,10 +284,64 @@ export class RAGService {
       results = this.rerankResults(query, uniqueResults);
     }
 
+    // Apply library-specific filters BEFORE taking top K
+    // Filter by source type (rule, standing-order, template, etc.)
+    if (options.filterBySourceType && options.filterBySourceType.length > 0) {
+      results = results.filter(result => {
+        const sourceType = result.document.metadata?.sourceType;
+        return sourceType && options.filterBySourceType!.includes(sourceType);
+      });
+    }
+
+    // Filter by county
+    if (options.filterByCounty) {
+      results = results.filter(result => 
+        result.document.metadata?.county === options.filterByCounty
+      );
+    }
+
+    // Filter by court
+    if (options.filterByCourt) {
+      results = results.filter(result => 
+        result.document.metadata?.court === options.filterByCourt
+      );
+    }
+
+    // Filter by judge/referee
+    if (options.filterByJudgeReferee) {
+      results = results.filter(result => 
+        result.document.metadata?.judgeReferee === options.filterByJudgeReferee
+      );
+    }
+
+    // Filter by issue tags (match any tag)
+    if (options.filterByIssueTags && options.filterByIssueTags.length > 0) {
+      results = results.filter(result => {
+        const issueTags = result.document.metadata?.issueTags;
+        if (!issueTags || !Array.isArray(issueTags)) return false;
+        return options.filterByIssueTags!.some(tag => issueTags.includes(tag));
+      });
+    }
+
+    // Filter by effective date range
+    if (options.filterByEffectiveDate) {
+      const { from, to } = options.filterByEffectiveDate;
+      results = results.filter(result => {
+        const effectiveFrom = result.document.metadata?.effectiveFrom;
+        const effectiveTo = result.document.metadata?.effectiveTo;
+        
+        // Check if document is effective within the specified range
+        if (from && effectiveTo && new Date(effectiveTo) < from) return false;
+        if (to && effectiveFrom && new Date(effectiveFrom) > to) return false;
+        
+        return true;
+      });
+    }
+
     // Take top K
     results = results.slice(0, topK);
 
-    // Filter by type if specified
+    // Filter by document type if specified (legacy support)
     if (options.filterByType && options.filterByType.length > 0) {
       results = results.filter(result => 
         result.document.metadata?.documentType && 
