@@ -407,8 +407,8 @@ export default function Dashboard() {
         {/* Bottom Row: Chronometric, MAE, and Library (glass overlay only) */}
         <div style={{ width: '100%', marginTop: '1.5rem', display: 'grid', gridTemplateColumns: '60px 1fr', gap: '1rem', alignItems: 'stretch' }}>
           <div style={{ width: '100%', height: '100%' }}></div>
-          <div className="grid grid-cols-6 gap-6" style={{ display: 'grid', width: '100%', maxWidth: '100%', gridTemplateColumns: 'repeat(6, minmax(0, 1fr))', boxSizing: 'border-box' }}>
-          <div className="col-span-2 widget background-widget" onClick={() => expandPanel('chronometric')}>
+          <div style={{ display: 'grid', width: '100%', maxWidth: '100%', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '1.5rem', boxSizing: 'border-box' }}>
+          <div className="widget background-widget" onClick={() => expandPanel('chronometric')}>
             <div className="widget-header">
               <h3 className="widget-title flex items-center gap-2" style={{ color: 'rgba(255, 255, 255, 0.9)', fontWeight: '600' }}>
                 <Clock className="widget-icon" style={{ width: '18px', height: '18px' }} />
@@ -419,7 +419,7 @@ export default function Dashboard() {
               <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.875rem' }}>Time tracking and analytics</p>
             </div>
           </div>
-          <div className="col-span-2 widget background-widget" onClick={() => expandPanel('mae')}>
+          <div className="widget background-widget" onClick={() => expandPanel('mae')}>
             <div className="widget-header">
               <h3 className="widget-title flex items-center gap-2" style={{ color: 'rgba(255, 255, 255, 0.9)', fontWeight: '600' }}>
                 <div className="multi-agent-icon-group" style={{ width: '18px', height: '18px', position: 'relative' }}>
@@ -434,7 +434,7 @@ export default function Dashboard() {
               <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.875rem' }}>Agent coordination and execution</p>
             </div>
           </div>
-          <div className="col-span-2 widget background-widget">
+          <div className="widget background-widget">
             <a href="/library" className="block">
               <div className="widget-header">
                 <h3 className="widget-title flex items-center gap-2" style={{ color: 'rgba(255, 255, 255, 0.9)', fontWeight: '600' }}>
