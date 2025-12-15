@@ -108,6 +108,7 @@ import {
   runExtractionPipeline,
   createArkiverConfig
 } from './tools/arkiver-tools.js';
+import { cyranoPathfinder } from './tools/cyrano-pathfinder.js';
 
 class CyranoMCPServer {
   private server: Server;
@@ -214,6 +215,8 @@ class CyranoMCPServer {
           evaluateGoodCounselContextTool.getToolDefinition(),
           // Wellness Journaling
           wellnessJournalTool.getToolDefinition(),
+          // Cyrano Pathfinder - Unified Chat Interface
+          cyranoPathfinder.getToolDefinition(),
         ],
       };
     });
@@ -436,6 +439,9 @@ class CyranoMCPServer {
             break;
           case 'wellness_journal':
             result = await wellnessJournalTool.execute(args);
+            break;
+          case 'cyrano_pathfinder':
+            result = await cyranoPathfinder.execute(args);
             break;
           default:
             throw new Error(`Unknown tool: ${name}`);
