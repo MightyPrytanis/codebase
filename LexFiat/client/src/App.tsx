@@ -8,6 +8,7 @@ import { IconSprite } from "@/components/ui/icon-sprite";
 import { DemoModeBanner } from "@/components/demo/demo-mode-banner";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { CyranoChatDrawer } from "@/components/cyrano-chat-drawer";
 import { Loader2 } from "lucide-react";
 import "@/styles/ad-astra.css";
 
@@ -90,6 +91,7 @@ function App() {
               <ErrorBoundary>
                 <Router />
               </ErrorBoundary>
+              <CyranoChatDrawer app="lexfiat" />
             </div>
           </TooltipProvider>
         </ThemeProvider>

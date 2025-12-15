@@ -14,6 +14,7 @@ import express from 'express';
 import cors, { CorsOptions } from 'cors';
 import dotenv from 'dotenv';
 import multer from 'multer';
+import cookieParser from 'cookie-parser';
 
 // Load environment variables
 dotenv.config();
@@ -25,6 +26,10 @@ import {
   Tool,
   CallToolResult,
 } from '@modelcontextprotocol/sdk/types.js';
+
+// Import security middleware
+import security from './middleware/security.js';
+import authRoutes from './routes/auth.js';
 
 // Import tool implementations
 import { documentAnalyzer } from './tools/document-analyzer.js';
@@ -49,7 +54,7 @@ import { timeValueBilling } from './tools/time-value-billing.js';
 import { tasksCollector } from './tools/tasks-collector.js';
 import { contactsCollector } from './tools/contacts-collector.js';
 import { DocumentDrafterTool } from './tools/document-drafter.js';
-import { toolEnhancer } from './tools/tool-enhancer.js';
+// import { toolEnhancer } from './tools/tool-enhancer.js'; // TODO: File doesn't exist
 import { ethicsReviewer } from './engines/goodcounsel/tools/ethics-reviewer.js';
 import {
   arkiverTextProcessor,
@@ -106,6 +111,7 @@ import {
   integrityMonitor,
   alertGenerator,
 } from './engines/potemkin/tools/index.js';
+import { cyranoPathfinder } from './tools/cyrano-pathfinder.js';
 
 // Import library routes
 import libraryRoutes from './routes/library.js';
@@ -116,6 +122,12 @@ const port = process.env.PORT || 5002;
 
 // Disable X-Powered-By header to prevent information disclosure
 app.disable('x-powered-by');
+
+// Security: Apply Helmet.js for secure headers
+app.use(security.secureHeaders);
+
+// Cookie parser for session management
+app.use(cookieParser());
 
 // Middleware
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').map(o => o.trim()).filter(Boolean);
@@ -134,6 +146,13 @@ app.use((req, res, next) => {
 });
 app.use(express.json());
 app.use(express.raw({ type: 'application/octet-stream', limit: '100mb' }));
+
+// Security: Input sanitization
+app.use(security.sanitizeInputs);
+
+// Security: Rate limiting (applies to all routes)
+app.use(security.authenticatedLimiter);
+app.use(security.unauthenticatedLimiter);
 
 // Multer configuration for file uploads
 const upload = multer({
@@ -224,6 +243,8 @@ mcpServer.setRequestHandler(ListToolsRequestSchema, async () => {
       legalEmailDrafter.getToolDefinition(),
       refineEmailTone.getToolDefinition(),
       validateLegalLanguage.getToolDefinition(),
+      // Cyrano Pathfinder - Unified Chat Interface
+      cyranoPathfinder.getToolDefinition(),
     ],
   };
 });
@@ -401,7 +422,11 @@ mcpServer.setRequestHandler(CallToolRequestSchema, async (request) => {
             result = await new DocumentDrafterTool().execute(args);
             break;
           case 'tool_enhancer':
-            result = await toolEnhancer.execute(args);
+            // TODO: tool_enhancer not implemented
+            result = {
+              content: [{ type: 'text', text: 'Tool enhancer not available' }],
+              isError: true,
+            };
             break;
           case 'source_verifier':
             result = await sourceVerifier.execute(args);
@@ -434,6 +459,9 @@ mcpServer.setRequestHandler(CallToolRequestSchema, async (request) => {
             break;
           case 'validate_legal_language':
             result = await validateLegalLanguage.execute(args);
+            break;
+          case 'cyrano_pathfinder':
+            result = await cyranoPathfinder.execute(args);
             break;
           default:
             throw new Error(`Unknown tool: ${name}`);
@@ -516,6 +544,8 @@ app.get('/mcp/tools', async (req, res) => {
       legalEmailDrafter.getToolDefinition(),
       refineEmailTone.getToolDefinition(),
       validateLegalLanguage.getToolDefinition(),
+      // Cyrano Pathfinder - Unified Chat Interface
+      cyranoPathfinder.getToolDefinition(),
     ];
     
     res.json({ tools });
@@ -697,7 +727,11 @@ app.post('/mcp/execute', async (req, res) => {
         result = await new DocumentDrafterTool().execute(toolInput);
         break;
       case 'tool_enhancer':
-        result = await toolEnhancer.execute(toolInput);
+        // TODO: tool_enhancer not implemented
+        result = {
+          content: [{ type: 'text', text: 'Tool enhancer not available' }],
+          isError: true,
+        };
         break;
       case 'source_verifier':
         result = await sourceVerifier.execute(toolInput);
@@ -721,6 +755,11 @@ app.post('/mcp/execute', async (req, res) => {
         break;
       case 'alert_generator':
         result = await alertGenerator.execute(toolInput);
+        break;
+      
+      // Cyrano Pathfinder
+      case 'cyrano_pathfinder':
+        result = await cyranoPathfinder.execute(toolInput);
         break;
         
       default:
@@ -777,13 +816,25 @@ app.get('/api/good-counsel/overview', async (req, res) => {
   }
 });
 
+// Authentication routes
+app.use('/auth', authRoutes);
+
+// Security endpoints
+app.get('/csrf-token', security.getCSRFToken);
+app.get('/security/status', security.securityStatus);
+
 app.get('/health', (req, res) => {
   res.json({ 
     status: 'healthy',
     timestamp: new Date().toISOString(),
     version: '1.0.0',
     tools_count: 32,
-    uptime: process.uptime()
+    uptime: process.uptime(),
+    security: {
+      jwtEnabled: !!process.env.JWT_SECRET,
+      csrfProtection: true,
+      rateLimiting: true,
+    }
   });
 });
 

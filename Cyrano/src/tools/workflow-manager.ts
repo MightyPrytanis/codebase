@@ -153,22 +153,6 @@ export const workflowManager = new (class extends BaseTool {
 
   public getWorkflowSteps(type: string): any[] {
     const stepTemplates: Record<string, any[]> = {
-      compare: [
-        { step: 1, agent: 'document_analyzer', description: 'Analyze documents' },
-        { step: 2, agent: 'contract_comparator', description: 'Compare contract/agreement elements' },
-        { step: 3, agent: 'fact_checker', description: 'Verify facts' },
-      ],
-      critique: [
-        { step: 1, agent: 'document_analyzer', description: 'Analyze document' },
-        { step: 2, agent: 'legal_reviewer', description: 'Review legal compliance' },
-        { step: 3, agent: 'quality_assessor', description: 'Assess quality' },
-      ],
-      collaborate: [
-        { step: 1, agent: 'document_analyzer', description: 'Initial analysis' },
-        { step: 2, agent: 'legal_reviewer', description: 'Legal review' },
-        { step: 3, agent: 'compliance_checker', description: 'Compliance check' },
-        { step: 4, agent: 'quality_assessor', description: 'Final assessment' },
-      ],
       // C Workflows (Compare, Critique, Collaborate, etc. - adapted from SwimMeet)
       compare: [
         { step: 1, tool: 'document_processor', description: 'Document ingestion' },
@@ -292,9 +276,6 @@ export const workflowManager = new (class extends BaseTool {
 
   public estimateCompletion(type: string): string {
     const estimates: Record<string, string> = {
-      compare: '5-10 minutes',
-      critique: '3-7 minutes',
-      collaborate: '10-15 minutes',
       compare: '5-10 minutes',
       critique: '8-15 minutes',
       collaborate: '10-20 minutes',
