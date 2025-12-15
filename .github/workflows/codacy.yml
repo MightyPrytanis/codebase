@@ -37,6 +37,8 @@ jobs:
       # Checkout the repository to the GitHub Actions runner
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          submodules: false
 
       # Execute Codacy Analysis CLI and generate a SARIF output with the security issues identified during the analysis
       - name: Run Codacy Analysis CLI
@@ -53,6 +55,12 @@ jobs:
           # Force 0 exit code to allow SARIF file generation
           # This will handover control about PR rejection to the GitHub side
           max-allowed-issues: 2147483647
+          # Exclude paths without ESLint config
+          exclude-paths: |
+            Miscellaneous/ui,
+            apps/arkiver
+          # Exclude problematic tools
+          exclude-tools: pmd,pmd-legacy
 
       # Upload the SARIF file generated in the previous step
       - name: Upload SARIF results file
