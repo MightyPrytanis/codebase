@@ -813,6 +813,9 @@ app.get('/mcp/tools/info', async (req, res) => {
       { category: 'Engine', ...maeEngineTool.getToolDefinition() },
       { category: 'Engine', ...goodcounselEngineTool.getToolDefinition() },
       { category: 'Engine', ...potemkinEngineTool.getToolDefinition() },
+      
+      // Codename tool
+      { category: 'Codename', ...menloPark.getToolDefinition() },
     ];
     
     res.json({ 
@@ -823,7 +826,8 @@ app.get('/mcp/tools/info', async (req, res) => {
         data_processing_tools: toolsInfo.filter(t => t.category === 'Data Processing').length,
         timekeeping_tools: toolsInfo.filter(t => t.category === 'Timekeeping').length,
         modules: toolsInfo.filter(t => t.category === 'Module').length,
-        engines: toolsInfo.filter(t => t.category === 'Engine').length
+        engines: toolsInfo.filter(t => t.category === 'Engine').length,
+        codename_tools: toolsInfo.filter(t => t.category === 'Codename').length
       }
     });
   } catch (error) {
