@@ -3,7 +3,269 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cyrano Icon Preview</title>
+    <title>Cyrano Icon Preview - Simplified C-Shape Design</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            padding: 40px 20px;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #D89B6A;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            color: #888;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+        
+        .section {
+            margin-bottom: 60px;
+            background: #2a2a2a;
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid #3a3a3a;
+        }
+        
+        .section h2 {
+            color: #D89B6A;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-bottom: 2px solid #3a3a3a;
+            padding-bottom: 10px;
+        }
+        
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        .icon-item {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #3a3a3a;
+            text-align: center;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        
+        .icon-item:hover {
+            transform: translateY(-2px);
+            border-color: #D89B6A;
+        }
+        
+        .icon-name {
+            font-weight: 600;
+            color: #e0e0e0;
+            margin-top: 15px;
+            font-size: 0.95em;
+        }
+        
+        .icon-description {
+            color: #888;
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+        
+        .icon-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .size-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .size-label {
+            font-size: 0.75em;
+            color: #666;
+            min-width: 50px;
+            text-align: right;
+        }
+        
+        svg {
+            display: block;
+        }
+        
+        .info-box {
+            background: #2a2a4a;
+            border: 1px solid #3a3a6a;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+            color: #a0a0d0;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Cyrano Copilot Icon</h1>
+        <p class="subtitle">Simplified C-Shape Design - HAL Icon with Opening at 3 O'Clock</p>
+        
+        <div class="info-box">
+            <strong>Design:</strong> Based on the original HAL 9000 tribute icon with a gap/break at the 3 o'clock position in both the circle and rectangle. This creates a "C" shape where negative space connects from inside (between the red dot and circle) to the outside, echoing the Cognisint logo.
+        </div>
+        
+        <!-- Different Sizes -->
+        <div class="section">
+            <h2>Icon Sizes</h2>
+            <div class="icon-grid">
+                <div class="icon-item">
+                    <div class="icon-display">
+                        <div id="icon-64"></div>
+                        <div class="icon-name">64px</div>
+                        <div class="icon-description">Large display</div>
+                    </div>
+                </div>
+                <div class="icon-item">
+                    <div class="icon-display">
+                        <div id="icon-48"></div>
+                        <div class="icon-name">48px</div>
+                        <div class="icon-description">Medium display</div>
+                    </div>
+                </div>
+                <div class="icon-item">
+                    <div class="icon-display">
+                        <div id="icon-32"></div>
+                        <div class="icon-name">32px</div>
+                        <div class="icon-description">Navigation</div>
+                    </div>
+                </div>
+                <div class="icon-item">
+                    <div class="icon-display">
+                        <div id="icon-24"></div>
+                        <div class="icon-name">24px</div>
+                        <div class="icon-description">Standard</div>
+                    </div>
+                </div>
+                <div class="icon-item">
+                    <div class="icon-display">
+                        <div id="icon-16"></div>
+                        <div class="icon-name">16px</div>
+                        <div class="icon-description">Small/inline</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Design Notes</h2>
+            <div style="color: #888;">
+                <p><strong>Key features:</strong></p>
+                <ul style="margin-top: 10px; padding-left: 20px;">
+                    <li>Same tall rounded rectangle as original HAL icon</li>
+                    <li>Gap at 3 o'clock position in both circle and rectangle</li>
+                    <li>Small red dot (radius 1.6) - same size as original</li>
+                    <li>Stroke-based design maintains high visual clarity</li>
+                    <li>Negative space creates the "C" shape</li>
+                    <li>Simple, clean, recognizable at all sizes</li>
+                </ul>
+                <p style="margin-top: 15px;"><strong>Usage:</strong> Copilot/assistant entry points in LexFiat and Arkiver</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function createSimplifiedCyranoIcon(size) {
+            // Helper to describe circle with gap at 3 o'clock
+            const describeCircleWithGap = () => {
+                const cx = 12;
+                const cy = 12;
+                const r = 4;
+                
+                // Gap from ~60° to ~120° (2 o'clock to 4 o'clock)
+                const startAngle = 120;
+                const endAngle = 60;
+                
+                const startRad = (startAngle * Math.PI) / 180;
+                const endRad = (endAngle * Math.PI) / 180;
+                
+                const x1 = cx + r * Math.cos(startRad);
+                const y1 = cy + r * Math.sin(startRad);
+                const x2 = cx + r * Math.cos(endRad);
+                const y2 = cy + r * Math.sin(endRad);
+                
+                // Arc going the long way (left side of circle - the "C")
+                return `M ${x1},${y1} A ${r},${r} 0 1,1 ${x2},${y2}`;
+            };
+            
+            // Helper to describe rectangle with gap on right side
+            const describeRectWithGap = () => {
+                const rectX = 7;
+                const rectY = 3;
+                const rectWidth = 10;
+                const rectHeight = 18;
+                const rx = 2.5;
+                
+                // Gap at 3 o'clock (right side, middle)
+                const gapTop = 10;
+                const gapBottom = 14;
+                const rightX = rectX + rectWidth;
+                
+                return `
+                    M ${rectX + rx},${rectY}
+                    L ${rightX - rx},${rectY}
+                    Q ${rightX},${rectY} ${rightX},${rectY + rx}
+                    L ${rightX},${gapTop}
+                    M ${rightX},${gapBottom}
+                    L ${rightX},${rectY + rectHeight - rx}
+                    Q ${rightX},${rectY + rectHeight} ${rightX - rx},${rectY + rectHeight}
+                    L ${rectX + rx},${rectY + rectHeight}
+                    Q ${rectX},${rectY + rectHeight} ${rectX},${rectY + rectHeight - rx}
+                    L ${rectX},${rectY + rx}
+                    Q ${rectX},${rectY} ${rectX + rx},${rectY}
+                    Z
+                `;
+            };
+            
+            return `
+                <svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Rectangle with gap on right side -->
+                    <path d="${describeRectWithGap()}" fill="none" stroke="#D89B6A" stroke-width="2" />
+                    
+                    <!-- Circle with gap at 3 o'clock -->
+                    <path d="${describeCircleWithGap()}" fill="none" stroke="#D89B6A" stroke-width="2" stroke-linecap="round" />
+                    
+                    <!-- Red dot - same size as original -->
+                    <circle cx="12" cy="12" r="1.6" fill="#DC2626" />
+                </svg>
+            `;
+        }
+        
+        // Render icons
+        document.getElementById('icon-64').innerHTML = createSimplifiedCyranoIcon(64);
+        document.getElementById('icon-48').innerHTML = createSimplifiedCyranoIcon(48);
+        document.getElementById('icon-32').innerHTML = createSimplifiedCyranoIcon(32);
+        document.getElementById('icon-24').innerHTML = createSimplifiedCyranoIcon(24);
+        document.getElementById('icon-16').innerHTML = createSimplifiedCyranoIcon(16);
+    </script>
+</body>
+</html>
     <style>
         * {
             margin: 0;
