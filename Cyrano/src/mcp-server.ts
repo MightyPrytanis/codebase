@@ -16,6 +16,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+import dotenv from 'dotenv';
+
+// Load environment variables from .env file
+dotenv.config();
+
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { gapIdentifier } from './tools/gap-identifier.js';

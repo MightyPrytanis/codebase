@@ -143,29 +143,47 @@ function App() {
 
 ### Environment Variables
 
-The Cyrano Pathfinder requires API keys for AI providers:
+The Cyrano Pathfinder requires API keys for AI providers to be configured in a `.env` file (not committed to the repository).
+
+#### Required API Keys
+
+Create a `.env` file in the `Cyrano/` directory with these **three primary providers**:
 
 ```bash
-# Perplexity (default)
+# Perplexity (Default - Real-time web search)
 PERPLEXITY_API_KEY=pplx-xxxxxxxxxxxx
+# Get your key at: https://www.perplexity.ai/settings/api
 
-# Anthropic Claude
+# Anthropic Claude (Advanced reasoning)
 ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxx
+# Get your key at: https://console.anthropic.com/
 
-# OpenAI
+# OpenAI (General-purpose AI)
 OPENAI_API_KEY=sk-xxxxxxxxxxxx
+# Get your key at: https://platform.openai.com/api-keys
+```
 
-# Google Gemini
+#### Optional Additional Providers
+
+For extended functionality, you can also add:
+
+```bash
+# Google Gemini (Long-context analysis)
 GEMINI_API_KEY=xxxxxxxxxxxx
 # or
 GOOGLE_API_KEY=xxxxxxxxxxxx
+# Get your key at: https://makersuite.google.com/app/apikey
 
-# xAI Grok
+# xAI Grok (Direct analysis)
 XAI_API_KEY=xai-xxxxxxxxxxxx
+# Get your key at: https://console.x.ai/
 
-# DeepSeek
+# DeepSeek (Comprehensive analysis)
 DEEPSEEK_API_KEY=sk-xxxxxxxxxxxx
+# Get your key at: https://platform.deepseek.com/
 ```
+
+**Note:** The system gracefully handles missing keys. If a provider is not configured, it will be disabled and users will see a helpful error message when attempting to use it.
 
 ### MCP Server URL
 
