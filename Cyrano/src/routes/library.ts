@@ -15,6 +15,7 @@
  */
 
 import { Router, Request, Response } from 'express';
+import { z } from 'zod';
 import {
   upsertPracticeProfile,
   getPracticeProfile,
@@ -29,16 +30,96 @@ import {
 
 const router = Router();
 
+// Validation schemas for input data
+const PracticeProfileSchema = z.object({
+  userId: z.string().optional(),
+  primaryJurisdiction: z.string().optional(),
+  additionalJurisdictions: z.array(z.string()).optional(),
+  practiceAreas: z.array(z.string()).optional(),
+  counties: z.array(z.string()).optional(),
+  courts: z.array(z.string()).optional(),
+  issueTags: z.array(z.string()).optional(),
+  storagePreferences: z.object({
+    localPath: z.string().optional(),
+    useOneDrive: z.boolean().optional(),
+    useGoogleDrive: z.boolean().optional(),
+    useS3: z.boolean().optional(),
+    s3Bucket: z.string().optional(),
+    cacheSize: z.number().optional(),
+  }).optional(),
+  researchProvider: z.string().optional(),
+  integrations: z.object({
+    clio: z.object({
+      enabled: z.boolean().optional(),
+      apiKey: z.string().optional(),
+    }).optional(),
+    miFile: z.object({
+      enabled: z.boolean().optional(),
+      enrolled: z.boolean().optional(),
+    }).optional(),
+    outlook: z.object({
+      enabled: z.boolean().optional(),
+      accessToken: z.string().optional(),
+    }).optional(),
+    gmail: z.object({
+      enabled: z.boolean().optional(),
+      accessToken: z.string().optional(),
+    }).optional(),
+  }).optional(),
+  llmProvider: z.string().optional(),
+  llmProviderTested: z.boolean().optional(),
+});
+
+const LibraryLocationSchema = z.object({
+  userId: z.string().optional(),
+  name: z.string().min(1, 'Location name is required'),
+  type: z.enum(['local', 'onedrive', 'gdrive', 's3']),
+  config: z.record(z.any()),
+  enabled: z.boolean().optional(),
+});
+
+const IngestRequestSchema = z.object({
+  userId: z.string().optional(),
+  priority: z.enum(['low', 'normal', 'high']).optional(),
+});
+
+const LibraryFiltersSchema = z.object({
+  sourceType: z.array(z.string()).optional(),
+  county: z.string().optional(),
+  court: z.string().optional(),
+  judgeReferee: z.string().optional(),
+  issueTags: z.array(z.string()).optional(),
+  ingested: z.boolean().optional(),
+  pinned: z.boolean().optional(),
+  superseded: z.boolean().optional(),
+});
+
 /**
  * POST /api/onboarding/practice-profile
  * Create or update user's practice profile
  */
 router.post('/onboarding/practice-profile', async (req: Request, res: Response) => {
   try {
-    // TODO: Get userId from authenticated session
-    const userId = req.body.userId || 'default-user';
+    // Validate request body type
+    if (!req.body || typeof req.body !== 'object') {
+      return res.status(400).json({ error: 'Invalid request body' });
+    }
+
+    // Validate and sanitize input using Zod schema
+    const validationResult = PracticeProfileSchema.safeParse(req.body);
+    if (!validationResult.success) {
+      return res.status(400).json({ 
+        error: 'Invalid practice profile data',
+        details: validationResult.error.errors
+      });
+    }
+
+    const profileData = validationResult.data;
     
-    const profile = await upsertPracticeProfile(userId, req.body);
+    // TODO: Get userId from authenticated session
+    const userId = profileData.userId || 'default-user';
+    
+    const profile = await upsertPracticeProfile(userId, profileData);
     res.json(profile);
   } catch (error) {
     console.error('Error upserting practice profile:', error);
@@ -56,7 +137,7 @@ router.post('/onboarding/practice-profile', async (req: Request, res: Response) 
 router.get('/onboarding/practice-profile', async (req: Request, res: Response) => {
   try {
     // TODO: Get userId from authenticated session
-    const userId = req.query.userId as string || 'default-user';
+    const userId = typeof req.query.userId === 'string' ? req.query.userId : 'default-user';
     
     const profile = await getPracticeProfile(userId);
     if (!profile) {
@@ -79,10 +160,26 @@ router.get('/onboarding/practice-profile', async (req: Request, res: Response) =
  */
 router.post('/library/locations', async (req: Request, res: Response) => {
   try {
-    // TODO: Get userId from authenticated session
-    const userId = req.body.userId || 'default-user';
+    // Validate request body type
+    if (!req.body || typeof req.body !== 'object') {
+      return res.status(400).json({ error: 'Invalid request body' });
+    }
+
+    // Validate and sanitize input using Zod schema
+    const validationResult = LibraryLocationSchema.safeParse(req.body);
+    if (!validationResult.success) {
+      return res.status(400).json({ 
+        error: 'Invalid library location data',
+        details: validationResult.error.errors
+      });
+    }
+
+    const locationData = validationResult.data;
     
-    const location = await upsertLibraryLocation(userId, req.body);
+    // TODO: Get userId from authenticated session
+    const userId = locationData.userId || 'default-user';
+    
+    const location = await upsertLibraryLocation(userId, locationData);
     res.json(location);
   } catch (error) {
     console.error('Error upserting library location:', error);
@@ -100,7 +197,7 @@ router.post('/library/locations', async (req: Request, res: Response) => {
 router.get('/library/locations', async (req: Request, res: Response) => {
   try {
     // TODO: Get userId from authenticated session
-    const userId = req.query.userId as string || 'default-user';
+    const userId = typeof req.query.userId === 'string' ? req.query.userId : 'default-user';
     
     const locations = await getLibraryLocations(userId);
     res.json(locations);
@@ -120,34 +217,46 @@ router.get('/library/locations', async (req: Request, res: Response) => {
 router.get('/library/items', async (req: Request, res: Response) => {
   try {
     // TODO: Get userId from authenticated session
-    const userId = req.query.userId as string || 'default-user';
+    const userId = typeof req.query.userId === 'string' ? req.query.userId : 'default-user';
     
-    // Parse filters from query params
-    const filters: any = {};
-    if (req.query.sourceType) {
-      filters.sourceType = (req.query.sourceType as string).split(',');
+    // Parse and validate filters from query params
+    const rawFilters: Record<string, any> = {};
+    
+    if (req.query.sourceType && typeof req.query.sourceType === 'string') {
+      rawFilters.sourceType = req.query.sourceType.split(',').filter(s => typeof s === 'string');
     }
-    if (req.query.county) {
-      filters.county = req.query.county as string;
+    if (req.query.county && typeof req.query.county === 'string') {
+      rawFilters.county = req.query.county;
     }
-    if (req.query.court) {
-      filters.court = req.query.court as string;
+    if (req.query.court && typeof req.query.court === 'string') {
+      rawFilters.court = req.query.court;
     }
-    if (req.query.judgeReferee) {
-      filters.judgeReferee = req.query.judgeReferee as string;
+    if (req.query.judgeReferee && typeof req.query.judgeReferee === 'string') {
+      rawFilters.judgeReferee = req.query.judgeReferee;
     }
-    if (req.query.issueTags) {
-      filters.issueTags = (req.query.issueTags as string).split(',');
+    if (req.query.issueTags && typeof req.query.issueTags === 'string') {
+      rawFilters.issueTags = req.query.issueTags.split(',').filter(s => typeof s === 'string');
     }
     if (req.query.ingested !== undefined) {
-      filters.ingested = req.query.ingested === 'true';
+      rawFilters.ingested = req.query.ingested === 'true';
     }
     if (req.query.pinned !== undefined) {
-      filters.pinned = req.query.pinned === 'true';
+      rawFilters.pinned = req.query.pinned === 'true';
     }
     if (req.query.superseded !== undefined) {
-      filters.superseded = req.query.superseded === 'true';
+      rawFilters.superseded = req.query.superseded === 'true';
     }
+
+    // Validate filters with Zod schema
+    const validationResult = LibraryFiltersSchema.safeParse(rawFilters);
+    if (!validationResult.success) {
+      return res.status(400).json({ 
+        error: 'Invalid filter parameters',
+        details: validationResult.error.errors
+      });
+    }
+
+    const filters = validationResult.data;
     
     const items = await listLibraryItems(userId, filters);
     res.json(items);
@@ -166,6 +275,11 @@ router.get('/library/items', async (req: Request, res: Response) => {
  */
 router.get('/library/items/:id', async (req: Request, res: Response) => {
   try {
+    // Validate item ID
+    if (!req.params.id || typeof req.params.id !== 'string') {
+      return res.status(400).json({ error: 'Invalid item ID' });
+    }
+
     const item = await getLibraryItem(req.params.id);
     if (!item) {
       return res.status(404).json({ error: 'Library item not found' });
@@ -186,6 +300,11 @@ router.get('/library/items/:id', async (req: Request, res: Response) => {
  */
 router.post('/library/items/:id/pin', async (req: Request, res: Response) => {
   try {
+    // Validate item ID
+    if (!req.params.id || typeof req.params.id !== 'string') {
+      return res.status(400).json({ error: 'Invalid item ID' });
+    }
+
     const item = await togglePin(req.params.id);
     if (!item) {
       return res.status(404).json({ error: 'Library item not found' });
@@ -206,9 +325,30 @@ router.post('/library/items/:id/pin', async (req: Request, res: Response) => {
  */
 router.post('/library/items/:id/ingest', async (req: Request, res: Response) => {
   try {
+    // Validate request body type
+    if (!req.body || typeof req.body !== 'object') {
+      return res.status(400).json({ error: 'Invalid request body' });
+    }
+
+    // Validate and sanitize input using Zod schema
+    const validationResult = IngestRequestSchema.safeParse(req.body);
+    if (!validationResult.success) {
+      return res.status(400).json({ 
+        error: 'Invalid ingest request data',
+        details: validationResult.error.errors
+      });
+    }
+
+    const ingestData = validationResult.data;
+    
     // TODO: Get userId from authenticated session
-    const userId = req.body.userId || 'default-user';
-    const priority = req.body.priority || 'normal';
+    const userId = ingestData.userId || 'default-user';
+    const priority = ingestData.priority || 'normal';
+    
+    // Validate item ID
+    if (!req.params.id || typeof req.params.id !== 'string') {
+      return res.status(400).json({ error: 'Invalid item ID' });
+    }
     
     const queueItem = await enqueueIngest(req.params.id, userId, priority);
     res.json(queueItem);
@@ -228,7 +368,7 @@ router.post('/library/items/:id/ingest', async (req: Request, res: Response) => 
 router.get('/health/library', async (req: Request, res: Response) => {
   try {
     // TODO: Get userId from authenticated session
-    const userId = req.query.userId as string || 'default-user';
+    const userId = typeof req.query.userId === 'string' ? req.query.userId : 'default-user';
     
     const stats = await getLibraryStats(userId);
     res.json({
