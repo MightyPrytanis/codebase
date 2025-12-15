@@ -1,0 +1,24 @@
+# Minimal Codacy configuration: enable node analysis, ignore test/build artifacts
+# See https://docs.codacy.com for more options
+engines:
+  eslint:
+    enabled: true
+  eslint-typescript:
+    enabled: true
+  jest:
+    enabled: true
+
+# Exclude common generated and vendor directories to reduce noise
+exclude:
+  - node_modules/**
+  - **/dist/**
+  - **/build/**
+  - **/coverage/**
+  - **/public/**
+
+# Patterns to skip for analysis
+patterns:
+  - '**/*.min.js'
+  - '**/*.bundle.js'
+  - '**/*.spec.ts'
+  - '**/*.test.ts'
