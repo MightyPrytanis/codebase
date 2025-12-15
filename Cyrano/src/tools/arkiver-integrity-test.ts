@@ -85,7 +85,8 @@ export class ArkiverIntegrityTestTool extends BaseTool {
       }
 
       // Get insights to test
-      let insightsToTest = [];
+      type InsightRecord = typeof arkiverInsights.$inferSelect;
+      let insightsToTest: InsightRecord[] = [];
       if (validated.insightIds && validated.insightIds.length > 0) {
         // Get specific insights
         insightsToTest = await db
@@ -212,19 +213,28 @@ export class ArkiverIntegrityTestTool extends BaseTool {
       });
 
       if (potemkinResult.isError) {
-        return this.createErrorResult(
-          `Potemkin engine error: ${potemkinResult.content[0]?.text || 'Unknown error'}`
-        );
+        const firstContent = potemkinResult.content[0];
+        const errorText = (firstContent && firstContent.type === 'text' && 'text' in firstContent)
+          ? firstContent.text
+          : 'Unknown error';
+        return this.createErrorResult(`Potemkin engine error: ${errorText}`);
       }
 
       // Parse Potemkin result
       let potemkinData: any;
       try {
-        const resultText = potemkinResult.content[0]?.text || '{}';
+        const firstContent = potemkinResult.content[0];
+        const resultText = (firstContent && firstContent.type === 'text' && 'text' in firstContent) 
+          ? firstContent.text 
+          : '{}';
         potemkinData = typeof resultText === 'string' ? JSON.parse(resultText) : resultText;
       } catch (e) {
         // If not JSON, treat as text
-        potemkinData = { analysis: potemkinResult.content[0]?.text || '' };
+        const firstContent = potemkinResult.content[0];
+        const textContent = (firstContent && firstContent.type === 'text' && 'text' in firstContent) 
+          ? firstContent.text 
+          : '';
+        potemkinData = { analysis: textContent };
       }
 
       // Extract scores and results based on test type
