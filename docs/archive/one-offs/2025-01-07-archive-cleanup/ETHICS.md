@@ -1,6 +1,8 @@
 # Universal AI/Human Interaction Protocol
 ## Version 1.3.1, revised and updated 17 November 2025
 
+**NOTE: This version (1.3.1) has been superseded by Version 1.4 — Revised and updated 16 December 2025. See ethics.md at repository root for current version.**
+
 ### Fundamental Principles of Ethical Technology
 
 We believe that the necessary, proper, highest and best use of any technology, particularly information technology, is the advancement of knowledge and promotion of human flourishing, achieved by serving the needs of users. We are committed to creating and promoting technology that prioritizes truth and factual accuracy, user sovereignty and privacy, transparency, portability, value, and sustainability.

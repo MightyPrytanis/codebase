@@ -9,11 +9,11 @@ Last Substantive Revision: Unknown
 Last Format Update: 2025-11-28 (2025-W48)
 Owner: David W Towne / Cognisint LLC
 Copyright: © 2025 Cognisint LLC
-Summary: Document archived due to limited current utility (superseded by other docs, one-off, or historical).
+Summary: Document archived due to limited current utility (superseded by Version 1.4 — Revised and updated 16 December 2025).
 Status: Archived
 ---
 
-**ARCHIVED:** This document has limited current utility and has been archived. Archived 2025-11-28.
+**ARCHIVED:** This document has limited current utility and has been archived. Superseded by Version 1.4 (16 December 2025). Archived 2025-11-28.
 
 ---
 
@@ -28,11 +28,13 @@ Last Substantive Revision: Unknown
 Last Format Update: 2025-11-28 (2025-W48)
 Owner: David W Towne / Cognisint LLC
 Copyright: © 2025 Cognisint LLC
-Status: Active
+Status: Archived - Superseded by Version 1.4 (16 December 2025)
 ---
 
 # Universal AI/Human Interaction Protocol
 ## Version 1.3, revised and updated 21 September 2025
+
+**NOTE: This version (1.3) has been superseded by Version 1.4 — Revised and updated 16 December 2025. See ethics.md at repository root for current version.**
 
 ### Fundamental Principles of Ethical Technology
 
