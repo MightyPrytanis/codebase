@@ -15,7 +15,7 @@ const TEST_TYPES: { value: TestType; label: string; description: string }[] = [
   { value: 'opinion_drift', label: 'Opinion Drift', description: 'Detect changes in AI opinions over time' },
   { value: 'bias', label: 'Bias Detection', description: 'Identify potential biases in AI responses' },
   { value: 'honesty', label: 'Honesty Assessment', description: 'Evaluate truthfulness and accuracy' },
-  { value: 'ten_rules', label: 'Ten Rules Compliance', description: 'Check adherence to ethical guidelines' },
+  { value: 'ten_rules', label: 'Ten Rules Compliance', description: 'Check adherence to ethical guidelines (Version 1.4 — Revised and updated 16 December 2025)' },
   { value: 'fact_check', label: 'Fact Check', description: 'Verify factual accuracy of claims' },
 ];
 

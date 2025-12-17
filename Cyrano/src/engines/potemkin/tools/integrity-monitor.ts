@@ -23,7 +23,7 @@ import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 export interface AIIntegrityTest {
   id: string;
   testName: string;
-  testType: string; // 'opinion_drift', 'bias_detection', 'honesty_assessment', 'ten_rules_compliance'
+  testType: string; // 'opinion_drift', 'bias_detection', 'honesty_assessment', 'ten_rules_compliance' (Version 1.4 — Revised and updated 16 December 2025)
   targetLLM: string;
   driftScore?: number | null;
   honestyScore?: number | null;
@@ -55,7 +55,7 @@ export interface UserIntegrityConfig {
  */
 export interface IntegrityAlert {
   id: string;
-  type: string; // 'opinion_drift', 'bias_detection', 'honesty_assessment', 'ten_rules_compliance'
+  type: string; // 'opinion_drift', 'bias_detection', 'honesty_assessment', 'ten_rules_compliance' (Version 1.4 — Revised and updated 16 December 2025)
   severity: 'critical' | 'high' | 'medium' | 'low';
   title: string;
   description: string;
@@ -269,7 +269,7 @@ export class IntegrityMonitor extends BaseTool {
           }
         }
 
-        // Ten Rules Compliance Alert (lines 2266-2279)
+        // Ten Rules (Version 1.4 — Revised and updated 16 December 2025) Compliance Alert (lines 2266-2279)
         if (
           test.testType === 'ten_rules_compliance' &&
           test.honestyScore !== null &&
@@ -283,7 +283,7 @@ export class IntegrityMonitor extends BaseTool {
               id: test.id,
               type: 'ten_rules_compliance',
               severity,
-              title: `Ten Rules Violations: ${test.targetLLM}`,
+              title: `Ten Rules (Version 1.4 — Revised and updated 16 December 2025) Violations: ${test.targetLLM}`,
               description: `Compliance score ${test.honestyScore} below ${params.userConfig.compliance_threshold}. ${severeViolations.length} severe violations found.`,
               test: test as AIIntegrityTest,
             });

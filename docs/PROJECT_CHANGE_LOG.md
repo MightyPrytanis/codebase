@@ -5,8 +5,8 @@ Subject(s): Project | History | Development
 Project: Cyrano
 Version: v550
 Created: 2025-11-28 (2025-W48)
-Last Substantive Revision: 2025-12-12 (2025-W50)
-Last Format Update: 2025-12-12 (2025-W50)
+Last Substantive Revision: 2025-12-16 (2025-W50)
+Last Format Update: 2025-12-16 (2025-W50)
 Owner: David W Towne / Cognisint LLC
 Copyright: © 2025 Cognisint LLC
 Summary: Consolidated running log of all project changes, structured by work plan steps.
@@ -17,8 +17,22 @@ Related Documents: REALISTIC-WORK-PLAN
 # Cyrano Project Change Log
 
 **Project Start:** July 2025  
-**Last Updated:** 2025-12-12  
+**Last Updated:** 2025-12-16  
 **Structure:** Organized by work plan steps (see REALISTIC_WORK_PLAN.md)
+
+---
+
+## Unreleased / Recent Changes
+
+### 2025-12-16: Ethics Policy Update
+- Updated ethics.md and all repository references to Ten Rules to Version 1.4 (Revised and updated 16 December 2025)
+- Created canonical ethics.md at repository root with Version 1.4 text
+- Updated active documentation:
+  - docs/GENERAL_GUIDE_PROJECT_POLICIES.md
+  - docs/guides/GENERAL_GUIDE_UNIVERSAL_AIHUMAN_INTERACTION_PROTOCOL.md
+- Updated version references in Legacy/SwimMeet components
+- Updated code comments and descriptions throughout repository to reference Version 1.4
+- Updated tools, modules, and UI components with Version 1.4 references
 
 ---
 
