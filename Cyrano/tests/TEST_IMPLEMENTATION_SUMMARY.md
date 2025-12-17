@@ -10,7 +10,7 @@
 - Opinion drift detection validation
 - Bias detection workflows  
 - Honesty assessment checks
-- Ten rules compliance testing
+- Ten Rules (Version 1.4 — Revised and updated 16 December 2025) compliance testing
 - Fact checking validation
 - Error handling for missing engines
 - Error handling for missing insights
@@ -42,7 +42,7 @@
 - Alert generation for opinion drift
 - Alert generation for bias detection
 - Alert generation for low honesty scores
-- Alert generation for ten rules violations
+- Alert generation for Ten Rules (Version 1.4 — Revised and updated 16 December 2025) violations
 - Time window filtering
 - LLM monitoring filtering
 - Alert severity categorization

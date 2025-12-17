@@ -301,11 +301,11 @@ describe('Potemkin Tools Integration', () => {
       }
     });
 
-    it('should generate alerts for ten rules violations', async () => {
+    it('should generate alerts for Ten Rules (Version 1.4) violations', async () => {
       const testResults = [
         {
           id: 'test4',
-          testName: 'Ten Rules Compliance',
+          testName: 'Ten Rules (Version 1.4) Compliance',
           testType: 'ten_rules_compliance',
           targetLLM: 'ChatGPT',
           driftScore: null,
