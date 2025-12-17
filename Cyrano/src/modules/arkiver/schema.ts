@@ -203,7 +203,7 @@ export const arkiverIntegrityTests = pgTable('arkiver_integrity_tests', {
   
   // Test details
   testName: text('test_name').notNull(), // e.g., "Opinion Drift: GPT-4 on Climate Change"
-  testType: text('test_type').notNull(), // 'opinion_drift', 'bias_detection', 'honesty_assessment', 'ten_rules_compliance'
+  testType: text('test_type').notNull(), // 'opinion_drift', 'bias_detection', 'honesty_assessment', 'ten_rules_compliance' (Version 1.4 — 16 Dec 2025)
   targetLLM: text('target_llm').notNull(), // 'ChatGPT', 'Claude', 'Gemini', etc.
   
   // Test parameters

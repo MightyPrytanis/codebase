@@ -1,6 +1,7 @@
 /**
  * Arkiver Integrity Test Tool - Unit Tests
  * Tests opinion drift detection, bias detection, honesty assessment, and other integrity checks
+ * Note: Ten Rules compliance references in this file are for Version 1.4 (16 Dec 2025)
  */
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { arkiverIntegrityTestTool } from '../../src/tools/arkiver-integrity-test.js';
