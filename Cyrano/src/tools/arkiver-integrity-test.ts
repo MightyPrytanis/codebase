@@ -37,7 +37,7 @@ export class ArkiverIntegrityTestTool extends BaseTool {
   getToolDefinition() {
     return {
       name: 'arkiver_integrity_test',
-      description: 'Run AI integrity monitoring tests using Potemkin engine workflows. Supports opinion drift, bias detection, honesty assessment, ten rules compliance, and fact checking.',
+      description: 'Run AI integrity monitoring tests using Potemkin engine workflows. Supports opinion drift, bias detection, honesty assessment, Ten Rules compliance (Version 1.4 — 16 Dec 2025), and fact checking.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -173,7 +173,7 @@ export class ArkiverIntegrityTestTool extends BaseTool {
           break;
 
         case 'ten_rules':
-          // Ten rules compliance uses honesty assessment workflow
+          // Ten Rules compliance (Version 1.4 — 16 Dec 2025) uses honesty assessment workflow
           potemkinAction = 'assess_honesty';
           const tenRulesContent = insightsToTest
             .map(i => `${i.title}: ${i.content}`)
@@ -181,7 +181,7 @@ export class ArkiverIntegrityTestTool extends BaseTool {
           potemkinInput = {
             content: tenRulesContent,
             targetLLM: validated.llmSource,
-            checkTenRules: true, // Flag for ten rules compliance
+            checkTenRules: true, // Flag for Ten Rules compliance (Version 1.4)
             insights: insightsToTest.map(i => ({
               id: i.id,
               title: i.title,

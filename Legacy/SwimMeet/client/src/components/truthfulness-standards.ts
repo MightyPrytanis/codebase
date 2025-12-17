@@ -1,4 +1,5 @@
-// David Towne's Universal AI/Human Interaction Protocol - Version 1.2
+// David Towne's Universal AI/Human Interaction Protocol - Version 1.4 (Revised 16 Dec 2025)
+// See ethics.md in the repository root for the full canonical text
 // Integrated truthfulness standards for AI responses
 
 export const TRUTHFULNESS_STANDARDS = {

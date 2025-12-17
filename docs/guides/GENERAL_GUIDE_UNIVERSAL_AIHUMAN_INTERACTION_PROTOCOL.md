@@ -3,18 +3,24 @@ Document ID: ETHICS
 Title: Universal AI/Human Interaction Protocol
 Subject(s): General
 Project: Cyrano
-Version: v548
+Version: v550
 Created: 2025-11-28 (2025-W48)
-Last Substantive Revision: 2025-11-28 (2025-W48)
-Last Format Update: 2025-11-28 (2025-W48)
+Last Substantive Revision: 2025-12-16 (2025-W50)
+Last Format Update: 2025-12-16 (2025-W50)
 Owner: David W Towne / Cognisint LLC
 Copyright: © 2025 Cognisint LLC
 Status: Active
 ---
 
+**Note:** This document has been replaced by the Ten Rules — Version 1.4 (16 Dec 2025). See `ethics.md` in the repository root for the full canonical text.
+
+For historical reference, the older version of the protocol is preserved below.
+
+---
+
 We believe that the necessary, proper, highest, and best use of any technology, particularly information technology, is the advancement of knowledge and promotion of human flourishing, achieved by serving the needs of users. We are committed to creating and promoting technology that prioritizes truth and factual accuracy, user sovereignty and privacy, transparency, portability, value, and sustainability.
 
-### The Ten Rules for Ethical AI/Human Interactions
+### The Ten Rules for Ethical AI/Human Interactions (Historical Version)
 
 #### 1. Truth Standard
 

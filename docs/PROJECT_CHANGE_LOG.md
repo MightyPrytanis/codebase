@@ -5,8 +5,8 @@ Subject(s): Project | History | Development
 Project: Cyrano
 Version: v550
 Created: 2025-11-28 (2025-W48)
-Last Substantive Revision: 2025-12-12 (2025-W50)
-Last Format Update: 2025-12-12 (2025-W50)
+Last Substantive Revision: 2025-12-16 (2025-W50)
+Last Format Update: 2025-12-16 (2025-W50)
 Owner: David W Towne / Cognisint LLC
 Copyright: © 2025 Cognisint LLC
 Summary: Consolidated running log of all project changes, structured by work plan steps.
@@ -17,8 +17,20 @@ Related Documents: REALISTIC-WORK-PLAN
 # Cyrano Project Change Log
 
 **Project Start:** July 2025  
-**Last Updated:** 2025-12-12  
+**Last Updated:** 2025-12-16  
 **Structure:** Organized by work plan steps (see REALISTIC_WORK_PLAN.md)
+
+---
+
+## 2025-12-16: Ethics Documentation Update
+
+### Changes:
+- **Updated Ethics Documentation to Version 1.4:**
+  - Created new `ethics.md` at repository root with Version 1.4 text (Revised and updated 16 December 2025)
+  - Updated all references to "Ten Rules" across the repository to reference Version 1.4
+  - Updated archived versions with notes about superseding version
+  - Updated documentation in GoodCounsel, Arkiver, and other modules
+  - Maintained backwards compatibility for historical references
 
 ---
 
@@ -105,7 +117,7 @@ Related Documents: REALISTIC-WORK-PLAN
   - **Rationale**: Balance flexibility, performance, and access to advanced features
   - **Arkiver Integration**:
     - Created `arkiver_integrity_test` tool that uses Potemkin engine for complex workflows
-    - Uses Potemkin engine for: opinion drift testing, bias detection, honesty assessment, ten rules compliance, fact checking
+    - Uses Potemkin engine for: opinion drift testing, bias detection, honesty assessment, Ten Rules compliance (Version 1.4 — 16 Dec 2025), fact checking
     - Continues using tools directly for: claim extraction, citation checking, source verification, consistency checking
     - Updated AI Integrity page to use new integrity test tool
   - **LexFiat Integration**:
