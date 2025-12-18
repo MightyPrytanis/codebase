@@ -1,4 +1,4 @@
-// David Towne's Universal AI/Human Interaction Protocol - Version 1.4 (Revised and updated 16 December 2025)
+// David Towne's Universal AI/Human Interaction Protocol - Version 1.2
 // Integrated truthfulness standards for AI responses
 
 export const TRUTHFULNESS_STANDARDS = {
