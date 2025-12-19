@@ -12,13 +12,22 @@ try {
 } catch (error) {
   console.error("Failed to render app:", error);
   // Sanitize error message to prevent XSS
+  // Apply iterative replacement to avoid incomplete multi-character sanitization
   const errorMessage = error instanceof Error ? error.message : "Unknown error";
-  const sanitizedMessage = errorMessage
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;');
+  let sanitizedMessage = errorMessage;
+  let previous: string;
+  
+  // Apply entity encoding repeatedly until no changes occur
+  do {
+    previous = sanitizedMessage;
+    sanitizedMessage = sanitizedMessage
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#x27;');
+  } while (sanitizedMessage !== previous);
+  
   rootElement.innerHTML = `
     <div style="color: white; padding: 20px; font-family: monospace;">
       <h1>Error Loading LexFiat</h1>
