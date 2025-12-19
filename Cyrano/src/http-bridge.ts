@@ -42,7 +42,7 @@ import { qualityAssessor } from './tools/quality-assessor.js';
 import { workflowManager } from './tools/workflow-manager.js';
 import { caseManager } from './tools/case-manager.js';
 import { documentProcessor } from './tools/document-processor.js';
-import { aiOrchestrator } from './tools/ai-orchestrator.js';
+import { aiOrchestrator } from './engines/mae/tools/ai-orchestrator.js';
 import { systemStatus } from './tools/system-status.js';
 // status-indicator tool archived - see Cyrano/archive/broken-tools/
 import { ragQuery } from './tools/rag-query.js';
@@ -125,19 +125,54 @@ app.use(security.secureHeaders);
 // Cookie parser for session management
 app.use(cookieParser());
 
-// Middleware
+// Middleware - CORS and HTTPS enforcement
+const isProduction = process.env.NODE_ENV === 'production';
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').map(o => o.trim()).filter(Boolean);
-const corsOptions: CorsOptions = allowedOrigins.length > 0
-  ? { origin: allowedOrigins, credentials: true }
-  : { origin: false }; // disallow if not configured
+
+// Require ALLOWED_ORIGINS in production
+if (isProduction && allowedOrigins.length === 0) {
+  throw new Error('ALLOWED_ORIGINS must be set in production environment');
+}
+
+// Configure CORS with origin validation
+const corsOptions: CorsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, Postman) in development only
+    if (!origin && !isProduction) {
+      return callback(null, true);
+    }
+    // In production, require origin
+    if (!origin && isProduction) {
+      return callback(new Error('CORS: Origin header required in production'));
+    }
+    // Check if origin is in whitelist
+    if (origin && allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS: Origin ${origin} not allowed`));
+    }
+  },
+  credentials: true,
+  optionsSuccessStatus: 200
+};
 
 app.use(cors(corsOptions));
 
-// Enforce HTTPS if behind proxy
+// Enforce HTTPS in production (auto-enforce, not just when FORCE_HTTPS=true)
 app.use((req, res, next) => {
-  if (process.env.FORCE_HTTPS === 'true' && req.protocol !== 'https') {
+  // Check both req.secure (direct) and X-Forwarded-Proto (behind proxy)
+  const isSecure = req.secure || req.get('X-Forwarded-Proto') === 'https';
+  
+  // In production, always enforce HTTPS
+  if (isProduction && !isSecure) {
     return res.redirect(301, `https://${req.headers.host}${req.url}`);
   }
+  
+  // In development, allow FORCE_HTTPS override
+  if (!isProduction && process.env.FORCE_HTTPS === 'true' && !isSecure) {
+    return res.redirect(301, `https://${req.headers.host}${req.url}`);
+  }
+  
   next();
 });
 app.use(express.json());
@@ -147,6 +182,7 @@ app.use(express.raw({ type: 'application/octet-stream', limit: '100mb' }));
 app.use(security.sanitizeInputs);
 
 // Security: Rate limiting (applies to all routes)
+// Tool execution through MCP protocol is already rate-limited by these global limiters
 app.use(security.authenticatedLimiter);
 app.use(security.unauthenticatedLimiter);
 

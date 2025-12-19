@@ -24,6 +24,20 @@ export interface PerplexityRequest {
   stream?: boolean;
 }
 
+/**
+ * Perplexity Sonar Models
+ * Available models for different verification tasks
+ */
+export const PERPLEXITY_MODELS = {
+  SONAR: 'sonar',
+  SONAR_DEEP_RESEARCH: 'sonar-deep-research',
+  SONAR_REASONING: 'sonar-reasoning',
+  SONAR_SMALL_ONLINE: 'llama-3.1-sonar-small-128k-online',
+  SONAR_LARGE_ONLINE: 'llama-3.1-sonar-large-128k-online',
+} as const;
+
+export type PerplexityModel = typeof PERPLEXITY_MODELS[keyof typeof PERPLEXITY_MODELS];
+
 export interface PerplexityResponse {
   id: string;
   object: string;
