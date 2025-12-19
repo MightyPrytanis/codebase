@@ -10,6 +10,8 @@
         This repository is TypeScript/React based and does not contain Java code.
     </description>
 
-    <!-- Empty ruleset - no Java code to analyze -->
+    <!-- Minimal rule to prevent "No rules found" error -->
+    <!-- Even though disabled, Codacy sometimes initializes PMD and requires at least one rule -->
+    <rule ref="category/java/errorprone.xml/EmptyCatchBlock" />
     
 </ruleset>
