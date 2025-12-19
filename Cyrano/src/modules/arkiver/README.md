@@ -260,7 +260,7 @@ Arkiver implements a hybrid approach that balances flexibility, performance, and
   - Opinion drift testing: Detects changes in AI opinions over time
   - Bias detection: Identifies potential biases in AI responses
   - Honesty assessment: Evaluates truthfulness and accuracy
-  - Ten rules compliance: Checks adherence to ethical guidelines
+  - Ten Rules compliance (Version 1.4 — 16 Dec 2025): Checks adherence to ethical guidelines
   - Fact checking: Comprehensive document verification
 
 These workflows combine multiple verification steps with AI analysis, providing structured reports and recommendations.
@@ -287,7 +287,7 @@ The following MCP tools are available for Arkiver functionality:
 ### File Processing Tools (`arkiver-mcp-tools.ts`)
 - `arkiver_process_file` - Initiates file processing (supports PDF, DOCX, TXT, MD, JSON conversations)
 - `arkiver_job_status` - Check processing job status
-- `arkiver_integrity_test` - Run AI integrity tests using Potemkin engine workflows (opinion drift, bias detection, honesty assessment, ten rules compliance, fact checking)
+- `arkiver_integrity_test` - Run AI integrity tests using Potemkin engine workflows (opinion drift, bias detection, honesty assessment, Ten Rules compliance (Version 1.4 — 16 Dec 2025), fact checking)
 
 ### Data Extraction Tools (`arkiver-tools.ts`)
 - `extract_conversations` - Extract and parse LLM conversation data from JSON files

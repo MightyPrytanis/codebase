@@ -8,6 +8,7 @@ import { IconSprite } from "@/components/ui/icon-sprite";
 import { DemoModeBanner } from "@/components/demo/demo-mode-banner";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { CyranoChatDrawer } from "@/components/cyrano-chat-drawer";
 import { Loader2 } from "lucide-react";
 import "@/styles/ad-astra.css";
 
@@ -40,6 +41,8 @@ const DocumentComparisonPage = lazy(() => import("@/pages/document-comparison"))
 const IconPreviewPage = lazy(() => import("@/pages/icon-preview"));
 const MaeWorkflowsPage = lazy(() => import("@/pages/mae-workflows"));
 const WorkflowLibraryPage = lazy(() => import("@/pages/workflow-library"));
+const LibraryPage = lazy(() => import("@/pages/library"));
+const OnboardingPage = lazy(() => import("@/pages/onboarding"));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -67,6 +70,8 @@ function Router() {
         <Route path="/mae-workflows" component={MaeWorkflowsPage} />
         <Route path="/workflows" component={WorkflowLibraryPage} />
         <Route path="/workflow-library" component={WorkflowLibraryPage} />
+        <Route path="/library" component={LibraryPage} />
+        <Route path="/onboarding" component={OnboardingPage} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>
@@ -86,6 +91,7 @@ function App() {
               <ErrorBoundary>
                 <Router />
               </ErrorBoundary>
+              <CyranoChatDrawer app="lexfiat" />
             </div>
           </TooltipProvider>
         </ThemeProvider>

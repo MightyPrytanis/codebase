@@ -5,7 +5,7 @@
  */
 
 import React, { useState } from "react";
-import ExpandedPanel from "./expanded-panel";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Settings, Shield, Database, Users, Activity, RefreshCw, CheckCircle2, AlertTriangle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { executeCyranoTool } from "@/lib/cyrano-api";
@@ -31,12 +31,14 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
   });
 
   return (
-    <ExpandedPanel
-      title="Admin Panel"
-      isOpen={isOpen}
-      onClose={onClose}
-      className="max-w-4xl"
-    >
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent 
+        side="right" 
+        className="w-full sm:max-w-4xl bg-charcoal border-gray-800 overflow-y-auto"
+      >
+        <SheetHeader>
+          <SheetTitle className="text-xl font-semibold text-white">Admin Panel</SheetTitle>
+        </SheetHeader>
       <div className="space-y-6">
         {/* System Monitoring */}
         <div 
@@ -147,8 +149,8 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
             </div>
           )}
         </div>
-      </div>
-    </ExpandedPanel>
+      </SheetContent>
+    </Sheet>
   );
 }
 
