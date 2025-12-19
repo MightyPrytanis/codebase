@@ -83,7 +83,7 @@ export class ForecastEngine extends BaseEngine {
           return await this.generateChildSupportForecast(parsed.forecast_input, parsed.branding);
 
         case 'generate_qdro_forecast':
-          return await this.generateQDR0Forecast(parsed.forecast_input, parsed.branding);
+          return await this.generateQDROForecast(parsed.forecast_input, parsed.branding);
 
         case 'get_status':
           return {
@@ -294,7 +294,7 @@ export class ForecastEngine extends BaseEngine {
   /**
    * Generate QDRO forecast
    */
-  private async generateQDR0Forecast(
+  private async generateQDROForecast(
     input: any,
     branding?: ForecastBrandingConfig
   ): Promise<CallToolResult> {

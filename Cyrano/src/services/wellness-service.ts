@@ -234,7 +234,10 @@ class WellnessService {
       updateData.mood = updates.mood ? encryption.encryptField(updates.mood, 'mood').encrypted : null;
     }
     if (updates.tags !== undefined) {
-      updateData.tags = updates.tags ? encryption.encryptField(JSON.stringify(updates.tags), 'tags').encrypted : null;
+      // Handle empty arrays consistently with createJournalEntry (store null if empty)
+      updateData.tags = updates.tags && updates.tags.length > 0
+        ? encryption.encryptField(JSON.stringify(updates.tags), 'tags').encrypted
+        : null;
     }
 
     // Update sentiment if content changed

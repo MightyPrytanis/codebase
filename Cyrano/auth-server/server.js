@@ -59,7 +59,7 @@ app.use(session({
   saveUninitialized: false, // Changed from true for security - don't create session until needed
   name: 'cyrano.session', // Custom session name to avoid fingerprinting
   cookie: { 
-    secure: true, // Always require TLS
+    secure: isProduction, // Require TLS in production only (allows HTTP in development)
     httpOnly: true, // Always prevent XSS access to cookies
     sameSite: 'strict', // CSRF protection via SameSite attribute
     maxAge: 24 * 60 * 60 * 1000, // 24 hours

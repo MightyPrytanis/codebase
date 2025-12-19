@@ -145,6 +145,10 @@ const corsOptions: CorsOptions = {
     if (!origin && isProduction) {
       return callback(new Error('CORS: Origin header required in production'));
     }
+    // In development, if no whitelist is configured, allow all origins
+    if (!isProduction && allowedOrigins.length === 0) {
+      return callback(null, true);
+    }
     // Check if origin is in whitelist
     if (origin && allowedOrigins.includes(origin)) {
       callback(null, true);

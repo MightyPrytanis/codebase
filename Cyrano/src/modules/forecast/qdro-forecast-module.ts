@@ -123,10 +123,10 @@ export class QDROForecastModule extends BaseModule {
 
       switch (parsed.action) {
         case 'calculate':
-          return await this.calculateQDR0Scenarios(parsed.input);
+          return await this.calculateQDROScenarios(parsed.input);
 
         case 'generate_pdf':
-          return await this.generateQDR0PDF(parsed.input);
+          return await this.generateQDROPDF(parsed.input);
 
         case 'verify_erisa':
           return await this.verifyERISACompliance(parsed.input);
@@ -172,7 +172,7 @@ export class QDROForecastModule extends BaseModule {
   /**
    * Calculate QDRO scenarios using ERISA-compliant formulas
    */
-  private async calculateQDR0Scenarios(input: any): Promise<CallToolResult> {
+  private async calculateQDROScenarios(input: any): Promise<CallToolResult> {
     try {
       // Validate and convert input to QDROInput format
       const qdroInput: QDROInput = {
@@ -219,7 +219,7 @@ export class QDROForecastModule extends BaseModule {
   /**
    * Generate QDRO PDF with form filling
    */
-  private async generateQDR0PDF(input: any): Promise<CallToolResult> {
+  private async generateQDROPDF(input: any): Promise<CallToolResult> {
     // Use PDF form filler tool if available
     const pdfFiller = this.getTool('pdf_form_filler');
     if (pdfFiller) {
