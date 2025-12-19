@@ -22,9 +22,20 @@
  *   --once                                       Run once and exit (no periodic updates)
  */
 
+/*
+ * ⚠️ BROKEN TOOL - ARCHIVED
+ * 
+ * This tool has been archived because it depends on status-indicator.ts,
+ * which was archived due to fundamental design flaws.
+ * 
+ * See: Cyrano/archive/broken-tools/README.md
+ * Archived: 2025-12-08
+ */
+
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
+// status-indicator tool archived - see Cyrano/archive/broken-tools/
 
 // If status-indicator.js is missing or unreachable, handle gracefully
 let statusIndicator: any = null;
@@ -193,34 +204,21 @@ Examples:
 }
 
 async function getStatusUpdate(config: UpdaterConfig): Promise<string> {
-  const args: any = {
-    context: config.context,
-    detailed: true,
-    include_history: false
-  };
-
-  if (config.customTasksPath) {
-    args.custom_tasks_path = config.customTasksPath;
-  }
-  if (config.customProgressPath) {
-    args.custom_progress_path = config.customProgressPath;
-  }
-
-  const result = await statusIndicator.execute(args);
+  // Tool is archived - return error message
+  const errorMsg = `⚠️ ERROR: This tool has been archived and is no longer functional.\n\n` +
+    `The status-indicator tool it depends on was archived due to fundamental design flaws.\n` +
+    `See: Cyrano/archive/broken-tools/README.md for details.\n\n` +
+    `Archived: 2025-12-08`;
   
-  if (result.isError) {
-    return result.content[0].text;
-  }
-
-  const data = JSON.parse(result.content[0].text);
-
   if (config.format === 'json') {
-    return JSON.stringify(data, null, 2);
-  } else if (config.format === 'text') {
-    return formatTextReport(data);
+    return JSON.stringify({
+      error: true,
+      message: errorMsg,
+      archived: true,
+      archivedDate: '2025-12-08'
+    }, null, 2);
   } else {
-    // formatted
-    return await statusIndicator.getFormattedReport();
+    return errorMsg;
   }
 }
 
@@ -272,6 +270,22 @@ function writeToFile(content: string) {
 }
 
 async function runUpdater(config: UpdaterConfig) {
+  console.error(`⚠️  WARNING: This tool has been archived and is no longer functional.\n`);
+  console.error(`The status-indicator tool it depends on was archived due to fundamental design flaws.\n`);
+  console.error(`See: Cyrano/archive/broken-tools/README.md for details.\n`);
+  console.error(`Archived: 2025-12-08\n`);
+  
+  if (config.once) {
+    const report = await getStatusUpdate(config);
+    if (config.output === 'console' || config.output === 'both') {
+      console.log(report);
+    }
+    if (config.output === 'file' || config.output === 'both') {
+      writeToFile(report);
+    }
+    return;
+  }
+  
   console.log(`🚀 Status Updater Agent Starting...\n`);
   console.log(`Context: ${config.context}`);
   console.log(`Interval: ${config.interval} seconds`);
