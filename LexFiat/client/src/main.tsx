@@ -12,21 +12,15 @@ try {
 } catch (error) {
   console.error("Failed to render app:", error);
   // Sanitize error message to prevent XSS
-  // Apply iterative replacement to avoid incomplete multi-character sanitization
+  // Note: For entity encoding, single-pass is correct (not iterative)
+  // Encode & first to avoid double-encoding other entities
   const errorMessage = error instanceof Error ? error.message : "Unknown error";
-  let sanitizedMessage = errorMessage;
-  let previous: string;
-  
-  // Apply entity encoding repeatedly until no changes occur
-  do {
-    previous = sanitizedMessage;
-    sanitizedMessage = sanitizedMessage
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#x27;');
-  } while (sanitizedMessage !== previous);
+  const sanitizedMessage = errorMessage
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;');
   
   rootElement.innerHTML = `
     <div style="color: white; padding: 20px; font-family: monospace;">
