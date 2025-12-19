@@ -15,6 +15,7 @@ import cors, { CorsOptions } from 'cors';
 import dotenv from 'dotenv';
 import multer from 'multer';
 import cookieParser from 'cookie-parser';
+import csurf from 'csurf';
 
 // Load environment variables
 dotenv.config();
@@ -128,6 +129,16 @@ app.use(security.secureHeaders);
 
 // Cookie parser for session management
 app.use(cookieParser());
+
+// CSRF protection: require valid CSRF tokens for state-changing requests
+const csrfProtection = csurf({
+  cookie: {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+  },
+});
+app.use(csrfProtection);
 
 // Middleware - CORS and HTTPS enforcement
 const isProduction = process.env.NODE_ENV === 'production';
