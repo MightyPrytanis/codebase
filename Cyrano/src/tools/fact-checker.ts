@@ -9,6 +9,9 @@ import { z } from 'zod';
 import { aiService, AIProvider } from '../services/ai-service.js';
 import { apiValidator } from '../utils/api-validator.js';
 import { aiProviderSelector } from '../services/ai-provider-selector.js';
+import { multiModelService, MultiModelConfig } from '../engines/mae/services/multi-model-service.js';
+import { userVerificationPreferences, VerificationMode, ProviderStrategy, ModelConfig } from '../services/user-verification-preferences.js';
+import { getPreset, isValidPreset } from '../config/model-presets.js';
 
 const FactCheckerSchema = z.object({
   claim_text: z.string().describe('The claim or statement to fact-check'),
@@ -16,6 +19,16 @@ const FactCheckerSchema = z.object({
   verification_level: z.enum(['basic', 'thorough', 'exhaustive']).default('thorough'),
   sources: z.array(z.string()).optional().describe('Sources to check against'),
   ai_provider: z.enum(['openai', 'anthropic', 'perplexity', 'google', 'xai', 'deepseek', 'auto']).optional().default('auto').describe('AI provider to use (default: auto-select, prefers Perplexity for real-time data)'),
+  verification_mode: z.enum(['simple', 'standard', 'comprehensive', 'custom']).optional().describe('Verification depth: simple (1 model), standard (2 models), comprehensive (3 models), custom (user-defined)'),
+  provider_strategy: z.enum(['single', 'mixed']).optional().describe('Use single provider (recommended) or mix providers (advanced)'),
+  custom_models: z.array(z.object({
+    provider: z.enum(['openai', 'anthropic', 'perplexity', 'google', 'xai', 'deepseek']),
+    model: z.string(),
+    role: z.enum(['fact_check', 'trust_chain', 'reasoning']),
+    weight: z.number().min(0).max(1),
+  })).optional().describe('Custom model configuration (required for custom mode)'),
+  user_id: z.string().optional().describe('User ID for preference loading (user sovereignty)'),
+  save_preference: z.boolean().optional().default(false).describe('Save current settings as user preference'),
 });
 
 export const factChecker = new (class extends BaseTool {
@@ -51,6 +64,39 @@ export const factChecker = new (class extends BaseTool {
             default: 'auto',
             description: 'AI provider to use (default: auto-select, prefers Perplexity for real-time data)',
           },
+          verification_mode: {
+            type: 'string',
+            enum: ['simple', 'standard', 'comprehensive', 'custom'],
+            description: 'Verification depth: simple (1 model), standard (2 models), comprehensive (3 models), custom (user-defined). Uses saved user preference if not specified.',
+          },
+          provider_strategy: {
+            type: 'string',
+            enum: ['single', 'mixed'],
+            description: 'Use single provider (recommended) or mix providers (advanced). Uses saved user preference if not specified.',
+          },
+          custom_models: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                provider: { type: 'string', enum: ['openai', 'anthropic', 'perplexity', 'google', 'xai', 'deepseek'] },
+                model: { type: 'string' },
+                role: { type: 'string', enum: ['fact_check', 'trust_chain', 'reasoning'] },
+                weight: { type: 'number', minimum: 0, maximum: 1 },
+              },
+              required: ['provider', 'model', 'role', 'weight'],
+            },
+            description: 'Custom model configuration (required for custom mode)',
+          },
+          user_id: {
+            type: 'string',
+            description: 'User ID for preference loading (user sovereignty)',
+          },
+          save_preference: {
+            type: 'boolean',
+            default: false,
+            description: 'Save current settings as user preference (user sovereignty)',
+          },
         },
         required: ['claim_text'],
       },
@@ -59,7 +105,18 @@ export const factChecker = new (class extends BaseTool {
 
   async execute(args: any) {
     try {
-      const { claim_text, context, verification_level, sources, ai_provider } = FactCheckerSchema.parse(args);
+      const { 
+        claim_text, 
+        context, 
+        verification_level, 
+        sources, 
+        ai_provider,
+        verification_mode,
+        provider_strategy,
+        custom_models,
+        user_id,
+        save_preference,
+      } = FactCheckerSchema.parse(args);
 
       // Check for available AI providers
       if (!apiValidator.hasAnyValidProviders()) {
@@ -68,26 +125,123 @@ export const factChecker = new (class extends BaseTool {
         );
       }
 
-      // Resolve provider (handle 'auto' mode - prefers Perplexity for real-time data)
-      let provider: AIProvider;
-      if (ai_provider === 'auto' || !ai_provider) {
-        // Use auto-select - fact-checking benefits from real-time data
-        provider = aiProviderSelector.getProviderForTask({
-          taskType: 'fact_check',
-          requiresRealTimeData: true, // Fact-checking needs current information
-          preferredProvider: 'auto',
-          balanceQualitySpeed: 'balanced',
-        });
-      } else {
-        // User explicitly selected a provider (user sovereignty)
-        const validation = apiValidator.validateProvider(ai_provider as AIProvider);
-        if (!validation.valid) {
-          return this.createErrorResult(
-            `Selected AI provider ${ai_provider} is not configured: ${validation.error}`
-          );
+      // Load user preferences (user sovereignty)
+      const userId = user_id || 'default';
+      const userPrefs = userVerificationPreferences.getToolPreference(userId, 'fact_checker');
+      
+      // Determine verification mode (user preference > explicit > default)
+      const mode: VerificationMode = verification_mode || userPrefs.mode || 'standard';
+      const strategy: ProviderStrategy = provider_strategy || userPrefs.providerStrategy || 'single';
+      
+      // Validate custom mode
+      if (mode === 'custom') {
+        if (!custom_models || custom_models.length === 0) {
+          // Try to load from saved custom config
+          const customConfigId = userPrefs.customConfigId;
+          if (customConfigId) {
+            const customConfig = userVerificationPreferences.getCustomConfig(userId, customConfigId);
+            if (customConfig) {
+              // Use saved custom config
+              const multiModelConfig: MultiModelConfig = {
+                mode: 'custom',
+                providerStrategy: strategy,
+                primaryProvider: ai_provider !== 'auto' ? (ai_provider as AIProvider) : undefined,
+                customModels: customConfig.models,
+                claim: claim_text,
+                context,
+                sources,
+                verificationLevel: verification_level,
+              };
+              
+              const result = await multiModelService.executeVerification(multiModelConfig);
+              
+              // Save preference if requested
+              if (save_preference) {
+                userVerificationPreferences.saveToolPreference(userId, 'fact_checker', mode, strategy, customConfigId);
+              }
+              
+              return this.createSuccessResult(JSON.stringify(this.formatMultiModelResult(result), null, 2), {
+                verification_level,
+                verification_mode: mode,
+                provider_strategy: strategy,
+                claim_length: claim_text.length,
+                sources_checked: sources?.length || 0,
+                models_used: result.metadata.modelsExecuted,
+                combined_confidence: result.combinedConfidence,
+                was_user_preference: !verification_mode,
+              });
+            }
+          }
+          return this.createErrorResult('Custom mode requires custom_models configuration or a saved custom config');
         }
-        provider = ai_provider as AIProvider;
       }
+      
+      // Validate mode
+      if (mode !== 'custom' && !isValidPreset(mode)) {
+        return this.createErrorResult(`Invalid verification mode: ${mode}`);
+      }
+      
+      // Resolve provider for single-provider strategy
+      let primaryProvider: AIProvider | undefined;
+      if (strategy === 'single') {
+        if (ai_provider === 'auto' || !ai_provider) {
+          primaryProvider = aiProviderSelector.getProviderForTask({
+            taskType: 'fact_check',
+            requiresRealTimeData: true,
+            preferredProvider: 'auto',
+            balanceQualitySpeed: 'balanced',
+          });
+        } else {
+          // User explicitly selected a provider (user sovereignty)
+          const validation = apiValidator.validateProvider(ai_provider as AIProvider);
+          if (!validation.valid) {
+            return this.createErrorResult(
+              `Selected AI provider ${ai_provider} is not configured: ${validation.error}`
+            );
+          }
+          primaryProvider = ai_provider as AIProvider;
+        }
+      }
+      
+      // Use multi-model service for standard/comprehensive/custom modes
+      if (mode !== 'simple') {
+        const multiModelConfig: MultiModelConfig = {
+          mode,
+          providerStrategy: strategy,
+          primaryProvider,
+          customModels: custom_models as ModelConfig[] | undefined,
+          claim: claim_text,
+          context,
+          sources,
+          verificationLevel: verification_level,
+        };
+        
+        const result = await multiModelService.executeVerification(multiModelConfig);
+        
+        // Save preference if requested (user sovereignty)
+        if (save_preference) {
+          userVerificationPreferences.saveToolPreference(userId, 'fact_checker', mode, strategy);
+        }
+        
+        return this.createSuccessResult(JSON.stringify(this.formatMultiModelResult(result), null, 2), {
+          verification_level,
+          verification_mode: mode,
+          provider_strategy: strategy,
+          claim_length: claim_text.length,
+          sources_checked: sources?.length || 0,
+          models_used: result.metadata.modelsExecuted,
+          combined_confidence: result.combinedConfidence,
+          was_user_preference: !verification_mode,
+        });
+      }
+      
+      // Simple mode: use single model (backward compatible)
+      const provider = primaryProvider || aiProviderSelector.getProviderForTask({
+        taskType: 'fact_check',
+        requiresRealTimeData: true,
+        preferredProvider: ai_provider === 'auto' ? 'auto' : (ai_provider as AIProvider),
+        balanceQualitySpeed: 'balanced',
+      });
 
       const verification = await this.performRealFactCheck(
         claim_text, 
@@ -96,17 +250,65 @@ export const factChecker = new (class extends BaseTool {
         sources,
         provider
       );
+      
+      // Save preference if requested (user sovereignty)
+      if (save_preference) {
+        userVerificationPreferences.saveToolPreference(userId, 'fact_checker', 'simple', 'single');
+      }
 
       return this.createSuccessResult(JSON.stringify(verification, null, 2), {
         verification_level,
+        verification_mode: 'simple',
         claim_length: claim_text.length,
         sources_checked: sources?.length || 0,
         ai_provider: provider,
         was_auto_selected: ai_provider === 'auto' || !ai_provider,
+        was_user_preference: !verification_mode,
       });
     } catch (error) {
       return this.createErrorResult(`Fact checking failed: ${error instanceof Error ? error.message : String(error)}`);
     }
+  }
+  
+  /**
+   * Format multi-model result for output
+   */
+  private formatMultiModelResult(result: any): any {
+    return {
+      verification_status: this.determineVerificationStatusFromConfidence(result.combinedConfidence),
+      combined_confidence: result.combinedConfidence,
+      fact_check: {
+        provider: result.factCheck.provider,
+        model: result.factCheck.model,
+        response: result.factCheck.response,
+        confidence: result.factCheck.confidence,
+      },
+      trust_chain: result.trustChain ? {
+        provider: result.trustChain.provider,
+        model: result.trustChain.model,
+        response: result.trustChain.response,
+        confidence: result.trustChain.confidence,
+      } : undefined,
+      reasoning: result.reasoning ? {
+        provider: result.reasoning.provider,
+        model: result.reasoning.model,
+        response: result.reasoning.response,
+        confidence: result.reasoning.confidence,
+      } : undefined,
+      metadata: result.metadata,
+      timestamp: new Date().toISOString(),
+    };
+  }
+  
+  /**
+   * Determine verification status from combined confidence
+   */
+  private determineVerificationStatusFromConfidence(confidence: number): string {
+    if (confidence >= 0.8) return 'VERIFIED';
+    if (confidence >= 0.6) return 'LIKELY_TRUE';
+    if (confidence >= 0.4) return 'UNCERTAIN';
+    if (confidence >= 0.2) return 'LIKELY_FALSE';
+    return 'UNVERIFIED';
   }
 
   /**

@@ -100,6 +100,13 @@ The Level Set agent performs a comprehensive baseline assessment of the entire c
 4. Preserve document metadata (version, dates, etc.)
 5. Handle errors gracefully and report to user
 
+### Phase 6: Reporting
+1. Generate consolidated daily digest report
+2. Display in chat (Stats, Discrepancies, Last Run sections)
+3. DO NOT save reports as files - display only
+4. Update report format to be concise and pithy
+5. Include actionable items and next steps
+
 ### Phase 6: Verification
 1. Verify all updates were applied correctly
 2. Verify no documents were corrupted
@@ -183,3 +190,67 @@ The agent should be invoked when:
 - When documentation appears out of sync
 - Periodically for maintenance
 - When explicitly requested by user
+
+## Persistent Monitoring and Automation
+
+### Automated Verification (When Persistent Mode Enabled)
+
+When the level-set-agent is invoked with persistent monitoring enabled, it will:
+
+1. **Automated Tool Count Verification:**
+   - Scan `Cyrano/src/tools/` directory and count actual tool files
+   - Count tool definitions in `Cyrano/src/mcp-server.ts`
+   - Compare with documented tool counts in README.md and other docs
+   - Flag discrepancies automatically
+   - Update documentation if count differs by more than 5%
+
+2. **Documentation Cross-Referencing:**
+   - Verify all cross-references in documentation are valid
+   - Check that referenced files exist
+   - Validate that section references are accurate
+   - Flag broken links or outdated references
+   - Update cross-references when files are moved or renamed
+
+3. **Automatic Tracking:**
+   - Track documentation update dates vs. code modification dates
+   - Identify documents that haven't been updated after related code changes
+   - Monitor version numbers for consistency
+   - Track project status across all tracking documents
+   - Generate discrepancy reports automatically
+
+4. **Continuous Monitoring:**
+   - Run lightweight checks on each documentation update
+   - Verify tool counts after new tools are added
+   - Check cross-references when documents are modified
+   - Validate status consistency across tracking documents
+   - Alert on significant discrepancies
+
+5. **File Existence Validation:**
+   - Verify all referenced file paths in documentation actually exist
+   - Check that tool names listed in documentation match actual tool registrations in `mcp-server.ts`
+   - Validate that tool file paths (e.g., "In tool-enhancer.ts") correspond to existing files
+   - Flag non-existent tools or files as critical errors
+   - Cross-reference tool definitions between documentation and code
+
+6. **Definition Cross-Checking:**
+   - Verify engine names and descriptions match between documentation and code (e.g., MAE = Multi-Agent Engine, not Mutual Assent Engine)
+   - Check that acronym definitions are consistent across all documents
+   - Validate tool descriptions match actual implementations
+   - Flag definition mismatches as critical errors
+   - Ensure terminology consistency across codebase and documentation
+
+7. **Tool Registry Validation:**
+   - Compare tool names in `TOOL_REGISTRY_CHECKLIST.md` with actual tool registrations in `mcp-server.ts`
+   - Verify all tools listed as "Implementation complete" actually exist
+   - Check that tool status matches actual implementation state
+   - Flag tools listed but not registered, or registered but not listed
+   - Validate tool grouping and categorization
+
+### Persistent Mode Configuration
+
+To enable persistent monitoring, the agent should:
+- Run automated checks after each major code change
+- Perform weekly documentation consistency scans
+- Generate monthly discrepancy reports
+- Maintain a discrepancy tracking log
+- Auto-update minor discrepancies (with user notification)

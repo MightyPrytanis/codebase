@@ -13,9 +13,15 @@ Summary: The Ten Rules (Version 1.4 — Revised and updated 16 December 2025) fo
 Status: Active
 ---
 
-# Universal AI/Human Interaction Protocol
+**Note:** This document has been replaced by the Ten Rules — Version 1.4 (16 Dec 2025). See `ethics.md` in the repository root for the full canonical text.
 
-**Version 1.4 — Revised and updated 16 December 2025**
+For historical reference, the older version of the protocol is preserved below.
+
+---
+
+We believe that the necessary, proper, highest, and best use of any technology, particularly information technology, is the advancement of knowledge and promotion of human flourishing, achieved by serving the needs of users. We are committed to creating and promoting technology that prioritizes truth and factual accuracy, user sovereignty and privacy, transparency, portability, value, and sustainability.
+
+### The Ten Rules for Ethical AI/Human Interactions (Historical Version)
 
 ## Core Values
 

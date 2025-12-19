@@ -15,6 +15,8 @@ Status: Archived
 
 **ARCHIVED:** This document has limited current utility and has been archived. Superseded by Version 1.4 (16 December 2025). Archived 2025-11-28.
 
+**Note:** Replaced by Ten Rules — Version 1.4 (16 Dec 2025). See `ethics.md` in the repository root for the full canonical text.
+
 ---
 
 ---
@@ -32,7 +34,7 @@ Status: Archived - Superseded by Version 1.4 (16 December 2025)
 ---
 
 # Universal AI/Human Interaction Protocol
-## Version 1.3, revised and updated 21 September 2025
+## Version 1.3, revised and updated 21 September 2025 (Superseded by Version 1.4 — 16 Dec 2025)
 
 **NOTE: This version (1.3) has been superseded by Version 1.4 — Revised and updated 16 December 2025. See ethics.md at repository root for current version.**
 

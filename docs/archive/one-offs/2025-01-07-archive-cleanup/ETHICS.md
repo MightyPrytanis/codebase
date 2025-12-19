@@ -1,5 +1,11 @@
 # Universal AI/Human Interaction Protocol
-## Version 1.3.1, revised and updated 17 November 2025
+## Version 1.3.1, revised and updated 17 November 2025 (Superseded by Version 1.4 — 16 Dec 2025)
+
+**Note:** Replaced by Ten Rules — Version 1.4 (16 Dec 2025). See `ethics.md` in the repository root for the full canonical text.
+
+For historical reference, the older version is preserved below.
+
+---
 
 **NOTE: This version (1.3.1) has been superseded by Version 1.4 — Revised and updated 16 December 2025. See ethics.md at repository root for current version.**
 

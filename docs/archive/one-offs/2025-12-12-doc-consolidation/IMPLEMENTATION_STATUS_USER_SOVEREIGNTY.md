@@ -71,17 +71,17 @@ Status: Active
 The following tools have hardcoded providers and need to be updated:
 
 1. **legal-email-drafter.ts**
-   - Hardcoded: `'anthropic'` default
+   - Hardcoded: none.  
    - Needs: `ai_provider` parameter with 'auto' default
    - Status: ⚠️ Pending
 
 2. **compliance-checker.ts**
-   - May have hardcoded providers
+   - No hardcoded providers; defalt choice is 'Auto'
    - Needs: Review and update if needed
    - Status: ⚠️ Needs review
 
 3. **document-analyzer.ts**
-   - May have hardcoded providers
+   - No hardcoded providers; default choice is 'Auto'
    - Needs: Review and update if needed
    - Status: ⚠️ Needs review
 
@@ -188,6 +188,7 @@ const result = await aiService.call(provider, prompt, options);
 ## Notes
 
 - **User Sovereignty:** All tools must respect user's explicit provider choice when provided
+- **Fact Checker:** Enhanced with user preference persistence for verification modes (simple/standard/comprehensive/custom) and provider strategies. Users can save preferences per tool and override recommendations at any time.
 - **Auto-Select Default:** When 'auto' is selected (or no provider specified), use performance-based selection
 - **MAE Exception:** Perplexity is hardcoded as MAE default, but user can change it
 - **Performance Tracking:** All AI calls automatically tracked via AIService integration

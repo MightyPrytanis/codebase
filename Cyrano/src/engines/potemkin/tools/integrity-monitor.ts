@@ -284,6 +284,7 @@ export class IntegrityMonitor extends BaseTool {
               type: 'ten_rules_compliance',
               severity,
               title: `Ten Rules (Version 1.4 — Revised and updated 16 December 2025) Violations: ${test.targetLLM}`,
+              title: `Ten Rules (v1.4) Violations: ${test.targetLLM}`,
               description: `Compliance score ${test.honestyScore} below ${params.userConfig.compliance_threshold}. ${severeViolations.length} severe violations found.`,
               test: test as AIIntegrityTest,
             });

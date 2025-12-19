@@ -38,6 +38,7 @@ import { maeEngineTool } from './tools/mae-engine.js';
 import { goodcounselEngineTool } from './tools/goodcounsel-engine.js';
 import { ethicsReviewer } from './engines/goodcounsel/tools/ethics-reviewer.js';
 import { potemkinEngineTool } from './tools/potemkin-engine.js';
+import { forecastEngineTool } from './tools/forecast-engine.js';
 // Import shared verification tools
 import { claimExtractor } from './tools/verification/claim-extractor.js';
 import { citationChecker } from './tools/verification/citation-checker.js';
@@ -80,7 +81,7 @@ import { qualityAssessor } from './tools/quality-assessor.js';
 import { workflowManager } from './tools/workflow-manager.js';
 import { caseManager } from './tools/case-manager.js';
 import { documentProcessor } from './tools/document-processor.js';
-import { aiOrchestrator } from './tools/ai-orchestrator.js';
+import { aiOrchestrator } from './engines/mae/tools/ai-orchestrator.js';
 import { systemStatus } from './tools/system-status.js';
 // status-indicator tool archived - see Cyrano/archive/broken-tools/
 import { ragQuery } from './tools/rag-query.js';
@@ -179,6 +180,7 @@ class CyranoMCPServer {
           goodcounselEngineTool.getToolDefinition(),
           ethicsReviewer.getToolDefinition(),
           potemkinEngineTool.getToolDefinition(),
+          forecastEngineTool.getToolDefinition(),
           // Shared verification tools (used by Potemkin and Arkiver)
           claimExtractor.getToolDefinition(),
           citationChecker.getToolDefinition(),
@@ -354,6 +356,9 @@ class CyranoMCPServer {
             break;
           case 'potemkin_engine':
             result = await potemkinEngineTool.execute(args);
+            break;
+          case 'forecast_engine':
+            result = await forecastEngineTool.execute(args);
             break;
           // Shared verification tools
           case 'claim_extractor':

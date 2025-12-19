@@ -283,13 +283,27 @@ export type ToolNameInput = z.infer<typeof ToolNameSchema>;
 ### Models: Default Models
 
 **Default Models per Provider:**
+- **Perplexity:** `sonar` (default), `sonar-deep-research` (trust chain), `sonar-reasoning` (Socratic reasoning)
 - **Gemini:** `gemini-pro` (default), `gemini-pro-vision` (if images)
 - **xAI Grok:** `grok-beta` (default)
 - **DeepSeek:** `deepseek-chat` (default)
 
-**Configuration:** Set via `ai_providers` parameter in `ai_orchestrator` tool
+**Multi-Model Verification:**
+- Fact-checker supports parallel multi-model execution with verification modes: simple (1 model), standard (2 models), comprehensive (3 models), custom (user-defined)
+- User preferences for verification modes are persisted and respected (user sovereignty)
+- Default mode: standard (first-time users), user preference (returning users)
+- **Multi-Model Service** (MAE utility service) provides role-based parallel multi-model verification with weighted confidence scoring
+- **AI Orchestrator** (MAE tool) provides generic multi-provider orchestration (sequential, parallel, collaborative)
+- Both are organized under MAE's hierarchy as MAE is the chief orchestrator for all multi-AI service applications
 
-**Reference:** `src/tools/ai-orchestrator.ts` lines 379-401
+**Configuration:** 
+- Multi-model verification: Set via `verification_mode` parameter in `fact_checker` tool
+- Generic orchestration: Set via `ai_providers` parameter in `ai_orchestrator` tool
+
+**Reference:** 
+- Multi-Model Service: `src/engines/mae/services/multi-model-service.ts`
+- AI Orchestrator: `src/engines/mae/tools/ai-orchestrator.ts`
+- Fact Checker: `src/tools/fact-checker.ts`
 
 ### Fallbacks: Cross-Provider Routing
 
