@@ -17,7 +17,7 @@ import './App.css';
  */
 function App() {
   const [activeTab, setActiveTab] = useState<'upload' | 'results' | 'dashboard' | 'settings'>('upload');
-  const [verificationResults, setVerificationResults] = useState<any[]>([]);
+  const [verificationResults, setVerificationResults] = useState<unknown[]>([]);
 
   return (
     <div className="app">
