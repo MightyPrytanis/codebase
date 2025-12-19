@@ -16,6 +16,11 @@ import rateLimit from 'express-rate-limit';
 import helmet from 'helmet';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
+import createDOMPurify from 'dompurify';
+import { JSDOM } from 'jsdom';
+
+const window = new JSDOM('').window as unknown as Window;
+const DOMPurify = createDOMPurify(window);
 
 // ============================================================================
 // JWT Authentication
@@ -343,11 +348,11 @@ export function clearAuthCookies(res: Response) {
  * Sanitize string input to prevent XSS
  */
 export function sanitizeString(input: string): string {
-  return input
-    .replace(/[<>]/g, '') // Remove < and >
-    .replace(/javascript:/gi, '') // Remove javascript: protocol
-    .replace(/on\w+=/gi, '') // Remove event handlers
-    .trim();
+  const sanitized = DOMPurify.sanitize(input, {
+    ALLOWED_TAGS: [],
+    ALLOWED_ATTR: [],
+  });
+  return sanitized.trim();
 }
 
 /**
