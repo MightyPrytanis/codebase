@@ -106,10 +106,10 @@ class WellnessService {
     // Encrypt sensitive fields
     const contentEncrypted = encryption.encryptField(input.content, 'content').encrypted;
     const moodEncrypted = input.mood ? encryption.encryptField(input.mood, 'mood').encrypted : null;
-    // For tags, we need to encrypt each tag individually since schema expects string[]
-    const tagsEncrypted = input.tags 
-      ? input.tags.map(tag => encryption.encryptField(tag, 'tags').encrypted)
-      : [];
+    // Encrypt tags as single JSON string (consistent with update/decrypt pattern)
+    const tagsEncrypted = input.tags && input.tags.length > 0
+      ? encryption.encryptField(JSON.stringify(input.tags), 'tags').encrypted
+      : null;
     const transcriptionEncrypted = transcription ? encryption.encryptField(transcription, 'transcription').encrypted : null;
     const voiceAudioPathEncrypted = voiceAudioPath ? encryption.encryptField(voiceAudioPath, 'voice_audio_path').encrypted : null;
 
@@ -234,7 +234,10 @@ class WellnessService {
       updateData.mood = updates.mood ? encryption.encryptField(updates.mood, 'mood').encrypted : null;
     }
     if (updates.tags !== undefined) {
-      updateData.tags = updates.tags ? encryption.encryptField(JSON.stringify(updates.tags), 'tags').encrypted : null;
+      // Handle empty arrays consistently with createJournalEntry (store null if empty)
+      updateData.tags = updates.tags && updates.tags.length > 0
+        ? encryption.encryptField(JSON.stringify(updates.tags), 'tags').encrypted
+        : null;
     }
 
     // Update sentiment if content changed
@@ -553,7 +556,35 @@ class WellnessService {
       content: encryption.decryptField({ encrypted: entry.contentEncrypted, algorithm: 'aes-256-gcm', keyDerivation: 'pbkdf2' }, 'content'),
       contentType: entry.contentType as 'text' | 'voice' | 'both',
       mood: entry.mood ? encryption.decryptField({ encrypted: entry.mood, algorithm: 'aes-256-gcm', keyDerivation: 'pbkdf2' }, 'mood') : undefined,
-      tags: entry.tags ? JSON.parse(encryption.decryptField({ encrypted: entry.tags, algorithm: 'aes-256-gcm', keyDerivation: 'pbkdf2' }, 'tags')) : [],
+      tags: entry.tags ? (() => {
+        try {
+          // New format: single encrypted JSON string
+          return JSON.parse(encryption.decryptField(
+            { encrypted: entry.tags, algorithm: 'aes-256-gcm', keyDerivation: 'pbkdf2' },
+            'tags'
+          ));
+        } catch (error) {
+          // Migration: handle old format (array of encrypted strings)
+          if (Array.isArray(entry.tags)) {
+            try {
+              return entry.tags.map(tag => {
+                try {
+                  return encryption.decryptField(
+                    { encrypted: tag, algorithm: 'aes-256-gcm', keyDerivation: 'pbkdf2' },
+                    'tags'
+                  );
+                } catch {
+                  return tag; // Fallback if decryption fails
+                }
+              });
+            } catch {
+              return [];
+            }
+          }
+          console.error('Error decrypting tags:', error);
+          return [];
+        }
+      })() : [],
       voiceAudioPath: entry.voiceAudioPath ? encryption.decryptField({ encrypted: entry.voiceAudioPath, algorithm: 'aes-256-gcm', keyDerivation: 'pbkdf2' }, 'voice_audio_path') : undefined,
       transcription: entry.transcriptionEncrypted ? encryption.decryptField({ encrypted: entry.transcriptionEncrypted, algorithm: 'aes-256-gcm', keyDerivation: 'pbkdf2' }, 'transcription') : undefined,
       sentimentScore: entry.sentimentScore || undefined,

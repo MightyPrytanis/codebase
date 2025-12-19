@@ -1,7 +1,7 @@
 # Codebase - Cyrano Ecosystem Monorepo
 
 **Repository:** [MightyPrytanis/codebase](https://github.com/MightyPrytanis/codebase)  
-**Last Updated:** 2025-01-07  
+**Last Updated:** 2025-12-17  
 **Status:** Active Development
 
 ## Overview
@@ -47,7 +47,7 @@ The following are intentionally excluded from git (see `.gitignore`):
 MCP-compliant AI orchestration server with modular architecture:
 - **Engines:** GoodCounsel, MAE, Potemkin
 - **Modules:** Arkiver, Chronometric, RAG
-- **Tools:** 48+ MCP tools for legal workflow automation
+- **Tools:** 69 MCP tools for legal workflow automation
 
 ### LexFiat
 Legal intelligence platform with adaptive workflow engine:

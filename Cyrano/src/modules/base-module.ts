@@ -28,9 +28,12 @@ export interface ModuleConfig {
 export interface ModuleResource {
   id: string;
   type: 'file' | 'data' | 'api' | 'template';
-  path?: string;
-  content?: any;
+  path?: string;        // Local file path (takes precedence over URL)
+  url?: string;         // URL to download from
+  content?: any;        // In-memory content
   description?: string;
+  version?: string;     // Version/year tracking (e.g., "2024", "2025")
+  cache?: boolean;      // Whether to cache downloaded resources (default: true)
 }
 
 export interface ModulePrompt {

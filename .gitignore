@@ -117,3 +117,7 @@ Document Archive/
 
 # Snyk Security Extension - AI Rules (auto-generated)
 .github/instructions/snyk_rules.instructions.md
+
+# Resource cache directory (downloaded forms, templates, etc.)
+resources/
+Cyrano/resources/

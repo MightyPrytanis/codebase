@@ -2,39 +2,30 @@ const express = require('express');
 const { google } = require('googleapis');
 const session = require('express-session');
 const path = require('path');
+const rateLimit = require('express-rate-limit');
 
 const app = express();
 app.enable('trust proxy');
 const port = process.env.PORT || 3000;
 
-// Simple rate limiting middleware (in-memory store)
-// For production, consider using express-rate-limit with Redis
-const rateLimitStore = new Map();
-const rateLimitMiddleware = (req, res, next) => {
-  const ip = req.ip || req.connection.remoteAddress;
-  const now = Date.now();
-  const windowMs = 15 * 60 * 1000; // 15 minutes
-  const maxRequests = 100; // Max 100 requests per window
-  
-  if (!rateLimitStore.has(ip)) {
-    rateLimitStore.set(ip, { count: 1, resetTime: now + windowMs });
-    return next();
-  }
-  
-  const limit = rateLimitStore.get(ip);
-  if (now > limit.resetTime) {
-    limit.count = 1;
-    limit.resetTime = now + windowMs;
-    return next();
-  }
-  
-  if (limit.count >= maxRequests) {
-    return res.status(429).json({ error: 'Too many requests, please try again later' });
-  }
-  
-  limit.count++;
-  next();
-};
+// Enhanced rate limiting using express-rate-limit
+// General rate limiter (100 requests per 15 minutes)
+const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // Max 100 requests per window
+  message: 'Too many requests, please try again later',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// Strict rate limiter for OAuth endpoints (5 requests per 15 minutes)
+const oauthLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Max 5 requests per window (protects against brute force)
+  message: 'Too many authentication attempts, please try again later',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 // --- CONFIGURATION ---
 // IMPORTANT: Use environment variables for these in production!
@@ -59,28 +50,36 @@ const sessionSecret = process.env.SESSION_SECRET;
 if (!sessionSecret) {
   throw new Error('SESSION_SECRET environment variable is required');
 }
+
+const isProduction = process.env.NODE_ENV === 'production';
+
 app.use(session({
   secret: sessionSecret,
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false, // Changed from true for security - don't create session until needed
+  name: 'cyrano.session', // Custom session name to avoid fingerprinting
   cookie: { 
-    secure: true, // Require TLS; set TRUST_PROXY for HTTPS behind proxy
+    secure: isProduction, // Require TLS in production only (allows HTTP in development)
+    httpOnly: true, // Always prevent XSS access to cookies
     sameSite: 'strict', // CSRF protection via SameSite attribute
-    httpOnly: true // Mitigate XSS session theft
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    path: '/'
   }
 }));
 
-// Enforce HTTPS
+// Enforce HTTPS in production
 app.use((req, res, next) => {
-  if (!req.secure) {
+  // Check both req.secure (direct) and X-Forwarded-Proto (behind proxy)
+  const isSecure = req.secure || req.get('X-Forwarded-Proto') === 'https';
+  if (!isSecure && isProduction) {
     const host = req.headers.host || '';
     return res.redirect(301, `https://${host}${req.url}`);
   }
   next();
 });
 
-// Apply rate limiting to all routes
-app.use(rateLimitMiddleware);
+// Apply general rate limiting to all routes
+app.use(generalLimiter);
 
 // CSRF protection middleware
 // For production, consider using csurf or csrf packages
@@ -145,8 +144,8 @@ app.get('/setup', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'setup.html'));
 });
 
-// 2. Redirect to Google to start the OAuth flow
-app.get('/connect/google', (req, res) => {
+// 2. Redirect to Google to start the OAuth flow (with strict rate limiting)
+app.get('/connect/google', oauthLimiter, (req, res) => {
   const authUrl = oauth2Client.generateAuthUrl({
     access_type: 'offline', // 'offline' is crucial for getting a refresh_token
     scope: SCOPES,
@@ -155,8 +154,8 @@ app.get('/connect/google', (req, res) => {
   res.redirect(authUrl);
 });
 
-// 3. The callback URL that Google redirects to after user consent
-app.get('/oauth2callback', async (req, res) => {
+// 3. The callback URL that Google redirects to after user consent (with strict rate limiting)
+app.get('/oauth2callback', oauthLimiter, async (req, res) => {
   const { code } = req.query;
 
   if (!code) {

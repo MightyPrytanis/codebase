@@ -15,6 +15,7 @@ import { BaseEngine } from './base-engine.js';
 import { maeEngine } from './mae/mae-engine.js';
 import { goodcounselEngine } from './goodcounsel/goodcounsel-engine.js';
 import { potemkinEngine } from './potemkin/potemkin-engine.js';
+import { forecastEngine } from './forecast/index.js';
 
 class EngineRegistry {
   private engines: Map<string, BaseEngine>;
@@ -25,6 +26,7 @@ class EngineRegistry {
     this.register(maeEngine);
     this.register(goodcounselEngine);
     this.register(potemkinEngine);
+    this.register(forecastEngine);
   }
 
   /**

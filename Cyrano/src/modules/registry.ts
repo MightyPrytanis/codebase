@@ -13,14 +13,18 @@
 
 import { BaseModule } from './base-module.js';
 import { chronometricModule } from './chronometric/chronometric.js';
+import { taxForecastModule, childSupportForecastModule, qdroForecastModule } from './forecast/index.js';
 
 class ModuleRegistry {
   private modules: Map<string, BaseModule>;
 
   constructor() {
     this.modules = new Map();
-    // Auto-register Chronometric module
+    // Auto-register modules
     this.register(chronometricModule);
+    this.register(taxForecastModule);
+    this.register(childSupportForecastModule);
+    this.register(qdroForecastModule);
   }
 
   /**

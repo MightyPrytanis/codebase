@@ -10,6 +10,7 @@ import { PerplexityService } from '../services/perplexity.js';
 import { apiValidator } from '../utils/api-validator.js';
 import { AIService, AIProvider } from '../services/ai-service.js';
 import { aiProviderSelector } from '../services/ai-provider-selector.js';
+import { alertGenerator } from '../engines/potemkin/tools/alert-generator.js';
 
 const RedFlagFinderSchema = z.object({
   action: z.enum(['scan_documents', 'scan_emails', 'scan_court_notices', 'scan_case_law', 'get_red_flags', 'analyze_urgency']).describe('Action to perform'),
@@ -132,6 +133,41 @@ export const redFlagFinder = new (class extends BaseTool {
       
       if (analysis.red_flags && analysis.red_flags.length > 0) {
         this.redFlags.get(caseId)!.push(...analysis.red_flags);
+        
+        // Generate alerts for critical/high urgency red flags using Potemkin's alert_generator
+        const criticalFlags = analysis.red_flags.filter((flag: any) => 
+          flag.urgency === 'critical' || flag.urgency === 'high' || flag.severity === 'critical' || flag.severity === 'high'
+        );
+        
+        if (criticalFlags.length > 0) {
+          try {
+            for (const flag of criticalFlags) {
+              await alertGenerator.execute({
+                alert: {
+                  id: `red_flag_${Date.now()}_${flag.id || Math.random()}`,
+                  type: 'red_flag',
+                  severity: flag.severity || flag.urgency || 'high',
+                  title: flag.title || flag.description?.substring(0, 100) || 'Red Flag Detected',
+                  description: flag.description || flag.details || 'Red flag requiring immediate attention',
+                  test: {
+                    id: `red_flag_test_${flag.id || Date.now()}`,
+                    testName: 'Red Flag Detection',
+                    testType: 'red_flag',
+                    targetLLM: 'red_flag_finder',
+                  },
+                },
+                userConfig: {
+                  notification_method: flag.urgency === 'critical' ? 'both' : 'email',
+                  email: undefined, // Will use default from user config
+                },
+                existingAlerts: [],
+              });
+            }
+          } catch (error) {
+            // Log but don't fail - alert generation is supplementary
+            console.warn('Failed to generate alerts for red flags:', error instanceof Error ? error.message : String(error));
+          }
+        }
       }
 
       return this.createSuccessResult(JSON.stringify(analysis, null, 2), {

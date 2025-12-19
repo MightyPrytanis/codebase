@@ -16,8 +16,8 @@ Status: Active
 # RAG Integration Guide - Architecture and Usage
 
 **Purpose:** Complete guide to understanding, implementing, and using RAG (Retrieval-Augmented Generation) in LexFiat  
-**Last Updated:** 2025-12-06  
-**Status:** Active - Core features implemented, multi-modal architecture ready
+**Last Updated:** 2025-12-17  
+**Status:** Active - Core features implemented, batch ingestion added, multi-modal architecture ready
 
 ---
 
@@ -58,8 +58,9 @@ Think of it as giving the AI a "library" of your documents that it can search th
 
 ## How RAG Works in LexFiat
 
-### 1. Document Ingestion (Automatic)
+### 1. Document Ingestion
 
+**Automatic Ingestion:**
 When documents are processed through LexFiat:
 1. **Document Processor** extracts text from PDFs, DOCX, emails, etc.
 2. **RAG Chunker** breaks documents into semantic chunks (preserving sentence/paragraph boundaries)
@@ -67,6 +68,13 @@ When documents are processed through LexFiat:
 4. **Vector Store** stores embeddings for fast semantic search
 
 **You don't need to do anything** - this happens automatically when documents are processed.
+
+**Manual Ingestion:**
+You can also manually ingest documents using the RAG tool:
+- **Single Document:** Use `action: 'ingest'` with a single document
+- **Batch Ingestion:** Use `action: 'ingest_batch'` with an array of documents for efficient mass ingestion
+
+Batch ingestion processes multiple documents in parallel and provides detailed results for each document, including success/failure status and chunk counts.
 
 ### 2. Query Processing
 
@@ -99,6 +107,8 @@ The AI uses RAG context to:
 
 ### Phase 2: Integration (✅ Complete)
 - ✅ MCP tool for RAG queries
+- ✅ Single document ingestion
+- ✅ Batch document ingestion
 - ✅ Integration with document analyzer
 - ✅ Integration with legal reviewer
 - ✅ Citation tracking
@@ -358,6 +368,7 @@ The RAG pipeline is designed to support multi-modal content, though full impleme
 ```typescript
 import { executeCyranoTool } from '@/lib/cyrano-api';
 
+// Query RAG
 const ragResult = await executeCyranoTool('rag_query', {
   action: 'query',
   query: 'Your search query',
@@ -365,6 +376,39 @@ const ragResult = await executeCyranoTool('rag_query', {
   expandQuery: true,
   rerank: true,
   includeSourceInfo: true,
+});
+
+// Ingest single document
+const ingestResult = await executeCyranoTool('rag_query', {
+  action: 'ingest',
+  document: {
+    id: 'doc-123',
+    text: 'Document text content...',
+    type: 'legal',
+    source: 'user-upload',
+    sourceType: 'user-upload',
+  },
+});
+
+// Ingest multiple documents in batch
+const batchResult = await executeCyranoTool('rag_query', {
+  action: 'ingest_batch',
+  documents: [
+    {
+      id: 'doc-123',
+      text: 'Document 1 text...',
+      type: 'legal',
+      source: 'user-upload',
+      sourceType: 'user-upload',
+    },
+    {
+      id: 'doc-124',
+      text: 'Document 2 text...',
+      type: 'brief',
+      source: 'clio',
+      sourceType: 'clio',
+    },
+  ],
 });
 ```
 
@@ -545,4 +589,4 @@ const aiPrompt = `Based on the following context from your documents:\n\n${conte
 ---
 
 **Document Owner:** David W Towne / Cognisint LLC  
-**Last Updated:** 2025-12-06
+**Last Updated:** 2025-12-17
