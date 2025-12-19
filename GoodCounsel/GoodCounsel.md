@@ -9,7 +9,7 @@ As a whole, LexFiat shifts routine, mundane yet still stress-inducing tasks to a
 ## Key Features  
   
 - **Wellness Support:** Automated, context-aware reminders and prompts addressing physical, mental, and social health.  
-- **Ethics & Professional Growth:** Tools for tracking ethical obligations, personal development, and reflective practice, in alignment with project-wide `ETHICS.md`.  
+- **Ethics & Professional Growth:** Tools for tracking ethical obligations, personal development, and reflective practice, in alignment with the Ten Rules (Version 1.4 — Revised and updated 16 December 2025) in `ethics.md`.  
 - **Workflow Awareness:** Integration with other LexFiat components to balance workflow and wellness in a cohesive, context-aware and mutually-reinforcing time and effort management strategy.  
 - **Extensibility:** Designed so the core logic can be adapted with different interfaces (“skins”) for use in other legal, health, or professional applications.  
   

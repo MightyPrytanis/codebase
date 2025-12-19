@@ -16,6 +16,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+import dotenv from 'dotenv';
+
+// Load environment variables from .env file
+dotenv.config();
+
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { gapIdentifier } from './tools/gap-identifier.js';
@@ -33,6 +38,7 @@ import { maeEngineTool } from './tools/mae-engine.js';
 import { goodcounselEngineTool } from './tools/goodcounsel-engine.js';
 import { ethicsReviewer } from './engines/goodcounsel/tools/ethics-reviewer.js';
 import { potemkinEngineTool } from './tools/potemkin-engine.js';
+import { forecastEngineTool } from './tools/forecast-engine.js';
 // Import shared verification tools
 import { claimExtractor } from './tools/verification/claim-extractor.js';
 import { citationChecker } from './tools/verification/citation-checker.js';
@@ -75,7 +81,7 @@ import { qualityAssessor } from './tools/quality-assessor.js';
 import { workflowManager } from './tools/workflow-manager.js';
 import { caseManager } from './tools/case-manager.js';
 import { documentProcessor } from './tools/document-processor.js';
-import { aiOrchestrator } from './tools/ai-orchestrator.js';
+import { aiOrchestrator } from './engines/mae/tools/ai-orchestrator.js';
 import { systemStatus } from './tools/system-status.js';
 // status-indicator tool archived - see Cyrano/archive/broken-tools/
 import { ragQuery } from './tools/rag-query.js';
@@ -108,6 +114,7 @@ import {
   runExtractionPipeline,
   createArkiverConfig
 } from './tools/arkiver-tools.js';
+import { cyranoPathfinder } from './tools/cyrano-pathfinder.js';
 
 class CyranoMCPServer {
   private server: Server;
@@ -173,6 +180,7 @@ class CyranoMCPServer {
           goodcounselEngineTool.getToolDefinition(),
           ethicsReviewer.getToolDefinition(),
           potemkinEngineTool.getToolDefinition(),
+          forecastEngineTool.getToolDefinition(),
           // Shared verification tools (used by Potemkin and Arkiver)
           claimExtractor.getToolDefinition(),
           citationChecker.getToolDefinition(),
@@ -214,6 +222,8 @@ class CyranoMCPServer {
           evaluateGoodCounselContextTool.getToolDefinition(),
           // Wellness Journaling
           wellnessJournalTool.getToolDefinition(),
+          // Cyrano Pathfinder - Unified Chat Interface
+          cyranoPathfinder.getToolDefinition(),
         ],
       };
     });
@@ -347,6 +357,9 @@ class CyranoMCPServer {
           case 'potemkin_engine':
             result = await potemkinEngineTool.execute(args);
             break;
+          case 'forecast_engine':
+            result = await forecastEngineTool.execute(args);
+            break;
           // Shared verification tools
           case 'claim_extractor':
             result = await claimExtractor.execute(args);
@@ -436,6 +449,9 @@ class CyranoMCPServer {
             break;
           case 'wellness_journal':
             result = await wellnessJournalTool.execute(args);
+            break;
+          case 'cyrano_pathfinder':
+            result = await cyranoPathfinder.execute(args);
             break;
           default:
             throw new Error(`Unknown tool: ${name}`);

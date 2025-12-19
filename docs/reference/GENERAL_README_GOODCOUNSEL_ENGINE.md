@@ -158,7 +158,7 @@ const workflows = await goodcounselEngine.getWorkflows();
 
 ## Ethical Principles
 
-GoodCounsel is governed by the principles in LexFiat's `ETHICS.md`, prioritizing:
+GoodCounsel is governed by the principles in the Ten Rules (Version 1.4 — Revised and updated 16 December 2025) in `ethics.md`, prioritizing:
 - User privacy
 - Autonomy
 - Transparency

@@ -1,4 +1,4 @@
-import { Search, Gavel, AlertTriangle, FolderOpen, Handshake, Plus, RefreshCw, Settings } from "lucide-react";
+import { Search, Gavel, AlertTriangle, FolderOpen, Handshake, Plus, RefreshCw, Settings, BookOpen } from "lucide-react";
 
 export default function Sidebar() {
   const workflowModules = [
@@ -7,6 +7,7 @@ export default function Sidebar() {
     { icon: AlertTriangle, name: "Emergency Response", active: false, color: "text-alert-red" },
     { icon: FolderOpen, name: "Discovery Management", active: false, color: "text-gray-400" },
     { icon: Handshake, name: "Settlement Negotiation", active: false, color: "text-gray-400" },
+    { icon: BookOpen, name: "Library", active: false, color: "text-aqua", href: "/library" },
   ];
 
   const quickActions = [
@@ -27,11 +28,13 @@ export default function Sidebar() {
       <div className="mb-6">
         <h3 className="text-base font-semibold mb-3 text-warm-white">Active Modules</h3>
         <div className="space-y-2">
-          {workflowModules.slice(0, 4).map((module) => {
+          {workflowModules.map((module) => {
             const IconComponent = module.icon;
+            const Component = module.href ? 'a' : 'div';
             return (
-              <div
+              <Component
                 key={module.name}
+                href={module.href}
                 className={`flex items-center space-x-2 p-2 rounded-md transition-colors cursor-pointer ${
                   module.active 
                     ? 'bg-navy border border-aqua' 
@@ -40,7 +43,7 @@ export default function Sidebar() {
               >
                 <IconComponent className={`h-3 w-3 ${module.color}`} />
                 <span className="text-xs text-warm-white">{module.name}</span>
-              </div>
+              </Component>
             );
           })}
         </div>

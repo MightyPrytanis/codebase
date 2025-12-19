@@ -11,16 +11,13 @@
  */
 
 import express from 'express';
-import cors from 'cors';
+import cors, { CorsOptions } from 'cors';
 import dotenv from 'dotenv';
 import multer from 'multer';
+import cookieParser from 'cookie-parser';
 
 // Load environment variables
 dotenv.config();
-console.log('Environment variables loaded:');
-console.log('PERPLEXITY_API_KEY exists:', !!process.env.PERPLEXITY_API_KEY);
-console.log('OPENAI_API_KEY exists:', !!process.env.OPENAI_API_KEY);
-console.log('ANTHROPIC_API_KEY exists:', !!process.env.ANTHROPIC_API_KEY);
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import {
@@ -29,6 +26,10 @@ import {
   Tool,
   CallToolResult,
 } from '@modelcontextprotocol/sdk/types.js';
+
+// Import security middleware
+import security from './middleware/security.js';
+import authRoutes from './routes/auth.js';
 
 // Import tool implementations
 import { documentAnalyzer } from './tools/document-analyzer.js';
@@ -41,7 +42,7 @@ import { qualityAssessor } from './tools/quality-assessor.js';
 import { workflowManager } from './tools/workflow-manager.js';
 import { caseManager } from './tools/case-manager.js';
 import { documentProcessor } from './tools/document-processor.js';
-import { aiOrchestrator } from './tools/ai-orchestrator.js';
+import { aiOrchestrator } from './engines/mae/tools/ai-orchestrator.js';
 import { systemStatus } from './tools/system-status.js';
 // status-indicator tool archived - see Cyrano/archive/broken-tools/
 import { ragQuery } from './tools/rag-query.js';
@@ -53,7 +54,7 @@ import { timeValueBilling } from './tools/time-value-billing.js';
 import { tasksCollector } from './tools/tasks-collector.js';
 import { contactsCollector } from './tools/contacts-collector.js';
 import { DocumentDrafterTool } from './tools/document-drafter.js';
-import { toolEnhancer } from './tools/tool-enhancer.js';
+// import { toolEnhancer } from './tools/tool-enhancer.js'; // TODO: File doesn't exist
 import { ethicsReviewer } from './engines/goodcounsel/tools/ethics-reviewer.js';
 import {
   arkiverTextProcessor,
@@ -110,17 +111,88 @@ import {
   integrityMonitor,
   alertGenerator,
 } from './engines/potemkin/tools/index.js';
+import { cyranoPathfinder } from './tools/cyrano-pathfinder.js';
+
+// Import library routes
+import libraryRoutes from './routes/library.js';
 
 const app = express();
+app.enable('trust proxy');
 const port = process.env.PORT || 5002;
 
 // Disable X-Powered-By header to prevent information disclosure
 app.disable('x-powered-by');
 
-// Middleware
-app.use(cors());
+// Security: Apply Helmet.js for secure headers
+app.use(security.secureHeaders);
+
+// Cookie parser for session management
+app.use(cookieParser());
+
+// Middleware - CORS and HTTPS enforcement
+const isProduction = process.env.NODE_ENV === 'production';
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').map(o => o.trim()).filter(Boolean);
+
+// Require ALLOWED_ORIGINS in production
+if (isProduction && allowedOrigins.length === 0) {
+  throw new Error('ALLOWED_ORIGINS must be set in production environment');
+}
+
+// Configure CORS with origin validation
+const corsOptions: CorsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, curl, Postman) in development only
+    if (!origin && !isProduction) {
+      return callback(null, true);
+    }
+    // In production, require origin
+    if (!origin && isProduction) {
+      return callback(new Error('CORS: Origin header required in production'));
+    }
+    // In development, if no whitelist is configured, allow all origins
+    if (!isProduction && allowedOrigins.length === 0) {
+      return callback(null, true);
+    }
+    // Check if origin is in whitelist
+    if (origin && allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS: Origin ${origin} not allowed`));
+    }
+  },
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
+
+// Enforce HTTPS in production (auto-enforce, not just when FORCE_HTTPS=true)
+app.use((req, res, next) => {
+  // Check both req.secure (direct) and X-Forwarded-Proto (behind proxy)
+  const isSecure = req.secure || req.get('X-Forwarded-Proto') === 'https';
+  
+  // In production, always enforce HTTPS
+  if (isProduction && !isSecure) {
+    return res.redirect(301, `https://${req.headers.host}${req.url}`);
+  }
+  
+  // In development, allow FORCE_HTTPS override
+  if (!isProduction && process.env.FORCE_HTTPS === 'true' && !isSecure) {
+    return res.redirect(301, `https://${req.headers.host}${req.url}`);
+  }
+  
+  next();
+});
 app.use(express.json());
 app.use(express.raw({ type: 'application/octet-stream', limit: '100mb' }));
+
+// Security: Input sanitization
+app.use(security.sanitizeInputs);
+
+// Security: Rate limiting (applies to all routes)
+// Tool execution through MCP protocol is already rate-limited by these global limiters
+app.use(security.authenticatedLimiter);
+app.use(security.unauthenticatedLimiter);
 
 // Multer configuration for file uploads
 const upload = multer({
@@ -211,6 +283,8 @@ mcpServer.setRequestHandler(ListToolsRequestSchema, async () => {
       legalEmailDrafter.getToolDefinition(),
       refineEmailTone.getToolDefinition(),
       validateLegalLanguage.getToolDefinition(),
+      // Cyrano Pathfinder - Unified Chat Interface
+      cyranoPathfinder.getToolDefinition(),
     ],
   };
 });
@@ -388,7 +462,11 @@ mcpServer.setRequestHandler(CallToolRequestSchema, async (request) => {
             result = await new DocumentDrafterTool().execute(args);
             break;
           case 'tool_enhancer':
-            result = await toolEnhancer.execute(args);
+            // TODO: tool_enhancer not implemented
+            result = {
+              content: [{ type: 'text', text: 'Tool enhancer not available' }],
+              isError: true,
+            };
             break;
           case 'source_verifier':
             result = await sourceVerifier.execute(args);
@@ -421,6 +499,9 @@ mcpServer.setRequestHandler(CallToolRequestSchema, async (request) => {
             break;
           case 'validate_legal_language':
             result = await validateLegalLanguage.execute(args);
+            break;
+          case 'cyrano_pathfinder':
+            result = await cyranoPathfinder.execute(args);
             break;
           default:
             throw new Error(`Unknown tool: ${name}`);
@@ -503,6 +584,8 @@ app.get('/mcp/tools', async (req, res) => {
       legalEmailDrafter.getToolDefinition(),
       refineEmailTone.getToolDefinition(),
       validateLegalLanguage.getToolDefinition(),
+      // Cyrano Pathfinder - Unified Chat Interface
+      cyranoPathfinder.getToolDefinition(),
     ];
     
     res.json({ tools });
@@ -684,7 +767,11 @@ app.post('/mcp/execute', async (req, res) => {
         result = await new DocumentDrafterTool().execute(toolInput);
         break;
       case 'tool_enhancer':
-        result = await toolEnhancer.execute(toolInput);
+        // TODO: tool_enhancer not implemented
+        result = {
+          content: [{ type: 'text', text: 'Tool enhancer not available' }],
+          isError: true,
+        };
         break;
       case 'source_verifier':
         result = await sourceVerifier.execute(toolInput);
@@ -708,6 +795,11 @@ app.post('/mcp/execute', async (req, res) => {
         break;
       case 'alert_generator':
         result = await alertGenerator.execute(toolInput);
+        break;
+      
+      // Cyrano Pathfinder
+      case 'cyrano_pathfinder':
+        result = await cyranoPathfinder.execute(toolInput);
         break;
         
       default:
@@ -764,13 +856,25 @@ app.get('/api/good-counsel/overview', async (req, res) => {
   }
 });
 
+// Authentication routes
+app.use('/auth', authRoutes);
+
+// Security endpoints
+app.get('/csrf-token', security.getCSRFToken);
+app.get('/security/status', security.securityStatus);
+
 app.get('/health', (req, res) => {
   res.json({ 
     status: 'healthy',
     timestamp: new Date().toISOString(),
     version: '1.0.0',
     tools_count: 32,
-    uptime: process.uptime()
+    uptime: process.uptime(),
+    security: {
+      jwtEnabled: !!process.env.JWT_SECRET,
+      csrfProtection: true,
+      rateLimiting: true,
+    }
   });
 });
 
@@ -985,6 +1089,9 @@ app.get('/api/arkiver/files/:fileId', async (req, res) => {
   }
 });
 
+// Mount library routes
+app.use('/api', libraryRoutes);
+
 // Start server
 // Export app for testing
 export { app };
@@ -1002,5 +1109,13 @@ if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith
     console.log(`  GET  /mcp/status - Server status`);
     console.log(`  POST /api/arkiver/upload - Upload file to Arkiver`);
     console.log(`  GET  /api/arkiver/files/:fileId - Get file status`);
+    console.log(`  POST /api/onboarding/practice-profile - Save practice profile`);
+    console.log(`  GET  /api/onboarding/practice-profile - Get practice profile`);
+    console.log(`  POST /api/library/locations - Add/update library location`);
+    console.log(`  GET  /api/library/locations - List library locations`);
+    console.log(`  GET  /api/library/items - List library items`);
+    console.log(`  POST /api/library/items/:id/pin - Toggle pin status`);
+    console.log(`  POST /api/library/items/:id/ingest - Enqueue for RAG ingestion`);
+    console.log(`  GET  /api/health/library - Library health status`);
   });
 }

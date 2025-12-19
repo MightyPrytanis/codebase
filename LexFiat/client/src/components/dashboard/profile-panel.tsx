@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect } from "react";
-import ExpandedPanel from "./expanded-panel";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { User, Mail, Briefcase, Edit, Phone, MapPin, Save } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { Input } from "@/components/ui/input";
@@ -106,195 +106,192 @@ export default function ProfilePanel({ isOpen, onClose, attorney }: ProfilePanel
   };
 
   return (
-    <ExpandedPanel
-      title="Profile"
-      isOpen={isOpen}
-      onClose={onClose}
-      className="max-w-4xl"
-    >
-      <div className="space-y-6">
-        <div className="flex items-center gap-4 p-4 bg-black/30 rounded-lg">
-          <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center border-2 border-primary">
-            <User className="w-8 h-8 text-primary" />
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto bg-charcoal border-gray-600">
+        <SheetHeader>
+          <SheetTitle className="text-warm-white">Profile</SheetTitle>
+        </SheetHeader>
+        
+        <div className="space-y-6 mt-6">
+          <div className="flex items-center gap-4 p-4 bg-black/30 rounded-lg">
+            <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center border-2 border-primary">
+              <User className="w-8 h-8 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold text-warm-white">{attorney?.name || attorneyData?.name || "Mekel S. Miller"}</h3>
+              <p className="text-sm text-muted-foreground">{attorney?.specialization || attorneyData?.specialization || "Family Law"}</p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-xl font-semibold">{attorney?.name || attorneyData?.name || "Mekel S. Miller"}</h3>
-            <p className="text-sm text-muted-foreground">{attorney?.specialization || attorneyData?.specialization || "Family Law"}</p>
-          </div>
-        </div>
 
-        {/* Contact Information */}
-        <div className="insight-card info p-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <Mail className="h-5 w-5" />
-              <h3 className="font-semibold">Contact Information</h3>
-            </div>
-            {!isEditing && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => setIsEditing(true)}
-                disabled={isLoadingAttorney || !attorneyData?.id}
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                Edit
-              </Button>
-            )}
-          </div>
-          {isEditing ? (
-            <div className="space-y-3">
-              <div>
-                <Label htmlFor="email" className="text-sm text-muted-foreground">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={contactData.email}
-                  onChange={(e) => setContactData(prev => ({ ...prev, email: e.target.value }))}
-                  className="bg-black/20 border-slate-600 text-white mt-1"
-                />
+          {/* Contact Information */}
+          <div className="insight-card info p-4">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <Mail className="h-5 w-5" />
+                <h3 className="font-semibold text-warm-white">Contact Information</h3>
               </div>
-              <div>
-                <Label htmlFor="phone" className="text-sm text-muted-foreground">Phone</Label>
-                <Input
-                  id="phone"
-                  type="tel"
-                  value={contactData.phone}
-                  onChange={(e) => setContactData(prev => ({ ...prev, phone: e.target.value }))}
-                  className="bg-black/20 border-slate-600 text-white mt-1"
-                />
-              </div>
-              <div>
-                <Label htmlFor="address" className="text-sm text-muted-foreground">Address</Label>
-                <Input
-                  id="address"
-                  value={contactData.address}
-                  onChange={(e) => setContactData(prev => ({ ...prev, address: e.target.value }))}
-                  className="bg-black/20 border-slate-600 text-white mt-1"
-                />
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-2 text-sm text-muted-foreground">
-              {contactData.email && <div><Mail className="h-4 w-4 inline mr-2" />{contactData.email}</div>}
-              {contactData.phone && <div><Phone className="h-4 w-4 inline mr-2" />{contactData.phone}</div>}
-              {contactData.address && <div><MapPin className="h-4 w-4 inline mr-2" />{contactData.address}</div>}
-              {!contactData.email && !contactData.phone && !contactData.address && (
-                <p className="text-xs">No contact information on file</p>
+              {!isEditing && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setIsEditing(true)}
+                  disabled={isLoadingAttorney || !attorneyData?.id}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit
+                </Button>
               )}
             </div>
-          )}
-        </div>
-
-        {/* Practice Details */}
-        <div className="insight-card info p-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-3">
-              <Briefcase className="h-5 w-5" />
-              <h3 className="font-semibold">Practice Details</h3>
-            </div>
-            {!isEditing && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => setIsEditing(true)}
-                disabled={isLoadingAttorney || !attorneyData?.id}
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                Edit
-              </Button>
+            {isEditing ? (
+              <div className="space-y-3">
+                <div>
+                  <Label htmlFor="email" className="text-sm text-muted-foreground">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={contactData.email}
+                    onChange={(e) => setContactData(prev => ({ ...prev, email: e.target.value }))}
+                    className="bg-black/20 border-slate-600 text-white mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="phone" className="text-sm text-muted-foreground">Phone</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={contactData.phone}
+                    onChange={(e) => setContactData(prev => ({ ...prev, phone: e.target.value }))}
+                    className="bg-black/20 border-slate-600 text-white mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="address" className="text-sm text-muted-foreground">Address</Label>
+                  <Input
+                    id="address"
+                    value={contactData.address}
+                    onChange={(e) => setContactData(prev => ({ ...prev, address: e.target.value }))}
+                    className="bg-black/20 border-slate-600 text-white mt-1"
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2 text-sm text-muted-foreground">
+                {contactData.email && <div><Mail className="h-4 w-4 inline mr-2" />{contactData.email}</div>}
+                {contactData.phone && <div><Phone className="h-4 w-4 inline mr-2" />{contactData.phone}</div>}
+                {contactData.address && <div><MapPin className="h-4 w-4 inline mr-2" />{contactData.address}</div>}
+                {!contactData.email && !contactData.phone && !contactData.address && (
+                  <p className="text-xs">No contact information on file</p>
+                )}
+              </div>
             )}
           </div>
-          {isEditing ? (
-            <div className="space-y-3">
-              <div>
-                <Label htmlFor="specialization" className="text-sm text-muted-foreground">Specialization</Label>
-                <Input
-                  id="specialization"
-                  value={practiceData.specialization}
-                  onChange={(e) => setPracticeData(prev => ({ ...prev, specialization: e.target.value }))}
-                  className="bg-black/20 border-slate-600 text-white mt-1"
-                />
+
+          {/* Practice Details */}
+          <div className="insight-card info p-4">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <Briefcase className="h-5 w-5" />
+                <h3 className="font-semibold text-warm-white">Practice Details</h3>
               </div>
-              <div>
-                <Label htmlFor="barNumber" className="text-sm text-muted-foreground">Bar Number</Label>
-                <Input
-                  id="barNumber"
-                  value={practiceData.barNumber}
-                  onChange={(e) => setPracticeData(prev => ({ ...prev, barNumber: e.target.value }))}
-                  className="bg-black/20 border-slate-600 text-white mt-1"
-                />
-              </div>
-              <div>
-                <Label htmlFor="firmName" className="text-sm text-muted-foreground">Firm Name</Label>
-                <Input
-                  id="firmName"
-                  value={practiceData.firmName}
-                  onChange={(e) => setPracticeData(prev => ({ ...prev, firmName: e.target.value }))}
-                  className="bg-black/20 border-slate-600 text-white mt-1"
-                />
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-2 text-sm text-muted-foreground">
-              {practiceData.specialization && <div><strong>Specialization:</strong> {practiceData.specialization}</div>}
-              {practiceData.barNumber && <div><strong>Bar Number:</strong> {practiceData.barNumber}</div>}
-              {practiceData.firmName && <div><strong>Firm:</strong> {practiceData.firmName}</div>}
-              {!practiceData.specialization && !practiceData.barNumber && !practiceData.firmName && (
-                <p className="text-xs">No practice details on file</p>
+              {!isEditing && (
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  onClick={() => setIsEditing(true)}
+                  disabled={isLoadingAttorney || !attorneyData?.id}
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Edit
+                </Button>
               )}
             </div>
-          )}
-        </div>
-
-        {isEditing && (
-          <div className="flex gap-3">
-            <Button
-              onClick={handleSave}
-              disabled={updateProfile.isPending}
-              className="flex-1 bg-gold hover:bg-gold/90 text-slate-900"
-            >
-              <Save className="h-4 w-4 mr-2" />
-              {updateProfile.isPending ? "Saving..." : "Save Changes"}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsEditing(false);
-                // Reset to original values
-                if (attorneyData) {
-                  setContactData({
-                    email: attorneyData.email || "",
-                    phone: attorneyData.phone || "",
-                    address: attorneyData.address || "",
-                  });
-                  setPracticeData({
-                    specialization: attorneyData.specialization || "",
-                    barNumber: attorneyData.barNumber || "",
-                    firmName: attorneyData.firmName || "",
-                  });
-                }
-              }}
-            >
-              Cancel
-            </Button>
+            {isEditing ? (
+              <div className="space-y-3">
+                <div>
+                  <Label htmlFor="specialization" className="text-sm text-muted-foreground">Specialization</Label>
+                  <Input
+                    id="specialization"
+                    value={practiceData.specialization}
+                    onChange={(e) => setPracticeData(prev => ({ ...prev, specialization: e.target.value }))}
+                    className="bg-black/20 border-slate-600 text-white mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="barNumber" className="text-sm text-muted-foreground">Bar Number</Label>
+                  <Input
+                    id="barNumber"
+                    value={practiceData.barNumber}
+                    onChange={(e) => setPracticeData(prev => ({ ...prev, barNumber: e.target.value }))}
+                    className="bg-black/20 border-slate-600 text-white mt-1"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="firmName" className="text-sm text-muted-foreground">Firm Name</Label>
+                  <Input
+                    id="firmName"
+                    value={practiceData.firmName}
+                    onChange={(e) => setPracticeData(prev => ({ ...prev, firmName: e.target.value }))}
+                    className="bg-black/20 border-slate-600 text-white mt-1"
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2 text-sm text-muted-foreground">
+                {practiceData.specialization && <div><strong>Specialization:</strong> {practiceData.specialization}</div>}
+                {practiceData.barNumber && <div><strong>Bar Number:</strong> {practiceData.barNumber}</div>}
+                {practiceData.firmName && <div><strong>Firm:</strong> {practiceData.firmName}</div>}
+                {!practiceData.specialization && !practiceData.barNumber && !practiceData.firmName && (
+                  <p className="text-xs">No practice details on file</p>
+                )}
+              </div>
+            )}
           </div>
-        )}
 
-        <Link href="/settings">
-          <div className="insight-card info p-4 cursor-pointer hover:bg-black/40 transition-colors" onClick={() => setLocation("/settings")}>
-            <div className="flex items-center gap-3 mb-2">
-              <Edit className="h-5 w-5" />
-              <h3 className="font-semibold">Full Settings Page</h3>
+          {isEditing && (
+            <div className="flex gap-3">
+              <Button
+                onClick={handleSave}
+                disabled={updateProfile.isPending}
+                className="flex-1 bg-gold hover:bg-gold/90 text-slate-900"
+              >
+                <Save className="h-4 w-4 mr-2" />
+                {updateProfile.isPending ? "Saving..." : "Save Changes"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setIsEditing(false);
+                  // Reset to original values
+                  if (attorneyData) {
+                    setContactData({
+                      email: attorneyData.email || "",
+                      phone: attorneyData.phone || "",
+                      address: attorneyData.address || "",
+                    });
+                    setPracticeData({
+                      specialization: attorneyData.specialization || "",
+                      barNumber: attorneyData.barNumber || "",
+                      firmName: attorneyData.firmName || "",
+                    });
+                  }
+                }}
+              >
+                Cancel
+              </Button>
             </div>
-            <p className="text-sm text-muted-foreground">Access all settings, integrations, and preferences</p>
-          </div>
-        </Link>
-      </div>
-    </ExpandedPanel>
+          )}
+
+          <Link href="/settings">
+            <div className="insight-card info p-4 cursor-pointer hover:bg-black/40 transition-colors" onClick={() => setLocation("/settings")}>
+              <div className="flex items-center gap-3 mb-2">
+                <Edit className="h-5 w-5" />
+                <h3 className="font-semibold text-warm-white">Full Settings Page</h3>
+              </div>
+              <p className="text-sm text-muted-foreground">Access all settings, integrations, and preferences</p>
+            </div>
+          </Link>
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }
-
-
-
-

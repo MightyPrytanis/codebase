@@ -37,7 +37,7 @@ export class ArkiverIntegrityTestTool extends BaseTool {
   getToolDefinition() {
     return {
       name: 'arkiver_integrity_test',
-      description: 'Run AI integrity monitoring tests using Potemkin engine workflows. Supports opinion drift, bias detection, honesty assessment, ten rules compliance, and fact checking.',
+      description: 'Run AI integrity monitoring tests using Potemkin engine workflows. Supports opinion drift, bias detection, honesty assessment, Ten Rules compliance (Version 1.4 — 16 Dec 2025), and fact checking.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -85,7 +85,8 @@ export class ArkiverIntegrityTestTool extends BaseTool {
       }
 
       // Get insights to test
-      let insightsToTest = [];
+      type InsightRecord = typeof arkiverInsights.$inferSelect;
+      let insightsToTest: InsightRecord[] = [];
       if (validated.insightIds && validated.insightIds.length > 0) {
         // Get specific insights
         insightsToTest = await db
@@ -172,7 +173,7 @@ export class ArkiverIntegrityTestTool extends BaseTool {
           break;
 
         case 'ten_rules':
-          // Ten rules compliance uses honesty assessment workflow
+          // Ten Rules compliance (Version 1.4 — 16 Dec 2025) uses honesty assessment workflow
           potemkinAction = 'assess_honesty';
           const tenRulesContent = insightsToTest
             .map(i => `${i.title}: ${i.content}`)
@@ -180,7 +181,7 @@ export class ArkiverIntegrityTestTool extends BaseTool {
           potemkinInput = {
             content: tenRulesContent,
             targetLLM: validated.llmSource,
-            checkTenRules: true, // Flag for ten rules compliance
+            checkTenRules: true, // Flag for Ten Rules compliance (Version 1.4)
             insights: insightsToTest.map(i => ({
               id: i.id,
               title: i.title,
@@ -212,19 +213,28 @@ export class ArkiverIntegrityTestTool extends BaseTool {
       });
 
       if (potemkinResult.isError) {
-        return this.createErrorResult(
-          `Potemkin engine error: ${potemkinResult.content[0]?.text || 'Unknown error'}`
-        );
+        const firstContent = potemkinResult.content[0];
+        const errorText = (firstContent && firstContent.type === 'text' && 'text' in firstContent)
+          ? firstContent.text
+          : 'Unknown error';
+        return this.createErrorResult(`Potemkin engine error: ${errorText}`);
       }
 
       // Parse Potemkin result
       let potemkinData: any;
       try {
-        const resultText = potemkinResult.content[0]?.text || '{}';
+        const firstContent = potemkinResult.content[0];
+        const resultText = (firstContent && firstContent.type === 'text' && 'text' in firstContent) 
+          ? firstContent.text 
+          : '{}';
         potemkinData = typeof resultText === 'string' ? JSON.parse(resultText) : resultText;
       } catch (e) {
         // If not JSON, treat as text
-        potemkinData = { analysis: potemkinResult.content[0]?.text || '' };
+        const firstContent = potemkinResult.content[0];
+        const textContent = (firstContent && firstContent.type === 'text' && 'text' in firstContent) 
+          ? firstContent.text 
+          : '';
+        potemkinData = { analysis: textContent };
       }
 
       // Extract scores and results based on test type

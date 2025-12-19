@@ -18,6 +18,14 @@ export interface VectorDocument {
     sourceType?: string;
     hierarchyLevel?: number;
     chunkType?: string;
+    // Library-specific metadata
+    county?: string;
+    court?: string;
+    judgeReferee?: string;
+    issueTags?: string[];
+    effectiveFrom?: Date;
+    effectiveTo?: Date;
+    [key: string]: any; // Allow additional metadata fields
   };
 }
 

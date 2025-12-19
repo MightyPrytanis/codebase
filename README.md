@@ -1,7 +1,7 @@
 # Codebase - Cyrano Ecosystem Monorepo
 
 **Repository:** [MightyPrytanis/codebase](https://github.com/MightyPrytanis/codebase)  
-**Last Updated:** 2025-01-07  
+**Last Updated:** 2025-12-17  
 **Status:** Active Development
 
 ## Overview
@@ -47,7 +47,7 @@ The following are intentionally excluded from git (see `.gitignore`):
 MCP-compliant AI orchestration server with modular architecture:
 - **Engines:** GoodCounsel, MAE, Potemkin
 - **Modules:** Arkiver, Chronometric, RAG
-- **Tools:** 48+ MCP tools for legal workflow automation
+- **Tools:** 69 MCP tools for legal workflow automation
 
 ### LexFiat
 Legal intelligence platform with adaptive workflow engine:
@@ -84,12 +84,19 @@ cd ../apps/arkiver/frontend && npm install
 ```
 
 ### Environment Variables
-Copy `.env.example` files and configure:
-- API keys for AI providers
-- Database connections
-- Integration credentials
 
-See individual project READMEs for specific setup instructions.
+**Important:** API keys are stored locally in `.env` files and **NOT** committed to the repository.
+
+To configure:
+1. Copy the example file: `cp Cyrano/.env.example Cyrano/.env`
+2. Edit `Cyrano/.env` and add your API keys for:
+   - **Perplexity** (default AI provider) - Get key at https://www.perplexity.ai/settings/api
+   - **Anthropic Claude** - Get key at https://console.anthropic.com/
+   - **OpenAI** - Get key at https://platform.openai.com/api-keys
+
+Optional providers (Google, xAI, DeepSeek) can be added for extended functionality.
+
+See individual project READMEs for complete setup instructions.
 
 ## Archive Branch
 

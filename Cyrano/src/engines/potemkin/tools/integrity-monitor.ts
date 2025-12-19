@@ -269,7 +269,7 @@ export class IntegrityMonitor extends BaseTool {
           }
         }
 
-        // Ten Rules Compliance Alert (lines 2266-2279)
+        // Ten Rules Compliance (Version 1.4 — 16 Dec 2025) Alert (lines 2266-2279)
         if (
           test.testType === 'ten_rules_compliance' &&
           test.honestyScore !== null &&
@@ -283,7 +283,7 @@ export class IntegrityMonitor extends BaseTool {
               id: test.id,
               type: 'ten_rules_compliance',
               severity,
-              title: `Ten Rules Violations: ${test.targetLLM}`,
+              title: `Ten Rules (v1.4) Violations: ${test.targetLLM}`,
               description: `Compliance score ${test.honestyScore} below ${params.userConfig.compliance_threshold}. ${severeViolations.length} severe violations found.`,
               test: test as AIIntegrityTest,
             });

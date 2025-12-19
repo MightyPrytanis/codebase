@@ -37,6 +37,29 @@ import * as path from 'path';
 import { fileURLToPath } from 'url';
 // status-indicator tool archived - see Cyrano/archive/broken-tools/
 
+// If status-indicator.js is missing or unreachable, handle gracefully
+let statusIndicator: any = null;
+try {
+  // Try both JS and TS extensions, and relative to this script.
+  statusIndicator = require('../../src/tools/status-indicator');
+} catch (err1) {
+  try {
+    statusIndicator = require('../../src/tools/status-indicator.js');
+  } catch (err2) {
+    // Provide fallback: dummy implementation and a warning
+    console.warn('[status-updater] Warning: Could not load status-indicator module. Some features may be unavailable.');
+    statusIndicator = {
+      getStatus: () => ({ 
+        status: 'unknown', 
+        progress: 0, 
+        blocks: ['Unknown, unable to load status-indicator'],
+        estimatedTime: null
+      }),
+      formatStatus: (status: any) => JSON.stringify(status, null, 2)
+    };
+  }
+}
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PROJECT_ROOT = path.resolve(__dirname, '..');

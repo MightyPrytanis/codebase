@@ -4,7 +4,7 @@
  * See LICENSE.md for full license text
  */
 
-import ExpandedPanel from "./expanded-panel";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { DraftPreparationIcon } from "@cyrano/shared-assets/icon-components";
 import { DraftingModeSelector } from "./drafting-mode-selector";
 
@@ -19,12 +19,14 @@ export default function DraftPrepPanel({ isOpen, onClose }: DraftPrepPanelProps)
   const draftsInProgress = 3;
 
   return (
-    <ExpandedPanel
-      title="Draft Preparation"
-      isOpen={isOpen}
-      onClose={onClose}
-      className="max-w-5xl"
-    >
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent 
+        side="right" 
+        className="w-full sm:max-w-5xl bg-charcoal border-gray-800 overflow-y-auto"
+      >
+        <SheetHeader>
+          <SheetTitle className="text-xl font-semibold text-white">Draft Preparation</SheetTitle>
+        </SheetHeader>
       <div className="space-y-6">
         {/* Drafting Mode Selector */}
         <DraftingModeSelector
@@ -66,8 +68,8 @@ export default function DraftPrepPanel({ isOpen, onClose }: DraftPrepPanelProps)
             <div className="insight-subtext">In progress</div>
           </div>
         </div>
-      </div>
-    </ExpandedPanel>
+      </SheetContent>
+    </Sheet>
   );
 }
 

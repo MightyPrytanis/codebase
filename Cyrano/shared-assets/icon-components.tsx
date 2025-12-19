@@ -38,6 +38,7 @@ import { Icon } from '@iconify/react';
 import { AIIcon } from './ai-icon';
 import { AIInsightsIcon } from './ai-insights-icon';
 import { AIAnalysisIcon } from './ai-analysis-icon';
+import { CyranoIcon } from './cyrano-icon';
 
 interface IconProps {
   className?: string;
@@ -217,6 +218,11 @@ export { AIIcon };
  * AI Insights Icon - Single Eye with Always-Red Pupil
  */
 export { AIInsightsIcon };
+
+/**
+ * Cyrano Icon - Technorganic "C" Ring with HAL-inspired red eye
+ */
+export { CyranoIcon };
 
 /**
  * Workflow Stage Icons

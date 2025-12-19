@@ -9,7 +9,7 @@ import { z } from 'zod';
 import { RAGService } from '../services/rag-service.js';
 
 const RAGQuerySchema = z.object({
-  action: z.enum(['query', 'ingest', 'get_context', 'get_stats']).describe('Action to perform'),
+  action: z.enum(['query', 'ingest', 'ingest_batch', 'get_context', 'get_stats']).describe('Action to perform'),
   query: z.string().optional().describe('Query string for RAG search'),
   document: z.object({
     id: z.string(),
@@ -18,6 +18,13 @@ const RAGQuerySchema = z.object({
     source: z.string().optional().describe('Data source identifier (e.g., "user-upload", "clio", "email")'),
     sourceType: z.enum(['user-upload', 'email', 'clio', 'courtlistener', 'westlaw', 'manual']).optional(),
   }).optional().describe('Document to ingest'),
+  documents: z.array(z.object({
+    id: z.string(),
+    text: z.string(),
+    type: z.string().optional(),
+    source: z.string().optional().describe('Data source identifier (e.g., "user-upload", "clio", "email")'),
+    sourceType: z.enum(['user-upload', 'email', 'clio', 'courtlistener', 'westlaw', 'manual']).optional(),
+  })).optional().describe('Array of documents to ingest in batch'),
   topK: z.number().optional().default(5).describe('Number of chunks to retrieve'),
   minScore: z.number().optional().default(0.0).describe('Minimum similarity score'),
   filterByType: z.array(z.string()).optional().describe('Filter documents by type'),
@@ -54,7 +61,7 @@ All retrieved information includes source attribution for transparency and verif
         properties: {
           action: {
             type: 'string',
-            enum: ['query', 'ingest', 'get_context', 'get_stats'],
+            enum: ['query', 'ingest', 'ingest_batch', 'get_context', 'get_stats'],
             description: 'Action to perform',
           },
           query: {
@@ -74,7 +81,25 @@ All retrieved information includes source attribution for transparency and verif
                 description: 'Type of data source'
               },
             },
-            description: 'Document to ingest',
+            description: 'Document to ingest (for ingest action)',
+          },
+          documents: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                id: { type: 'string' },
+                text: { type: 'string' },
+                type: { type: 'string' },
+                source: { type: 'string', description: 'Data source identifier' },
+                sourceType: { 
+                  type: 'string', 
+                  enum: ['user-upload', 'email', 'clio', 'courtlistener', 'westlaw', 'manual'],
+                  description: 'Type of data source'
+                },
+              },
+            },
+            description: 'Array of documents to ingest in batch (for ingest_batch action)',
           },
           topK: {
             type: 'number',
@@ -114,7 +139,7 @@ All retrieved information includes source attribution for transparency and verif
 
   async execute(args: any) {
     try {
-      const { action, query, document, topK, minScore, filterByType, expandQuery, rerank, includeSourceInfo } = RAGQuerySchema.parse(args);
+      const { action, query, document, documents, topK, minScore, filterByType, expandQuery, rerank, includeSourceInfo } = RAGQuerySchema.parse(args);
 
       switch (action) {
         case 'query':
@@ -159,6 +184,48 @@ All retrieved information includes source attribution for transparency and verif
             sourceType: document.sourceType || 'manual',
             notice: `Document ingested from source: ${document.source || document.sourceType || 'unknown'}. ` +
                    `This document will be available for retrieval in RAG queries.`,
+          }, null, 2));
+
+        case 'ingest_batch':
+          if (!documents || documents.length === 0) {
+            return this.createErrorResult('Documents array is required for ingest_batch action and must not be empty');
+          }
+          
+          // Process documents in parallel with Promise.allSettled to handle individual failures
+          const results = await Promise.allSettled(
+            documents.map(doc => 
+              this.ragService.ingestDocument({
+                id: doc.id,
+                text: doc.text,
+                type: doc.type,
+                source: doc.source,
+                sourceType: doc.sourceType,
+              })
+            )
+          );
+          
+          const successful = results.filter(r => r.status === 'fulfilled').length;
+          const failed = results.filter(r => r.status === 'rejected').length;
+          
+          const detailedResults = results.map((r, i) => ({
+            documentId: documents[i].id,
+            status: r.status === 'fulfilled' ? 'success' : 'failed',
+            chunkIds: r.status === 'fulfilled' ? r.value : null,
+            chunkCount: r.status === 'fulfilled' ? r.value.length : 0,
+            error: r.status === 'rejected' ? (r.reason instanceof Error ? r.reason.message : String(r.reason)) : null,
+            source: documents[i].source || 'unknown',
+            sourceType: documents[i].sourceType || 'manual',
+          }));
+          
+          return this.createSuccessResult(JSON.stringify({
+            success: true,
+            total: documents.length,
+            successful,
+            failed,
+            results: detailedResults,
+            notice: `Batch ingestion complete: ${successful} of ${documents.length} documents ingested successfully. ` +
+                   `${failed > 0 ? `${failed} documents failed. ` : ''}` +
+                   `All successful documents are now available for retrieval in RAG queries.`,
           }, null, 2));
 
         case 'get_context':

@@ -15,6 +15,8 @@ Status: Archived
 
 **ARCHIVED:** This document has limited current utility and has been archived. Archived 2025-11-28.
 
+**Note:** Replaced by Ten Rules — Version 1.4 (16 Dec 2025). See `ethics.md` in the repository root for the full canonical text.
+
 ---
 
 ---
@@ -32,7 +34,7 @@ Status: Active
 ---
 
 # Universal AI/Human Interaction Protocol
-## Version 1.3, revised and updated 21 September 2025
+## Version 1.3, revised and updated 21 September 2025 (Superseded by Version 1.4 — 16 Dec 2025)
 
 ### Fundamental Principles of Ethical Technology
 
