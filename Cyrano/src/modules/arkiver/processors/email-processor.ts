@@ -258,12 +258,12 @@ export class EmailProcessor {
     let text = html;
     
     // Remove script and style tags (apply repeatedly to avoid incomplete multi-character sanitization)
-    let previous: string;
+    let previousText: string;
     do {
-      previous = text;
+      previousText = text;
       text = text.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
       text = text.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
-    } while (text !== previous);
+    } while (text !== previousText);
     
     // Convert common tags
     text = text.replace(/<br\s*\/?>/gi, '\n');

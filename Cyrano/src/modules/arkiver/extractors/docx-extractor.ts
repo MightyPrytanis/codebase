@@ -226,9 +226,19 @@ export class DOCXExtractor {
 
   /**
    * Strip HTML tags from text
+   * Apply iteratively to avoid incomplete multi-character sanitization
    */
   private stripHtml(html: string): string {
-    return html.replace(/<[^>]*>/g, '').trim();
+    let text = html;
+    let previousText: string;
+    
+    // Apply HTML tag removal repeatedly until no changes occur
+    do {
+      previousText = text;
+      text = text.replace(/<[^>]*>/g, '');
+    } while (text !== previousText);
+    
+    return text.trim();
   }
 
   /**
