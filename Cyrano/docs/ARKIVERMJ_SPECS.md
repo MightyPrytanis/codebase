@@ -126,7 +126,7 @@ ArkiverMJ
 **Key Fields:**
 - `id`: UUID primary key
 - `testName`: Name of the test
-- `testType`: 'opinion_drift', 'bias_detection', 'honesty_assessment', 'ten_rules_compliance'
+- `testType`: 'opinion_drift', 'bias_detection', 'honesty_assessment', 'ten_rules_compliance' (Version 1.4 — Revised and updated 16 December 2025)
 - `targetLLM`: LLM being tested
 - `topic`: Topic being tested (for opinion drift)
 - `score`: Overall score (0.0-1.0)

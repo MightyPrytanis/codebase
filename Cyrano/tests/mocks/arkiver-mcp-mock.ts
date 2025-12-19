@@ -97,7 +97,7 @@ export interface QueryInsightsResult {
 }
 
 export interface IntegrityTestParams {
-  testType: 'opinion_drift' | 'bias_detection' | 'honesty_assessment' | 'ten_rules_compliance'; // Version 1.4 — 16 Dec 2025
+  testType: 'opinion_drift' | 'bias_detection' | 'honesty_assessment' | 'ten_rules_compliance'; // Version 1.4 — Revised and updated 16 December 2025
   targetLLM: string;
   topic?: string;
   dateRange?: {
