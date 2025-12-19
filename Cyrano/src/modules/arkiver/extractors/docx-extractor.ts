@@ -230,13 +230,13 @@ export class DOCXExtractor {
    */
   private stripHtml(html: string): string {
     let text = html;
-    let previous: string;
+    let previousText: string;
     
     // Apply HTML tag removal repeatedly until no changes occur
     do {
-      previous = text;
+      previousText = text;
       text = text.replace(/<[^>]*>/g, '');
-    } while (text !== previous);
+    } while (text !== previousText);
     
     return text.trim();
   }
