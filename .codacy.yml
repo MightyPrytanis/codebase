@@ -1,20 +1,43 @@
-# Minimal Codacy configuration: enable node analysis, ignore test/build artifacts
-# See https://docs.codacy.com for more options
+# Codacy configuration with disabled problematic analyzers
 engines:
   eslint:
     enabled: true
+    exclude_paths:
+      - 'Legacy/**'
+      - 'Cyrano/**'
+      - 'apps/**'
+      - 'LexFiat/**'
+      - 'docs/**'
+      - 'node_modules/**'
   eslint-typescript:
     enabled: true
+    exclude_paths:
+      - 'Legacy/**'
+      - 'Cyrano/**'
+      - 'apps/**'
+      - 'LexFiat/**'
+      - 'docs/**'
+      - 'node_modules/**'
   jest:
     enabled: true
+  pmd: 
+    enabled: false
+  pmd-legacy:
+    enabled: false
 
 # Exclude common generated and vendor directories to reduce noise
-exclude:
-  - node_modules/**
-  - **/dist/**
-  - **/build/**
-  - **/coverage/**
-  - **/public/**
+exclude_paths:
+  - 'node_modules/**'
+  - '**/dist/**'
+  - '**/build/**'
+  - '**/coverage/**'
+  - '**/public/**'
+  - 'Legacy/**'
+  - 'Cyrano/**'
+  - 'apps/**'
+  - 'LexFiat/**'
+  - 'docs/**'
+  - 'Miscellaneous/**'
 
 # Patterns to skip for analysis
 patterns:

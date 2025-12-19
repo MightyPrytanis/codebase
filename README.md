@@ -84,12 +84,19 @@ cd ../apps/arkiver/frontend && npm install
 ```
 
 ### Environment Variables
-Copy `.env.example` files and configure:
-- API keys for AI providers
-- Database connections
-- Integration credentials
 
-See individual project READMEs for specific setup instructions.
+**Important:** API keys are stored locally in `.env` files and **NOT** committed to the repository.
+
+To configure:
+1. Copy the example file: `cp Cyrano/.env.example Cyrano/.env`
+2. Edit `Cyrano/.env` and add your API keys for:
+   - **Perplexity** (default AI provider) - Get key at https://www.perplexity.ai/settings/api
+   - **Anthropic Claude** - Get key at https://console.anthropic.com/
+   - **OpenAI** - Get key at https://platform.openai.com/api-keys
+
+Optional providers (Google, xAI, DeepSeek) can be added for extended functionality.
+
+See individual project READMEs for complete setup instructions.
 
 ## Archive Branch
 

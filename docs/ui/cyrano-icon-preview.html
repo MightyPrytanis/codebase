@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyrano Icon Preview - Simplified C-Shape Design</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            padding: 40px 20px;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #D89B6A;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            color: #888;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+        
+        .section {
+            margin-bottom: 60px;
+            background: #2a2a2a;
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid #3a3a3a;
+        }
+        
+        .section h2 {
+            color: #D89B6A;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-bottom: 2px solid #3a3a3a;
+            padding-bottom: 10px;
+        }
+        
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        .icon-item {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #3a3a3a;
+            text-align: center;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        
+        .icon-item:hover {
+            transform: translateY(-2px);
+            border-color: #D89B6A;
+        }
+        
+        .icon-name {
+            font-weight: 600;
+            color: #e0e0e0;
+            margin-top: 15px;
+            font-size: 0.95em;
+        }
+        
+        .icon-description {
+            color: #888;
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+        
+        .icon-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .size-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .size-label {
+            font-size: 0.75em;
+            color: #666;
+            min-width: 50px;
+            text-align: right;
+        }
+        
+        svg {
+            display: block;
+        }
+        
+        .info-box {
+            background: #2a2a4a;
+            border: 1px solid #3a3a6a;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+            color: #a0a0d0;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Cyrano Copilot Icon</h1>
+        <p class="subtitle">Simplified C-Shape Design - HAL Icon with Opening at 3 O'Clock</p>
+        
+        <div class="info-box">
+            <strong>Design:</strong> Based on the original HAL 9000 tribute icon with a gap/break at the 3 o'clock position in both the circle and rectangle. This creates a "C" shape where negative space connects from inside (between the red dot and circle) to the outside, echoing the Cognisint logo.
+        </div>
+        
+        <!-- Different Sizes -->
+        <div class="section">
+            <h2>Icon Sizes</h2>
+            <div class="icon-grid">
+                <div class="icon-item">
+                    <div class="icon-display">
+                        <div id="icon-64"></div>
+                        <div class="icon-name">64px</div>
+                        <div class="icon-description">Large display</div>
+                    </div>
+                </div>
+                <div class="icon-item">
+                    <div class="icon-display">
+                        <div id="icon-48"></div>
+                        <div class="icon-name">48px</div>
+                        <div class="icon-description">Medium display</div>
+                    </div>
+                </div>
+                <div class="icon-item">
+                    <div class="icon-display">
+                        <div id="icon-32"></div>
+                        <div class="icon-name">32px</div>
+                        <div class="icon-description">Navigation</div>
+                    </div>
+                </div>
+                <div class="icon-item">
+                    <div class="icon-display">
+                        <div id="icon-24"></div>
+                        <div class="icon-name">24px</div>
+                        <div class="icon-description">Standard</div>
+                    </div>
+                </div>
+                <div class="icon-item">
+                    <div class="icon-display">
+                        <div id="icon-16"></div>
+                        <div class="icon-name">16px</div>
+                        <div class="icon-description">Small/inline</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>Design Notes</h2>
+            <div style="color: #888;">
+                <p><strong>Key features:</strong></p>
+                <ul style="margin-top: 10px; padding-left: 20px;">
+                    <li>Same tall rounded rectangle as original HAL icon</li>
+                    <li>Gap at 3 o'clock position in both circle and rectangle</li>
+                    <li>Small red dot (radius 1.6) - same size as original</li>
+                    <li>Stroke-based design maintains high visual clarity</li>
+                    <li>Negative space creates the "C" shape</li>
+                    <li>Simple, clean, recognizable at all sizes</li>
+                </ul>
+                <p style="margin-top: 15px;"><strong>Usage:</strong> Copilot/assistant entry points in LexFiat and Arkiver</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function createSimplifiedCyranoIcon(size) {
+            // Helper to describe circle with gap at 3 o'clock
+            const describeCircleWithGap = () => {
+                const cx = 12;
+                const cy = 12;
+                const r = 4;
+                
+                // Gap centered at 3 o'clock (0° = right side)
+                // Gap from 30° to 330° (60° total gap)
+                const startAngle = 30;   // 4 o'clock position
+                const endAngle = 330;     // 2 o'clock position
+                
+                const startRad = (startAngle * Math.PI) / 180;
+                const endRad = (endAngle * Math.PI) / 180;
+                
+                const x1 = cx + r * Math.cos(startRad);
+                const y1 = cy + r * Math.sin(startRad);
+                const x2 = cx + r * Math.cos(endRad);
+                const y2 = cy + r * Math.sin(endRad);
+                
+                // Arc going the long way (forming the "C")
+                return `M ${x1},${y1} A ${r},${r} 0 1,1 ${x2},${y2}`;
+            };
+            
+            // Helper to describe rectangle with gap on right side
+            const describeRectWithGap = () => {
+                const rectX = 7;
+                const rectY = 3;
+                const rectWidth = 10;
+                const rectHeight = 18;
+                const rx = 2.5;
+                
+                // Gap at 3 o'clock (right side, middle)
+                const gapTop = 10;
+                const gapBottom = 14;
+                const rightX = rectX + rectWidth;
+                
+                // No Z command - open path with gap
+                return `
+                    M ${rectX + rx},${rectY}
+                    L ${rightX - rx},${rectY}
+                    Q ${rightX},${rectY} ${rightX},${rectY + rx}
+                    L ${rightX},${gapTop}
+                    M ${rightX},${gapBottom}
+                    L ${rightX},${rectY + rectHeight - rx}
+                    Q ${rightX},${rectY + rectHeight} ${rightX - rx},${rectY + rectHeight}
+                    L ${rectX + rx},${rectY + rectHeight}
+                    Q ${rectX},${rectY + rectHeight} ${rectX},${rectY + rectHeight - rx}
+                    L ${rectX},${rectY + rx}
+                    Q ${rectX},${rectY} ${rectX + rx},${rectY}
+                `;
+            };
+            
+            return `
+                <svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Rectangle with gap on right side -->
+                    <path d="${describeRectWithGap()}" fill="none" stroke="#D89B6A" stroke-width="2" />
+                    
+                    <!-- Circle with gap at 3 o'clock -->
+                    <path d="${describeCircleWithGap()}" fill="none" stroke="#D89B6A" stroke-width="2" stroke-linecap="round" />
+                    
+                    <!-- Red dot - same size as original -->
+                    <circle cx="12" cy="12" r="1.6" fill="#DC2626" />
+                </svg>
+            `;
+        }
+        
+        // Render icons
+        document.getElementById('icon-64').innerHTML = createSimplifiedCyranoIcon(64);
+        document.getElementById('icon-48').innerHTML = createSimplifiedCyranoIcon(48);
+        document.getElementById('icon-32').innerHTML = createSimplifiedCyranoIcon(32);
+        document.getElementById('icon-24').innerHTML = createSimplifiedCyranoIcon(24);
+        document.getElementById('icon-16').innerHTML = createSimplifiedCyranoIcon(16);
+    </script>
+</body>
+</html>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: #1a1a1a;
+            color: #e0e0e0;
+            padding: 40px 20px;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #D89B6A;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            color: #888;
+            margin-bottom: 40px;
+            font-size: 1.1em;
+        }
+        
+        .section {
+            margin-bottom: 60px;
+            background: #2a2a2a;
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid #3a3a3a;
+        }
+        
+        .section h2 {
+            color: #D89B6A;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            border-bottom: 2px solid #3a3a3a;
+            padding-bottom: 10px;
+        }
+        
+        .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        .icon-item {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #3a3a3a;
+            text-align: center;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        
+        .icon-item:hover {
+            transform: translateY(-2px);
+            border-color: #D89B6A;
+        }
+        
+        .icon-name {
+            font-weight: 600;
+            color: #e0e0e0;
+            margin-top: 15px;
+            font-size: 0.95em;
+        }
+        
+        .icon-description {
+            color: #888;
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+        
+        .icon-display {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .size-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .size-label {
+            font-size: 0.75em;
+            color: #666;
+            min-width: 50px;
+            text-align: right;
+        }
+        
+        svg {
+            display: block;
+        }
+        
+        .info-box {
+            background: #2a2a4a;
+            border: 1px solid #3a3a6a;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+            color: #a0a0d0;
+            font-size: 0.9em;
+        }
+        
+        :root {
+            --cyrano-panel-bg: #0D1117;
+            --cyrano-panel-border: #1A1F24;
+            --cyrano-eye-core: #D62323;
+            --cyrano-eye-glow: #FF5555;
+            --cyrano-organic-base: #0D1A1A;
+            --cyrano-organic-branch: #9BD3C7;
+            --cyrano-tech-base: #96B9AE;
+            --cyrano-tech-trace: #CFE7DF;
+            --cyrano-tech-pad: #E5F3EE;
+            --cyrano-alert-amber: #FFB347;
+        }
+        
+        @keyframes cyrano-pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 0.85; }
+        }
+        
+        .state-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        
+        .state-button {
+            padding: 8px 16px;
+            background: #3a3a3a;
+            border: 1px solid #4a4a4a;
+            border-radius: 4px;
+            color: #e0e0e0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .state-button:hover {
+            background: #4a4a4a;
+            border-color: #D89B6A;
+        }
+        
+        .state-button.active {
+            background: #D89B6A;
+            color: #1a1a1a;
+            border-color: #D89B6A;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Cyrano Copilot Icon</h1>
+        <p class="subtitle">Technorganic "C" Ring Design</p>
+        
+        <div class="info-box">
+            <strong>Design Specification:</strong> HAL-style panel with central red eye surrounded by a C-shaped technorganic ring. 
+            The left half features organic (neural) branches, while the right half displays tech (circuit) traces with pads.
+        </div>
+        
+        <!-- Different Sizes -->
+        <div class="section">
+            <h2>Icon Sizes</h2>
+            <div class="icon-grid">
+                <div class="icon-item">
+                    <div class="icon-display">
+                        <div id="icon-64"></div>
+                        <div class="icon-name">64px</div>
+                        <div class="icon-description">Large display</div>
+                    </div>
+                </div>
+                <div class="icon-item">
+                    <div class="icon-display">
+                        <div id="icon-48"></div>
+                        <div class="icon-name">48px</div>
+                        <div class="icon-description">Medium display</div>
+                    </div>
+                </div>
+                <div class="icon-item">
+                    <div class="icon-display">
+                        <div id="icon-32"></div>
+                        <div class="icon-name">32px</div>
+                        <div class="icon-description">Navigation</div>
+                    </div>
+                </div>
+                <div class="icon-item">
+                    <div class="icon-display">
+                        <div id="icon-24"></div>
+                        <div class="icon-name">24px</div>
+                        <div class="icon-description">Standard</div>
+                    </div>
+                </div>
+                <div class="icon-item">
+                    <div class="icon-display">
+                        <div id="icon-16"></div>
+                        <div class="icon-name">16px</div>
+                        <div class="icon-description">Small/inline</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- States -->
+        <div class="section">
+            <h2>Interactive States</h2>
+            <div class="icon-grid">
+                <div class="icon-item">
+                    <div class="icon-display">
+                        <div id="icon-state-idle"></div>
+                        <div class="icon-name">Idle</div>
+                        <div class="icon-description">Default resting state with subtle pulse</div>
+                    </div>
+                </div>
+                <div class="icon-item">
+                    <div class="icon-display">
+                        <div id="icon-state-active"></div>
+                        <div class="icon-name">Active</div>
+                        <div class="icon-description">Thinking/executing - enhanced brightness</div>
+                    </div>
+                </div>
+                <div class="icon-item">
+                    <div class="icon-display">
+                        <div id="icon-state-alert"></div>
+                        <div class="icon-name">Alert</div>
+                        <div class="icon-description">Attention/error - amber tint</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Interactive Demo -->
+        <div class="section">
+            <h2>Interactive Demo</h2>
+            <div style="text-align: center;">
+                <div id="icon-interactive" style="display: inline-block;"></div>
+                <div class="state-buttons">
+                    <button class="state-button active" onclick="setState('idle', event)">Idle</button>
+                    <button class="state-button" onclick="setState('active', event)">Active</button>
+                    <button class="state-button" onclick="setState('alert', event)">Alert</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function createCyranoIcon(size, state = 'idle') {
+            const panelWidth = size;
+            const panelHeight = size * 1.5;
+            const cornerRadius = panelWidth * 0.22;
+            
+            const eyeRadius = panelWidth * 0.20;
+            const eyeCenterX = panelWidth / 2;
+            const eyeCenterY = panelHeight * 0.48;
+            
+            const glowRadius = eyeRadius * 1.5;
+            
+            const ringOuterRadius = eyeRadius * 1.8;
+            const ringThickness = eyeRadius * 0.4;
+            const ringInnerRadius = ringOuterRadius - ringThickness;
+            
+            const openingAngle = 75;
+            const startAngle = -180 + openingAngle / 2;
+            const endAngle = 180 - openingAngle / 2;
+            
+            const polarToCartesian = (centerX, centerY, radius, angleDegrees) => {
+                const angleRadians = (angleDegrees - 90) * Math.PI / 180.0;
+                return {
+                    x: centerX + (radius * Math.cos(angleRadians)),
+                    y: centerY + (radius * Math.sin(angleRadians))
+                };
+            };
+            
+            const describeArc = (x, y, radius, startAngle, endAngle) => {
+                const start = polarToCartesian(x, y, radius, endAngle);
+                const end = polarToCartesian(x, y, radius, startAngle);
+                const largeArcFlag = endAngle - startAngle <= 180 ? "0" : "1";
+                return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArcFlag} 0 ${end.x} ${end.y}`;
+            };
+            
+            const outerArc = describeArc(eyeCenterX, eyeCenterY, ringOuterRadius, startAngle, endAngle);
+            const innerArc = describeArc(eyeCenterX, eyeCenterY, ringInnerRadius, startAngle, endAngle);
+            
+            const splitAngle = -30;
+            
+            const organicBranches = [
+                { angle: -150, length: ringThickness * 0.7 },
+                { angle: -120, length: ringThickness * 0.6 },
+                { angle: -90, length: ringThickness * 0.8 },
+                { angle: -60, length: ringThickness * 0.65 },
+                { angle: -30, length: ringThickness * 0.7 },
+            ];
+            
+            const circuitTraces = [
+                { angle: 30, length: ringThickness * 0.5 },
+                { angle: 60, length: ringThickness * 0.6 },
+                { angle: 90, length: ringThickness * 0.55 },
+                { angle: 120, length: ringThickness * 0.5 },
+            ];
+            
+            const padRadius = Math.max(1.5, size * 0.06);
+            
+            const glowStyle = state === 'idle' ? 'animation: cyrano-pulse 2.5s ease-in-out infinite;' : '';
+            const alertColor = state === 'alert' ? 'var(--cyrano-alert-amber)' : null;
+            
+            const organicOpacity = state === 'active' ? 0.9 : 0.75;
+            const techOpacity = state === 'active' ? 0.9 : 0.8;
+            const padOpacity = state === 'active' ? 1 : 0.9;
+            
+            let svg = `
+                <svg width="${panelWidth}" height="${panelHeight}" viewBox="0 0 ${panelWidth} ${panelHeight}" xmlns="http://www.w3.org/2000/svg">
+                    <defs>
+                        <radialGradient id="cyrano-eye-glow-${size}">
+                            <stop offset="0%" stop-color="var(--cyrano-eye-glow)" stop-opacity="0.8" />
+                            <stop offset="100%" stop-color="var(--cyrano-eye-glow)" stop-opacity="0" />
+                        </radialGradient>
+                        
+                        <clipPath id="cyrano-left-clip-${size}">
+                            <path d="M ${eyeCenterX} ${eyeCenterY} L ${polarToCartesian(eyeCenterX, eyeCenterY, ringOuterRadius * 2, startAngle).x} ${polarToCartesian(eyeCenterX, eyeCenterY, ringOuterRadius * 2, startAngle).y} A ${ringOuterRadius * 2} ${ringOuterRadius * 2} 0 0 1 ${polarToCartesian(eyeCenterX, eyeCenterY, ringOuterRadius * 2, splitAngle).x} ${polarToCartesian(eyeCenterX, eyeCenterY, ringOuterRadius * 2, splitAngle).y} Z" />
+                        </clipPath>
+                        
+                        <clipPath id="cyrano-right-clip-${size}">
+                            <path d="M ${eyeCenterX} ${eyeCenterY} L ${polarToCartesian(eyeCenterX, eyeCenterY, ringOuterRadius * 2, splitAngle).x} ${polarToCartesian(eyeCenterX, eyeCenterY, ringOuterRadius * 2, splitAngle).y} A ${ringOuterRadius * 2} ${ringOuterRadius * 2} 0 0 1 ${polarToCartesian(eyeCenterX, eyeCenterY, ringOuterRadius * 2, endAngle).x} ${polarToCartesian(eyeCenterX, eyeCenterY, ringOuterRadius * 2, endAngle).y} Z" />
+                        </clipPath>
+                    </defs>
+                    
+                    <!-- Base panel -->
+                    <rect x="0" y="0" width="${panelWidth}" height="${panelHeight}" rx="${cornerRadius}" fill="var(--cyrano-panel-bg)" stroke="var(--cyrano-panel-border)" stroke-width="${Math.max(1, panelWidth * 0.04)}" />
+                    
+                    <!-- Eye glow -->
+                    <circle cx="${eyeCenterX}" cy="${eyeCenterY}" r="${glowRadius}" fill="url(#cyrano-eye-glow-${size})" style="${glowStyle}" />
+                    
+                    <!-- C-ring base - left half (organic) -->
+                    <g clip-path="url(#cyrano-left-clip-${size})">
+                        <path d="${outerArc} L ${polarToCartesian(eyeCenterX, eyeCenterY, ringInnerRadius, startAngle).x} ${polarToCartesian(eyeCenterX, eyeCenterY, ringInnerRadius, startAngle).y} ${innerArc.replace('M', 'L')} Z" fill="${alertColor || 'var(--cyrano-organic-base)'}" />
+                    </g>
+                    
+                    <!-- C-ring base - right half (tech) -->
+                    <g clip-path="url(#cyrano-right-clip-${size})">
+                        <path d="${outerArc} L ${polarToCartesian(eyeCenterX, eyeCenterY, ringInnerRadius, startAngle).x} ${polarToCartesian(eyeCenterX, eyeCenterY, ringInnerRadius, startAngle).y} ${innerArc.replace('M', 'L')} Z" fill="${alertColor || 'var(--cyrano-tech-base)'}" />
+                    </g>
+            `;
+            
+            // Organic branches
+            organicBranches.forEach(branch => {
+                const startPoint = polarToCartesian(eyeCenterX, eyeCenterY, ringInnerRadius, branch.angle);
+                const endPoint = polarToCartesian(eyeCenterX, eyeCenterY, ringInnerRadius - branch.length, branch.angle);
+                svg += `<line x1="${startPoint.x}" y1="${startPoint.y}" x2="${endPoint.x}" y2="${endPoint.y}" stroke="var(--cyrano-organic-branch)" stroke-width="${Math.max(0.5, size * 0.02)}" stroke-linecap="round" opacity="${organicOpacity}" />`;
+            });
+            
+            // Circuit traces
+            circuitTraces.forEach(trace => {
+                const startPoint = polarToCartesian(eyeCenterX, eyeCenterY, ringOuterRadius, trace.angle);
+                const endPoint = polarToCartesian(eyeCenterX, eyeCenterY, ringOuterRadius + trace.length, trace.angle);
+                svg += `<line x1="${startPoint.x}" y1="${startPoint.y}" x2="${endPoint.x}" y2="${endPoint.y}" stroke="var(--cyrano-tech-trace)" stroke-width="${Math.max(0.5, size * 0.02)}" stroke-linecap="round" opacity="${techOpacity}" />`;
+                svg += `<circle cx="${endPoint.x}" cy="${endPoint.y}" r="${padRadius}" fill="var(--cyrano-tech-pad)" opacity="${padOpacity}" />`;
+            });
+            
+            // Central eye
+            svg += `<circle cx="${eyeCenterX}" cy="${eyeCenterY}" r="${eyeRadius}" fill="var(--cyrano-eye-core)" />`;
+            
+            svg += `</svg>`;
+            
+            return svg;
+        }
+        
+        // Render icons
+        document.getElementById('icon-64').innerHTML = createCyranoIcon(64);
+        document.getElementById('icon-48').innerHTML = createCyranoIcon(48);
+        document.getElementById('icon-32').innerHTML = createCyranoIcon(32);
+        document.getElementById('icon-24').innerHTML = createCyranoIcon(24);
+        document.getElementById('icon-16').innerHTML = createCyranoIcon(16);
+        
+        document.getElementById('icon-state-idle').innerHTML = createCyranoIcon(64, 'idle');
+        document.getElementById('icon-state-active').innerHTML = createCyranoIcon(64, 'active');
+        document.getElementById('icon-state-alert').innerHTML = createCyranoIcon(64, 'alert');
+        
+        document.getElementById('icon-interactive').innerHTML = createCyranoIcon(96, 'idle');
+        
+        let currentState = 'idle';
+        function setState(state, event) {
+            currentState = state;
+            document.getElementById('icon-interactive').innerHTML = createCyranoIcon(96, state);
+            
+            // Update button states
+            document.querySelectorAll('.state-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>

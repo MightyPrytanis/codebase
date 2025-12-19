@@ -16,6 +16,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+import dotenv from 'dotenv';
+
+// Load environment variables from .env file
+dotenv.config();
+
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { gapIdentifier } from './tools/gap-identifier.js';
@@ -109,6 +114,7 @@ import {
   runExtractionPipeline,
   createArkiverConfig
 } from './tools/arkiver-tools.js';
+import { cyranoPathfinder } from './tools/cyrano-pathfinder.js';
 
 class CyranoMCPServer {
   private server: Server;
@@ -216,6 +222,8 @@ class CyranoMCPServer {
           evaluateGoodCounselContextTool.getToolDefinition(),
           // Wellness Journaling
           wellnessJournalTool.getToolDefinition(),
+          // Cyrano Pathfinder - Unified Chat Interface
+          cyranoPathfinder.getToolDefinition(),
         ],
       };
     });
@@ -441,6 +449,9 @@ class CyranoMCPServer {
             break;
           case 'wellness_journal':
             result = await wellnessJournalTool.execute(args);
+            break;
+          case 'cyrano_pathfinder':
+            result = await cyranoPathfinder.execute(args);
             break;
           default:
             throw new Error(`Unknown tool: ${name}`);
