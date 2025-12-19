@@ -257,9 +257,13 @@ export class EmailProcessor {
   private htmlToText(html: string): string {
     let text = html;
     
-    // Remove script and style tags
-    text = text.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-    text = text.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
+    // Remove script and style tags (apply repeatedly to avoid incomplete multi-character sanitization)
+    let previous: string;
+    do {
+      previous = text;
+      text = text.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+      text = text.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
+    } while (text !== previous);
     
     // Convert common tags
     text = text.replace(/<br\s*\/?>/gi, '\n');
