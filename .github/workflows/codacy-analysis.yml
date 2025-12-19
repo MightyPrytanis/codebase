@@ -1,5 +1,8 @@
 name: Codacy analysis & coverage
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [ main ]
