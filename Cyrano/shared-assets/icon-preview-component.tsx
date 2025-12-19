@@ -9,6 +9,7 @@ import {
   AIIcon,
   AIAnalysisIcon,
   AIInsightsIcon,
+  CyranoIcon,
   ResearchIcon,
   GoodCounselIcon,
   BetaTestingIcon,
@@ -69,6 +70,11 @@ export default function IconPreview() {
         <p style={{ color: '#888', marginBottom: '20px' }}>Shared icons used across all Cyrano apps</p>
         
         <div className="icon-grid">
+          <IconPreviewItem
+            name="Cyrano Copilot"
+            description="Technorganic C-ring with HAL-inspired red eye (copilot/assistant)"
+            IconComponent={CyranoIcon}
+          />
           <IconPreviewItem
             name="AI Icon"
             description="HAL-inspired (red dot always red)"
