@@ -166,6 +166,8 @@ declare global {
       DEBUG?: string;
       /** Enable verbose logging (true | false) */
       VERBOSE_LOGGING?: string;
+      // SECURITY WARNING: Development-only flag - NEVER ENABLE IN PRODUCTION
+      // This skips authentication checks and should ONLY be used in local development
       /** Skip authentication (development only - SECURITY WARNING: NEVER ENABLE IN PRODUCTION) */
       SKIP_AUTH?: string;
     }

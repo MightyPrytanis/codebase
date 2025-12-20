@@ -16,6 +16,7 @@
  */
 
 // Augment Vite's ImportMetaEnv interface with custom environment variables
+// TypeScript's declaration merging automatically combines this with Vite's built-in interface
 interface ImportMetaEnv {
   /** Cyrano MCP Server API URL (default: http://localhost:5002) */
   readonly VITE_CYRANO_API_URL?: string;
