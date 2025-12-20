@@ -166,7 +166,7 @@ declare global {
       DEBUG?: string;
       /** Enable verbose logging (true | false) */
       VERBOSE_LOGGING?: string;
-      /** Skip authentication (development only - NEVER in production) */
+      /** Skip authentication (development only - SECURITY WARNING: NEVER ENABLE IN PRODUCTION) */
       SKIP_AUTH?: string;
     }
   }
