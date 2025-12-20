@@ -7,14 +7,15 @@
 /**
  * Global TypeScript declarations for LexFiat frontend environment.
  * 
- * This file augments the Vite ImportMetaEnv interface to add custom
- * environment variables used throughout the LexFiat client application.
- * Vite exposes environment variables via import.meta.env, and only
- * variables prefixed with VITE_ are exposed to the client code.
+ * This file augments the Vite ImportMetaEnv and ImportMeta interfaces
+ * to add custom environment variables used throughout the LexFiat client
+ * application. Vite exposes environment variables via import.meta.env, and
+ * only variables prefixed with VITE_ are exposed to the client code.
  * 
  * @see https://vitejs.dev/guide/env-and-mode.html
  */
 
+// Augment Vite's ImportMetaEnv interface with custom environment variables
 interface ImportMetaEnv {
   /** Cyrano MCP Server API URL (default: http://localhost:5002) */
   readonly VITE_CYRANO_API_URL?: string;
