@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { potemkinService } from '../services/potemkinService';
 
 interface DocumentUploadProps {
-  onVerificationComplete: (result: any) => void;
+  onVerificationComplete: (result: unknown) => void;
 }
 
 /**

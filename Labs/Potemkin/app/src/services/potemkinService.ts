@@ -11,7 +11,7 @@ class PotemkinService {
   /**
    * Verify a document file
    */
-  async verifyDocument(file: File): Promise<any> {
+  async verifyDocument(file: File): Promise<unknown> {
     // TODO: Implement file upload and verification via MCP
     // For now, return mock data
     return {
@@ -25,7 +25,7 @@ class PotemkinService {
   /**
    * Verify content from a URL
    */
-  async verifyUrl(url: string): Promise<any> {
+  async verifyUrl(url: string): Promise<unknown> {
     // TODO: Fetch URL content and verify via MCP
     return {
       status: 'verified',
@@ -38,7 +38,7 @@ class PotemkinService {
   /**
    * Verify pasted content
    */
-  async verifyContent(content: string): Promise<any> {
+  async verifyContent(content: string): Promise<unknown> {
     // TODO: Verify content via MCP potemkin_engine tool
     const response = await fetch(`${MCP_SERVER_URL}/mcp/execute`, {
       method: 'POST',
@@ -65,7 +65,7 @@ class PotemkinService {
   /**
    * Get integrity metrics
    */
-  async getIntegrityMetrics(): Promise<any> {
+  async getIntegrityMetrics(): Promise<unknown> {
     // TODO: Fetch integrity metrics via MCP
     return {
       overallScore: 0.88,
@@ -78,7 +78,7 @@ class PotemkinService {
   /**
    * Detect bias in content
    */
-  async detectBias(content: string): Promise<any> {
+  async detectBias(content: string): Promise<unknown> {
     const response = await fetch(`${MCP_SERVER_URL}/mcp/execute`, {
       method: 'POST',
       headers: {
@@ -103,7 +103,7 @@ class PotemkinService {
   /**
    * Test opinion drift
    */
-  async testOpinionDrift(): Promise<any> {
+  async testOpinionDrift(): Promise<unknown> {
     const response = await fetch(`${MCP_SERVER_URL}/mcp/execute`, {
       method: 'POST',
       headers: {

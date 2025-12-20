@@ -11,7 +11,7 @@ import { potemkinService } from '../services/potemkinService';
  * - Integrity score over time
  */
 export function IntegrityDashboard() {
-  const [metrics, setMetrics] = useState<any>(null);
+  const [metrics, setMetrics] = useState<unknown>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -58,7 +58,7 @@ export function IntegrityDashboard() {
             <h3>Recent Alerts</h3>
             {metrics.recentAlerts && metrics.recentAlerts.length > 0 ? (
               <ul>
-                {metrics.recentAlerts.map((alert: any, i: number) => (
+                {metrics.recentAlerts.map((alert: unknown, i: number) => (
                   <li key={i}>{alert.message}</li>
                 ))}
               </ul>

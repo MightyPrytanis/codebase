@@ -1,7 +1,7 @@
 import React from 'react';
 
 interface VerificationResultsProps {
-  results: any[];
+  results: unknown[];
 }
 
 /**
