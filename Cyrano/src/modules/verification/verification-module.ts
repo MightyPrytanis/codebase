@@ -66,10 +66,17 @@ export class VerificationModule extends BaseModule {
   }
 
   /**
-   * Helper method to check if an array is empty or undefined
+   * Helper method to check if an array is empty, null, or undefined
    */
-  private isEmptyArray(arr: any[] | undefined): boolean {
+  private isEmptyArray(arr: any[] | undefined | null): boolean {
     return !arr || arr.length === 0;
+  }
+
+  /**
+   * Helper method to check if a value is null or undefined
+   */
+  private isNullOrUndefined(value: any): boolean {
+    return value === null || value === undefined;
   }
 
   async execute(input: any): Promise<CallToolResult> {
@@ -79,7 +86,7 @@ export class VerificationModule extends BaseModule {
       switch (action) {
         case 'extract_claims':
           // Validate required field for extract_claims
-          if (args.text === undefined || args.text === null) {
+          if (this.isNullOrUndefined(args.text)) {
             return this.createErrorResult('extract_claims action requires "text" field');
           }
           return await claimExtractor.execute({
