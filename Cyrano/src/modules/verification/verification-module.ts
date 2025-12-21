@@ -65,6 +65,13 @@ export class VerificationModule extends BaseModule {
     // Cleanup if needed
   }
 
+  /**
+   * Helper method to check if an array is empty or undefined
+   */
+  private isEmptyArray(arr: any[] | undefined): boolean {
+    return !arr || arr.length === 0;
+  }
+
   async execute(input: any): Promise<CallToolResult> {
     try {
       const { action, ...args } = VerificationModuleInputSchema.parse(input);
@@ -72,7 +79,7 @@ export class VerificationModule extends BaseModule {
       switch (action) {
         case 'extract_claims':
           // Validate required field for extract_claims
-          if (!args.text) {
+          if (args.text === undefined || args.text === null) {
             return this.createErrorResult('extract_claims action requires "text" field');
           }
           return await claimExtractor.execute({
@@ -81,7 +88,7 @@ export class VerificationModule extends BaseModule {
 
         case 'check_citations':
           // Validate required field for check_citations
-          if (!args.citations || args.citations.length === 0) {
+          if (this.isEmptyArray(args.citations)) {
             return this.createErrorResult('check_citations action requires non-empty "citations" array');
           }
           return await citationChecker.execute({
@@ -91,7 +98,7 @@ export class VerificationModule extends BaseModule {
 
         case 'format_citations':
           // Validate required field for format_citations
-          if (!args.citations || args.citations.length === 0) {
+          if (this.isEmptyArray(args.citations)) {
             return this.createErrorResult('format_citations action requires non-empty "citations" array');
           }
           return await citationFormatter.execute({
@@ -101,7 +108,7 @@ export class VerificationModule extends BaseModule {
 
         case 'verify_sources':
           // Validate required field for verify_sources
-          if (!args.sources || args.sources.length === 0) {
+          if (this.isEmptyArray(args.sources)) {
             return this.createErrorResult('verify_sources action requires non-empty "sources" array');
           }
           return await sourceVerifier.execute({
@@ -110,7 +117,7 @@ export class VerificationModule extends BaseModule {
 
         case 'check_consistency':
           // Validate required field for check_consistency
-          if (!args.claims || args.claims.length === 0) {
+          if (this.isEmptyArray(args.claims)) {
             return this.createErrorResult('check_consistency action requires non-empty "claims" array');
           }
           return await consistencyChecker.execute({
