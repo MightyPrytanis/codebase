@@ -1871,8 +1871,8 @@ export class MaeEngine extends BaseEngine {
         // Execute the engine with the provided input
         // Merge context into input for template variable resolution
         const engineInput = {
-          ...step.input,
           ...context,
+          ...step.input,  // step.input takes precedence over context
         };
         
         return await targetEngine.execute(engineInput);
