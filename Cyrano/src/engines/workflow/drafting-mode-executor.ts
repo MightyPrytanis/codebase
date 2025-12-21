@@ -19,7 +19,7 @@ import {
 } from './document-state-machine.js';
 import { logStateTransition } from './state-transition-log.js';
 import { documentAnalyzer } from '../../tools/document-analyzer.js';
-import { DocumentDrafterTool } from '../../tools/document-drafter.js';
+import { documentDrafterTool } from '../../tools/document-drafter.js';
 import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { getTextFromResult } from '../../utils/mcp-helpers.js';
 
@@ -118,12 +118,11 @@ export async function executeModeA(context: DraftingContext): Promise<DraftingRe
 
     // Step 4: Generate Draft
     if (currentState === 'draft_pending') {
-      const drafter = new DocumentDrafterTool();
       const draftPrompt = context.documentText
         ? `Based on the following document, draft a response:\n\n${context.documentText.substring(0, 2000)}`
         : `Draft a ${context.documentType} document${context.caseContext ? ` for case: ${context.caseContext}` : ''}`;
 
-      const draftResult = await drafter.execute({
+      const draftResult = await documentDrafterTool.execute({
         prompt: draftPrompt,
         documentType: context.documentType as any,
         caseContext: context.caseContext,
@@ -292,8 +291,6 @@ export async function executeModeBDraft(context: DraftingContext, summary: strin
 
     // Step 2: Generate Draft (same as Mode A)
     if (currentState === 'draft_pending') {
-      const drafter = new DocumentDrafterTool();
-      
       // Include summary and Q&A in prompt
       let draftPrompt = `Based on the following summary, draft a ${context.documentType} response:\n\nSummary:\n${summary}`;
       
@@ -308,7 +305,7 @@ export async function executeModeBDraft(context: DraftingContext, summary: strin
         draftPrompt += `\nCase: ${context.caseContext}`;
       }
 
-      const draftResult = await drafter.execute({
+      const draftResult = await documentDrafterTool.execute({
         prompt: draftPrompt,
         documentType: context.documentType as any,
         caseContext: context.caseContext,

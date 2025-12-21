@@ -3,5 +3,28 @@ version: v1.22.0
 ignore: {}
 patch: {}
 
-
-
+# Exclude large directories to reduce code test usage
+exclude:
+  # Legacy and archived code
+  - Legacy/**
+  - Miscellaneous/**
+  
+  # Build artifacts and dependencies
+  - "**/node_modules/**"
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/coverage/**"
+  
+  # Test files
+  - "**/*.test.ts"
+  - "**/*.test.tsx"
+  - "**/*.test.js"
+  - "**/*.test.jsx"
+  - "**/*.spec.ts"
+  - "**/*.spec.tsx"
+  - "**/*.spec.js"
+  - "**/*.spec.jsx"
+  
+  # Minified files
+  - "**/*.min.js"
+  - "**/*.bundle.js"
