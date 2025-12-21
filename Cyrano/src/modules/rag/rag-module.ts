@@ -8,8 +8,6 @@ import { BaseModule } from '../base-module.js';
 import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { ragQuery } from '../../tools/rag-query.js';
-import { Chunker } from './chunker.js';
-import { VectorStore } from './vector-store.js';
 
 const RagModuleInputSchema = z.object({
   action: z.enum([
@@ -36,12 +34,9 @@ const RagModuleInputSchema = z.object({
  * 
  * Composes RAG tool and resources:
  * - RAG Query tool for document search and ingestion
- * - Chunker resource for text chunking
- * - Vector Store resource for vector storage
+ * - Resources are managed internally by ragQuery service
  */
 export class RagModule extends BaseModule {
-  private chunker: Chunker;
-  private vectorStore: VectorStore;
 
   constructor() {
     super({
@@ -49,21 +44,8 @@ export class RagModule extends BaseModule {
       description: 'RAG Module - Retrieval-Augmented Generation for document search and knowledge retrieval',
       version: '1.0.0',
       tools: [ragQuery],
-      resources: [
-        {
-          id: 'chunker',
-          type: 'data',
-          description: 'Text chunker for semantic chunking with overlap',
-        },
-        {
-          id: 'vector_store',
-          type: 'data',
-          description: 'In-memory vector store for document embeddings',
-        },
-      ],
+      resources: [],
     });
-    this.chunker = new Chunker();
-    this.vectorStore = new VectorStore();
   }
 
   async initialize(): Promise<void> {
@@ -130,20 +112,6 @@ export class RagModule extends BaseModule {
         `RAG module error: ${error instanceof Error ? error.message : String(error)}`
       );
     }
-  }
-
-  /**
-   * Get chunker resource
-   */
-  getChunker(): Chunker {
-    return this.chunker;
-  }
-
-  /**
-   * Get vector store resource
-   */
-  getVectorStore(): VectorStore {
-    return this.vectorStore;
   }
 
   private createErrorResult(message: string): CallToolResult {
