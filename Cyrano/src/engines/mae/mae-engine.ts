@@ -26,7 +26,7 @@ import { factChecker } from '../../tools/fact-checker.js';
 import { workflowManager } from '../../tools/workflow-manager.js';
 import { caseManager } from '../../tools/case-manager.js';
 import { documentProcessor } from '../../tools/document-processor.js';
-import { DocumentDrafterTool } from '../../tools/document-drafter.js';
+import { documentDrafterTool } from '../../tools/document-drafter.js';
 import { clioIntegration } from '../../tools/clio-integration.js';
 import { syncManager } from '../../tools/sync-manager.js';
 
@@ -80,7 +80,7 @@ export class MaeEngine extends BaseEngine {
         workflowManager,
         caseManager,
         documentProcessor,
-        new DocumentDrafterTool(),
+        documentDrafterTool,
         clioIntegration,
         syncManager,
         // Note: Engine-specific tools (Potemkin, GoodCounsel) are accessed via engines

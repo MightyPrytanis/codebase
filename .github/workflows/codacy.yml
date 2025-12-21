@@ -55,6 +55,7 @@ jobs:
           # Force 0 exit code to allow SARIF file generation
           # This will handover control about PR rejection to the GitHub side
           max-allowed-issues: 2147483647
+          tool: eslint,eslint-typescript,jest,shellcheck
 
       # Upload the SARIF file generated in the previous step
       - name: Upload SARIF results file

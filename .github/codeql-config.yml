@@ -1,0 +1,22 @@
+name: "CodeQL Config"
+
+paths-ignore:
+  - 'Legacy/**'
+  - 'Miscellaneous/**'
+  - 'Cyrano/**'
+  - 'apps/**'
+  - 'LexFiat/**'
+  - 'docs/**'
+  - 'Labs/**'
+  - 'GoodCounsel/**'
+  - 'NewCodex/**'
+  - '**/node_modules/**'
+  - '**/dist/**'
+  - '**/build/**'
+  - '**/coverage/**'
+  - '**/*.min.js'
+  - '**/*.bundle.js'
+  - '**/*.test.ts'
+  - '**/*.test.tsx'
+  - '**/*.spec.ts'
+  - '**/*.spec.tsx'
