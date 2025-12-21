@@ -71,30 +71,50 @@ export class VerificationModule extends BaseModule {
 
       switch (action) {
         case 'extract_claims':
+          // Validate required field for extract_claims
+          if (!args.text) {
+            return this.createErrorResult('extract_claims action requires "text" field');
+          }
           return await claimExtractor.execute({
             text: args.text,
           });
 
         case 'check_citations':
+          // Validate required field for check_citations
+          if (!args.citations || args.citations.length === 0) {
+            return this.createErrorResult('check_citations action requires non-empty "citations" array');
+          }
           return await citationChecker.execute({
-            citations: args.citations || [],
+            citations: args.citations,
             jurisdiction: args.jurisdiction,
           });
 
         case 'format_citations':
+          // Validate required field for format_citations
+          if (!args.citations || args.citations.length === 0) {
+            return this.createErrorResult('format_citations action requires non-empty "citations" array');
+          }
           return await citationFormatter.execute({
-            citations: args.citations || [],
+            citations: args.citations,
             jurisdiction: args.jurisdiction,
           });
 
         case 'verify_sources':
+          // Validate required field for verify_sources
+          if (!args.sources || args.sources.length === 0) {
+            return this.createErrorResult('verify_sources action requires non-empty "sources" array');
+          }
           return await sourceVerifier.execute({
-            sources: args.sources || [],
+            sources: args.sources,
           });
 
         case 'check_consistency':
+          // Validate required field for check_consistency
+          if (!args.claims || args.claims.length === 0) {
+            return this.createErrorResult('check_consistency action requires non-empty "claims" array');
+          }
           return await consistencyChecker.execute({
-            claims: args.claims || [],
+            claims: args.claims,
           });
 
         default:
