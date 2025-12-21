@@ -1,31 +1,18 @@
-# Codacy configuration with disabled problematic analyzers
+---
+# Codacy configuration (disable PMD analyzers by omission)
 engines:
   eslint:
     enabled: true
-    exclude_paths:
-      - 'Legacy/**'
-      - 'Cyrano/**'
-      - 'apps/**'
-      - 'LexFiat/**'
-      - 'docs/**'
-      - 'node_modules/**'
   eslint-typescript:
     enabled: true
-    exclude_paths:
-      - 'Legacy/**'
-      - 'Cyrano/**'
-      - 'apps/**'
-      - 'LexFiat/**'
-      - 'docs/**'
-      - 'node_modules/**'
   jest:
     enabled: true
-  pmd: 
-    enabled: false
-  pmd-legacy:
-    enabled: false
+  shellcheck:
+    enabled: true
+  metrics:
+    enabled: true
 
-# Exclude common generated and vendor directories to reduce noise
+# Exclude common generated/vendor/archived directories
 exclude_paths:
   - 'node_modules/**'
   - '**/dist/**'
@@ -40,7 +27,7 @@ exclude_paths:
   - 'Miscellaneous/**'
 
 # Patterns to skip for analysis
-patterns:
+exclude_patterns:
   - '**/*.min.js'
   - '**/*.bundle.js'
   - '**/*.spec.ts'
