@@ -14,6 +14,7 @@ import { recollectionSupport } from '../../../tools/recollection-support.js';
 import { preFillLogic } from '../../../tools/pre-fill-logic.js';
 import { dupeCheck } from '../../../tools/dupe-check.js';
 import { provenanceTracker } from '../../../tools/provenance-tracker.js';
+import { forensicReconstructionService } from '../services/forensic-reconstruction.js';
 import { z } from 'zod';
 
 const TimeReconstructionInputSchema = z.object({
@@ -21,6 +22,7 @@ const TimeReconstructionInputSchema = z.object({
     'identify_gaps',
     'collect_artifacts',
     'reconstruct_time',
+    'reconstruct_period',
     'check_duplicates',
     'recollection_support',
     'pre_fill',
@@ -116,6 +118,9 @@ export class TimeReconstructionModule extends BaseModule {
         
         case 'reconstruct_time':
           return await this.reconstructTime(parsed);
+        
+        case 'reconstruct_period':
+          return await this.reconstructPeriod(parsed);
         
         case 'check_duplicates':
           return await this.checkDuplicates(parsed);
@@ -422,6 +427,58 @@ export class TimeReconstructionModule extends BaseModule {
       time_entry: input.time_entry,
       artifacts: input.artifacts,
     });
+  }
+
+  /**
+   * Reconstruct a time period using forensic reconstruction (Workflow Archaeology)
+   */
+  private async reconstructPeriod(input: any): Promise<CallToolResult> {
+    if (!input.start_date || !input.end_date) {
+      return {
+        content: [{ type: 'text', text: 'Error: start_date and end_date are required for period reconstruction' }],
+        isError: true,
+      };
+    }
+
+    if (!input.artifacts || !Array.isArray(input.artifacts)) {
+      return {
+        content: [{ type: 'text', text: 'Error: artifacts array is required for period reconstruction' }],
+        isError: true,
+      };
+    }
+
+    try {
+      // Convert date strings to ISO format
+      const startTime = new Date(input.start_date).toISOString();
+      const endTime = new Date(input.end_date).toISOString();
+
+      // Use forensic reconstruction service
+      const result = await forensicReconstructionService.reconstructWithTimeEntries(
+        startTime,
+        endTime,
+        { matter_id: input.matter_id },
+        input.artifacts
+      );
+
+      return {
+        content: [{
+          type: 'text',
+          text: JSON.stringify({
+            forensic_reconstruction: result,
+            note: 'Forensic reconstruction complete using Workflow Archaeology service',
+          }, null, 2)
+        }],
+        isError: false,
+      };
+    } catch (error) {
+      return {
+        content: [{
+          type: 'text',
+          text: `Error in period reconstruction: ${error instanceof Error ? error.message : String(error)}`
+        }],
+        isError: true,
+      };
+    }
   }
 
   /**
