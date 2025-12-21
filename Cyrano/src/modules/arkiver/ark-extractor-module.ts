@@ -86,8 +86,9 @@ export class ArkExtractorModule extends BaseModule {
     // Cleanup if needed
   }
 
-  async execute(input: any): Promise<CallToolResult> {
+  async execute(input: z.infer<typeof ArkExtractorInputSchema>): Promise<CallToolResult> {
     try {
+      // Validate input at runtime to ensure type safety
       const { action, ...args } = ArkExtractorInputSchema.parse(input);
 
       switch (action) {
