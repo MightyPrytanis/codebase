@@ -32,20 +32,20 @@ jobs:
 
       - name: Upload coverage to Codacy
         # Works if Codacy GitHub App is installed; otherwise set CODACY_PROJECT_TOKEN in repo secrets
-        uses: codacy/coverage-reporter-action@v1
+        uses: codacy/codacy-coverage-reporter-action@v1
         # If you have a project token, uncomment the 'with:' block below and set it as a repository secret named CODACY_PROJECT_TOKEN
-        # with:
-        #   token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-        #   coverage_reporter_version: '1.0.0'  # optional
-        env:
-          # Fallback: if you have private token, put it in repo secrets as CODACY_PROJECT_TOKEN
-          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN || '' }}
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+        #   coverage-reports: coverage/lcov.info  # optional
 
       - name: Run Codacy Analysis CLI (optional)
         # Optional: run Codacy analysis CLI to upload issues — works with GitHub App or CODACY_PROJECT_TOKEN
-        uses: codacy/codacy-analysis-cli-action@v1
+        uses: codacy/codacy-analysis-cli-action@v4
         # If using token, uncomment the 'with:' block below and provide as secret
-        # with:
-        #   token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-        env:
-          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN || '' }}
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          verbose: true
+          output: results.sarif
+          format: sarif
+          gh-code-scanning-compat: true
+          max-allowed-issues: 2147483647
