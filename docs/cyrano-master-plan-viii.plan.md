@@ -1,0 +1,2546 @@
+# Cyrano Master Plan VIII: The Voyage Home
+
+## Overview
+
+This document contains eight detailed mini-plans for completing the Cyrano ecosystem (MCP server, LexFiat, Arkiver) with all engines, modules, and integrations. Plans are prioritized by dependencies and critical path to production readiness.**Current Status:** ~61% complete toward beta readiness**Critical Path:** Directory Structure → Chronometric → Library → Tests → Ethics → Onboarding → Security → Production
+
+## Plan History: Why This Is The Last One
+
+Multiple comprehensive plans have been created to reach beta release. The pattern has been consistent: detailed planning, partial execution, then a new plan to "fix" what the previous one missed. This plan is different.
+
+### What Actually Got Done
+
+Looking at `docs/PROJECT_CHANGE_LOG.md` and the actual work accomplished:**Completed Steps (8 of 15):**
+
+- ✅ **Step 1: Architecture Implementation** - Tool layer, module abstraction (Chronometric), engine abstraction (MAE, GoodCounsel, Potemkin), MCP compliance
+- ✅ **Step 2: Legacy Code Extraction** - Inventories created, code extracted and integrated from Legacy/ and Labs/
+- ✅ **Step 3: Pre-Reconciliation** - Diff reports, files merged from GitHub, reconciliation documented
+- ✅ **Step 4: Build Out Arkiver** - Complete UI finished and functional, MCP tools, frontend extracted from Base44, all pages implemented
+- ✅ **Step 5: Replace Mock AI Code** - All AI integrations real (6 providers), all mock code replaced, rate limiting enhanced
+- ✅ **Step 6: Open-Source Enhancements** - OCR, CourtListener, PDF extraction, JSON rules engine, Playwright E2E testing
+- ✅ **Step 8: RAG Pipeline** - Fully functional RAG service, embedding service, chunker, vector store, MCP tool
+- ✅ **Step 12: Security Evaluation** - Snyk scanning, OWASP ZAP, security headers, high-priority fixes completed
+
+**Major Epic Implementations:**
+
+- ✅ **LexFiat Dashboard & Workflow** - Complete dashboard overhaul, workflow state machine, drafting modes, GoodCounsel integration, theme system, 30+ components
+- ✅ **GoodCounsel Wellness System** - Enterprise encryption, HIPAA compliance, wellness journaling, burnout detection, meditation components
+- ✅ **Ethics Documentation** - Updated to Version 1.4, all references updated across codebase
+
+**In Progress:**
+
+- ⚠️ **Step 7: LexFiat UI/UX** - 50% complete (dashboard done, some integrations pending)
+- ⚠️ **Step 9: Comprehensive Refactoring** - 15% complete (some tests fixed, more work needed)
+- ⚠️ **Step 10: Documentation** - 60% complete (major reorganization done, some guides pending)
+
+**Still Pending:**
+
+- ⏳ **Steps 11-15** - Cleanup, deployment, beta release (ready but not started)
+- ⏳ **Repo structure reorganization** - Planned but not executed
+- ⏳ **EthicalAI module** - Designed but not implemented
+- ⏳ **Modularization** - Planned but not executed
+- ⏳ **Chronometric enhancements** - Designed but not implemented
+
+### The Pattern
+
+The "realistic" plan (likely the first one actually used) underestimated complexity. Later plans were more comprehensive but suffered from:
+
+- **Interdependencies not fully mapped** - Tasks that seemed independent actually required decisions from other tasks
+- **Linear thinking** - Plans assumed sequential execution when parallel work was possible (or necessary)
+- **Scope creep** - Each plan added new requirements discovered during execution
+- **Execution gaps** - Plans were detailed but lacked the explicit, machine-readable instructions needed for actual implementation
+
+### Why This Plan Will Succeed
+
+**This is Plan VIII: The Voyage Home**—and it will be the last one because:
+
+1. **It consolidates everything**—All valuable ideas from previous plans are integrated here. Security fixes (done) are preserved. Modularization (pending) is included. EthicalAI (pending) is included. Chronometric enhancements (pending) are included. Nothing is lost.
+2. **It's execution-ready**—Every task has explicit GitHub Copilot instructions. No ambiguity. The plan can be handed to Copilot and executed without further interpretation.
+3. **It acknowledges reality**—No time estimates (they've been consistently wrong). No false assumptions about "realistic" scope. Just clear tasks with clear dependencies.
+4. **It enforces discipline**—The "0 net increase in documentation" rule prevents sprawl. The "Sleep When You're Dead" rule prevents process overhead.
+5. **It's comprehensive but modular**—Eight priorities that can work in parallel where possible, with clear critical paths where they can't.
+6. **It includes Workflow Archaeology**—Acknowledging that sometimes we need to reconstruct what happened, not just plan what will happen. (Indeed, this very section is an exercise in workflow archaeology: reconstructing the history of previous plans when the details have been forgotten.)
+
+**The difference this time:** This plan is a **blueprint for execution**, not a wish list. Every task is actionable. Every dependency is mapped. We're not planning anymore—we're building. And this time, we're finishing.
+
+### Implementation Rules
+
+**0 Net Increase in Documentation (MANDATORY):**
+
+- **CRITICAL:** When all steps are finished, there must be 0 net increase in documentation files
+- Do NOT create new documentation files unless absolutely necessary for transparency
+- **Always prefer updating existing documents** over creating new ones
+- If new information is needed, add it to existing relevant documents
+- Consolidate information rather than creating new files
+- Exception: Code files (services, components, etc.) are not subject to this rule
+- When updating documentation, merge into existing files rather than creating new ones
+- If you must create a new doc, identify an obsolete doc to remove or archive
+- **Documentation tasks must specify:** "Update existing doc X" or "Add section to existing doc Y" - never "Create new doc"
+
+**Sleep When You're Dead Rule:**
+
+- Work efficiently and directly
+- Don't create unnecessary intermediate steps
+- Focus on deliverables, not process documentation
+- Execute immediately when instructions are clear
+- **MANDATORY:** Work without interruption. If user input is required, work on things that don't depend on that input in the meantime
+- **MANDATORY:** Continue working on subsequent sections while waiting for approval
+- **MANDATORY:** Do not stop working if there is work to be done
+
+**Ongoing Maintenance Requirements:**
+
+- **PROJECT_CHANGE_LOG.md Updates:** All agents must update `docs/PROJECT_CHANGE_LOG.md` when completing tasks, implementing features, or making significant changes
+- **Level-Set Agent Integration:** Level-set-agent rules (`.cursor/rules/level-set-agent.mdc`) must be incorporated into agent workflows for documentation synchronization
+- **Human Task Reminder Agent:** A dedicated agent must remind the user of tasks in `docs/HUMAN_USER_TODOS_STEP_12.md`, `docs/security/guides/SECURITY_CONFIGURATION_WALKTHROUGH.md`, and other human-only tasks that Cursor/Copilot cannot complete
+
+---
+
+## Agent Coordination & Ongoing Maintenance
+
+### Overview
+
+This section defines mandatory ongoing maintenance tasks and agent coordination requirements that apply throughout all priorities. These are not one-time tasks but continuous responsibilities for all agents working on the codebase.
+
+### Mandatory Ongoing Tasks
+
+#### PROJECT_CHANGE_LOG.md Updates
+
+**Requirement:** All agents must update `docs/PROJECT_CHANGE_LOG.md` when:
+
+- Completing any task or step
+- Implementing new features
+- Making significant code changes
+- Fixing bugs or security issues
+- Completing any priority or sub-priority
+
+**Format:** Follow existing PROJECT_CHANGE_LOG.md structure:
+
+- Add entry with date
+- Reference step/epic/ticket/priority
+- Describe changes made
+- List files modified
+- Note completion status
+
+**Files:** `docs/PROJECT_CHANGE_LOG.md`**Cursor Instructions:**
+
+- After completing any task, add entry to PROJECT_CHANGE_LOG.md
+- Use existing format and structure
+- Include date, priority reference, description, and files modified
+- Update "Last Updated" date in document header
+
+#### Level-Set Agent Integration
+
+**Requirement:** Level-set-agent rules (`.cursor/rules/level-set-agent.mdc`) must be incorporated into agent workflows for:
+
+- Documentation synchronization
+- Codebase assessment
+- Status comparison
+- Cross-reference validation
+- Tool count verification
+
+**When to Run:**
+
+- After major implementation milestones
+- After completing each priority
+- When documentation appears out of sync
+- Periodically for maintenance
+- When explicitly requested by user
+
+**Files:** `.cursor/rules/level-set-agent.mdc`**Cursor Instructions:**
+
+- Incorporate level-set-agent rules into agent workflows
+- Run level-set agent after completing each priority
+- Use level-set agent to validate documentation accuracy
+- Update documentation based on level-set agent findings
+- Do not create new documents - only update existing ones per level-set-agent rules
+
+#### Human Task Reminder Agent
+
+**Requirement:** A dedicated agent must remind the user of human-only tasks that Cursor/Copilot cannot complete.**Tasks to Monitor:**
+
+- `docs/HUMAN_USER_TODOS_STEP_12.md` - Security configuration tasks
+- `docs/security/guides/SECURITY_CONFIGURATION_WALKTHROUGH.md` - Production security setup
+- Any other human-only tasks identified during development
+
+**Reminder Frequency:**
+
+- Check human task documents at start of each session
+- Remind user when tasks are blocking progress
+- Remind user when tasks are approaching deadlines
+- Provide clear, actionable prompts for each task
+
+**Files:**
+
+- `docs/HUMAN_USER_TODOS_STEP_12.md`
+- `docs/security/guides/SECURITY_CONFIGURATION_WALKTHROUGH.md`
+- Any other human task documents
+
+**Cursor Instructions:**
+
+- At start of each session, check human task documents
+- Identify tasks that are blocking or approaching deadlines
+- Present clear reminder to user with:
+- Task name and priority
+- Why it's needed
+- Estimated time
+- Step-by-step instructions
+- Link to relevant documentation
+- Continue with independent work while waiting for user action
+- Do not block on human tasks - work on other priorities
+
+**Example Reminder Format:**
+
+```javascript
+⚠️ HUMAN USER ACTION REQUIRED
+
+Task: [Task Name]
+Priority: [HIGH/MEDIUM/LOW]
+Estimated Time: [Time estimate]
+Why: [Why it's needed]
+Instructions: [Step-by-step instructions]
+Documentation: [Link to relevant doc]
+
+While waiting for this action, I will continue with [independent work].
+
+Please complete the prerequisite and update the status in [task document].
+```
+
+
+
+### Agent Workflow Integration
+
+**All agents must:**
+
+1. **Update PROJECT_CHANGE_LOG.md** after completing tasks
+2. **Run level-set agent** after major milestones
+3. **Check human task documents** at session start
+4. **Remind user** of blocking human tasks
+5. **Continue working** on independent tasks while waiting for user action
+
+**Files:**
+
+- `docs/PROJECT_CHANGE_LOG.md` - Update after each task
+- `.cursor/rules/level-set-agent.mdc` - Follow rules for documentation
+- `docs/HUMAN_USER_TODOS_STEP_12.md` - Monitor and remind
+- `docs/security/guides/SECURITY_CONFIGURATION_WALKTHROUGH.md` - Monitor and remind
+
+**Dependencies:** None - these are ongoing requirements throughout all priorities**Suitability:** ✅ Fully Suitable (ongoing maintenance tasks)---
+
+## Priority 1: Directory Structure Reorganization
+
+### Overview
+
+Reorganize the codebase to eliminate confusion, clarify structure, and prevent tools like GitHub Copilot from updating archived code. Establish clear conventions for apps, engines, modules, tools, docs, and labs.
+
+### Current Problems
+
+- Multiple Arkiver folders causing confusion
+- Old/unused code in active directories (e.g., SwimMeet causing GitHub Copilot issues)
+- Unclear structure: apps under `/apps/` vs. root level (LexFiat)
+- Engines, modules, tools scattered across directories
+- Legacy code mixed with active code
+
+### Proposed Structure
+
+```javascript
+codebase/
+├── apps/                    # User-facing applications
+│   ├── arkiver/             # Arkiver frontend (current active version)
+│   ├── lexfiat/             # LexFiat frontend
+│   │   └── client/          # LexFiat client code
+│   └── [future-apps]/       # Other apps go here
+│
+├── Cyrano/                  # MCP Server
+│   ├── src/
+│   │   ├── engines/         # Engines (Potemkin, GoodCounsel, MAE, Chronometric)
+│   │   ├── modules/         # Modules (Library, RAG, Chronometric sub-modules)
+│   │   ├── tools/          # MCP Tools
+│   │   ├── services/       # Services (RAG, legal research, etc.)
+│   │   └── routes/         # API Routes
+│   └── docs/               # Cyrano-specific docs
+│
+├── docs/                    # Project-wide documentation
+│   ├── guides/             # User guides
+│   ├── reference/          # API reference, architecture
+│   ├── security/           # Security docs
+│   └── install/            # Installation/onboarding docs
+│
+├── labs/                   # Experimental/in-development features
+│   └── [experimental-projects]/
+│
+└── Legacy/                  # Archived, non-active code
+    ├── old-codebase-artifacts/
+    │   ├── arkivermj/      # Original Base44 Arkiver
+    │   └── [other-archived]/
+    └── [other-legacy]/
+```
+
+
+
+### Implementation Tasks
+
+#### 1.1 Audit Current Structure
+
+**File:** Update `docs/reference/DIRECTORY_STRUCTURE_AUDIT.md` (if exists) or add section to existing structure doc**Rule:** No new docs - update existing only**Tasks:**
+
+- [ ] List all directories at root level
+- [ ] Identify which are active vs. archived
+- [ ] Document current Arkiver locations and status
+- [ ] Identify duplicate/conflicting code
+- [ ] List all apps, engines, modules, tools with current locations
+
+**Deliverable:** Complete audit document with recommendations
+
+#### 1.2 Move Archived Code to Legacy/
+
+**Files:** Various legacy directories**Tasks:**
+
+- [ ] Move `Legacy/old-codebase-artifacts/arkivermj/` (already there, verify)
+- [ ] Move any SwimMeet code to `Legacy/` (if not already moved)
+- [ ] Move any other archived projects
+- [ ] Update any references to moved code
+- [ ] Verify `.gitignore` excludes Legacy/ from searches
+
+**Deliverable:** All archived code in `Legacy/` directory
+
+#### 1.3 Reorganize Active Code
+
+**Files:** Various active directories**Tasks:**
+
+- [ ] Verify `apps/arkiver/` is the active Arkiver (not Base44 version)
+- [ ] Move `LexFiat/` to `apps/lexfiat/` (for consistency with arkiver)
+- [ ] Verify engines are under `Cyrano/src/engines/`
+- [ ] Verify modules are under `Cyrano/src/modules/`
+- [ ] Verify tools are under `Cyrano/src/tools/`
+- [ ] Move any misplaced engines/modules/tools to correct locations
+
+**Deliverable:** Clean, organized structure matching proposed layout
+
+#### 1.4 Update .gitignore and Search Exclusions
+
+**File:** `.gitignore` and `.cursorignore`**Tasks:**
+
+- [ ] Add `Legacy/` to exclusions for code search tools
+- [ ] Add patterns to prevent GitHub Copilot from indexing Legacy/
+- [ ] Update `.cursorignore` if needed
+- [ ] Test that searches don't return Legacy/ results
+
+**Deliverable:** Updated ignore files preventing Legacy/ confusion
+
+#### 1.5 Create Directory Structure Documentation
+
+**File:** Update `docs/reference/DIRECTORY_STRUCTURE.md` (if exists) or add section to existing reference doc**Rule:** No new docs - update existing only**Tasks:**
+
+- [ ] Document the new structure
+- [ ] Explain where new code should go
+- [ ] Create decision tree: "Where does X go?"
+- [ ] Add to README.md
+
+**Deliverable:** Complete directory structure guide
+
+#### 1.6 Update All References
+
+**Files:** All files referencing moved code**Tasks:**
+
+- [ ] Search for imports/references to moved code
+- [ ] Update all references to `LexFiat/` → `apps/lexfiat/`
+- [ ] Update import paths
+- [ ] Update documentation references
+- [ ] Update CI/CD scripts if needed
+- [ ] Update README.md references
+- [ ] Verify nothing breaks
+
+**Deliverable:** All references updated, codebase still functional
+
+#### 1.7 MAE Hierarchy Reorganization
+
+**Files:**
+
+- `Cyrano/src/engines/mae/services/` (new directory)
+- `Cyrano/src/tools/ai-orchestrator.ts` (move)
+- `Cyrano/src/services/multi-model-service.ts` (move)
+
+**Dependencies:** [Depends on: 1.3]**Suitability:** ✅ Fully Suitable**Cursor Instructions:**
+
+- Design MAE services structure
+- Verify backward compatibility
+- Review import paths
+
+**GitHub Copilot Instructions:**
+
+```javascript
+**Task:** Reorganize MAE hierarchy - move AI Orchestrator and Multi-Model Service to MAE services
+**Context:** Priority 1.7 - MAE Hierarchy Reorganization
+
+**Requirements:**
+
+1. Create MAE services directory:
+            - Create Cyrano/src/engines/mae/services/ directory
+            - Create services/index.ts export file
+
+2. Move AI Orchestrator:
+            - Move Cyrano/src/tools/ai-orchestrator.ts → Cyrano/src/engines/mae/services/ai-orchestrator.ts
+            - Update class documentation to reflect it's a MAE service
+            - Export from services/index.ts
+            - Maintain tool interface (extends BaseTool) for backward compatibility
+
+3. Move Multi-Model Service:
+            - Move Cyrano/src/services/multi-model-service.ts → Cyrano/src/engines/mae/services/multi-model-service.ts
+            - Update class documentation to reflect it's a MAE service
+            - Export from services/index.ts
+            - Update internal imports if needed
+
+4. Update all imports:
+            - http-bridge.ts: Update AI Orchestrator import
+            - mcp-server.ts: Update AI Orchestrator import
+            - fact-checker.ts: Update Multi-Model Service import
+            - mae-engine.ts: Import from services directory
+            - test-all-tools.ts: Update imports
+            - Any other files referencing these services
+
+5. Update MAE Engine:
+            - Add methods: getAIOrchestrator(), getMultiModelService()
+            - Import services from services directory
+            - Document that MAE orchestrates these services
+
+**Pattern:**
+- Use git mv to preserve history
+- Update imports to new paths
+- Maintain backward compatibility (tools still registered)
+- Update documentation
+
+**Acceptance Criteria:**
+- [ ] MAE services directory created
+- [ ] AI Orchestrator moved to MAE services
+- [ ] Multi-Model Service moved to MAE services
+- [ ] All imports updated
+- [ ] MAE engine updated with service access methods
+- [ ] Tools still work (backward compatible)
+- [ ] Documentation updated
+```
+
+**Deliverable:** MAE hierarchy reorganized with services under MAE authority
+
+#### 1.8 Create Modular BaseModule Classes
+
+**Files:**
+
+- `Cyrano/src/modules/arkiver/ark-extractor-module.ts` (new)
+- `Cyrano/src/modules/arkiver/ark-processor-module.ts` (new)
+- `Cyrano/src/modules/arkiver/ark-analyst-module.ts` (new)
+- `Cyrano/src/modules/rag/rag-module.ts` (new)
+- `Cyrano/src/modules/verification/verification-module.ts` (new)
+- `Cyrano/src/modules/legal-analysis/legal-analysis-module.ts` (new)
+
+**Dependencies:** [Depends on: 1.3]**Suitability:** ⚠️ Partially Suitable (requires understanding module architecture)**Cursor Instructions:**
+
+- Review BaseModule architecture
+- Design module structure
+- Verify module registration
+
+**GitHub Copilot Instructions:**
+
+```javascript
+**Task:** Create modular BaseModule classes for Arkiver, RAG, Verification, and Legal Analysis
+**Context:** Priority 1.8 - Module Creation
+
+**Requirements:**
+
+1. Create ArkExtractor Module:
+            - File: Cyrano/src/modules/arkiver/ark-extractor-module.ts
+            - Extend BaseModule
+            - Compose extraction tools: extractConversations, extractTextContent, categorizeWithKeywords, processWithRegex, generateCategorizedFiles, runExtractionPipeline, arkiverProcessFileTool, arkiverJobStatusTool
+            - name: 'ark_extractor'
+            - description: 'Document Extraction Module - Extracts content from various file formats'
+            - Implement execute() with actions: 'extract_conversations', 'extract_text', 'categorize', 'process_regex', 'generate_files', 'run_pipeline', 'process_file', 'job_status'
+            - Export: export const arkExtractorModule = new ArkExtractorModule()
+
+2. Create ArkProcessor Module:
+            - File: Cyrano/src/modules/arkiver/ark-processor-module.ts
+            - Extend BaseModule
+            - Compose processor tools: arkiverTextProcessor, arkiverEmailProcessor
+            - name: 'ark_processor'
+            - description: 'Text Processing Module - Processes extracted text and email content'
+            - Implement execute() with actions: 'process_text', 'process_email'
+            - Export: export const arkProcessorModule = new ArkProcessorModule()
+
+3. Create ArkAnalyst Module:
+            - File: Cyrano/src/modules/arkiver/ark-analyst-module.ts
+            - Extend BaseModule
+            - Compose analysis tools: arkiverEntityProcessor, arkiverInsightProcessor, arkiverTimelineProcessor
+            - Include shared verification tools: claimExtractor, citationChecker, sourceVerifier, consistencyChecker
+            - name: 'ark_analyst'
+            - description: 'Content Analysis Module - Analyzes processed content for entities, insights, and timelines'
+            - Implement execute() with actions: 'extract_entities', 'generate_insights', 'extract_timeline'
+            - Export: export const arkAnalystModule = new ArkAnalystModule()
+
+4. Create RagModule:
+            - File: Cyrano/src/modules/rag/rag-module.ts
+            - Extend BaseModule
+            - Compose RAG tool: ragQuery
+            - Add resources: chunker, vector_store
+            - name: 'rag'
+            - description: 'RAG Module - Retrieval-Augmented Generation for document search and knowledge retrieval'
+            - Implement execute() with actions: 'query', 'ingest', 'ingest_batch', 'get_context', 'get_stats'
+            - Export: export const ragModule = new RagModule()
+
+5. Create VerificationModule:
+            - File: Cyrano/src/modules/verification/verification-module.ts
+            - Extend BaseModule
+            - Compose verification tools: claimExtractor, citationChecker, citationFormatter, sourceVerifier, consistencyChecker
+            - name: 'verification'
+            - description: 'Verification Module - Shared verification tools for claims, citations, sources, and consistency'
+            - Implement execute() with actions: 'extract_claims', 'check_citations', 'format_citations', 'verify_sources', 'check_consistency'
+            - Export: export const verificationModule = new VerificationModule()
+
+6. Create LegalAnalysisModule:
+            - File: Cyrano/src/modules/legal-analysis/legal-analysis-module.ts
+            - Extend BaseModule
+            - Compose legal analysis tools: documentAnalyzer, contractComparator, legalReviewer, complianceChecker, qualityAssessor, redFlagFinder
+            - name: 'legal_analysis'
+            - description: 'Legal Analysis Module - Comprehensive legal document analysis, review, and assessment'
+            - Implement execute() with actions: 'analyze_document', 'compare_contracts', 'review_legal', 'check_compliance', 'assess_quality', 'find_red_flags'
+            - Export: export const legalAnalysisModule = new LegalAnalysisModule()
+
+7. Register all modules in module registry:
+            - File: Cyrano/src/modules/registry.ts
+            - Import all new modules
+            - Register in constructor: this.register(arkExtractorModule), etc.
+
+8. Update MAE Engine to use modules:
+            - File: Cyrano/src/engines/mae/mae-engine.ts
+            - Add modules to constructor: 'ark_extractor', 'ark_processor', 'ark_analyst', 'rag', 'verification', 'legal_analysis'
+            - Add commonly used tools to constructor tools array:
+                    - documentAnalyzer, factChecker, workflowManager, caseManager, documentProcessor, documentDrafter, clioIntegration, syncManager
+                    - Exclude engine-specific tools (Potemkin-specific, GoodCounsel-specific) - access via engines
+
+9. Enable MAE to call other engines:
+            - Update execute() method to handle engine calls
+            - Add action: 'call_engine' or extend execute_workflow to support engine targets
+            - In workflow execution, if target is an engine name, call that engine's execute() method
+            - Example: if (step.type === 'engine') { const engine = engineRegistry.get(step.target); return await engine.execute(step.input || {}); }
+
+10. Verify MAE workflows:
+            - Check if compare, critique, collaborate workflows are registered
+            - If missing, add them to registerDefaultWorkflows()
+
+**Pattern:**
+- Follow existing BaseModule patterns (see ChronometricModule)
+- Import tools from appropriate locations
+- Implement initialize() (can be no-op if tools are stateless)
+- Implement execute() to route actions to tools
+- Implement cleanup() (can be no-op)
+- Register in module registry
+
+**Acceptance Criteria:**
+- [ ] All 6 modules created
+- [ ] All modules extend BaseModule
+- [ ] All modules registered in registry
+- [ ] MAE engine updated to use modules
+- [ ] MAE engine updated to use common tools
+- [ ] MAE can call other engines
+- [ ] MAE workflows verified/registered
+- [ ] Modules can be executed via MAE
+- [ ] Backward compatibility maintained (tools still accessible)
+```
+
+**Deliverable:** Modular BaseModule classes created and registered, MAE fully connected
+
+#### 1.9 LevelSet Agent Re-run
+
+**Files:** LevelSet agent configuration**Dependencies:** [Depends on: 1.8, 5.7 (EthicalAI module)]**Suitability:** ⚠️ Partially Suitable (requires human to run agent)**Cursor Instructions:**
+
+- Configure LevelSet agent with updated ignore rules
+- Run LevelSet agent
+- Review and address discrepancies
+
+**GitHub Copilot Instructions:**
+
+```javascript
+**Task:** Re-run LevelSet agent after structural and ethics changes
+**Context:** Priority 1.9 - LevelSet Re-run
+
+**Requirements:**
+
+1. Update LevelSet agent configuration:
+            - File: .cursor/rules/level-set-agent.mdc
+            - Ensure ignore rules exclude: Legacy/, Document Archive/, IP/, unused Labs/
+            - Verify LevelSet covers: Cyrano/, apps/, docs/
+
+2. Run LevelSet agent:
+            - Execute LevelSet agent to validate documentation
+            - Agent should check:
+                    - Directory structure matches docs
+                    - EthicalAI module documented
+                    - Ten Rules integration points documented
+                    - Module structure documented
+                    - No inconsistencies between code and docs
+
+3. Review LevelSet output:
+            - Identify discrepancies
+            - Fix documentation to match code
+            - Fix code to match documentation (if code is wrong)
+            - Update cross-references
+
+4. Update documentation based on LevelSet findings:
+            - Fix outdated docs
+            - Add missing documentation
+            - Remove obsolete documentation
+            - Ensure consistency
+
+**Pattern:**
+- Follow LevelSet agent instructions
+- Update docs to match reality
+- No new docs - update existing only
+
+**Acceptance Criteria:**
+- [ ] LevelSet agent configuration updated
+- [ ] LevelSet agent run successfully
+- [ ] All discrepancies identified
+- [ ] Documentation updated to match code
+- [ ] Cross-references validated
+- [ ] No inconsistencies remain
+```
+
+**Deliverable:** Documentation validated and synchronized with codebase
+
+### Success Criteria
+
+- [ ] Clear directory structure matching proposed layout
+- [ ] All archived code in `Legacy/`
+- [ ] LexFiat moved to `apps/lexfiat/`
+- [ ] No confusion about which Arkiver is active
+- [ ] GitHub Copilot doesn't update Legacy/ code
+- [ ] Documentation explains structure clearly
+- [ ] All imports/references work correctly
+- [ ] MAE hierarchy reorganized
+- [ ] Modular BaseModule classes created
+- [ ] LevelSet agent re-run and documentation validated
+
+---
+
+## Priority 2: Chronometric Engine Promotion & Workflow Archaeology
+
+### Overview
+
+Promote Chronometric from Module to Engine status and reorganize into three specialized modules. Develop Workflow Archaeology as shared forensic recreation tools for reconstructing past hours, days, or weeks when details have been forgotten. These tools will be usable in both LexFiat and Arkiver.
+
+### Current Status
+
+- ✅ Chronometric exists as a Module (`Cyrano/src/modules/chronometric/`)
+- ✅ Core tools exist (gap identification, artifact collection, reconstruction)
+- ❌ Not yet an Engine (should be promoted)
+- ❌ Tools not organized into specialized modules
+- ❌ Workflow Archaeology not implemented
+- ❌ Shared forensic recreation tools not available
+
+### Architecture Changes
+
+**Promote Chronometric to Engine:**
+
+- Move from `Cyrano/src/modules/chronometric/` → `Cyrano/src/engines/chronometric/`
+- Convert `ChronometricModule` → `ChronometricEngine` (extends BaseEngine)
+- Organize tools into three specialized modules under the engine
+
+**Three Module Structure:**
+
+1. **Time Reconstruction Module** - Gap identification, artifact collection, time reconstruction
+2. **Pattern Learning & Analytics Module** - Baseline setup, pattern learning, profitability intelligence
+3. **Cost Estimation Module** - Predictive cost estimation, proposals, budget tracking
+
+**Workflow Archaeology:**
+
+- Shared forensic recreation service/tools
+- Reconstruct past hours, days, or weeks
+- Usable by both LexFiat (time tracking) and Arkiver (workflow/document history)
+- Leverages same artifact collection and reconstruction logic as Chronometric
+
+### Implementation Tasks
+
+#### 2.1 Promote Chronometric to Engine
+
+**Files:**
+
+- `Cyrano/src/engines/chronometric/chronometric-engine.ts` (new - move from modules/)
+- `Cyrano/src/engines/chronometric/index.ts` (new)
+- Update all references from module to engine
+
+**Dependencies:** [Depends on: 1.3]**Suitability:** ⚠️ Partially Suitable (requires architecture decisions)**Cursor Instructions:**
+
+- Design Chronometric Engine architecture
+- Review BaseEngine patterns
+- Plan module organization
+
+**GitHub Copilot Instructions:**
+
+```javascript
+**Task:** Promote Chronometric from Module to Engine
+**Context:** Priority 2.1 - Chronometric Engine Promotion
+
+**Requirements:**
+
+1. Create Chronometric Engine structure:
+            - Create Cyrano/src/engines/chronometric/ directory
+            - Move chronometric.ts from modules/ to engines/chronometric/chronometric-engine.ts
+            - Convert ChronometricModule class to ChronometricEngine (extends BaseEngine)
+            - Update class name, description, and documentation
+
+2. Update engine configuration:
+            - name: 'chronometric'
+            - description: 'Chronometric Engine - Forensic time capture and workflow archaeology engine'
+            - version: '1.0.0'
+            - modules: ['time_reconstruction', 'pattern_learning', 'cost_estimation'] (will be created in next steps)
+            - tools: [] (tools will be in modules)
+            - Remove direct tool references (tools move to modules)
+
+3. Update all references:
+            - Update module registry (remove chronometric module)
+            - Update engine registry (add chronometric engine)
+            - Update MAE engine (change 'chronometric' from modules to engines)
+            - Update imports in: mcp-server.ts, http-bridge.ts, mae-engine.ts
+            - Update chronometric-module.ts tool wrapper (rename to chronometric-engine.ts or update references)
+
+4. Create engine index:
+            - File: Cyrano/src/engines/chronometric/index.ts
+            - Export: export { chronometricEngine } from './chronometric-engine.js'
+            - Export: export * from './chronometric-engine.js'
+
+**Pattern:**
+- Follow BaseEngine patterns (see GoodCounsel, Potemkin, MAE)
+- Engines orchestrate modules, not tools directly
+- Update all imports and references
+- Maintain backward compatibility where possible
+
+**Acceptance Criteria:**
+- [ ] Chronometric Engine created (extends BaseEngine)
+- [ ] All references updated (module → engine)
+- [ ] Engine registered in engine registry
+- [ ] MAE updated to reference Chronometric as engine
+- [ ] No broken imports
+```
+
+**Deliverable:** Chronometric promoted to Engine status
+
+#### 2.2 Create Time Reconstruction Module
+
+**Files:**
+
+- `Cyrano/src/engines/chronometric/modules/time-reconstruction-module.ts` (new)
+- `Cyrano/src/engines/chronometric/modules/index.ts` (new)
+
+**Dependencies:** [Depends on: 2.1]**Suitability:** ✅ Fully Suitable**GitHub Copilot Instructions:**
+
+```javascript
+**Task:** Create Time Reconstruction Module under Chronometric Engine
+**Context:** Priority 2.2 - Time Reconstruction Module
+
+**Requirements:**
+
+1. Create Time Reconstruction Module:
+            - File: Cyrano/src/engines/chronometric/modules/time-reconstruction-module.ts
+            - Extend BaseModule
+            - Compose tools:
+                    - gapIdentifier
+                    - emailArtifactCollector
+                    - calendarArtifactCollector
+                    - documentArtifactCollector
+                    - recollectionSupport
+                    - preFillLogic
+                    - dupeCheck
+                    - provenanceTracker
+            - name: 'time_reconstruction'
+            - description: 'Time Reconstruction Module - Gap identification, artifact collection, and time entry reconstruction'
+            - Implement execute() with actions: 'identify_gaps', 'collect_artifacts', 'reconstruct_time', 'check_duplicates', 'recollection_support', 'pre_fill', 'track_provenance'
+            - Export: export const timeReconstructionModule = new TimeReconstructionModule()
+
+2. Register module in Chronometric Engine:
+            - Update chronometric-engine.ts
+            - Add 'time_reconstruction' to modules array
+            - Import and register timeReconstructionModule
+
+3. Create modules index:
+            - File: Cyrano/src/engines/chronometric/modules/index.ts
+            - Export all modules
+
+**Pattern:**
+- Follow existing BaseModule patterns
+- Tools remain in Cyrano/src/tools/
+- Module composes and orchestrates tools
+- Module provides structured interface
+
+**Acceptance Criteria:**
+- [ ] Time Reconstruction Module created
+- [ ] All reconstruction tools composed
+- [ ] Module registered in Chronometric Engine
+- [ ] Module can be executed via engine
+```
+
+**Deliverable:** Time Reconstruction Module created and registered
+
+#### 2.3 Create Pattern Learning & Analytics Module
+
+**Files:**
+
+- `Cyrano/src/engines/chronometric/modules/pattern-learning-module.ts` (new)
+- `Cyrano/src/engines/chronometric/services/baseline-config.ts` (new)
+- `Cyrano/src/engines/chronometric/services/pattern-learning.ts` (new)
+- `Cyrano/src/engines/chronometric/services/profitability-analyzer.ts` (new)
+
+**Dependencies:** [Depends on: 2.1]**Suitability:** ⚠️ Partially Suitable (business logic requires human design)**GitHub Copilot Instructions:**
+
+```javascript
+**Task:** Create Pattern Learning & Analytics Module under Chronometric Engine
+**Context:** Priority 2.3 - Pattern Learning & Analytics Module
+
+**Requirements:**
+
+1. Create baseline-config service:
+            - File: Cyrano/src/engines/chronometric/services/baseline-config.ts
+            - Store/retrieve user baseline configuration
+            - Minimum hours per week/day
+            - Typical schedule
+            - Off-days management
+            - Database persistence
+
+2. Create pattern-learning service:
+            - File: Cyrano/src/engines/chronometric/services/pattern-learning.ts
+            - Learn from historical time entries (30+ days)
+            - Calculate averages, day-of-week patterns, standard deviation
+            - Provide pattern data to gap detection
+            - Schedule periodic updates
+
+3. Create profitability-analyzer service:
+            - File: Cyrano/src/engines/chronometric/services/profitability-analyzer.ts
+            - Track matter profitability
+            - Calculate metrics (actual vs budget, profitability ratios)
+            - Flag at-risk matters
+            - Integrate ethics_reviewer for recommendations
+
+4. Create Pattern Learning & Analytics Module:
+            - File: Cyrano/src/engines/chronometric/modules/pattern-learning-module.ts
+            - Extend BaseModule
+            - Compose tools:
+                    - gapIdentifier (uses patterns when available)
+                    - time_value_billing
+                    - (profitability tools if created)
+            - Services: baseline-config, pattern-learning, profitability-analyzer
+            - name: 'pattern_learning'
+            - description: 'Pattern Learning & Analytics Module - Baseline setup, pattern learning, profitability intelligence'
+            - Implement execute() with actions: 'setup_baseline', 'learn_patterns', 'analyze_profitability', 'get_baseline', 'get_patterns'
+            - Export: export const patternLearningModule = new PatternLearningModule()
+
+5. Register module in Chronometric Engine:
+            - Add 'pattern_learning' to modules array
+            - Import and register patternLearningModule
+
+**Pattern:**
+- Services provide business logic
+- Module composes tools and services
+- Module provides structured interface
+- Integrate with ethics framework
+
+**Acceptance Criteria:**
+- [ ] Baseline config service created
+- [ ] Pattern learning service created
+- [ ] Profitability analyzer service created
+- [ ] Pattern Learning & Analytics Module created
+- [ ] Module registered in Chronometric Engine
+- [ ] Ethics integration in profitability analyzer
+```
+
+**Deliverable:** Pattern Learning & Analytics Module created with services
+
+#### 2.4 Create Cost Estimation Module
+
+**Files:**
+
+- `Cyrano/src/engines/chronometric/modules/cost-estimation-module.ts` (new)
+- `Cyrano/src/engines/chronometric/services/cost-estimation.ts` (new)
+
+**Dependencies:** [Depends on: 2.3]**Suitability:** ⚠️ Partially Suitable (business logic requires human design)**GitHub Copilot Instructions:**
+
+```javascript
+**Task:** Create Cost Estimation Module under Chronometric Engine
+**Context:** Priority 2.4 - Cost Estimation Module
+
+**Requirements:**
+
+1. Create cost-estimation service:
+            - File: Cyrano/src/engines/chronometric/services/cost-estimation.ts
+            - Learn from historical matter data
+            - Estimate costs/hours for new matters
+            - Based on: matter type, complexity, attorney's historical performance
+            - Seed data system (manual entry, Clio import, CSV)
+            - Learning algorithm from completed matters
+
+2. Create Cost Estimation Module:
+            - File: Cyrano/src/engines/chronometric/modules/cost-estimation-module.ts
+            - Extend BaseModule
+            - Compose tools: (cost estimation tools if created)
+            - Services: cost-estimation
+            - name: 'cost_estimation'
+            - description: 'Cost Estimation Module - Predictive cost estimation for planning, budgeting, and client proposals'
+            - Implement execute() with actions: 'estimate_cost', 'learn_from_matter', 'generate_proposal', 'get_estimates'
+            - Export: export const costEstimationModule = new CostEstimationModule()
+
+3. Register module in Chronometric Engine:
+            - Add 'cost_estimation' to modules array
+            - Import and register costEstimationModule
+
+4. Create proposal template system:
+            - Template generation for client-facing proposals
+            - PDF, email-ready formats
+            - Customizable branding
+
+**Pattern:**
+- Service provides learning and estimation logic
+- Module provides structured interface
+- Support both internal planning and client proposals
+- Integrate with matter lifecycle
+
+**Acceptance Criteria:**
+- [ ] Cost estimation service created
+- [ ] Learning algorithm implemented
+- [ ] Cost Estimation Module created
+- [ ] Module registered in Chronometric Engine
+- [ ] Proposal template system created
+```
+
+**Deliverable:** Cost Estimation Module created with learning and proposal capabilities
+
+#### 2.5 Create Workflow Archaeology (Shared Forensic Recreation)
+
+**Files:**
+
+- `Cyrano/src/services/workflow-archaeology.ts` (new - shared service)
+- `Cyrano/src/tools/workflow-archaeology.ts` (new - MCP tool)
+- `Cyrano/src/engines/chronometric/services/forensic-reconstruction.ts` (new)
+
+**Dependencies:** [Depends on: 2.2]**Suitability:** ⚠️ Partially Suitable (requires design decisions)**Cursor Instructions:**
+
+- Design Workflow Archaeology architecture
+- Design shared forensic recreation service
+- Review integration points with Chronometric and Arkiver
+
+**GitHub Copilot Instructions:**
+
+```javascript
+**Task:** Create Workflow Archaeology - Shared Forensic Recreation Tools
+**Context:** Priority 2.5 - Workflow Archaeology
+
+**Requirements:**
+
+1. Create shared forensic reconstruction service:
+            - File: Cyrano/src/services/workflow-archaeology.ts
+            - Function: reconstructTimePeriod(startTime, endTime, context, artifactSources)
+            - Supports time granularity: hour, day, week
+            - Uses same artifact collection logic as Chronometric:
+                    - Email artifacts
+                    - Calendar artifacts
+                    - Document artifacts
+                    - Call logs (if available)
+            - Reconstructs workflow/activity timeline
+            - Returns structured timeline with evidence chain
+            - Usable by both LexFiat (time tracking) and Arkiver (workflow history)
+
+2. Create forensic reconstruction service (Chronometric-specific):
+            - File: Cyrano/src/engines/chronometric/services/forensic-reconstruction.ts
+            - Wraps workflow-archaeology service
+            - Adds time entry generation
+            - Adds billable time context
+            - Integrates with Chronometric modules
+
+3. Create Workflow Archaeology MCP tool:
+            - File: Cyrano/src/tools/workflow-archaeology.ts
+            - Extends BaseTool
+            - Input: time period (hour/day/week), context, artifact sources
+            - Calls workflow-archaeology service
+            - Returns reconstructed timeline
+            - Usable by both LexFiat and Arkiver apps
+
+4. Integrate with Chronometric Engine:
+            - Add forensic-reconstruction service to Time Reconstruction Module
+            - Add action: 'reconstruct_period' to Time Reconstruction Module
+            - Use shared workflow-archaeology service
+
+5. Integrate with Arkiver:
+            - Arkiver can call workflow-archaeology tool directly
+            - Use for reconstructing document processing workflows
+            - Use for reconstructing analysis timelines
+            - Display in Arkiver UI as workflow history
+
+6. Create UI components (LexFiat):
+            - "Reconstruct Hour/Day/Week" buttons
+            - Timeline visualization
+            - Evidence chain display
+            - Time entry suggestions
+
+7. Create UI components (Arkiver):
+            - "Reconstruct Workflow" feature
+            - Timeline visualization
+            - Document processing history
+            - Analysis activity timeline
+
+**Pattern:**
+- Shared service provides core logic
+- Tool provides MCP interface
+- Engine-specific services add domain context
+- Both apps can use the same underlying service
+- Reuse Chronometric artifact collection logic
+
+8. Ensure self-documenting development (avoid needing workflow archaeology on workflow archaeology):
+            - Document all architectural decisions as they're made (in code comments, commit messages, or existing docs)
+            - Record why shared service approach was chosen vs. separate implementations
+            - Document integration points and dependencies clearly
+            - Use Workflow Archaeology on itself during development (dogfooding):
+                    - Track development artifacts (PRs, commits, design docs, decisions)
+                    - Use Workflow Archaeology to reconstruct development timeline if needed
+                    - Validate that the tool can reconstruct its own development process
+            - Create development decision log (update existing architecture doc, don't create new):
+                    - Why shared service vs. separate tools?
+                    - Why hour/day/week granularity?
+                    - Why reuse Chronometric artifact collection?
+                    - Integration decisions and tradeoffs
+            - Ensure all code changes are traceable and explainable
+            - No "magic" or unexplained decisions
+
+**Acceptance Criteria:**
+- [ ] Workflow Archaeology shared service created
+- [ ] Forensic reconstruction service created (Chronometric)
+- [ ] Workflow Archaeology MCP tool created
+- [ ] Integrated with Chronometric Engine
+- [ ] Integrated with Arkiver
+- [ ] UI components created (LexFiat)
+- [ ] UI components created (Arkiver)
+- [ ] Supports hour/day/week granularity
+- [ ] Development process self-documented
+- [ ] Workflow Archaeology can reconstruct its own development timeline
+- [ ] All architectural decisions recorded
+```
+
+**Deliverable:** Workflow Archaeology implemented as shared forensic recreation tools, with self-documenting development process
+
+#### 2.6 Update Onboarding for Chronometric Engine
+
+**Files:**
+
+- `apps/lexfiat/client/src/pages/onboarding.tsx` (modify)
+
+**Dependencies:** [Depends on: 2.3]**Suitability:** ✅ Fully Suitable**Tasks:**
+
+- [ ] Update onboarding to use Chronometric Engine (not module)
+- [ ] Add baseline setup step (from Pattern Learning Module)
+- [ ] Add Workflow Archaeology introduction
+- [ ] Update API calls to use engine endpoints
+
+**Deliverable:** Onboarding updated for Chronometric Engine
+
+### Success Criteria
+
+- [ ] Chronometric promoted to Engine status
+- [ ] Three modules created and registered:
+                - [ ] Time Reconstruction Module
+                - [ ] Pattern Learning & Analytics Module
+                - [ ] Cost Estimation Module
+- [ ] Workflow Archaeology implemented as shared service
+- [ ] Forensic recreation tools work in both LexFiat and Arkiver
+- [ ] All existing Chronometric functionality preserved
+- [ ] Onboarding updated for engine structure
+- [ ] All API endpoints functional
+- [ ] Modules can be used independently in other contexts
+
+---
+
+## Priority 3: Library Feature Completion
+
+### Overview
+
+Complete the Library feature for storing and managing local rules, standing orders, playbooks, templates, and other legal resources with RAG integration. Backend models and services exist but need database migration, storage connectors, and UI integration.
+
+### Current Status
+
+- ✅ Models exist (`LibraryItem`, `LibraryLocation`, `PracticeProfile`)
+- ✅ Service exists (`library-service.ts`) - but uses in-memory Maps
+- ✅ API routes exist (`/api/library/*`)
+- ✅ Storage connector stubs exist (local, OneDrive, Google Drive, S3)
+- ✅ RAG integration hooks exist
+- ❌ Database migration needed
+- ❌ Storage connectors need implementation
+- ❌ UI integration needed (top-level Library icon/widget)
+- ❌ Ingest worker needs completion
+
+### Implementation Tasks
+
+#### 3.1 Database Migration
+
+**File:** Database migration script**Tasks:**
+
+- [ ] Create database schema for:
+- `practice_profiles` table
+- `library_locations` table
+- `library_items` table
+- `ingest_queue` table
+- [ ] Create migration script
+- [ ] Update `library-service.ts` to use database instead of Maps
+- [ ] Add connection pooling and error handling
+- [ ] Test migration on sample data
+
+**Deliverable:** Library service using database persistence
+
+#### 3.2 Storage Connector Implementations
+
+**Files:** `Cyrano/src/modules/library/connectors/*.ts`**Tasks:**
+
+- [ ] **Local Connector** (`local.ts`)
+- Implement filesystem scanning
+- Watch for file changes
+- Handle file metadata extraction
+- [ ] **OneDrive Connector** (`onedrive.ts`)
+- Implement Microsoft Graph API integration
+- OAuth authentication flow
+- File listing and download
+- [ ] **Google Drive Connector** (`gdrive.ts`)
+- Implement Google Drive API integration
+- OAuth authentication flow
+- File listing and download
+- [ ] **S3 Connector** (`s3.ts`)
+- Implement AWS SDK integration
+- Credential management
+- File listing and download
+- [ ] Create connector interface/abstract class
+- [ ] Add error handling and retry logic
+- [ ] Add rate limiting for API calls
+
+**Deliverable:** All storage connectors functional
+
+#### 3.3 Ingest Worker Completion
+
+**File:** `Cyrano/src/modules/library/library-ingest-worker.ts`**Tasks:**
+
+- [ ] Complete queue processor:
+- Extract documents from storage
+- Classify document type (rule, template, etc.)
+- Auto-tag with metadata (jurisdiction, county, court, etc.)
+- Ingest into RAG with proper metadata
+- [ ] Add error handling and retry logic
+- [ ] Add progress tracking
+- [ ] Add notification system (email/UI) for completion
+- [ ] Test with sample documents
+
+**Deliverable:** Functional ingest worker processing queue
+
+#### 3.4 UI Integration
+
+**Files:**
+
+- `apps/lexfiat/client/src/pages/library.tsx` (new)
+- `apps/lexfiat/client/src/components/library/` (new directory)
+
+**Tasks:**
+
+- [ ] Create Library page/route
+- [ ] Add Library icon to top-level navigation
+- [ ] Create Library dashboard widget
+- [ ] Build Library item list/browser UI:
+- Filter by type, jurisdiction, county, court
+- Search functionality
+- Sort options
+- View/edit metadata
+- [ ] Create Library item detail view
+- [ ] Add "Add Location" UI (connect storage)
+- [ ] Add "Upload Document" UI
+- [ ] Add ingest status/progress indicators
+- [ ] Integrate with RAG search (show items in search results)
+
+**Deliverable:** Complete Library UI integrated into LexFiat
+
+#### 3.5 Onboarding Integration
+
+**File:** `apps/lexfiat/client/src/pages/onboarding.tsx` (modify)**Tasks:**
+
+- [ ] Add Library setup step to onboarding wizard:
+- Connect storage locations (local, OneDrive, Google Drive, S3)
+- Initial library scan
+- Option to import seed data
+- [ ] Link practice profile (from Step 1) to Library setup
+- [ ] Pre-populate Library locations based on practice profile
+- [ ] Trigger initial ingest after onboarding
+
+**Deliverable:** Library setup integrated into onboarding flow
+
+#### 3.6 API Endpoint Completion
+
+**File:** `Cyrano/src/routes/library.ts` (verify/complete)**Tasks:**
+
+- [ ] Verify all endpoints are implemented:
+- `GET /api/library/items` - List items with filters
+- `GET /api/library/items/:id` - Get item details
+- `POST /api/library/items` - Create/update item
+- `DELETE /api/library/items/:id` - Delete item
+- `GET /api/library/locations` - List storage locations
+- `POST /api/library/locations` - Add storage location
+- `POST /api/library/locations/:id/sync` - Trigger sync
+- `GET /api/library/ingest/queue` - Get ingest queue status
+- `POST /api/library/ingest/:id` - Trigger ingest for item
+- [ ] Add authentication/authorization
+- [ ] Add input validation
+- [ ] Add error handling
+- [ ] Test all endpoints
+
+**Deliverable:** Complete, tested API endpoints
+
+### Success Criteria
+
+- [ ] Database migration complete, service using database
+- [ ] All storage connectors functional (at least local + one cloud)
+- [ ] Ingest worker processing documents end-to-end
+- [ ] Library UI accessible from LexFiat navigation
+- [ ] Onboarding includes Library setup
+- [ ] Documents ingested into RAG with proper metadata
+- [ ] Library items searchable via RAG
+
+---
+
+## Priority 4: Test Infrastructure Fixes
+
+### Overview
+
+Fix 15 failing tests, add missing test coverage, and establish CI/CD pipeline. Current status: 128/143 tests passing.
+
+### Current Problems
+
+- 15 failing tests due to outdated mocks
+- Missing test coverage for critical security features
+- No CI/CD pipeline
+- No test coverage reporting
+
+### Implementation Tasks
+
+#### 4.1 Fix Failing Test Mocks
+
+**Files:**
+
+- `Cyrano/src/tools/arkiver-integrity-test.test.ts`
+- `Cyrano/src/tools/potemkin-tools-integration.test.ts`
+- Auth-related test files
+
+**Tasks:**
+
+- [ ] Update `arkiver-integrity-test.test.ts` mocks to match engine registry interface
+- [ ] Fix AI service mocks in `potemkin-tools-integration.test.ts`
+- [ ] Align auth tests with actual auth tool API (register/login/logout only)
+- [ ] Update Potemkin error message expectations for Zod validation
+- [ ] Run tests, verify all 143 tests pass
+
+**Deliverable:** All 143 tests passing
+
+#### 4.2 Add Missing Test Coverage
+
+**Files:** New test files as needed**Tasks:**
+
+- [ ] **JWT Token Tests**
+- Test token generation (if implemented)
+- Test token validation
+- Test token refresh
+- Document if not yet implemented
+- [ ] **CSRF Middleware Tests**
+- Test CSRF token generation
+- Test CSRF validation
+- Test safe methods (GET, HEAD, OPTIONS) bypass
+- Document if middleware not yet implemented
+- [ ] **Cookie Security Tests**
+- Test SameSite flag
+- Test Secure flag (HTTPS only)
+- Test HttpOnly flag
+- Test maxAge
+- [ ] **Session Management Tests**
+- Test session creation
+- Test session validation
+- Test session expiration
+- Test session cleanup
+
+**Deliverable:** Comprehensive test coverage for security features
+
+#### 4.3 Establish CI/CD Pipeline
+
+**Files:**
+
+- `.github/workflows/ci.yml` (new or update)
+- `package.json` (add test scripts if needed)
+
+**Tasks:**
+
+- [ ] Create GitHub Actions workflow:
+- Run tests on every PR
+- Run tests on push to main
+- Fail PR if tests don't pass
+- [ ] Configure build verification:
+- TypeScript compilation
+- Linting
+- Build artifacts
+- [ ] Add test coverage reporting:
+- Use coverage tool (nyc, jest --coverage, etc.)
+- Generate coverage reports
+- Upload to coverage service (Codecov, Coveralls, etc.)
+- [ ] Set quality gates:
+- Minimum 85% test pass rate
+- Minimum 70% code coverage (adjustable)
+- Block merge if gates not met
+
+**Deliverable:** Functional CI/CD pipeline with quality gates
+
+#### 4.4 Test Documentation
+
+**File:** Update `docs/reference/TESTING.md` (if exists) or add section to existing reference doc**Rule:** No new docs - update existing only**Tasks:**
+
+- [ ] Document test structure
+- [ ] Document how to run tests
+- [ ] Document test coverage goals
+- [ ] Document CI/CD process
+- [ ] Add troubleshooting guide
+
+**Deliverable:** Complete testing documentation
+
+### Success Criteria
+
+- [ ] All 143 tests passing (100% pass rate)
+- [ ] Test coverage for JWT, CSRF, cookies, sessions
+- [ ] CI/CD pipeline operational
+- [ ] Quality gates enforced
+- [ ] Test coverage reporting working
+- [ ] Documentation complete
+
+---
+
+## Priority 5: Ethics Framework Enforcement
+
+### Overview
+
+Systematically enforce "The Ten Rules for Ethical AI/Human Interactions" across all AI interactions in the Cyrano ecosystem. Currently partially integrated (ethics_reviewer tool exists, used in profitability analyzer) but needs system-wide integration.
+
+### Current Status
+
+- ✅ `ethics_reviewer` tool exists
+- ✅ `ethicsRulesService` with rules implemented (to be renamed from ethicsRulesModule)
+- ✅ Integration in profitability analyzer
+- ❌ Not integrated system-wide
+- ❌ No automatic prompt injection
+- ❌ Not enforced in all engines/tools
+
+### Implementation Tasks
+
+#### 5.1 System-Wide Prompt Injection
+
+**Files:**
+
+- `Cyrano/src/engines/goodcounsel/tools/goodcounsel.ts`
+- `Cyrano/src/tools/ai-orchestrator.ts`
+- `Cyrano/src/tools/cyrano-pathfinder.ts`
+- All AI-calling tools
+
+**Tasks:**
+
+- [ ] Rename EthicsRulesModule to EthicsRulesService:
+- Rename file: `ethics-rules-module.ts` → `ethics-rules-service.ts`
+- Rename class: `EthicsRulesModule` → `EthicsRulesService`
+- Rename export: `ethicsRulesModule` → `ethicsRulesService`
+- Update file comment to clarify it's a service utility class, not a BaseModule
+- Update all imports in: goodcounsel-engine.ts, ethics-reviewer.ts
+- [ ] Create `ethics-prompt-injector.ts` utility:
+- Load Ten Rules from `docs/guides/GENERAL_GUIDE_UNIVERSAL_AIHUMAN_INTERACTION_PROTOCOL.md`
+- Format rules for prompt injection
+- Provide function to inject into system prompts
+- [ ] Update `goodcounsel.ts` to inject Ten Rules into system prompt
+- [ ] Update `ai-orchestrator.ts` to inject Ten Rules
+- [ ] Update `cyrano-pathfinder.ts` to inject Ten Rules
+- [ ] Update all other AI-calling tools
+- [ ] Create test to verify injection happens
+
+**Deliverable:** Ten Rules injected into all AI system prompts
+
+#### 5.2 Automatic Ethics Checks
+
+**Files:**
+
+- `Cyrano/src/engines/goodcounsel/services/ethics-rules-service.ts` (modify - renamed from ethics-rules-module.ts)
+- All tools that make recommendations or take actions
+
+**Tasks:**
+
+- [ ] Identify all tools that:
+- Make recommendations to users
+- Suggest actions
+- Generate content for users
+- Process sensitive data
+- [ ] Add automatic `ethics_reviewer` calls before:
+- Returning recommendations
+- Suggesting actions
+- Generating user-facing content
+- [ ] Block or modify output if ethics check fails
+- [ ] Log all ethics checks for audit trail
+- [ ] Add UI indicators when recommendations are ethics-reviewed
+
+**Deliverable:** Automatic ethics checks in all relevant workflows
+
+#### 5.3 Engine Integration
+
+**Files:**
+
+- `Cyrano/src/engines/potemkin/potemkin-engine.ts`
+- `Cyrano/src/engines/goodcounsel/` (verify complete)
+- `Cyrano/src/engines/mae/` (if exists)
+
+**Tasks:**
+
+- [ ] **Potemkin Engine:**
+- Inject Ten Rules into verification prompts
+- Run ethics check on verification results
+- Flag ethics concerns in verification reports
+- [ ] **GoodCounsel Engine:**
+- Verify Ten Rules are in all prompts
+- Ensure ethics_reviewer is called for all guidance
+- Add ethics compliance score to guidance
+- [ ] **MAE Engine:**
+- Inject Ten Rules into orchestration prompts
+- Run ethics checks on workflow recommendations
+- [ ] Test all engines with ethics framework
+
+**Deliverable:** All engines integrated with ethics framework
+
+#### 5.4 Tool Integration
+
+**Files:**
+
+- `Cyrano/src/tools/rag-query.ts`
+- `Cyrano/src/tools/gap-identifier.ts` (Chronometric)
+- `Cyrano/src/tools/cost-estimation.ts` (when created)
+- Other recommendation-generating tools
+
+**Tasks:**
+
+- [ ] **RAG Query:**
+- Inject Ten Rules into query prompts
+- Ensure source attribution (Rule 7: Source Attribution)
+- [ ] **Gap Identifier:**
+- Run ethics check on time entry suggestions
+- Ensure no fabrication (Rule 1: Truth)
+- [ ] **Cost Estimation:**
+- Run ethics check on cost estimates
+- Ensure realistic estimates (Rule 1: Truth)
+- [ ] Review all tools, add ethics checks where needed
+
+**Deliverable:** All tools integrated with ethics framework
+
+#### 5.5 Ethics Dashboard
+
+**File:** `apps/lexfiat/client/src/components/ethics/ethics-dashboard.tsx` (new)**Tasks:**
+
+- [ ] Create ethics compliance dashboard:
+- Show ethics checks performed
+- Show compliance scores
+- Show blocked/modified recommendations
+- Show audit trail
+- [ ] Add to LexFiat settings/admin panel
+- [ ] Make accessible to users (transparency)
+
+**Deliverable:** Ethics dashboard showing compliance
+
+#### 5.6 Documentation
+
+**Files:**
+
+- Update `docs/guides/GENERAL_GUIDE_UNIVERSAL_AIHUMAN_INTERACTION_PROTOCOL.md` (add implementation section) OR update existing ethics guide  
+
+**Rule:** No new docs - update existing only**Tasks:**
+
+- [ ] Document ethics framework integration
+- [ ] Document where ethics checks are performed
+- [ ] Document how to add ethics checks to new tools
+- [ ] Document audit trail
+- [ ] Update user docs to explain ethics integration
+
+**Deliverable:** Complete ethics framework documentation
+
+#### 5.7 Create EthicalAI Module
+
+**Files:**
+
+- `Cyrano/src/modules/ethical-ai/ethical-ai-module.ts` (new)
+- `Cyrano/src/modules/ethical-ai/ten-rules.ts` (new)
+- `Cyrano/src/modules/ethical-ai/values.ts` (new)
+- `Cyrano/src/tools/ethical-ai-guard.ts` (new)
+- `Cyrano/src/tools/ten-rules-checker.ts` (new)
+- `Cyrano/src/tools/ethics-policy-explainer.ts` (new)
+
+**Dependencies:** [Depends on: 5.1, 5.2]**Suitability:** ⚠️ Partially Suitable (requires architecture decisions)**Cursor Instructions:**
+
+- Design EthicalAI module architecture
+- Design tool interfaces
+- Review integration points
+
+**GitHub Copilot Instructions:**
+
+```javascript
+**Task:** Create EthicalAI module as shared module (extracted from GoodCounsel)
+**Context:** Priority 5.7 - EthicalAI Module Creation
+
+**Requirements:**
+
+1. Create EthicalAI module structure:
+            - Create Cyrano/src/modules/ethical-ai/ directory
+            - Create ethical-ai-module.ts extending BaseModule
+            - Move/wrap ethicsRulesService into this module (keep in services/ but reference from module)
+            - Module should define multiple rule sets:
+                    - Professional-ethics rules (conflicts, confidentiality, competence, etc.)
+                    - Ten Rules ruleset (truth standard, classification, citation, disclosure, etc.)
+
+2. Create structured representation of values and Ten Rules:
+            - File: Cyrano/src/modules/ethical-ai/values.ts
+            - Define fundamental values: truth, user sovereignty, transparency, portability, value, sustainability
+            - Export as TypeScript constants/JSON
+   
+            - File: Cyrano/src/modules/ethical-ai/ten-rules.ts
+            - Define Ten Rules with: id, name, full text, category (truth/citation/anthropomorphism/etc.), enforcement strategy (hard rule vs advisory)
+            - Map into rules engine and prompts
+            - Export structured rules
+
+3. Create EthicalAI tools:
+            - File: Cyrano/src/tools/ethical-ai-guard.ts
+                    - Input: proposed AI action/output, context, provider, call site metadata (which engine/app/tool)
+                    - Behavior: runs Ten Rules + relevant professional rules
+                    - Returns: allow/allow-with-warnings/block plus structured reasons and suggested edits
+                    - Extends BaseTool
+   
+            - File: Cyrano/src/tools/ten-rules-checker.ts
+                    - Input: text content (answer, draft, report)
+                    - Behavior: enforces classification, cites missing justification, flags ungrounded factual assertions
+                    - Returns: machine-readable report (violations, warnings, suggestions)
+                    - Extends BaseTool
+   
+            - File: Cyrano/src/tools/ethics-policy-explainer.ts
+                    - Input: question + context
+                    - Behavior: explains which rule(s) apply and why, using values statement and Ten Rules as ground truth
+                    - Returns: explanation for debugging and user-facing transparency
+                    - Extends BaseTool
+
+4. Create EthicalAI module:
+            - File: Cyrano/src/modules/ethical-ai/ethical-ai-module.ts
+            - Extend BaseModule
+            - Compose tools: ethical_ai_guard, ten_rules_checker, ethics_policy_explainer
+            - name: 'ethical_ai'
+            - description: 'EthicalAI Module - Shared ethics enforcement module for Ten Rules and professional ethics'
+            - Resources: values, ten_rules (structured data)
+            - Implement execute() to route to tools
+            - Export: export const ethicalAIModule = new EthicalAIModule()
+
+5. Register EthicalAI module:
+            - Add to module registry
+            - Make accessible to MAE, GoodCounsel, Potemkin, Arkiver, RAG
+
+**Pattern:**
+- Follow existing BaseModule patterns
+- Keep ethicsRulesService in services/ but reference from module
+- Tools extend BaseTool for MCP registration
+- Module provides structured access to values and rules
+
+**Acceptance Criteria:**
+- [ ] EthicalAI module created
+- [ ] Values and Ten Rules structured representation created
+- [ ] Three EthicalAI tools created
+- [ ] Module registered in registry
+- [ ] Module accessible to all engines/apps
+- [ ] Backward compatibility maintained
+```
+
+**Deliverable:** EthicalAI module created as shared module
+
+#### 5.8 Moral Reasoning Layer
+
+**Files:**
+
+- `Cyrano/src/modules/ethical-ai/moral-reasoning.ts` (new)
+- `Cyrano/src/modules/ethical-ai/ethical-frameworks.ts` (new)
+- `Cyrano/src/modules/ethical-ai/reasoning-chain.ts` (new)
+
+**Dependencies:** [Depends on: 5.7]**Suitability:** ⚠️ Partially Suitable (requires deep LLM integration and ethical philosophy)**Cursor Instructions:**
+
+- Design comprehensive moral reasoning algorithm
+- Design ethical framework integration (deontological, consequentialist, virtue ethics)
+- Design reasoning chain structure
+- Review jurisprudential maxims as reference points (not primary mechanism)
+- Review ambiguous case handling with deep analysis
+
+**GitHub Copilot Instructions:**
+
+```javascript
+**Task:** Implement deep moral reasoning layer with structured ethical analysis
+**Context:** Priority 5.8 - Moral Reasoning Layer
+
+**Requirements:**
+
+1. Create ethical frameworks module:
+            - File: Cyrano/src/modules/ethical-ai/ethical-frameworks.ts
+            - Define structured ethical frameworks:
+                    - Deontological: Rule-based ethics, duties, categorical imperatives
+                    - Consequentialist: Utilitarian analysis, outcome evaluation, harm/benefit weighing
+                    - Virtue Ethics: Character, integrity, professional excellence, moral exemplars
+                    - Legal Ethics: MRPC principles, professional responsibility, client interests
+            - Each framework provides structured analysis methods
+            - Export framework analyzers for use in reasoning
+
+2. Create reasoning chain structure:
+            - File: Cyrano/src/modules/ethical-ai/reasoning-chain.ts
+            - Define ReasoningChain interface:
+                    - Problem identification (what ethical question is being asked?)
+                    - Context analysis (who, what, when, where, why, how?)
+                    - Stakeholder identification (who is affected?)
+                    - Principle identification (which ethical principles apply?)
+                    - Framework analysis (deontological, consequentialist, virtue, legal)
+                    - Conflict detection (where do principles/frameworks conflict?)
+                    - Reference to maxims (jurisprudential maxims as points of reference)
+                    - Weighing and balancing (how to resolve conflicts?)
+                    - Consequence analysis (what are the likely outcomes?)
+                    - Decision with justification (what is the right action and why?)
+                    - Alternative consideration (what other options exist?)
+            - Export structured reasoning chain builder
+
+3. Create deep moral reasoning service:
+            - File: Cyrano/src/modules/ethical-ai/moral-reasoning.ts
+            - Function: reasonAboutEthicalCase(conflict, context, rules, stakeholders)
+            - Takes ambiguous or conflicting cases with full context
+            - Implements structured reasoning process:
+                    Step 1: Problem Identification
+                            - Clearly articulate the ethical question
+                            - Identify what is at stake
+                            - Determine scope of analysis
+                    
+                    Step 2: Context Analysis
+                            - Gather all relevant facts
+                            - Understand relationships between parties
+                            - Identify temporal and situational factors
+                            - Consider historical patterns and precedents
+                    
+                    Step 3: Stakeholder Analysis
+                            - Identify all affected parties
+                            - Understand their interests and rights
+                            - Consider power dynamics
+                            - Evaluate vulnerability and dependency
+                    
+                    Step 4: Principle Identification
+                            - Map to Ten Rules (which rules apply?)
+                            - Map to professional ethics (MRPC, etc.)
+                            - Identify relevant legal principles
+                            - Consider broader moral principles (justice, fairness, autonomy, etc.)
+                    
+                    Step 5: Multi-Framework Analysis
+                            - Deontological analysis: What are the duties? What rules must be followed?
+                            - Consequentialist analysis: What are the likely outcomes? Who benefits/harms?
+                            - Virtue ethics analysis: What would a virtuous professional do? What builds character?
+                            - Legal ethics analysis: What do professional standards require?
+                            - Compare and contrast framework conclusions
+                    
+                    Step 6: Conflict Detection
+                            - Identify where frameworks/principles conflict
+                            - Understand the nature of conflicts (absolute vs. relative)
+                            - Identify irreconcilable tensions
+                            - Note areas of agreement
+                    
+                    Step 7: Reference to Jurisprudential Maxims
+                            - Use maxims as reference points, not primary mechanism:
+                                    - "specialis derogat generali" (specific overrides general) - when to apply
+                                    - "expressio unius est exclusio alterius" (expression of one excludes others) - when to apply
+                                    - "ut res magis valeat quam pereat" (things should be given effect) - when to apply
+                                    - "intentionem legis est lex" (intention of law is law) - when to apply
+                                    - "in pari materia" (on the same subject) - when to apply
+                            - Maxims provide guidance but don't replace reasoning
+                            - Explain how maxims inform but don't dictate the conclusion
+                    
+                    Step 8: Weighing and Balancing
+                            - Evaluate relative importance of conflicting principles
+                            - Consider context-specific factors
+                            - Apply proportionality analysis
+                            - Consider precedent and consistency
+                            - Evaluate long-term vs. short-term implications
+                    
+                    Step 9: Consequence Analysis
+                            - Identify likely outcomes of each option
+                            - Consider unintended consequences
+                            - Evaluate reversibility
+                            - Assess impact on trust and relationships
+                            - Consider systemic effects
+                    
+                    Step 10: Decision with Justification
+                            - Arrive at reasoned conclusion
+                            - Provide clear justification
+                            - Explain why this conclusion is ethically sound
+                            - Acknowledge limitations and uncertainties
+                            - Note any residual ethical concerns
+                    
+                    Step 11: Alternative Consideration
+                            - Identify other viable options
+                            - Explain why alternatives were not chosen
+                            - Suggest modifications that might improve the decision
+                    - Returns: Structured reasoning chain with full analysis
+
+4. Integrate with EthicalAI module:
+            - Call moral reasoning when rules conflict or cases are ambiguous
+            - Use reasoning layer for complex ethical dilemmas
+            - Keep rules engine as hard guardrails (clear violations still blocked)
+            - Use deep reasoning for nuanced cases where rules alone are insufficient
+            - Provide reasoning chain in response for transparency
+
+5. Surface ethical tradeoffs with depth:
+            - When Ten Rules or ethical rules conflict with user request:
+                    - Present full reasoning chain (not just conclusion)
+                    - State which rule(s) are implicated and why
+                    - Explain the tension with full context
+                    - Show how different frameworks view the conflict
+                    - Explain the weighing process
+                    - Present consequences of different choices
+                    - Suggest compliant alternatives with reasoning
+                    - Don't silently refuse or quietly bend rules
+                    - Make the ethical reasoning transparent
+
+6. Add to EthicalAI tools:
+            - ethical_ai_guard calls deep moral reasoning for ambiguous/complex cases
+            - Return full reasoning chain in response (not just decision)
+            - Allow users to see the ethical analysis process
+            - Log complete reasoning chains for audit and learning
+
+7. Create reasoning visualization (optional but valuable):
+            - Structure reasoning chain for display
+            - Show framework comparisons
+            - Visualize conflict points
+            - Show decision path
+
+**Pattern:**
+- Use LLM service for deep reasoning (not just rule application)
+- Structure reasoning as a chain of analysis steps
+- Apply multiple ethical frameworks
+- Use maxims as reference points, not primary mechanism
+- Return structured reasoning chain with full transparency
+- Log all reasoning decisions with complete chains
+- Make ethical reasoning process visible to users
+
+**Acceptance Criteria:**
+- [ ] Ethical frameworks module created (deontological, consequentialist, virtue, legal)
+- [ ] Reasoning chain structure defined
+- [ ] Deep moral reasoning service implements full 11-step process
+- [ ] Jurisprudential maxims integrated as reference points (not primary mechanism)
+- [ ] Multi-framework analysis working
+- [ ] Reasoning layer handles complex ethical dilemmas with depth
+- [ ] Full reasoning chains returned (not just conclusions)
+- [ ] Tradeoffs surfaced with complete analysis
+- [ ] Integrated with EthicalAI tools
+- [ ] Reasoning process transparent to users
+```
+
+**Deliverable:** Deep moral reasoning layer with structured ethical analysis, multi-framework evaluation, and complete reasoning chains
+
+#### 5.9 AI Provider Configuration Fixes
+
+**Files:**
+
+- `Cyrano/src/engines/mae/mae-engine.ts` (modify)
+- `Cyrano/src/engines/goodcounsel/goodcounsel-engine.ts` (modify)
+- `Cyrano/src/engines/potemkin/potemkin-engine.ts` (modify)
+- `Cyrano/src/engines/forecast/forecast-engine.ts` (modify)
+
+**Dependencies:** [No Dependencies]**Suitability:** ✅ Fully Suitable**Cursor Instructions:**
+
+- Review engine configurations
+- Verify user sovereignty approach
+- Test provider selection
+
+**GitHub Copilot Instructions:**
+
+```javascript
+**Task:** Remove hard-coded AI providers from engines, default to 'auto'
+**Context:** Priority 5.9 - AI Provider Configuration Fixes
+
+**Requirements:**
+
+1. Fix MAE Engine:
+            - File: Cyrano/src/engines/mae/mae-engine.ts
+            - Remove hard-coded aiProviders array from constructor
+            - Keep Perplexity as preferred startup provider via getDefaultProvider()/setDefaultProvider() (already exists)
+            - Update constructor to remove: aiProviders: ['openai', 'anthropic', 'google', 'perplexity', 'xai', 'deepseek']
+            - aiProviders will default to empty array (handled by BaseEngine)
+
+2. Fix GoodCounsel Engine:
+            - File: Cyrano/src/engines/goodcounsel/goodcounsel-engine.ts
+            - Remove hard-coded aiProviders from constructor
+            - Remove: aiProviders: ['openai', 'anthropic']
+            - Default to 'auto' provider selection
+
+3. Fix Potemkin Engine:
+            - File: Cyrano/src/engines/potemkin/potemkin-engine.ts
+            - Remove hard-coded aiProviders from constructor
+            - Remove: aiProviders: ['openai', 'anthropic']
+            - Default to 'auto' provider selection
+
+4. Fix Forecast Engine:
+            - File: Cyrano/src/engines/forecast/forecast-engine.ts
+            - Remove hard-coded aiProviders from constructor
+            - Remove: aiProviders: ['openai', 'anthropic']
+            - Default to 'auto' provider selection
+
+5. Verify user sovereignty:
+            - Users can select any provider via UI
+            - Engines respect user selection
+            - No hard-coded provider restrictions
+
+**Pattern:**
+- Remove aiProviders from constructor config
+- Let BaseEngine handle default (empty array = all providers available)
+- Keep getDefaultProvider()/setDefaultProvider() for user preferences
+
+**Acceptance Criteria:**
+- [ ] All engines have hard-coded providers removed
+- [ ] Engines default to 'auto' (all providers available)
+- [ ] User sovereignty maintained
+- [ ] MAE keeps Perplexity as startup preference
+- [ ] All engines respect user provider selection
+```
+
+**Deliverable:** All engines support user sovereignty for AI provider selection
+
+### Success Criteria
+
+- [ ] Ten Rules injected into all AI system prompts
+- [ ] Automatic ethics checks in all relevant workflows
+- [ ] All engines integrated with ethics framework
+- [ ] All tools integrated with ethics framework
+- [ ] Ethics dashboard functional
+- [ ] Audit trail logging all ethics checks
+- [ ] EthicalAI module created as shared module
+- [ ] Deep moral reasoning layer implemented (multi-framework analysis, reasoning chains, maxims as reference points)
+- [ ] AI provider configuration fixed (user sovereignty)
+- [ ] Documentation complete
+
+---
+
+## Priority 6: Onboarding Completion
+
+### Overview
+
+Complete the onboarding wizard to include all setup steps: practice profile (exists), Library setup, Chronometric baseline, and integration connections. Current wizard has 5 steps but missing Chronometric and some integrations.
+
+### Current Status
+
+- ✅ Onboarding wizard exists (`apps/lexfiat/client/src/pages/onboarding.tsx`)
+- ✅ 5 steps implemented:
+
+1. Jurisdiction & Practice Areas
+2. Counties & Courts
+3. Issue Tags
+4. Storage Locations
+5. AI Provider
+
+- ❌ Missing Chronometric baseline setup
+- ❌ Missing integration setup (Clio, email, calendar)
+- ❌ Library setup not fully integrated
+
+### Implementation Tasks
+
+#### 6.1 Add Chronometric Baseline Step
+
+**File:** `apps/lexfiat/client/src/pages/onboarding.tsx` (modify)**Tasks:**
+
+- [ ] Add Step 6: "Time Tracking Setup" (or integrate into existing step)
+- [ ] Add form fields:
+- Minimum hours per week (number input, default: 40)
+- Minimum hours per day (calculated or manual)
+- Typical schedule (optional, day-of-week hours)
+- Off-days calendar (date picker)
+- Toggle: "Use baseline until I have enough data" vs "Start learning immediately"
+- [ ] Add validation
+- [ ] Add API call to save baseline config
+- [ ] Update progress indicator
+- [ ] Update step navigation
+
+**Deliverable:** Chronometric baseline setup in onboarding
+
+#### 6.2 Add Integration Setup Step
+
+**File:** `apps/lexfiat/client/src/pages/onboarding.tsx` (modify)**Tasks:**
+
+- [ ] Add Step 7: "Integrations" (or add to existing step)
+- [ ] Add integration options:
+- **Clio Integration:**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                - OAuth connection button
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                - Status indicator (connected/not connected)
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                - Instructions for obtaining OAuth credentials
+- **Email Integration:**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                - Gmail OAuth connection
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                - Outlook OAuth connection
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                - Status indicators
+- **Calendar Integration:**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                - Google Calendar connection
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                - Outlook Calendar connection
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                - Status indicators
+- **Research Providers:**
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                - Westlaw API key input
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                - CourtListener API key input (if needed)
+- [ ] Add "Skip for now" option for each integration
+- [ ] Add "Test Connection" buttons
+- [ ] Store integration status
+
+**Deliverable:** Integration setup in onboarding
+
+#### 6.3 Enhance Library Setup
+
+**File:** `apps/lexfiat/client/src/pages/onboarding.tsx` (modify)**Tasks:**
+
+- [ ] Enhance Step 4 (Storage Locations) to include:
+- Library-specific storage setup
+- Initial library scan option
+- Seed data import option (if historical data available)
+- [ ] Link to practice profile (from Step 1) to pre-populate Library settings
+- [ ] Add Library-specific instructions
+
+**Deliverable:** Enhanced Library setup in onboarding
+
+#### 6.4 Add Completion/Summary Step
+
+**File:** `apps/lexfiat/client/src/pages/onboarding.tsx` (modify)**Tasks:**
+
+- [ ] Add final step: "Review & Complete"
+- [ ] Show summary of all settings:
+- Practice profile
+- Counties/courts
+- Storage locations
+- Integrations (connected/not connected)
+- Chronometric baseline
+- AI provider
+- [ ] Add "Edit" buttons to go back to any step
+- [ ] Add "Complete Setup" button
+- [ ] Show progress indicators (what will happen next)
+- [ ] Trigger initial Library scan/ingest if enabled
+- [ ] Redirect to dashboard on completion
+
+**Deliverable:** Completion step with summary
+
+#### 6.5 Onboarding State Management
+
+**Files:**
+
+- `apps/lexfiat/client/src/lib/onboarding-state.ts` (new or existing)
+
+**Tasks:**
+
+- [ ] Create onboarding state management:
+- Track completion status
+- Store partial progress
+- Allow resume from any step
+- [ ] Add API endpoints to save/load onboarding state
+- [ ] Add "Skip onboarding" option (for returning users)
+- [ ] Add check: redirect to onboarding if not completed
+
+**Deliverable:** Onboarding state management
+
+#### 6.6 Onboarding API Endpoints
+
+**File:** `Cyrano/src/routes/onboarding.ts` (new or update)**Tasks:**
+
+- [ ] Create/update endpoints:
+- `POST /api/onboarding/practice-profile` - Save practice profile
+- `POST /api/onboarding/baseline-config` - Save Chronometric baseline
+- `POST /api/onboarding/integrations` - Save integration status
+- `GET /api/onboarding/status` - Get onboarding completion status
+- `POST /api/onboarding/complete` - Mark onboarding complete
+- [ ] Add validation
+- [ ] Add error handling
+- [ ] Test all endpoints
+
+**Deliverable:** Complete onboarding API
+
+#### 6.7 Onboarding Documentation
+
+**File:** `docs/install/ONBOARDING.md` (update)**Tasks:**
+
+- [ ] Update onboarding guide with all steps
+- [ ] Add screenshots/walkthrough
+- [ ] Document integration setup requirements
+- [ ] Document what happens after onboarding
+- [ ] Add troubleshooting section
+
+**Deliverable:** Complete onboarding documentation
+
+### Success Criteria
+
+- [ ] All 7-8 steps implemented and functional
+- [ ] Chronometric baseline setup included
+- [ ] Integration setup included (with OAuth flows)
+- [ ] Library setup enhanced
+- [ ] Completion/summary step added
+- [ ] Onboarding state management working
+- [ ] Users can complete full setup in one flow
+- [ ] LexFiat uses goodcounsel_engine tool (not direct tool calls)
+- [ ] Documentation complete
+
+#### 6.8 Fix LexFiat GoodCounsel Architecture
+
+**Files:**
+
+- `apps/lexfiat/client/src/components/dashboard/good-counsel.tsx` (modify)
+- `apps/lexfiat/client/src/components/dashboard/goodcounsel-journaling.tsx` (modify)
+- Any LexFiat files calling GoodCounsel prompt tools directly
+
+**Dependencies:** [No Dependencies]**Suitability:** ✅ Fully Suitable**Cursor Instructions:**
+
+- Review LexFiat GoodCounsel usage
+- Verify goodcounsel_engine tool exists
+- Test architecture fix
+
+**GitHub Copilot Instructions:**
+
+```javascript
+**Task:** Update LexFiat to use goodcounsel_engine tool instead of direct tool calls
+**Context:** Priority 6.8 - LexFiat GoodCounsel Architecture Fix
+
+**Requirements:**
+
+1. Update good-counsel.tsx:
+            - File: apps/lexfiat/client/src/components/dashboard/good-counsel.tsx
+            - Replace direct good_counsel tool calls with goodcounsel_engine tool calls
+            - Update mutation to use goodcounsel_engine with action 'execute_routine'
+            - Use routine names: 'wellness_check', 'ethics_review', 'client_recommendations', 'crisis_support'
+            - Remove direct tool imports
+
+2. Update goodcounsel-journaling.tsx:
+            - File: apps/lexfiat/client/src/components/dashboard/goodcounsel-journaling.tsx
+            - Replace direct wellness_journal tool calls with goodcounsel_engine tool calls
+            - Use action 'execute_routine' with routine 'wellness_journal' or similar
+            - Remove direct tool imports
+
+3. Update GoodCounsel prompt tools:
+            - Find all LexFiat files calling GoodCounsel prompt tools directly:
+                    - get_goodcounsel_prompts
+                    - dismiss_goodcounsel_prompt
+                    - snooze_goodcounsel_prompt_type
+                    - get_goodcounsel_prompt_history
+                    - evaluate_goodcounsel_context
+            - Replace with goodcounsel_engine tool calls with appropriate actions
+            - Use goodcounsel_engine.execute() method
+
+4. Verify architecture:
+            - All GoodCounsel functionality accessed through engine
+            - No direct tool calls remain
+            - Engine provides unified interface
+
+**Pattern:**
+- Use goodcounsel_engine tool for all GoodCounsel operations
+- Pass routine names or actions to engine
+- Remove direct tool imports
+- Follow existing engine tool patterns
+
+**Acceptance Criteria:**
+- [ ] good-counsel.tsx uses goodcounsel_engine
+- [ ] goodcounsel-journaling.tsx uses goodcounsel_engine
+- [ ] All prompt tools use goodcounsel_engine
+- [ ] No direct tool calls remain
+- [ ] Architecture is correct (engine → tools)
+```
+
+**Deliverable:** LexFiat uses correct architecture (engine → tools)---
+
+## Priority 7: Security Hardening
+
+### Overview
+
+Implement comprehensive security measures: JWT authentication, CSRF protection, rate limiting, secure headers, encryption, and input validation. Based on Production Readiness Roadmap.
+
+### Current Status
+
+- ❌ JWT authentication incomplete
+- ❌ CSRF protection not implemented
+- ❌ Rate limiting not implemented
+- ❌ Secure headers not configured
+- ❌ Encryption at rest not implemented
+- ⚠️ Input validation partial (Zod used in some places)
+
+### Implementation Tasks
+
+#### 7.1 JWT Authentication
+
+**Files:**
+
+- `Cyrano/src/middleware/auth.ts` (new or update)
+- `Cyrano/src/services/jwt-service.ts` (new)
+
+**Tasks:**
+
+- [ ] Create JWT service:
+- Token generation with secure secrets (min 256-bit)
+- Token validation
+- Token refresh mechanism
+- Token expiration handling (15 min access, 7 day refresh)
+- [ ] Create auth middleware:
+- Verify JWT on protected routes
+- Extract user info from token
+- Handle token refresh
+- Handle expired tokens
+- [ ] Add role-based access control (RBAC):
+- Define roles (admin, user, etc.)
+- Check roles in middleware
+- Protect routes by role
+- [ ] Update all protected routes to use auth middleware
+- [ ] Add tests for JWT flow
+
+**Deliverable:** Complete JWT authentication system
+
+#### 7.2 CSRF Protection
+
+**File:** `Cyrano/src/middleware/csrf.ts` (new)**Tasks:**
+
+- [ ] Implement CSRF middleware:
+- Double-submit cookie pattern
+- Generate CSRF tokens
+- Validate tokens on state-changing operations
+- Whitelist safe methods (GET, HEAD, OPTIONS)
+- [ ] Add CSRF token to API responses
+- [ ] Update frontend to include CSRF token in requests
+- [ ] Add tests for CSRF protection
+
+**Deliverable:** CSRF protection implemented
+
+#### 7.3 Secure Cookie Configuration
+
+**Files:**
+
+- `Cyrano/src/middleware/auth.ts` (update)
+- All cookie-setting code
+
+**Tasks:**
+
+- [ ] Configure secure cookies:
+  ```typescript
+                  {
+                    httpOnly: true,
+                    secure: true, // HTTPS only
+                    sameSite: 'strict',
+                    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+                  }
+  ```
+
+
+
+
+- [ ] Update all cookie-setting code
+- [ ] Add tests for cookie security
+
+**Deliverable:** All cookies configured securely
+
+#### 7.4 Rate Limiting
+
+**File:** `Cyrano/src/middleware/rate-limit.ts` (new)**Tasks:**
+
+- [ ] Implement rate limiting middleware:
+- 100 requests/minute for authenticated users
+- 20 requests/minute for unauthenticated
+- Per-user/IP tracking
+- Exponential backoff on violations
+- [ ] Add rate limit headers to responses
+- [ ] Add rate limit error responses
+- [ ] Configure different limits for different endpoints
+- [ ] Add tests for rate limiting
+
+**Deliverable:** Rate limiting implemented
+
+#### 7.5 Secure Headers
+
+**File:** `Cyrano/src/middleware/security-headers.ts` (new)**Tasks:**
+
+- [ ] Implement security headers middleware (or use Helmet.js):
+- `X-Frame-Options: DENY`
+- `X-Content-Type-Options: nosniff`
+- `Strict-Transport-Security: max-age=31536000`
+- `Content-Security-Policy: default-src 'self'`
+- `X-XSS-Protection: 1; mode=block`
+- [ ] Apply to all routes
+- [ ] Test headers are present
+
+**Deliverable:** Security headers configured
+
+#### 7.6 Input Validation
+
+**Files:** All API route handlers**Tasks:**
+
+- [ ] Review all API endpoints
+- [ ] Add Zod schemas for all inputs
+- [ ] Validate all user inputs
+- [ ] Sanitize inputs (prevent XSS, SQL injection, etc.)
+- [ ] Reject malformed requests early
+- [ ] Add validation error responses
+- [ ] Add tests for input validation
+
+**Deliverable:** Comprehensive input validation
+
+#### 7.7 Encryption at Rest
+
+**Files:**
+
+- Database configuration
+- `Cyrano/src/services/encryption-service.ts` (new)
+
+**Tasks:**
+
+- [ ] Create encryption service:
+- AES-256 encryption for sensitive fields
+- Separate encryption keys per data type
+- Key rotation strategy
+- [ ] Encrypt sensitive data before storing:
+- API keys
+- OAuth tokens
+- Personal information
+- [ ] Decrypt on retrieval
+- [ ] Add key management (environment variables, key vault)
+- [ ] Document encryption strategy
+
+**Deliverable:** Encryption at rest implemented
+
+#### 7.8 Security Testing
+
+**Files:** Security test files**Tasks:**
+
+- [ ] Add security tests:
+- Authentication tests
+- Authorization tests
+- CSRF tests
+- Rate limiting tests
+- Input validation tests
+- Encryption tests
+- [ ] Run security audit tools (Snyk, OWASP ZAP)
+- [ ] Fix all Critical and High severity issues
+- [ ] Document security measures
+
+**Deliverable:** Comprehensive security testing
+
+### Success Criteria
+
+- [ ] JWT authentication complete and tested
+- [ ] CSRF protection implemented
+- [ ] Rate limiting functional
+- [ ] Secure headers configured
+- [ ] Input validation comprehensive
+- [ ] Encryption at rest implemented
+- [ ] Security tests passing
+- [ ] Security audit clean (no Critical/High issues)
+
+---
+
+## Priority 8: Production Readiness
+
+### Overview
+
+Complete remaining production readiness tasks: error handling verification, loading states, monitoring, logging, performance optimization, and deployment preparation.
+
+### Current Status
+
+From Production Readiness Roadmap:
+
+- ⚠️ Error handling needs verification
+- ⚠️ Loading states need verification
+- ❌ Monitoring not implemented
+- ❌ Logging incomplete
+- ⚠️ Performance optimization needed
+- ❌ Deployment preparation incomplete
+
+### Implementation Tasks
+
+#### 8.1 Error Handling Verification
+
+**Files:** All pages and components**Tasks:**
+
+- [ ] Audit all async operations:
+- API calls
+- File operations
+- Database operations
+- [ ] Verify error handling:
+- Try-catch blocks
+- Error boundaries (React)
+- User-friendly error messages
+- Error logging
+- [ ] Test error scenarios:
+- Network failures
+- API errors
+- Validation errors
+- Permission errors
+- [ ] Fix any missing error handling
+- [ ] Add error recovery mechanisms
+
+**Deliverable:** Comprehensive error handling verified
+
+#### 8.2 Loading States Verification
+
+**Files:** All pages and components**Tasks:**
+
+- [ ] Audit all async operations for loading states
+- [ ] Verify loading indicators:
+- Spinners
+- Skeleton screens
+- Progress bars
+- [ ] Test loading states:
+- Fast responses
+- Slow responses
+- Timeouts
+- [ ] Fix any missing loading states
+- [ ] Add timeout handling
+
+**Deliverable:** All loading states verified and functional
+
+#### 8.3 Monitoring & Logging
+
+**Files:**
+
+- `Cyrano/src/services/logging-service.ts` (new or update)
+- `Cyrano/src/services/monitoring-service.ts` (new)
+
+**Tasks:**
+
+- [ ] Implement logging service:
+- Structured logging (JSON)
+- Log levels (debug, info, warn, error)
+- Log rotation
+- Log aggregation (optional: ELK, CloudWatch, etc.)
+- [ ] Implement monitoring:
+- Health check endpoints
+- Performance metrics
+- Error tracking
+- Usage analytics
+- [ ] Add monitoring dashboard (optional)
+- [ ] Configure alerts for critical errors
+
+**Deliverable:** Monitoring and logging operational
+
+#### 8.4 Performance Optimization
+
+**Files:** All application code**Tasks:**
+
+- [ ] Performance audit:
+- Identify slow queries
+- Identify large bundle sizes
+- Identify memory leaks
+- Identify unnecessary re-renders
+- [ ] Optimize:
+- Database queries (indexes, query optimization)
+- Bundle size (code splitting, tree shaking)
+- React components (memoization, lazy loading)
+- API responses (caching, pagination)
+- [ ] Add performance monitoring
+- [ ] Set performance budgets
+
+**Deliverable:** Performance optimized
+
+#### 8.5 Deployment Preparation
+
+**Files:**
+
+- `docker-compose.yml` (new or update)
+- `Dockerfile` files
+- Deployment scripts
+- Update existing deployment docs in `docs/` (no new directory)
+
+**Tasks:**
+
+- [ ] Create Docker configuration:
+- Dockerfile for Cyrano MCP server
+- Dockerfile for LexFiat frontend (apps/lexfiat/)
+- Dockerfile for Arkiver frontend
+- docker-compose.yml for local development
+- [ ] Create deployment scripts:
+- Build scripts
+- Deployment scripts
+- Rollback scripts
+- [ ] Update deployment documentation (add to existing deploy docs):
+- Environment setup
+- Database migration
+- SSL certificate setup
+- Environment variables
+- [ ] Create production environment configuration
+- [ ] Test deployment process
+
+**Deliverable:** Deployment-ready configuration
+
+#### 8.6 Documentation Completion
+
+**Files:** Various documentation files**Tasks:**
+
+- [ ] Complete user documentation:
+- User guides for all features
+- API documentation
+- Troubleshooting guides
+- [ ] Complete developer documentation:
+- Architecture documentation
+- Contributing guide
+- Code style guide
+- [ ] Update existing deployment runbook (or add section to existing deploy docs)
+- [ ] Update existing operations manual (or add section to existing ops docs)
+
+**Deliverable:** Complete documentation
+
+#### 8.7 Multi-Model Verification Modes UI
+
+**Files:**
+
+- `apps/arkiver/frontend/src/components/VerificationModeSelector.tsx` (new)
+- `apps/arkiver/frontend/src/pages/Extractor.tsx` (modify)
+- `Cyrano/src/utils/ui-guidance.ts` (new or update)
+
+**Dependencies:** [No Dependencies] - Backend already exists**Suitability:** ⚠️ Partially Suitable (UX design)**Cursor Instructions:**
+
+- Design verification mode selector UX
+- Review backend multi-model service
+- Make UX decisions
+
+**GitHub Copilot Instructions:**
+
+````javascript
+**Task:** Create UI components for multi-model verification modes
+**Context:** Priority 8.7 - Multi-Model Verification Modes UI
+
+**Requirements:**
+
+1. Create VerificationModeSelector component:
+            - File: apps/arkiver/frontend/src/components/VerificationModeSelector.tsx
+            - Dropdown with three preset modes: Simple, Standard (Recommended), Comprehensive
+            - Tooltip on hover showing mode details
+            - Cost/time estimates displayed
+            - "Recommended" badge on standard mode
+            - Info icon with expandable help panel
+            - Warning when switching to comprehensive (cost/time impact)
+            - UI Pattern:
+     ```
+     ┌─────────────────────────────────────┐
+     │ Verification Mode: [Standard ▼] ⓘ  │
+     │ Recommended: Balanced accuracy      │
+     │ ~2-4s | Medium cost                │
+     └─────────────────────────────────────┘
+     ```
+
+2. Create/update ui-guidance.ts:
+            - File: Cyrano/src/utils/ui-guidance.ts
+            - Define GuidanceInfo interface: { title, description, recommendation, whenToUse[], warnings?, estimatedImpact{} }
+            - Create VERIFICATION_MODE_GUIDANCE for each mode:
+                    - simple: Fast, single-model verification, low cost
+                    - standard: Balanced accuracy with trust chain analysis, medium cost
+                    - comprehensive: Maximum accuracy with full analysis, high cost
+            - Export guidance lookup functions
+
+3. Integrate into Extractor page:
+            - File: apps/arkiver/frontend/src/pages/Extractor.tsx
+            - Add VerificationModeSelector component
+            - Pass selected mode to fact-checker tool
+            - Show mode-specific guidance
+
+4. Add provider strategy UI (optional):
+            - Show provider strategy selector (Single/Mixed)
+            - Tooltip: "Perplexity recommended for fact-checking (real-time data access)"
+            - Warning badge when mixing providers
+            - Info panel explaining tradeoffs
+
+**Pattern:**
+- Follow existing React component patterns
+- Use existing UI components (dropdowns, tooltips, etc.)
+- Show cost/time estimates clearly
+- Make recommendations obvious
+
+**Acceptance Criteria:**
+- [ ] VerificationModeSelector component created
+- [ ] UI guidance system created
+- [ ] Component integrated into Extractor page
+- [ ] Mode selection works
+- [ ] Guidance displays correctly
+- [ ] Cost/time estimates shown
+````
+
+**Deliverable:** Multi-model verification modes UI complete
+
+#### 8.8 Beta Testing Preparation
+
+**Files:** Beta testing materials**Tasks:**
+
+- [ ] Create beta testing plan:
+- Test scenarios
+- User acceptance criteria
+- Feedback collection process
+- [ ] Prepare beta testing materials:
+- User guides
+- Feedback forms
+- Known issues list
+- [ ] Set up beta testing environment
+- [ ] Recruit beta testers (if needed)
+
+**Deliverable:** Ready for beta testing
+
+### Success Criteria
+
+- [ ] Error handling comprehensive and verified
+- [ ] Loading states complete
+- [ ] Monitoring and logging operational
+- [ ] Performance optimized
+- [ ] Deployment configuration ready
+- [ ] Documentation complete
+- [ ] Beta testing prepared
+- [ ] Multi-model verification modes UI complete
+- [ ] All previous priorities completed
+
+---
+
+## Dependencies
+
+### Critical Path
+
+1. **Directory Structure** → Foundation for everything
+2. **Chronometric** → Can start after directory structure
+3. **Library** → Can overlap with Chronometric
+4. **Test Infrastructure** → Should complete early
+5. **Ethics Framework** → Can overlap with Library
+6. **Onboarding** → Depends on Chronometric and Library
+7. **Security** → Can start after test infrastructure
+8. **Production Readiness** → Final polish
+
+### Parallel Work Opportunities
+
+- Chronometric and Library can be worked on in parallel
+- Test fixes can happen alongside feature development
+- Ethics framework can be integrated as features are built
+- Security hardening can start after test infrastructure
+- Production readiness can overlap with final features
+
+---
+
+## Success Metrics
+
+### Code Quality
+
+- [ ] All tests passing (143/143)
+- [ ] Test coverage > 70%
+- [ ] No Critical/High security issues
+- [ ] Code follows style guide
+
+### Feature Completeness
+
+- [ ] Chronometric: All 4 features implemented
+- [ ] Library: Fully functional with database
+- [ ] Onboarding: All 7-8 steps complete
+- [ ] Ethics: System-wide integration
+- [ ] Security: All measures implemented
+
+### Production Readiness
+
+- [ ] Error handling verified
+- [ ] Loading states complete
+- [ ] Monitoring operational
+- [ ] Performance optimized
+- [ ] Deployment ready
+- [ ] Documentation complete
+
+### Beta Readiness
+
+- [ ] All features functional
+- [ ] Security hardened
+- [ ] Documentation complete
+- [ ] Beta testing plan ready
+- [ ] Known issues documented

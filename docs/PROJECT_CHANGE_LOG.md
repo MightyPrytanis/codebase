@@ -18,7 +18,111 @@ Related Documents: REALISTIC-WORK-PLAN
 
 **Project Start:** July 2025  
 **Last Updated:** 2025-12-17  
+**Last Substantive Revision:** 2025-12-17 (2025-W51)  
 **Structure:** Organized by work plan steps (see REALISTIC_WORK_PLAN.md)
+
+## Priority 1: Directory Structure Reorganization (2025-12-17)
+
+**Status:** ✅ COMPLETE
+
+**Changes:**
+1. **Directory Structure Audit (1.1):**
+   - Added comprehensive directory structure audit to README.md
+   - Documented all active vs archived directories
+   - Identified current Arkiver locations and status
+
+2. **Archived Code Organization (1.2):**
+   - Verified Legacy/ structure is correct
+   - All archived code properly organized in Legacy/ directory
+
+3. **Active Code Reorganization (1.3):**
+   - Moved LexFiat from root level to `apps/lexfiat/` (git mv)
+   - Verified engines under `Cyrano/src/engines/`
+   - Verified modules under `Cyrano/src/modules/`
+   - Verified tools under `Cyrano/src/tools/`
+
+4. **Search Exclusions (1.4):**
+   - Updated .gitignore to exclude Legacy/ from searches
+   - Created .cursorignore with Legacy/ exclusion
+   - Prevented GitHub Copilot from indexing archived code
+
+5. **Directory Structure Documentation (1.5):**
+   - Added comprehensive directory structure guide to README.md
+   - Created "Where does X go?" decision tree
+   - Documented proposed structure and conventions
+
+6. **Reference Updates (1.6):**
+   - Updated README.md references to apps/lexfiat/
+   - Updated docs/SETUP_CODACY.md path references
+   - Historical documentation entries preserved (intentionally unchanged)
+
+7. **MAE Hierarchy Reorganization (1.7):**
+   - Moved ai-orchestrator.ts to `Cyrano/src/engines/mae/services/`
+   - Updated all imports (http-bridge.ts, mcp-server.ts, mae-engine.ts)
+   - Added getAIOrchestrator() method to MAE engine
+   - Updated class documentation
+
+8. **Modular BaseModule Classes (1.8):**
+   - Created ArkExtractor Module
+   - Created ArkProcessor Module
+   - Created ArkAnalyst Module
+   - Created RagModule
+   - Created VerificationModule
+   - Created LegalAnalysisModule
+   - Registered all modules in module registry
+   - Updated MAE engine with common tools (documentAnalyzer, factChecker, workflowManager, caseManager, documentProcessor, documentDrafter, clioIntegration, syncManager)
+   - Enabled MAE to call other engines via 'engine' step type
+
+9. **LevelSet Agent Re-run (1.9):**
+   - Updated MAE engine README with new modules, tools, and engine step type documentation
+   - Updated PROJECT_CHANGE_LOG.md with Priority 1.8 completion entry
+   - Verified documentation reflects current implementation state
+
+**Files Modified:**
+- README.md - Added audit and directory structure guide
+- .gitignore - Added Legacy/ exclusion
+- .cursorignore - Created with Legacy/ exclusion
+- Cyrano/src/engines/mae/services/ai-orchestrator.ts - Moved and updated
+- Cyrano/src/engines/mae/services/index.ts - Added export
+- Cyrano/src/http-bridge.ts - Updated import
+- Cyrano/src/mcp-server.ts - Updated import
+- Cyrano/src/engines/mae/mae-engine.ts - Updated import, added getAIOrchestrator(), updated modules array, added common tools, enabled engine step type
+- Cyrano/src/engines/base-engine.ts - Updated WorkflowStep type to include 'engine'
+- Cyrano/src/modules/arkiver/ark-extractor-module.ts - Created
+- Cyrano/src/modules/arkiver/ark-processor-module.ts - Created
+- Cyrano/src/modules/arkiver/ark-analyst-module.ts - Created
+- Cyrano/src/modules/rag/rag-module.ts - Created
+- Cyrano/src/modules/verification/verification-module.ts - Created
+- Cyrano/src/modules/legal-analysis/legal-analysis-module.ts - Created
+- Cyrano/src/modules/registry.ts - Registered all new modules
+- docs/SETUP_CODACY.md - Updated LexFiat path
+- Cyrano/src/engines/mae/README.md - Updated with new modules, tools, and engine step type
+
+---
+
+## Priority 1.8: MAE Engine Integration (2025-12-17)
+
+**Status:** ✅ COMPLETE
+
+**Changes:**
+1. **MAE Engine Common Tools Integration:**
+   - Added common tools to MAE engine tools array: documentAnalyzer, factChecker, workflowManager, caseManager, documentProcessor, documentDrafter, clioIntegration, syncManager
+   - These tools are now accessible directly in MAE workflows
+
+2. **Engine Step Type Support:**
+   - Added 'engine' step type to WorkflowStep interface in base-engine.ts
+   - Implemented executeStep override in MAE engine to support calling other engines (Potemkin, GoodCounsel, etc.)
+   - MAE workflows can now orchestrate other engines via `type: 'engine'` steps
+
+3. **AI Orchestrator Location Update:**
+   - Updated documentation to reflect move from `engines/mae/tools/` to `engines/mae/services/`
+
+**Files Modified:**
+- `Cyrano/src/engines/mae/mae-engine.ts` - Added common tools, implemented engine step type support
+- `Cyrano/src/engines/base-engine.ts` - Updated WorkflowStep type to include 'engine'
+- `Cyrano/src/engines/mae/README.md` - Updated documentation for modules, tools, and engine step type
+
+---
 
 ## Step 4 and 5 Completion (2025-12-17)
 

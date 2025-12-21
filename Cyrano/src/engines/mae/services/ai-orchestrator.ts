@@ -4,10 +4,10 @@
  * See LICENSE.md for full license text
  */
 
-import { BaseTool } from '../../../tools/base-tool.js';
+import { BaseTool } from '../../tools/base-tool.js';
 import { z } from 'zod';
-import { apiValidator } from '../../../utils/api-validator.js';
-import { aiService, AIProvider } from '../../../services/ai-service.js';
+import { apiValidator } from '../../utils/api-validator.js';
+import { aiService, AIProvider } from '../../services/ai-service.js';
 
 const AIOrchestratorSchema = z.object({
   task_description: z.string().describe('Description of the task to orchestrate'),
@@ -17,11 +17,13 @@ const AIOrchestratorSchema = z.object({
 });
 
 /**
- * AI Orchestrator Tool
- * MAE Tool for generic multi-provider orchestration (sequential, parallel, collaborative execution)
+ * AI Orchestrator Service
+ * MAE Service for generic multi-provider orchestration (sequential, parallel, collaborative execution)
  * 
- * This tool is part of the MAE (Multi-Agent Engine) and provides orchestration
+ * This service is part of the MAE (Multi-Agent Engine) and provides orchestration
  * capabilities for coordinating multiple AI providers in complex workflows.
+ * 
+ * Note: This extends BaseTool for MCP registration, but it's a MAE service utility class.
  */
 export const aiOrchestrator = new (class extends BaseTool {
   getToolDefinition() {
