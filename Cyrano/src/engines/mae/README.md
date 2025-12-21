@@ -30,7 +30,13 @@ MAE (Multi-Agent Engine)
 ├── Services (utility classes under MAE's authority):
 │   └── Multi-Model Service (MMS) - Utility class for role-based multi-model orchestration
 ├── Modules (MAE-orchestrated modules):
-│   └── Chronometric - Time reconstruction and billable time management
+│   ├── Chronometric - Time reconstruction and billable time management
+│   ├── ArkExtractor - Arkiver extraction tools and pipelines
+│   ├── ArkProcessor - Arkiver text and email processing
+│   ├── ArkAnalyst - Arkiver analysis and verification
+│   ├── RagModule - RAG query and vector storage
+│   ├── VerificationModule - Shared verification tools
+│   └── LegalAnalysisModule - Legal document analysis tools
 └── Workflows (MAE workflow definitions)
 ```
 
@@ -43,7 +49,7 @@ MAE (Multi-Agent Engine)
 
 ### AI Orchestrator
 
-**Location:** `engines/mae/tools/ai-orchestrator.ts`
+**Location:** `engines/mae/services/ai-orchestrator.ts` (moved from tools/ to services/)
 
 Generic multi-provider orchestration tool supporting:
 - Sequential execution
@@ -62,6 +68,20 @@ Generic multi-provider orchestration tool supporting:
   }
 }
 ```
+
+### Common Tools
+
+MAE engine also provides access to commonly used tools for workflows:
+- `document_analyzer` - Document analysis and extraction
+- `fact_checker` - Multi-model fact verification
+- `workflow_manager` - Workflow creation and management
+- `case_manager` - Case management operations
+- `document_processor` - Document processing operations
+- `document_drafter` - Legal document drafting
+- `clio_integration` - Clio API integration
+- `sync_manager` - Synchronization management
+
+These tools are registered in MAE's tool registry and can be used directly in workflow steps.
 
 ## Services
 
@@ -92,6 +112,12 @@ const result = await multiModelService.executeVerification({
 
 This engine orchestrates the following modules:
 - **Chronometric**: Time reconstruction and billable time management
+- **ArkExtractor**: Arkiver extraction tools and pipelines (extractConversations, extractTextContent, categorizeWithKeywords, etc.)
+- **ArkProcessor**: Arkiver text and email processing (arkiverTextProcessor, arkiverEmailProcessor)
+- **ArkAnalyst**: Arkiver analysis and verification (arkiverEntityProcessor, arkiverInsightProcessor, arkiverTimelineProcessor, verification tools)
+- **RagModule**: RAG query and vector storage (ragQuery tool, chunker and vector_store resources)
+- **VerificationModule**: Shared verification tools (claimExtractor, citationChecker, sourceVerifier, consistencyChecker)
+- **LegalAnalysisModule**: Legal document analysis tools (documentAnalyzer, contractComparator, legalReviewer, complianceChecker, qualityAssessor, redFlagFinder)
 
 ## Workflows
 
@@ -142,9 +168,31 @@ const verificationResult = await multiModelService.executeVerification({
 });
 ```
 
+## Workflow Step Types
+
+MAE workflows support the following step types:
+- `module` - Execute a module action
+- `tool` - Execute a tool (MAE tools or common tools)
+- `ai` - Execute an AI provider call (with auto-select support)
+- `condition` - Conditional branching
+- `engine` - Call another engine (Potemkin, GoodCounsel, etc.)
+
+**Example: Calling Another Engine**
+```typescript
+{
+  id: 'potemkin_verification',
+  type: 'engine',
+  target: 'potemkin',
+  input: {
+    action: 'verify_document',
+    content: '{{document_content}}'
+  }
+}
+```
+
 ## Configuration
 
 MAE is configured with:
-- **Modules:** Chronometric
-- **Tools:** AI Orchestrator
-- **AI Providers:** OpenAI, Anthropic, Google, Perplexity, xAI, DeepSeek
+- **Modules:** Chronometric, ArkExtractor, ArkProcessor, ArkAnalyst, RagModule, VerificationModule, LegalAnalysisModule
+- **Tools:** AI Orchestrator, documentAnalyzer, factChecker, workflowManager, caseManager, documentProcessor, documentDrafter, clioIntegration, syncManager
+- **AI Providers:** OpenAI, Anthropic, Google, Perplexity, xAI, DeepSeek (user-selectable via UI)

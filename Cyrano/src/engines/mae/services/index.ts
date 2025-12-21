@@ -16,4 +16,5 @@
  */
 
 export { multiModelService, MultiModelService, MultiModelConfig, MultiModelResult, ModelResult } from './multi-model-service.js';
+export { aiOrchestrator } from './ai-orchestrator.js';
 
