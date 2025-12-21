@@ -115,6 +115,9 @@ src/tools/tool-enhancer.ts
 IP/
 Document Archive/
 
+# Legacy Directory - Exclude from code searches to prevent confusion
+Legacy/
+
 # Snyk Security Extension - AI Rules (auto-generated)
 .github/instructions/snyk_rules.instructions.md
 

@@ -1,0 +1,22 @@
+# Cursor Ignore - Exclude directories from code search and AI context
+
+# Legacy code - archived, not actively developed
+Legacy/
+
+# IP and Document Archive - excluded for security/privacy
+IP/
+Document Archive/
+
+# Build artifacts
+dist/
+build/
+*.tsbuildinfo
+
+# Dependencies
+node_modules/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
