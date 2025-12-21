@@ -78,11 +78,53 @@ export class RagModule extends BaseModule {
     try {
       const { action, ...args } = RagModuleInputSchema.parse(input);
 
-      // Route to RAG query tool
-      return await ragQuery.execute({
-        action,
-        ...args,
-      });
+      // Validate required fields before delegating to ragQuery
+      switch (action) {
+        case 'query':
+          if (!args.query) {
+            return this.createErrorResult('query is required for query action');
+          }
+          return await ragQuery.execute({
+            action,
+            ...args,
+          });
+
+        case 'ingest':
+          if (!args.document) {
+            return this.createErrorResult('document is required for ingest action');
+          }
+          return await ragQuery.execute({
+            action,
+            ...args,
+          });
+
+        case 'ingest_batch':
+          if (!args.documents || args.documents.length === 0) {
+            return this.createErrorResult('documents array is required for ingest_batch action and must not be empty');
+          }
+          return await ragQuery.execute({
+            action,
+            ...args,
+          });
+
+        case 'get_context':
+          if (!args.query) {
+            return this.createErrorResult('query is required for get_context action');
+          }
+          return await ragQuery.execute({
+            action,
+            ...args,
+          });
+
+        case 'get_stats':
+          return await ragQuery.execute({
+            action,
+            ...args,
+          });
+
+        default:
+          return this.createErrorResult(`Unknown action: ${action}`);
+      }
     } catch (error) {
       return this.createErrorResult(
         `RAG module error: ${error instanceof Error ? error.message : String(error)}`
