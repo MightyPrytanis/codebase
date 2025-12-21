@@ -90,7 +90,7 @@ import { syncManager } from './tools/sync-manager.js';
 import { redFlagFinder } from './tools/red-flag-finder.js';
 import { clioIntegration } from './tools/clio-integration.js';
 import { timeValueBilling } from './tools/time-value-billing.js';
-import { DocumentDrafterTool } from './tools/document-drafter.js';
+import { documentDrafterTool } from './tools/document-drafter.js';
 import { workflowStatusTool } from './tools/workflow-status.js';
 import {
   getGoodCounselPromptsTool,
@@ -207,7 +207,7 @@ class CyranoMCPServer {
           // RAG Pipeline
           ragQuery.getToolDefinition(),
           // Office/Acrobat Integration
-          new DocumentDrafterTool().getToolDefinition(),
+          documentDrafterTool.getToolDefinition(),
           // Legal Email Drafting Tools
           legalEmailDrafter.getToolDefinition(),
           refineEmailTone.getToolDefinition(),
@@ -310,7 +310,7 @@ class CyranoMCPServer {
             result = await timeValueBilling.execute(args);
             break;
           case 'document_drafter':
-            result = await new DocumentDrafterTool().execute(args);
+            result = await documentDrafterTool.execute(args);
             break;
           case 'gap_identifier':
             result = await gapIdentifier.execute(args);
