@@ -98,6 +98,9 @@ export class ArkExtractorModule extends BaseModule {
           });
 
         case 'extract_text':
+          if (!args.file_path) {
+            return this.createErrorResult('file_path is required for extract_text action');
+          }
           return await extractTextContent.execute({
             file_path: args.file_path,
           });
