@@ -1,3 +1,4 @@
+---
 # Codacy configuration with disabled problematic analyzers
 engines:
   eslint:
@@ -20,10 +21,8 @@ engines:
       - 'node_modules/**'
   jest:
     enabled: true
-  pmd: 
-    enabled: false
-  pmd-legacy:
-    enabled: false
+  shellcheck:
+    enabled: true
 
 # Exclude common generated and vendor directories to reduce noise
 exclude_paths:
@@ -40,7 +39,7 @@ exclude_paths:
   - 'Miscellaneous/**'
 
 # Patterns to skip for analysis
-patterns:
+exclude_patterns:
   - '**/*.min.js'
   - '**/*.bundle.js'
   - '**/*.spec.ts'
