@@ -57,7 +57,7 @@ export class ChronometricEngine extends BaseEngine {
       name: 'chronometric',
       description: 'Forensic Time Capture and Workflow Archaeology Engine - assists attorneys in retrospectively reconstructing lost or unentered billable time',
       version: '1.0.0',
-      modules: ['time_reconstruction'], // Modules: time_reconstruction (created), pattern_learning (pending), cost_estimation (pending)
+      modules: ['time_reconstruction', 'cost_estimation'], // Modules: time_reconstruction, cost_estimation (created), pattern_learning (pending)
       tools: [], // Tools are now in modules
       aiProviders: [], // Auto provider selection
     });

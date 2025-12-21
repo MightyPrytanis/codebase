@@ -19,7 +19,7 @@ import { arkAnalystModule } from './arkiver/ark-analyst-module.js';
 import { ragModule } from './rag/rag-module.js';
 import { verificationModule } from './verification/verification-module.js';
 import { legalAnalysisModule } from './legal-analysis/legal-analysis-module.js';
-import { timeReconstructionModule } from '../engines/chronometric/modules/index.js';
+import { timeReconstructionModule, costEstimationModule } from '../engines/chronometric/modules/index.js';
 
 class ModuleRegistry {
   private modules: Map<string, BaseModule>;
@@ -39,8 +39,9 @@ class ModuleRegistry {
     this.register(legalAnalysisModule);
     // Register Chronometric Engine modules
     this.register(timeReconstructionModule);
+    this.register(costEstimationModule);
     // Note: Chronometric is now an Engine (src/engines/chronometric), not a Module
-    // Its sub-modules (time_reconstruction, etc.) are registered here
+    // Its sub-modules (time_reconstruction, cost_estimation, etc.) are registered here
   }
 
   /**

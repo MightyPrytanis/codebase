@@ -5,4 +5,6 @@
  */
 
 export { TimeReconstructionModule, timeReconstructionModule } from './time-reconstruction-module.js';
+export { CostEstimationModule, costEstimationModule } from './cost-estimation-module.js';
 export * from './time-reconstruction-module.js';
+export * from './cost-estimation-module.js';
