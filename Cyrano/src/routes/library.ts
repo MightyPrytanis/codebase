@@ -83,6 +83,15 @@ const IngestRequestSchema = z.object({
   priority: z.enum(['low', 'normal', 'high']).optional(),
 });
 
+const BaselineConfigSchema = z.object({
+  userId: z.string().optional(),
+  minimumHoursPerWeek: z.number().min(0).max(168),
+  minimumHoursPerDay: z.number().min(0).max(24).optional(),
+  typicalSchedule: z.record(z.number()).optional(),
+  offDays: z.array(z.string()).optional(),
+  useBaselineUntilDataAvailable: z.boolean().optional(),
+});
+
 const LibraryFiltersSchema = z.object({
   sourceType: z.array(z.string()).optional(),
   county: z.string().optional(),
@@ -125,6 +134,47 @@ router.post('/onboarding/practice-profile', async (req: Request, res: Response) 
     console.error('Error upserting practice profile:', error);
     res.status(500).json({ 
       error: 'Failed to save practice profile',
+      message: error instanceof Error ? error.message : String(error)
+    });
+  }
+});
+
+/**
+ * POST /api/onboarding/baseline-config
+ * Save Chronometric baseline configuration
+ * Note: Once Chronometric Engine is created, this will call the pattern_learning module
+ */
+router.post('/onboarding/baseline-config', async (req: Request, res: Response) => {
+  try {
+    const validationResult = BaselineConfigSchema.safeParse(req.body);
+    if (!validationResult.success) {
+      return res.status(400).json({ 
+        error: 'Invalid baseline config data',
+        details: validationResult.error.errors
+      });
+    }
+
+    const configData = validationResult.data;
+    const userId = configData.userId || 'default-user';
+    
+    // Import baseline config service directly
+    // TODO: Once Chronometric Engine is created, use pattern_learning module via MCP
+    const { saveBaselineConfig } = await import('../engines/chronometric/services/baseline-config.js');
+    
+    const config = await saveBaselineConfig({
+      userId,
+      minimumHoursPerWeek: configData.minimumHoursPerWeek,
+      minimumHoursPerDay: configData.minimumHoursPerDay,
+      typicalSchedule: configData.typicalSchedule,
+      offDays: configData.offDays,
+      useBaselineUntilDataAvailable: configData.useBaselineUntilDataAvailable ?? true,
+    });
+    
+    res.json(config);
+  } catch (error) {
+    console.error('Error saving baseline config:', error);
+    res.status(500).json({ 
+      error: 'Failed to save baseline config',
       message: error instanceof Error ? error.message : String(error)
     });
   }

@@ -975,6 +975,67 @@ All Priority 1 tasks (1.1 through 1.9) have been completed. See detailed entry b
 
 ---
 
+## Priority 2: Chronometric Engine Promotion & Workflow Archaeology (2025-12-17)
+
+**Status:** ⚠️ IN PROGRESS (Partial - Tasks 2.3 and 2.6 complete)
+
+**Linting Fixes (2025-12-17):**
+- Fixed variable redeclaration errors in MAE engine (lines 167-168, 208-209)
+  - Wrapped `execute_workflow` and `list_workflows` case blocks in braces to create separate scopes
+- Fixed aiOrchestrator type error (line 79)
+  - Added BaseTool import
+  - Applied type assertion to resolve anonymous class type inference issue
+- All linting errors resolved in `mae-engine.ts`
+
+**Changes:**
+1. **Pattern Learning & Analytics Module Created (2.3):**
+   - Created baseline-config service (`Cyrano/src/engines/chronometric/services/baseline-config.ts`)
+     - Stores user baseline configuration (minimum hours, typical schedule, off-days)
+     - In-memory storage (database persistence pending engine promotion)
+   - Created pattern-learning service (`Cyrano/src/engines/chronometric/services/pattern-learning.ts`)
+     - Learns from historical time entries (30+ days)
+     - Calculates averages, day-of-week patterns, standard deviation
+     - Provides pattern data to gap detection
+   - Created profitability-analyzer service (`Cyrano/src/engines/chronometric/services/profitability-analyzer.ts`)
+     - Tracks matter profitability
+     - Calculates metrics (actual vs budget, profitability ratios)
+     - Flags at-risk matters
+     - Integrates with ethics_reviewer for recommendations
+   - Created Pattern Learning Module (`Cyrano/src/engines/chronometric/modules/pattern-learning-module.ts`)
+     - Extends BaseModule
+     - Composes gapIdentifier and timeValueBilling tools
+     - Provides actions: setup_baseline, get_baseline, learn_patterns, get_patterns, analyze_profitability, get_at_risk_matters, get_profitability_summary, add_time_entries
+     - Registered in modules/index.ts
+
+2. **Onboarding Updated for Chronometric Engine (2.6):**
+   - Added Step 6: "Time Tracking Setup" to onboarding wizard
+   - Added form fields for Chronometric baseline:
+     - Minimum hours per week (default: 40)
+     - Minimum hours per day (optional, calculated from weekly)
+     - Use baseline until data available toggle
+   - Added Workflow Archaeology introduction section
+   - Created API endpoint: `POST /api/onboarding/baseline-config`
+   - Updated handleSubmit to save baseline config after practice profile
+   - Updated STEPS array to include Clock icon for time tracking step
+
+**Pending Tasks (Assigned to GitHub Copilot):**
+- 2.1: Promote Chronometric to Engine status
+- 2.2: Create Time Reconstruction Module
+- 2.4: Create Cost Estimation Module
+- 2.5: Create Workflow Archaeology (Shared Forensic Recreation)
+- 2.9: (Not specified in plan - may be typo)
+
+**Files Modified:**
+- `Cyrano/src/engines/chronometric/services/baseline-config.ts` - Created
+- `Cyrano/src/engines/chronometric/services/pattern-learning.ts` - Created
+- `Cyrano/src/engines/chronometric/services/profitability-analyzer.ts` - Created
+- `Cyrano/src/engines/chronometric/modules/pattern-learning-module.ts` - Created
+- `Cyrano/src/engines/chronometric/modules/index.ts` - Created
+- `apps/lexfiat/client/src/pages/onboarding.tsx` - Updated with Step 6
+- `Cyrano/src/routes/library.ts` - Added baseline-config endpoint
+
+---
+
 ## Level Set Agent Assessment and Documentation Synchronization (2025-12-17)
 
 **Status:** ✅ COMPLETE

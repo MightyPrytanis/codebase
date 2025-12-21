@@ -963,23 +963,11 @@ Promote Chronometric from Module to Engine status and reorganize into three spec
             - Add action: 'reconstruct_period' to Time Reconstruction Module
             - Use shared workflow-archaeology service
 
-5. Integrate with Arkiver:
+5. Make tool accessible to both apps:
             - Arkiver can call workflow-archaeology tool directly
-            - Use for reconstructing document processing workflows
-            - Use for reconstructing analysis timelines
-            - Display in Arkiver UI as workflow history
-
-6. Create UI components (LexFiat):
-            - "Reconstruct Hour/Day/Week" buttons
-            - Timeline visualization
-            - Evidence chain display
-            - Time entry suggestions
-
-7. Create UI components (Arkiver):
-            - "Reconstruct Workflow" feature
-            - Timeline visualization
-            - Document processing history
-            - Analysis activity timeline
+            - LexFiat can call workflow-archaeology tool directly
+            - Tool provides MCP interface for both apps
+            - Note: UI integration will be done in tasks 2.7 (LexFiat) and 2.8 (Arkiver)
 
 **Pattern:**
 - Shared service provides core logic
@@ -988,7 +976,7 @@ Promote Chronometric from Module to Engine status and reorganize into three spec
 - Both apps can use the same underlying service
 - Reuse Chronometric artifact collection logic
 
-8. Ensure self-documenting development (avoid needing workflow archaeology on workflow archaeology):
+6. Ensure self-documenting development (avoid needing workflow archaeology on workflow archaeology):
             - Document all architectural decisions as they're made (in code comments, commit messages, or existing docs)
             - Record why shared service approach was chosen vs. separate implementations
             - Document integration points and dependencies clearly
@@ -1009,13 +997,12 @@ Promote Chronometric from Module to Engine status and reorganize into three spec
 - [ ] Forensic reconstruction service created (Chronometric)
 - [ ] Workflow Archaeology MCP tool created
 - [ ] Integrated with Chronometric Engine
-- [ ] Integrated with Arkiver
-- [ ] UI components created (LexFiat)
-- [ ] UI components created (Arkiver)
+- [ ] MCP tool accessible to both LexFiat and Arkiver
 - [ ] Supports hour/day/week granularity
 - [ ] Development process self-documented
 - [ ] Workflow Archaeology can reconstruct its own development timeline
 - [ ] All architectural decisions recorded
+- [ ] Note: UI integration deferred to tasks 2.7 (LexFiat) and 2.8 (Arkiver)
 ```
 
 **Deliverable:** Workflow Archaeology implemented as shared forensic recreation tools, with self-documenting development process
@@ -1034,6 +1021,247 @@ Promote Chronometric from Module to Engine status and reorganize into three spec
 - [ ] Update API calls to use engine endpoints
 
 **Deliverable:** Onboarding updated for Chronometric Engine
+
+#### 2.7 Integrate Workflow Archaeology into LexFiat
+
+**Files:**
+
+- `apps/lexfiat/client/src/pages/time-tracking.tsx` (modify)
+- `apps/lexfiat/client/src/components/time-tracking/workflow-archaeology.tsx` (new)
+- `apps/lexfiat/client/src/components/time-tracking/timeline-visualization.tsx` (new)
+- `apps/lexfiat/client/src/components/time-tracking/evidence-chain.tsx` (new)
+
+**Dependencies:** [Depends on: 2.5]**Suitability:** ⚠️ Partially Suitable (UI/UX decisions needed)**GitHub Copilot Instructions:**
+
+```javascript
+**Task:** Integrate Workflow Archaeology UI into LexFiat
+**Context:** Priority 2.7 - LexFiat Workflow Archaeology Integration
+
+**Requirements:**
+
+1. Create Workflow Archaeology component:
+            - File: apps/lexfiat/client/src/components/time-tracking/workflow-archaeology.tsx
+            - React component for Workflow Archaeology UI
+            - Props: userId, onReconstruct callback
+            - State: selectedPeriod (hour/day/week), startTime, endTime, isReconstructing, timeline data
+            - UI Elements:
+                    - Period selector (Hour/Day/Week radio buttons or dropdown)
+                    - Date/time picker for start time
+                    - "Reconstruct" button
+                    - Loading state during reconstruction
+                    - Error handling and display
+
+2. Create Timeline Visualization component:
+            - File: apps/lexfiat/client/src/components/time-tracking/timeline-visualization.tsx
+            - Visual timeline display of reconstructed activities
+            - Shows: time slots, activities, artifacts, evidence
+            - Interactive: click to expand details
+            - Visual indicators for different artifact types (email, calendar, document, call)
+            - Time entry suggestions highlighted
+
+3. Create Evidence Chain component:
+            - File: apps/lexfiat/client/src/components/time-tracking/evidence-chain.tsx
+            - Displays evidence chain for reconstructed timeline
+            - Shows: artifact sources, confidence levels, provenance
+            - Expandable details for each evidence item
+            - Visual connection between artifacts and time entries
+
+4. Integrate into Time Tracking page:
+            - File: apps/lexfiat/client/src/pages/time-tracking.tsx
+            - Add "Reconstruct Time" section/panel
+            - Add Workflow Archaeology component
+            - Display Timeline Visualization when reconstruction complete
+            - Display Evidence Chain alongside timeline
+            - Add "Use as Time Entries" button to accept suggestions
+
+5. API Integration:
+            - Use executeCyranoTool('workflow_archaeology', {...}) to call MCP tool
+            - Handle responses and errors
+            - Parse timeline data and evidence chain
+            - Update UI based on results
+
+6. Time Entry Suggestions:
+            - Display suggested time entries from reconstruction
+            - Allow user to review, edit, and accept/reject suggestions
+            - Integrate with existing time entry creation flow
+            - Show confidence levels for each suggestion
+
+**Pattern:**
+- Follow existing LexFiat component patterns (see good-counsel components)
+- Use existing UI components (buttons, cards, modals)
+- Use React Query for data fetching if needed
+- Handle loading and error states gracefully
+- Make UI intuitive and non-intrusive
+
+**Acceptance Criteria:**
+- [ ] Workflow Archaeology component created
+- [ ] Timeline Visualization component created
+- [ ] Evidence Chain component created
+- [ ] Integrated into Time Tracking page
+- [ ] API integration working
+- [ ] Time entry suggestions functional
+- [ ] UI matches LexFiat design system
+- [ ] Error handling implemented
+```
+
+**Deliverable:** Workflow Archaeology fully integrated into LexFiat time tracking UI
+
+#### 2.8 Integrate Workflow Archaeology into Arkiver
+
+**Files:**
+
+- `apps/arkiver/frontend/src/pages/Extractor.tsx` (modify)
+- `apps/arkiver/frontend/src/components/workflow-archaeology.tsx` (new)
+- `apps/arkiver/frontend/src/components/workflow-timeline.tsx` (new)
+- `apps/arkiver/frontend/src/components/processing-history.tsx` (new)
+
+**Dependencies:** [Depends on: 2.5]**Suitability:** ⚠️ Partially Suitable (UI/UX decisions needed)**GitHub Copilot Instructions:**
+
+```javascript
+**Task:** Integrate Workflow Archaeology UI into Arkiver
+**Context:** Priority 2.8 - Arkiver Workflow Archaeology Integration
+
+**Requirements:**
+
+1. Create Workflow Archaeology component:
+            - File: apps/arkiver/frontend/src/components/workflow-archaeology.tsx
+            - React component for Workflow Archaeology UI in Arkiver
+            - Props: fileId, jobId, onReconstruct callback
+            - State: selectedPeriod, startTime, endTime, isReconstructing, workflow data
+            - UI Elements:
+                    - Period selector (Hour/Day/Week)
+                    - "Reconstruct Workflow" button
+                    - Loading state
+                    - Error handling
+
+2. Create Workflow Timeline component:
+            - File: apps/arkiver/frontend/src/components/workflow-timeline.tsx
+            - Visual timeline of document processing workflow
+            - Shows: processing steps, analysis stages, artifact collection
+            - Interactive timeline with expandable details
+            - Visual indicators for different processing stages
+
+3. Create Processing History component:
+            - File: apps/arkiver/frontend/src/components/processing-history.tsx
+            - Displays document processing history
+            - Shows: file processing timeline, analysis activity, extraction steps
+            - Links to specific artifacts and results
+            - Filterable by date range, processing type
+
+4. Integrate into Extractor page:
+            - File: apps/arkiver/frontend/src/pages/Extractor.tsx
+            - Add "Reconstruct Workflow" feature/button
+            - Display Workflow Timeline when reconstruction complete
+            - Show Processing History for selected files/jobs
+            - Add to existing UI without disrupting workflow
+
+5. API Integration:
+            - Use executeCyranoTool('workflow_archaeology', {...}) to call MCP tool
+            - Pass file/job context for reconstruction
+            - Handle responses and parse workflow data
+            - Update UI based on results
+
+6. Display in Arkiver UI:
+            - Add workflow history section to file details
+            - Show processing timeline in analysis results
+            - Link workflow archaeology to existing Arkiver features
+            - Make it discoverable but not intrusive
+
+**Pattern:**
+- Follow existing Arkiver component patterns
+- Use existing UI components and styling
+- Integrate seamlessly with existing Arkiver features
+- Handle loading and error states
+- Make workflow reconstruction optional/on-demand
+
+**Acceptance Criteria:**
+- [ ] Workflow Archaeology component created
+- [ ] Workflow Timeline component created
+- [ ] Processing History component created
+- [ ] Integrated into Extractor page
+- [ ] API integration working
+- [ ] UI matches Arkiver design system
+- [ ] Error handling implemented
+- [ ] Non-intrusive integration
+```
+
+**Deliverable:** Workflow Archaeology fully integrated into Arkiver UI
+
+#### 2.9 Update Documentation for Chronometric Engine
+
+**Files:**
+
+- `docs/reference/GENERAL_README_CHRONOMETRIC_MODULE.md` (update - rename to ENGINE)
+- `Cyrano/src/engines/chronometric/README.md` (new or update)
+- `docs/architecture/` (update existing architecture docs)
+
+**Dependencies:** [Depends on: 2.1, 2.2, 2.3, 2.4]**Suitability:** ✅ Fully Suitable**GitHub Copilot Instructions:**
+
+```javascript
+**Task:** Update Documentation for Chronometric Engine Promotion
+**Context:** Priority 2.9 - Documentation Updates
+
+**Requirements:**
+
+1. Update Chronometric documentation:
+            - File: docs/reference/GENERAL_README_CHRONOMETRIC_MODULE.md
+            - Rename to GENERAL_README_CHRONOMETRIC_ENGINE.md (or update in place)
+            - Update title from "Module" to "Engine"
+            - Update description to reflect engine status
+            - Document three modules: Time Reconstruction, Pattern Learning, Cost Estimation
+            - Update usage examples to use engine instead of module
+            - Update architecture diagrams if any
+
+2. Create/Update Chronometric Engine README:
+            - File: Cyrano/src/engines/chronometric/README.md
+            - Document engine architecture
+            - Document three modules and their purposes
+            - Document services (baseline-config, pattern-learning, profitability-analyzer, cost-estimation, forensic-reconstruction)
+            - Document Workflow Archaeology integration
+            - Provide usage examples
+            - Document API/actions available
+
+3. Update architecture documentation:
+            - Find existing architecture docs in docs/architecture/
+            - Update to reflect Chronometric as Engine (not module)
+            - Document module structure under engine
+            - Update engine registry documentation
+            - Update module registry (remove chronometric, note it's now an engine)
+
+4. Update API documentation:
+            - Document Chronometric Engine tool/endpoint
+            - Document module actions (time_reconstruction, pattern_learning, cost_estimation)
+            - Document Workflow Archaeology tool
+            - Update examples to use engine
+
+5. Update integration guides:
+            - Update LexFiat integration docs to reference Chronometric Engine
+            - Update Arkiver integration docs if applicable
+            - Document Workflow Archaeology usage in both apps
+
+6. Follow "0 Net Increase in Documentation" rule:
+            - Update existing docs, don't create new ones
+            - If must create new doc, identify obsolete doc to remove
+            - Consolidate information rather than creating new files
+
+**Pattern:**
+- Update existing documentation files
+- Maintain documentation structure and format
+- Use existing documentation patterns
+- Cross-reference related documentation
+- Keep documentation accurate and current
+
+**Acceptance Criteria:**
+- [ ] Chronometric documentation updated (Module → Engine)
+- [ ] Engine README created/updated
+- [ ] Architecture documentation updated
+- [ ] API documentation updated
+- [ ] Integration guides updated
+- [ ] No net increase in documentation files
+- [ ] All references to Chronometric as module updated to engine
+```
+
+**Deliverable:** Complete documentation updates reflecting Chronometric Engine status and Workflow Archaeology
 
 ### Success Criteria
 

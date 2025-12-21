@@ -14,6 +14,7 @@ import {
   Tag, 
   HardDrive, 
   Sparkles,
+  Clock,
   CheckCircle,
   AlertCircle,
   Loader2
@@ -27,6 +28,7 @@ const STEPS = [
   { id: 3, title: 'Issue Tags', icon: Tag },
   { id: 4, title: 'Storage Locations', icon: HardDrive },
   { id: 5, title: 'AI Provider', icon: Sparkles },
+  { id: 6, title: 'Time Tracking Setup', icon: Clock },
 ];
 
 const US_STATES = [
@@ -82,6 +84,12 @@ interface OnboardingFormData {
   researchProvider: 'westlaw' | 'courtlistener' | 'other' | '';
   llmProvider: 'openai' | 'anthropic' | 'perplexity' | '';
   llmApiKey: string;
+  chronometricBaseline: {
+    minimumHoursPerWeek: number;
+    minimumHoursPerDay?: number;
+    typicalSchedule?: { [dayOfWeek: string]: number };
+    useBaselineUntilDataAvailable: boolean;
+  };
 }
 
 export default function Onboarding() {
@@ -105,6 +113,10 @@ export default function Onboarding() {
     researchProvider: '',
     llmProvider: '',
     llmApiKey: '',
+    chronometricBaseline: {
+      minimumHoursPerWeek: 40,
+      useBaselineUntilDataAvailable: true,
+    },
   });
   const [customCounty, setCustomCounty] = useState('');
   const [customCourt, setCustomCourt] = useState('');
@@ -156,6 +168,7 @@ export default function Onboarding() {
   const handleSubmit = async () => {
     setSaving(true);
     try {
+      // Save practice profile
       await savePracticeProfile({
         userId: 'default-user', // TODO: Get from auth
         primaryJurisdiction: formData.primaryJurisdiction,
@@ -170,10 +183,28 @@ export default function Onboarding() {
         llmProviderTested: llmTestResult === 'success',
       } as Partial<PracticeProfile>);
       
-      // Redirect to library page
-      setLocation('/library');
+      // Save Chronometric baseline config
+      const API_URL = import.meta.env.VITE_CYRANO_API_URL || 'http://localhost:5002';
+      const baselineResponse = await fetch(`${API_URL}/api/onboarding/baseline-config`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: 'default-user', // TODO: Get from auth
+          ...formData.chronometricBaseline,
+        }),
+      });
+      
+      if (!baselineResponse.ok) {
+        console.warn('Failed to save baseline config:', await baselineResponse.text());
+        // Don't fail onboarding if baseline save fails
+      }
+      
+      // Redirect to dashboard
+      setLocation('/dashboard');
     } catch (error) {
-      console.error('Failed to save practice profile:', error);
+      console.error('Failed to save onboarding data:', error);
       alert('Failed to save profile. Please try again.');
     } finally {
       setSaving(false);
@@ -192,6 +223,8 @@ export default function Onboarding() {
         return true; // Optional step
       case 5:
         return formData.llmProvider !== '';
+      case 6:
+        return formData.chronometricBaseline.minimumHoursPerWeek > 0;
       default:
         return false;
     }
@@ -659,6 +692,86 @@ export default function Onboarding() {
                   <option value="courtlistener">CourtListener</option>
                   <option value="other">Other</option>
                 </select>
+              </div>
+            </div>
+          )}
+
+          {/* Step 6: Time Tracking Setup (Chronometric Baseline) */}
+          {currentStep === 6 && (
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-warm-white mb-4">
+                Time Tracking Setup
+              </h2>
+              
+              <p className="text-warm-white/70 text-sm mb-4">
+                Configure your baseline time tracking settings. Chronometric will use this to identify gaps in your billable time until it learns your patterns from 30+ days of historical data.
+              </p>
+
+              <div>
+                <label className="block text-sm font-semibold text-warm-white mb-2">
+                  Minimum Hours Per Week *
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="168"
+                  value={formData.chronometricBaseline.minimumHoursPerWeek}
+                  onChange={(e) => updateFormData('chronometricBaseline', {
+                    ...formData.chronometricBaseline,
+                    minimumHoursPerWeek: parseInt(e.target.value) || 40
+                  })}
+                  className="w-full bg-navy border border-gray-600 rounded px-3 py-2 text-warm-white"
+                />
+                <p className="text-xs text-warm-white/60 mt-1">
+                  Typical full-time: 40 hours/week
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-warm-white mb-2">
+                  Minimum Hours Per Day (Optional)
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  max="24"
+                  value={formData.chronometricBaseline.minimumHoursPerDay || Math.round(formData.chronometricBaseline.minimumHoursPerWeek / 5)}
+                  onChange={(e) => updateFormData('chronometricBaseline', {
+                    ...formData.chronometricBaseline,
+                    minimumHoursPerDay: e.target.value ? parseInt(e.target.value) : undefined
+                  })}
+                  className="w-full bg-navy border border-gray-600 rounded px-3 py-2 text-warm-white"
+                />
+                <p className="text-xs text-warm-white/60 mt-1">
+                  Calculated from weekly hours if not specified (assumes 5-day work week)
+                </p>
+              </div>
+
+              <div>
+                <label className="flex items-center gap-3 text-warm-white cursor-pointer hover:bg-navy p-3 rounded border border-gray-600">
+                  <input
+                    type="checkbox"
+                    checked={formData.chronometricBaseline.useBaselineUntilDataAvailable}
+                    onChange={(e) => updateFormData('chronometricBaseline', {
+                      ...formData.chronometricBaseline,
+                      useBaselineUntilDataAvailable: e.target.checked
+                    })}
+                    className="form-checkbox"
+                  />
+                  <div>
+                    <div className="font-semibold">Use Baseline Until Pattern Learning Available</div>
+                    <div className="text-xs text-warm-white/60">
+                      Use baseline configuration until Chronometric has 30+ days of historical data to learn your patterns
+                    </div>
+                  </div>
+                </label>
+              </div>
+
+              <div className="p-4 bg-navy/50 border border-aqua/30 rounded">
+                <h3 className="text-sm font-semibold text-aqua mb-2">Workflow Archaeology</h3>
+                <p className="text-xs text-warm-white/70">
+                  Chronometric includes Workflow Archaeology—forensic recreation tools that help reconstruct past hours, days, or weeks when details have been forgotten. These tools use the same artifact collection and reconstruction logic to help you recover lost billable time.
+                </p>
               </div>
             </div>
           )}

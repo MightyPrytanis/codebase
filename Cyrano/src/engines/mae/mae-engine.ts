@@ -7,8 +7,8 @@
 import { BaseEngine } from '../base-engine.js';
 import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { Workflow, WorkflowStep } from '../base-engine.js';
+import { BaseTool } from '../../tools/base-tool.js';
 import { z } from 'zod';
-import { chronometricModule } from '../../modules/chronometric/index.js';
 import {
   buildExecutionPlan,
   workflowToNodes,
@@ -64,7 +64,11 @@ export class MaeEngine extends BaseEngine {
       description: 'Multi-Agent Engine - Orchestrates multiple AI assistants/agents and modules for complex workflows',
       version: '1.0.0',
       modules: [
-        'chronometric',
+        // Chronometric Engine modules (Chronometric is now an Engine, not a module)
+        'time_reconstruction',  // Chronometric Engine: Time Reconstruction Module
+        'pattern_learning',      // Chronometric Engine: Pattern Learning & Analytics Module
+        'cost_estimation',       // Chronometric Engine: Cost Estimation Module
+        // Other modules
         'ark_extractor',
         'ark_processor',
         'ark_analyst',
@@ -73,7 +77,7 @@ export class MaeEngine extends BaseEngine {
         'legal_analysis',
       ], // Modules this engine orchestrates
       tools: [
-        aiOrchestrator,
+        aiOrchestrator as unknown as BaseTool,
         // Commonly used tools accessible via MAE
         documentAnalyzer,
         factChecker,
@@ -141,7 +145,7 @@ export class MaeEngine extends BaseEngine {
       const parsed = MaeInputSchema.parse(input);
       
       switch (parsed.action) {
-        case 'execute_workflow':
+        case 'execute_workflow': {
           if (!parsed.workflow_id) {
             return {
               content: [
@@ -184,8 +188,9 @@ export class MaeEngine extends BaseEngine {
             ],
             isError: true,
           };
+        }
         
-        case 'list_workflows':
+        case 'list_workflows': {
           // Aggregate workflows from all engines (MAE, Potemkin, GoodCounsel, etc.)
           const maeWorkflows = await this.getWorkflows();
           const allWorkflows: Array<{ id: string; name: string; description: string; step_count: number; engine: string }> = [];
@@ -236,6 +241,7 @@ export class MaeEngine extends BaseEngine {
             ],
             isError: false,
           };
+        }
         
         case 'create_workflow':
           if (!parsed.workflow) {
@@ -497,7 +503,8 @@ export class MaeEngine extends BaseEngine {
    * Register default workflows
    */
   private registerDefaultWorkflows(): void {
-    // Time reconstruction workflow using Chronometric module
+    // Time reconstruction workflow using Chronometric engine modules
+    // Note: Once Chronometric Engine is created (Priority 2.1), these should use type: 'engine' to call the Chronometric engine
     this.registerWorkflow({
       id: 'time_reconstruction',
       name: 'Time Reconstruction Workflow',
