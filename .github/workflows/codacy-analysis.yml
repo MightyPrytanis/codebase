@@ -33,7 +33,7 @@ jobs:
       - name: Upload coverage to Codacy
         # Works if Codacy GitHub App is installed; otherwise set CODACY_PROJECT_TOKEN in repo secrets
         uses: codacy/codacy-coverage-reporter-action@v1
-        if: secrets.CODACY_PROJECT_TOKEN != ''
+        if: ${{ secrets.CODACY_PROJECT_TOKEN != '' }}
         # If you have a project token, uncomment the 'with:' block below and set it as a repository secret named CODACY_PROJECT_TOKEN
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
@@ -42,7 +42,7 @@ jobs:
       - name: Run Codacy Analysis CLI (optional)
         # Optional: run Codacy analysis CLI to upload issues — works with GitHub App or CODACY_PROJECT_TOKEN
         uses: codacy/codacy-analysis-cli-action@v4
-        if: secrets.CODACY_PROJECT_TOKEN != ''
+        if: ${{ secrets.CODACY_PROJECT_TOKEN != '' }}
         # If using token, uncomment the 'with:' block below and provide as secret
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
