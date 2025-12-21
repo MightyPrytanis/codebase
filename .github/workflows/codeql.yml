@@ -14,8 +14,24 @@ name: "CodeQL Advanced"
 on:
   push:
     branches: [ "main" ]
+    paths-ignore:
+      - 'Legacy/**'
+      - 'Cyrano/**'
+      - 'apps/**'
+      - 'LexFiat/**'
+      - 'docs/**'
+      - 'Miscellaneous/**'
+      - 'node_modules/**'
   pull_request:
     branches: [ "main" ]
+    paths-ignore:
+      - 'Legacy/**'
+      - 'Cyrano/**'
+      - 'apps/**'
+      - 'LexFiat/**'
+      - 'docs/**'
+      - 'Miscellaneous/**'
+      - 'node_modules/**'
   schedule:
     - cron: '25 14 * * 4'
 
