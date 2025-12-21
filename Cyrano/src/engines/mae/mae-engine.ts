@@ -18,8 +18,17 @@ import {
 } from './workflow-utils.js';
 import { aiProviderSelector } from '../../services/ai-provider-selector.js';
 import { AIProvider } from '../../services/ai-service.js';
-import { aiOrchestrator } from './tools/ai-orchestrator.js';
+import { aiOrchestrator } from './services/ai-orchestrator.js';
 import { multiModelService } from './services/multi-model-service.js';
+// Import common tools for MAE workflows
+import { documentAnalyzer } from '../../tools/document-analyzer.js';
+import { factChecker } from '../../tools/fact-checker.js';
+import { workflowManager } from '../../tools/workflow-manager.js';
+import { caseManager } from '../../tools/case-manager.js';
+import { documentProcessor } from '../../tools/document-processor.js';
+import { DocumentDrafterTool } from '../../tools/document-drafter.js';
+import { clioIntegration } from '../../tools/clio-integration.js';
+import { syncManager } from '../../tools/sync-manager.js';
 
 const MaeInputSchema = z.object({
   action: z.enum([
@@ -54,10 +63,39 @@ export class MaeEngine extends BaseEngine {
       name: 'mae',
       description: 'Multi-Agent Engine - Orchestrates multiple AI assistants/agents and modules for complex workflows',
       version: '1.0.0',
-      modules: ['chronometric'], // Modules this engine orchestrates
-      tools: [aiOrchestrator], // MAE tools - AI Orchestrator for generic multi-provider orchestration
-      aiProviders: ['openai', 'anthropic', 'google', 'perplexity', 'xai', 'deepseek'],
+      modules: [
+        'chronometric',
+        'ark_extractor',
+        'ark_processor',
+        'ark_analyst',
+        'rag',
+        'verification',
+        'legal_analysis',
+      ], // Modules this engine orchestrates
+      tools: [
+        aiOrchestrator,
+        // Commonly used tools accessible via MAE
+        documentAnalyzer,
+        factChecker,
+        workflowManager,
+        caseManager,
+        documentProcessor,
+        new DocumentDrafterTool(),
+        clioIntegration,
+        syncManager,
+        // Note: Engine-specific tools (Potemkin, GoodCounsel) are accessed via engines
+      ],
+      // Remove hard-coded aiProviders - default to 'auto' (all providers available)
+      // User sovereignty: users can select any provider via UI
     });
+  }
+
+  /**
+   * Get AI Orchestrator Service
+   * Utility service for generic multi-provider orchestration
+   */
+  getAIOrchestrator() {
+    return aiOrchestrator;
   }
 
   /**
@@ -1805,6 +1843,54 @@ export class MaeEngine extends BaseEngine {
         },
       ],
     });
+  }
+
+  /**
+   * Override executeStep to add support for 'engine' step type
+   * Allows MAE workflows to call other engines (Potemkin, GoodCounsel, etc.)
+   */
+  protected async executeStep(step: WorkflowStep, context: any): Promise<CallToolResult> {
+    // Handle 'engine' step type for calling other engines
+    if (step.type === 'engine') {
+      try {
+        const { engineRegistry: registry } = await import('../registry.js');
+        const targetEngine = registry.get(step.target);
+        
+        if (!targetEngine) {
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Error: Engine ${step.target} not found in registry`,
+              },
+            ],
+            isError: true,
+          };
+        }
+        
+        // Execute the engine with the provided input
+        // Merge context into input for template variable resolution
+        const engineInput = {
+          ...context,
+          ...step.input,  // step.input takes precedence over context
+        };
+        
+        return await targetEngine.execute(engineInput);
+      } catch (error) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Error calling engine ${step.target}: ${error instanceof Error ? error.message : String(error)}`,
+            },
+          ],
+          isError: true,
+        };
+      }
+    }
+    
+    // Fall back to base implementation for other step types
+    return await super.executeStep(step, context);
   }
 
   /**

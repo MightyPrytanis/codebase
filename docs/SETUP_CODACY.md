@@ -24,7 +24,7 @@ ESLint `no-undef` errors are disabled for TypeScript files (`.ts`, `.tsx`) follo
 - The file augments the `NodeJS.ProcessEnv` interface
 
 **LexFiat Frontend (Vite):**
-- Type definitions for `import.meta.env` variables are in `LexFiat/client/src/global.d.ts`
+- Type definitions for `import.meta.env` variables are in `apps/lexfiat/client/src/global.d.ts`
 - This provides type safety for Vite environment variables (prefixed with `VITE_`)
 - The file augments the `ImportMetaEnv` interface
 
