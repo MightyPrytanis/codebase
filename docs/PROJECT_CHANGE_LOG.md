@@ -106,6 +106,85 @@ All Priority 1 tasks (1.1 through 1.9) have been completed. See detailed entry b
 
 ---
 
+## Priority 2: Chronometric Engine Promotion & Workflow Archaeology (2025-12-21)
+
+**Status:** ✅ COMPLETE
+
+**Changes:**
+
+1. **Promote Chronometric to Engine (2.1):**
+   - Created Chronometric Engine at `Cyrano/src/engines/chronometric/chronometric-engine.ts`
+   - Converted ChronometricModule to ChronometricEngine (extends BaseEngine)
+   - Added workflow orchestration capabilities (time_reconstruction, forensic_reconstruction, pattern_learning, cost_estimation workflows)
+   - Updated engine registry to register chronometric engine
+   - Removed chronometric from module registry (now an engine)
+   - Updated MAE engine to reference chronometric as engine instead of module
+   - Changed workflow step types from 'module' to 'engine' for chronometric calls
+   - Updated chronometric-module.ts tool wrapper to call engine instead of module
+
+2. **Create Time Reconstruction Module (2.2):**
+   - Created Time Reconstruction Module at `Cyrano/src/engines/chronometric/modules/time-reconstruction-module.ts`
+   - Composes existing tools: gap_identifier, email_artifact_collector, calendar_artifact_collector, document_artifact_collector, recollection_support, pre_fill_logic, dupe_check, provenance_tracker
+   - Implements 8 actions: identify_gaps, collect_artifacts, reconstruct_time, reconstruct_period, check_duplicates, recollection_support, pre_fill, track_provenance
+   - Includes AI-powered time reconstruction using AIService
+   - Integrated forensic reconstruction service for workflow archaeology
+   - Registered in Chronometric Engine and module registry
+
+3. **Create Cost Estimation Module (2.4):**
+   - Created Cost Estimation Service at `Cyrano/src/engines/chronometric/services/cost-estimation.ts`
+   - Implements learning algorithm from completed matters
+   - Provides cost/hour estimation based on matter type, complexity, and attorney performance
+   - Supports seed data system (manual entry, Clio import, CSV)
+   - Created Cost Estimation Module at `Cyrano/src/engines/chronometric/modules/cost-estimation-module.ts`
+   - Implements 5 actions: estimate_cost, learn_from_matter, generate_proposal, get_stats, load_seed_data
+   - Generates professional proposal documents for clients
+   - Registered in Chronometric Engine and module registry
+
+4. **Create Workflow Archaeology (2.5 - Backend Only):**
+   - Created shared Workflow Archaeology Service at `Cyrano/src/services/workflow-archaeology.ts`
+   - Supports hour/day/week granularity with automatic detection
+   - Reconstructs timelines from artifact analysis (email, calendar, documents, calls)
+   - Provides structured output with evidence chains and confidence scoring
+   - Identifies gaps in timeline coverage
+   - Self-documenting architectural decisions in code comments
+   - Created Forensic Reconstruction Service at `Cyrano/src/engines/chronometric/services/forensic-reconstruction.ts`
+   - Wraps workflow archaeology for time entry generation
+   - Adds billable time context and classification
+   - Implements reconstructHour, reconstructDay, reconstructWeek convenience methods
+   - Created Workflow Archaeology MCP Tool at `Cyrano/src/tools/workflow-archaeology.ts`
+   - Provides MCP interface to workflow archaeology service
+   - Usable by both LexFiat (time tracking) and Arkiver (workflow/document history)
+   - Structured input validation with Zod schemas
+   - Integrated 'reconstruct_period' action into Time Reconstruction Module
+
+**Architecture Changes:**
+- **Before:** Chronometric was a standalone module in `src/modules/chronometric/`
+- **After:** Chronometric is now an engine in `src/engines/chronometric/` that orchestrates specialized modules:
+  - Time Reconstruction Module - Gap identification and artifact collection
+  - Cost Estimation Module - Predictive cost estimation with learning
+  - Pattern Learning Module (pending) - Baseline setup and profitability analysis
+
+**Files Created:**
+1. `Cyrano/src/engines/chronometric/chronometric-engine.ts` - Chronometric Engine
+2. `Cyrano/src/engines/chronometric/index.ts` - Engine exports
+3. `Cyrano/src/engines/chronometric/modules/time-reconstruction-module.ts` - Time Reconstruction Module
+4. `Cyrano/src/engines/chronometric/modules/cost-estimation-module.ts` - Cost Estimation Module
+5. `Cyrano/src/engines/chronometric/modules/index.ts` - Module exports
+6. `Cyrano/src/engines/chronometric/services/cost-estimation.ts` - Cost Estimation Service with learning algorithm
+7. `Cyrano/src/engines/chronometric/services/forensic-reconstruction.ts` - Forensic Reconstruction Service
+8. `Cyrano/src/services/workflow-archaeology.ts` - Shared Workflow Archaeology Service
+9. `Cyrano/src/tools/workflow-archaeology.ts` - Workflow Archaeology MCP Tool
+
+**Files Modified:**
+1. `Cyrano/src/engines/registry.ts` - Added chronometric engine registration
+2. `Cyrano/src/modules/registry.ts` - Removed chronometric module, added time_reconstruction and cost_estimation modules
+3. `Cyrano/src/engines/mae/mae-engine.ts` - Updated chronometric references from module to engine, changed workflow step types
+4. `Cyrano/src/tools/chronometric-module.ts` - Updated to call chronometric engine instead of module
+
+**Note:** UI integration for Workflow Archaeology (LexFiat and Arkiver components) is deferred to separate tasks and not included in this implementation.
+
+---
+
 ## Priority 1.8: MAE Engine Integration (2025-12-17)
 
 **Status:** ✅ COMPLETE
