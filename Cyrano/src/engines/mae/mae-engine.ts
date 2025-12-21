@@ -8,7 +8,6 @@ import { BaseEngine } from '../base-engine.js';
 import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { Workflow, WorkflowStep } from '../base-engine.js';
 import { z } from 'zod';
-import { chronometricModule } from '../../modules/chronometric/index.js';
 import {
   buildExecutionPlan,
   workflowToNodes,
@@ -26,7 +25,7 @@ import { factChecker } from '../../tools/fact-checker.js';
 import { workflowManager } from '../../tools/workflow-manager.js';
 import { caseManager } from '../../tools/case-manager.js';
 import { documentProcessor } from '../../tools/document-processor.js';
-import { DocumentDrafterTool } from '../../tools/document-drafter.js';
+import { documentDrafterTool } from '../../tools/document-drafter.js';
 import { clioIntegration } from '../../tools/clio-integration.js';
 import { syncManager } from '../../tools/sync-manager.js';
 
@@ -64,13 +63,13 @@ export class MaeEngine extends BaseEngine {
       description: 'Multi-Agent Engine - Orchestrates multiple AI assistants/agents and modules for complex workflows',
       version: '1.0.0',
       modules: [
-        'chronometric',
         'ark_extractor',
         'ark_processor',
         'ark_analyst',
         'rag',
         'verification',
         'legal_analysis',
+        // Note: 'chronometric' is now an Engine (src/engines/chronometric), not a Module
       ], // Modules this engine orchestrates
       tools: [
         aiOrchestrator,
@@ -80,10 +79,10 @@ export class MaeEngine extends BaseEngine {
         workflowManager,
         caseManager,
         documentProcessor,
-        new DocumentDrafterTool(),
+        documentDrafterTool,
         clioIntegration,
         syncManager,
-        // Note: Engine-specific tools (Potemkin, GoodCounsel) are accessed via engines
+        // Note: Engine-specific tools (Potemkin, GoodCounsel, Chronometric) are accessed via engines
       ],
       // Remove hard-coded aiProviders - default to 'auto' (all providers available)
       // User sovereignty: users can select any provider via UI
@@ -497,15 +496,15 @@ export class MaeEngine extends BaseEngine {
    * Register default workflows
    */
   private registerDefaultWorkflows(): void {
-    // Time reconstruction workflow using Chronometric module
+    // Time reconstruction workflow using Chronometric engine
     this.registerWorkflow({
       id: 'time_reconstruction',
       name: 'Time Reconstruction Workflow',
-      description: 'Complete workflow for reconstructing billable time using Chronometric module',
+      description: 'Complete workflow for reconstructing billable time using Chronometric engine',
       steps: [
         {
           id: 'identify_gaps',
-          type: 'module',
+          type: 'engine',
           target: 'chronometric',
           input: { action: 'identify_gaps' },
           onSuccess: 'collect_artifacts',
@@ -513,7 +512,7 @@ export class MaeEngine extends BaseEngine {
         },
         {
           id: 'collect_artifacts',
-          type: 'module',
+          type: 'engine',
           target: 'chronometric',
           input: { action: 'collect_artifacts' },
           onSuccess: 'recollection_support',
@@ -521,7 +520,7 @@ export class MaeEngine extends BaseEngine {
         },
         {
           id: 'recollection_support',
-          type: 'module',
+          type: 'engine',
           target: 'chronometric',
           input: { action: 'recollection_support' },
           onSuccess: 'pre_fill',
@@ -529,7 +528,7 @@ export class MaeEngine extends BaseEngine {
         },
         {
           id: 'pre_fill',
-          type: 'module',
+          type: 'engine',
           target: 'chronometric',
           input: { action: 'pre_fill' },
           onSuccess: 'check_duplicates',
@@ -537,7 +536,7 @@ export class MaeEngine extends BaseEngine {
         },
         {
           id: 'check_duplicates',
-          type: 'module',
+          type: 'engine',
           target: 'chronometric',
           input: { action: 'check_duplicates' },
           onSuccess: 'generate_report',
@@ -545,7 +544,7 @@ export class MaeEngine extends BaseEngine {
         },
         {
           id: 'generate_report',
-          type: 'module',
+          type: 'engine',
           target: 'chronometric',
           input: { action: 'generate_report' },
         },
@@ -742,7 +741,7 @@ export class MaeEngine extends BaseEngine {
         },
         {
           id: 'capture_time',
-          type: 'module',
+          type: 'engine',
           target: 'chronometric',
           input: { 
             action: 'pre_fill',
@@ -1871,8 +1870,8 @@ export class MaeEngine extends BaseEngine {
         // Execute the engine with the provided input
         // Merge context into input for template variable resolution
         const engineInput = {
-          ...step.input,
           ...context,
+          ...step.input,  // step.input takes precedence over context
         };
         
         return await targetEngine.execute(engineInput);

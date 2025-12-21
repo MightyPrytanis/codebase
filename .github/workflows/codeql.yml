@@ -14,8 +14,32 @@ name: "CodeQL Advanced"
 on:
   push:
     branches: [ "main" ]
+    exclude_paths:
+      - 'Legacy/**'
+      - 'Cyrano/**'
+      - 'apps/**'
+      - 'LexFiat/**'
+      - 'docs/**'
+      - 'Miscellaneous/**'
+      - 'node_modules/**'
+      - '. cursor/**'
+      - '.cursorignore'
+      - '. gitmodules'
+      - 'Labs/**'
   pull_request:
     branches: [ "main" ]
+     exclude_paths:
+      - 'Legacy/**'
+      - 'Cyrano/**'
+      - 'apps/**'
+      - 'LexFiat/**'
+      - 'docs/**'
+      - 'Miscellaneous/**'
+      - 'node_modules/**'
+      - '. cursor/**'
+      - '.cursorignore'
+      - '. gitmodules'
+      - 'Labs/**'
   schedule:
     - cron: '25 14 * * 4'
 
@@ -75,6 +99,7 @@ jobs:
       with:
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
+        config-file: ./.github/codeql-config.yml
         # If you wish to specify custom queries, you can do so here or in a config file.
         # By default, queries listed here will override any specified in a config file.
         # Prefix the list here with "+" to use these queries and those in the config file.
