@@ -12,7 +12,6 @@
  */
 
 import { BaseModule } from './base-module.js';
-import { chronometricModule } from './chronometric/chronometric.js';
 import { taxForecastModule, childSupportForecastModule, qdroForecastModule } from './forecast/index.js';
 import { arkExtractorModule } from './arkiver/ark-extractor-module.js';
 import { arkProcessorModule } from './arkiver/ark-processor-module.js';
@@ -27,7 +26,6 @@ class ModuleRegistry {
   constructor() {
     this.modules = new Map();
     // Auto-register modules
-    this.register(chronometricModule);
     this.register(taxForecastModule);
     this.register(childSupportForecastModule);
     this.register(qdroForecastModule);
@@ -38,6 +36,7 @@ class ModuleRegistry {
     this.register(ragModule);
     this.register(verificationModule);
     this.register(legalAnalysisModule);
+    // Note: Chronometric is now an Engine (src/engines/chronometric), not a Module
   }
 
   /**
