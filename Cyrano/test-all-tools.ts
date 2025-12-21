@@ -467,7 +467,7 @@ const toolTests: Array<{
   {
     name: 'document_drafter',
     importPath: './src/tools/document-drafter.js',
-    exportName: 'DocumentDrafterTool',
+    exportName: 'documentDrafterTool',
     testArgs: { prompt: 'Draft a test motion.', documentType: 'motion' },
     category: 'Document',
   },

@@ -43,7 +43,7 @@ import { qualityAssessor } from './tools/quality-assessor.js';
 import { workflowManager } from './tools/workflow-manager.js';
 import { caseManager } from './tools/case-manager.js';
 import { documentProcessor } from './tools/document-processor.js';
-import { aiOrchestrator } from './engines/mae/tools/ai-orchestrator.js';
+import { aiOrchestrator } from './engines/mae/services/ai-orchestrator.js';
 import { systemStatus } from './tools/system-status.js';
 // status-indicator tool archived - see Cyrano/archive/broken-tools/
 import { ragQuery } from './tools/rag-query.js';
@@ -54,7 +54,7 @@ import { clioIntegration } from './tools/clio-integration.js';
 import { timeValueBilling } from './tools/time-value-billing.js';
 import { tasksCollector } from './tools/tasks-collector.js';
 import { contactsCollector } from './tools/contacts-collector.js';
-import { DocumentDrafterTool } from './tools/document-drafter.js';
+import { documentDrafterTool } from './tools/document-drafter.js';
 // import { toolEnhancer } from './tools/tool-enhancer.js'; // TODO: File doesn't exist
 import { ethicsReviewer } from './engines/goodcounsel/tools/ethics-reviewer.js';
 import {
@@ -470,7 +470,7 @@ mcpServer.setRequestHandler(CallToolRequestSchema, async (request) => {
             result = await ragQuery.execute(args);
             break;
           case 'document_drafter':
-            result = await new DocumentDrafterTool().execute(args);
+            result = await documentDrafterTool.execute(args);
             break;
           case 'tool_enhancer':
             // TODO: tool_enhancer not implemented
@@ -775,7 +775,7 @@ app.post('/mcp/execute', async (req, res) => {
         result = await ragQuery.execute(toolInput);
         break;
       case 'document_drafter':
-        result = await new DocumentDrafterTool().execute(toolInput);
+        result = await documentDrafterTool.execute(toolInput);
         break;
       case 'tool_enhancer':
         // TODO: tool_enhancer not implemented

@@ -16,15 +16,94 @@ This monorepo consolidates all components of the Cyrano ecosystem, previously ma
 
 ```
 codebase/
-├── Cyrano/              # MCP server, engines, modules, tools
-├── LexFiat/            # Legal workflow platform (client + backend)
-├── apps/
-│   └── arkiver/        # Arkiver frontend application
-├── docs/                # Active documentation
-├── Labs/                # Experimental projects
-└── Legacy/              # Archived projects (SwimMeet, Cosmos, etc.)
-    └── Note: Legacy/ is excluded from main branch, preserved in archive/2024-10-10-snapshot
+├── apps/                # User-facing applications
+│   ├── lexfiat/        # Legal workflow platform (client + backend)
+│   ├── arkiver/        # Arkiver frontend application (active)
+│   └── forecaster/     # Forecaster frontend application
+├── Cyrano/              # MCP Server
+│   ├── src/
+│   │   ├── engines/     # Engines (GoodCounsel, MAE, Potemkin, Forecast, Chronometric)
+│   │   ├── modules/    # Modules (Arkiver, Chronometric, RAG, Forecast, Library)
+│   │   ├── tools/       # MCP Tools (69 tools)
+│   │   ├── services/   # Services (RAG, legal research, AI, etc.)
+│   │   └── routes/      # API Routes
+│   └── docs/            # Cyrano-specific docs
+├── docs/                # Project-wide documentation
+│   ├── guides/         # User guides
+│   ├── reference/      # API reference, architecture
+│   ├── security/       # Security docs
+│   └── install/        # Installation/onboarding docs
+├── Labs/                # Experimental/in-development features
+│   ├── Potemkin/       # Potemkin experimental code
+│   └── [other-experimental]/
+└── Legacy/              # Archived, non-active code
+    ├── old-codebase-artifacts/
+    │   ├── arkivermj/  # Original Base44 Arkiver
+    │   └── [other-archived]/
+    └── [other-legacy]/
 ```
+
+### Directory Structure Guide
+
+**Where does X go?**
+
+- **New App?** → `apps/[app-name]/`
+- **New Engine?** → `Cyrano/src/engines/[engine-name]/`
+- **New Module?** → `Cyrano/src/modules/[module-name]/`
+- **New Tool?** → `Cyrano/src/tools/[tool-name].ts`
+- **New Service?** → `Cyrano/src/services/[service-name].ts`
+- **New Documentation?** → `docs/[category]/[doc-name].md` (update existing docs when possible)
+- **Experimental Feature?** → `Labs/[feature-name]/`
+- **Archived Code?** → `Legacy/[project-name]/`
+
+## Directory Structure Audit (2025-12-17)
+
+### Current Status
+
+**Active Applications:**
+- ✅ `apps/arkiver/` - Active Arkiver frontend (correct location)
+- ✅ `apps/lexfiat/` - Legal workflow platform (moved from root level)
+- ✅ `apps/forecaster/` - Forecaster frontend (correct location)
+
+**MCP Server:**
+- ✅ `Cyrano/` - MCP server (correct location)
+- ✅ `Cyrano/src/engines/` - Engines (GoodCounsel, MAE, Potemkin, Forecast)
+- ✅ `Cyrano/src/modules/` - Modules (Arkiver, Chronometric, RAG, Forecast, Library)
+- ✅ `Cyrano/src/tools/` - MCP Tools (69 tools)
+
+**Archived Code:**
+- ✅ `Legacy/old-codebase-artifacts/arkivermj/` - Original Base44 Arkiver (archived)
+- ✅ `Legacy/Arkiver/` - Python version Arkiver (archived)
+- ✅ `Legacy/SwimMeet/` - SwimMeet project (archived)
+- ✅ `Legacy/Cosmos/` - Cosmos project (archived)
+- ✅ `Legacy/sparetools/` - Spare tools (archived)
+
+**Experimental:**
+- ✅ `Labs/Potemkin/` - Potemkin experimental code (correct)
+- ✅ `Labs/infinite-helix/` - Experimental project (correct)
+- ✅ `Labs/muskification-meter/` - Experimental project (correct)
+
+**Other Directories:**
+- ⚠️ `Miscellaneous/` - Contains duplicate UI components (should be archived)
+- ⚠️ `Cosmos/` - At root level (should be in Legacy/ if not needed)
+- ⚠️ `NewCodex/` - At root level (should be archived or removed)
+- ✅ `IP/` - Intellectual property (excluded from git, correct)
+- ✅ `Document Archive/` - Historical docs (excluded from git, correct)
+
+### Issues Identified
+
+1. ✅ **LexFiat Location:** Moved to `apps/lexfiat/` for consistency with `apps/arkiver/`
+2. **Miscellaneous Directory:** Contains duplicate UI components that should be archived
+3. **Root-Level Directories:** `Cosmos/` and `NewCodex/` at root level need review/archival
+4. **Legacy/ Exclusion:** Legacy/ should be excluded from code search tools to prevent confusion
+
+### Recommendations
+
+1. ✅ Move `LexFiat/` → `apps/lexfiat/` (COMPLETE)
+2. Archive `Miscellaneous/` to `Legacy/` if not needed
+3. Review and archive `Cosmos/` and `NewCodex/` if not needed
+4. Update `.gitignore` and create `.cursorignore` to exclude `Legacy/` from searches
+5. ⚠️ Update all references to `LexFiat/` → `apps/lexfiat/` (IN PROGRESS)
 
 ## Branches
 
@@ -79,7 +158,7 @@ See `docs/ACTIVE_DOCUMENTATION_INDEX.md` for complete index.
 ```bash
 # Install dependencies for each project
 cd Cyrano && npm install
-cd ../LexFiat && npm install
+cd ../apps/lexfiat && npm install
 cd ../apps/arkiver/frontend && npm install
 ```
 

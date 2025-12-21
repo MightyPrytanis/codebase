@@ -14,6 +14,12 @@
 import { BaseModule } from './base-module.js';
 import { chronometricModule } from './chronometric/chronometric.js';
 import { taxForecastModule, childSupportForecastModule, qdroForecastModule } from './forecast/index.js';
+import { arkExtractorModule } from './arkiver/ark-extractor-module.js';
+import { arkProcessorModule } from './arkiver/ark-processor-module.js';
+import { arkAnalystModule } from './arkiver/ark-analyst-module.js';
+import { ragModule } from './rag/rag-module.js';
+import { verificationModule } from './verification/verification-module.js';
+import { legalAnalysisModule } from './legal-analysis/legal-analysis-module.js';
 
 class ModuleRegistry {
   private modules: Map<string, BaseModule>;
@@ -25,6 +31,13 @@ class ModuleRegistry {
     this.register(taxForecastModule);
     this.register(childSupportForecastModule);
     this.register(qdroForecastModule);
+    // Register new modular BaseModule classes
+    this.register(arkExtractorModule);
+    this.register(arkProcessorModule);
+    this.register(arkAnalystModule);
+    this.register(ragModule);
+    this.register(verificationModule);
+    this.register(legalAnalysisModule);
   }
 
   /**

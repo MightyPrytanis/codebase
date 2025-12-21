@@ -1,5 +1,6 @@
 ---
 # Codacy configuration (disable PMD analyzers by omission)
+# Codacy configuration with disabled problematic analyzers
 engines:
   eslint:
     enabled: true

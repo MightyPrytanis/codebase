@@ -31,8 +31,8 @@ export interface EngineConfig {
 
 export interface WorkflowStep {
   id: string;
-  type: 'module' | 'tool' | 'ai' | 'condition';
-  target: string; // Module name, tool name, or AI provider
+  type: 'module' | 'tool' | 'ai' | 'condition' | 'engine';
+  target: string; // Module name, tool name, AI provider, or engine name
   input?: any;
   condition?: (context: any) => boolean;
   onSuccess?: string; // Next step ID
