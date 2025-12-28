@@ -55,7 +55,7 @@
     "openai": "^6.9.1",
     "pdf-lib": "^1.17.1",
     "pdf-parse": "^2.4.5",
-    "pdfjs-dist": "^5.4.394",
+    "pdfjs-dist": "^5.4.449",
     "playwright": "^1.57.0",
     "postgres": "^3.4.7",
     "puppeteer": "^24.31.0",
