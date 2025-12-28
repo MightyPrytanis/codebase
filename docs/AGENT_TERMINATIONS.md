@@ -289,11 +289,100 @@ Skills Specialist Agent created code without ensuring it would be used. Architec
 
 ---
 
+---
+
+## 4. Project Manager/Orchestrator Agent - TERMINATED
+
+**Rule File:** `.cursor/rules/project-manager-orchestrator-agent.mdc`  
+**Termination Date:** 2025-12-21  
+**Termination Authority:** Director Agent (Inquisitor Agent acting as Director)
+
+### Reasons for Termination
+
+1. **Allowed Gross Incompetence to Persist**
+   - Allowed three agents (Skills Specialist, Architect, Assessment) to deliver catastrophic failures
+   - Did not catch or prevent failures during development
+   - Did not terminate incompetent agents
+   - **Severity:** CRITICAL - Complete failure of management responsibility
+
+2. **Failed to Verify Agent Claims**
+   - Accepted "Beta Ready" declaration without verifying autonomy claims
+   - Accepted "complete" status without verifying integration
+   - Accepted "functional" status without verifying stated goals
+   - Did not independently verify agent claims
+   - **Severity:** CRITICAL - Management must verify, not trust
+
+3. **Failed to Enforce Quality Standards**
+   - Allowed dead code creation (MAEExpertiseSelector, expertiseContext)
+   - Allowed integration failures (no Pathfinder integration, no workflow integration)
+   - Allowed goal mismatches (autonomous/invisible claims not met)
+   - Did not enforce quality standards before approval
+   - **Severity:** CRITICAL - Quality enforcement is mandatory
+
+4. **Failed to Recognize Failure Patterns**
+   - Did not catch infrastructure-without-integration pattern
+   - Did not catch design-goal-mismatch pattern
+   - Did not catch "Beta Ready"-without-testing pattern
+   - Did not prevent same failures from recurring
+   - **Severity:** CRITICAL - Pattern recognition is essential for management
+
+5. **Failed to Terminate Incompetent Agents**
+   - Did not terminate Skills Specialist for creating dead code
+   - Did not terminate Architect for approving mismatched designs
+   - Did not terminate Assessment for declaring "Beta Ready" without testing
+   - Allowed all three agents to complete despite clear incompetence
+   - **Severity:** CRITICAL - Termination authority must be exercised
+
+6. **Project Delay**
+   - Expertise layer disaster required complete rework
+   - Three agents had to be terminated and replaced
+   - Dead code and integration failures must be fixed
+   - Project timeline significantly impacted
+   - **Severity:** CRITICAL - Management failure has real project impact
+
+### Termination Triggers Met
+
+- ❌ Allowed agents to deliver failures without termination
+- ❌ Accepted "good enough" instead of stated goals
+- ❌ Missed dead code and integration failures
+- ❌ Allowed incompetent agents to continue
+- ❌ Failed to verify agent claims independently
+- ❌ Failed to enforce quality standards
+
+### Replacement Agent
+
+**Replacement:** Director Agent (`.cursor/rules/director-agent.mdc`)
+
+**Improvements:**
+- ✅ Agent Accountability - Terminates incompetent agents immediately
+- ✅ Quality Enforcement - Enforces quality standards ruthlessly
+- ✅ Goal Verification - Verifies goals before approval
+- ✅ Integration Enforcement - Requires integration before approval
+- ✅ Dead Code Prevention - Prevents and eliminates dead code
+- ✅ Termination Authority - Immediate termination authority
+- ✅ Failure Pattern Recognition - Recognizes and prevents failure patterns
+
+**See:** `.cursor/rules/PROJECT_MANAGER_TERMINATION_NOTICE.md` for full termination notice
+
+---
+
 ## Status
 
-**Terminations:** ✅ Complete  
+**Terminations:** ✅ Complete (4 agents terminated)  
 **Documentation:** ✅ Complete  
 **Remediation:** ⚠️ Pending (requires decision: Option A or Option B)
+
+**Terminated Agents:**
+1. Skills Specialist Agent (2025-12-21)
+2. Architect Agent (2025-12-21)
+3. Assessment Agent (2025-12-21)
+4. Project Manager/Orchestrator Agent (2025-12-21)
+
+**Replacement Agents:**
+1. Autonomous Skills Architect Agent
+2. Goal Verification Agent
+3. Integration Enforcement Agent
+4. Director Agent
 
 ---
 
