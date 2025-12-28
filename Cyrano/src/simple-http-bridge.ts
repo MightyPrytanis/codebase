@@ -1,7 +1,11 @@
 /**
- * Simple Cyrano HTTP Bridge - Working Version
+ * Simple Cyrano HTTP Bridge - Development/Test Version
  * 
- * This is a simplified HTTP bridge that actually works.
+ * ⚠️ WARNING: This is a simplified HTTP bridge for development/testing only.
+ * For production, use the full http-bridge.ts implementation.
+ * 
+ * This bridge uses mock responses and should NOT be used in production.
+ * It is provided for quick testing and development purposes only.
  */
 /*
  * Copyright 2025 Cognisint LLC
@@ -15,6 +19,11 @@ import cors from 'cors';
 const app = express();
 const port = process.env.PORT || 5002;
 
+// Warn if used in production
+if (process.env.NODE_ENV === 'production') {
+  console.warn('⚠️  WARNING: simple-http-bridge.ts is for development/testing only. Use http-bridge.ts for production.');
+}
+
 // Disable X-Powered-By header to prevent information disclosure
 app.disable('x-powered-by');
 
@@ -26,7 +35,7 @@ app.use(express.json());
 const tools = [
   {
     name: 'document_analyzer',
-    description: 'Analyze legal documents',
+    description: 'Analyze legal documents (MOCK - development only)',
     inputSchema: {
       type: 'object',
       properties: {
@@ -38,7 +47,7 @@ const tools = [
   },
   {
     name: 'contract_comparator',
-    description: 'Compare contracts/agreements (not all legal documents)',
+    description: 'Compare contracts/agreements (MOCK - development only)',
     inputSchema: {
       type: 'object',
       properties: {
@@ -50,7 +59,7 @@ const tools = [
   },
   {
     name: 'extract_conversations',
-    description: 'Extract ChatGPT conversations',
+    description: 'Extract ChatGPT conversations (MOCK - development only)',
     inputSchema: {
       type: 'object',
       properties: {
@@ -64,7 +73,7 @@ const tools = [
 
 // Routes
 app.get('/mcp/tools', (req, res) => {
-  res.json({ tools });
+  res.json({ tools, _warning: 'This is a development/test bridge with mock responses. Use http-bridge.ts for production.' });
 });
 
 app.post('/mcp/execute', (req, res) => {
@@ -81,36 +90,16 @@ app.post('/mcp/execute', (req, res) => {
     });
   }
   
-  // Simple mock responses
-  const responses = {
-    document_analyzer: {
-      content: [{
-        type: 'text',
-        text: `Analyzed document: ${(typeof input.content === 'string' ? input.content.substring(0, 100) : '')}...`
-      }]
-    },
-    contract_comparator: {
-      content: [{
-        type: 'text',
-        text: `Compared ${(Array.isArray(input.documents) ? input.documents.length : 0)} documents`
-      }]
-    },
-    extract_conversations: {
-      content: [{
-        type: 'text',
-        text: `Extracted conversations from ${input.file_path}`
-      }]
-    }
-  };
-  
-  const response = (responses as any)[tool] || {
+  // Return error indicating this is a mock/test bridge
+  // In production, this should use real tool implementations
+  return res.status(501).json({
     content: [{
       type: 'text',
-      text: `Executed tool: ${tool}`
-    }]
-  };
-  
-  res.json(response);
+      text: `Tool execution not available in simple-http-bridge (development/test only). Use http-bridge.ts for production. Tool requested: ${tool}`
+    }],
+    isError: true,
+    _warning: 'This is a development/test bridge. Use http-bridge.ts for production tool execution.'
+  });
 });
 
 app.get('/mcp/status', (req, res) => {
