@@ -38,15 +38,15 @@ export const workflowStatusTool = new (class extends BaseTool {
       const documentStates = new Map<string, DocumentState>();
       
       // Process audit logs to determine current state of each document
-      for (const log of auditLogs) {
+      // Sort by timestamp to ensure we process in chronological order
+      const sortedLogs = [...auditLogs].sort((a, b) => 
+        a.transition.timestamp.localeCompare(b.transition.timestamp)
+      );
+      
+      for (const log of sortedLogs) {
         const currentState = log.transition.to;
-        const existingState = documentStates.get(log.documentId);
-        
-        // Keep the most recent state (assuming logs are in chronological order)
-        // If we have a newer transition, use it
-        if (!existingState || log.transition.timestamp > auditLogs.find(l => l.documentId === log.documentId && l.transition.to === existingState)?.transition.timestamp || '') {
-          documentStates.set(log.documentId, currentState);
-        }
+        // Always update to the latest state (since we sorted chronologically)
+        documentStates.set(log.documentId, currentState);
       }
       
       // Count documents by state

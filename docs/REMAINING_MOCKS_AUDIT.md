@@ -140,19 +140,22 @@ All test mocks have been removed. Tests now use:
 
 ## Inquisitor Readiness Assessment
 
-### ❌ **NOT READY** - 3 Critical Violations
+### ✅ **READY** - All Violations Fixed (2025-12-28)
 
-**Blockers:**
-1. `workflow-status.ts` returns random fake data
-2. `priority-alerts-row.tsx` returns hardcoded fake alerts
-3. `simple-http-bridge.ts` has mock responses (needs verification if production)
+**Status:** All 3 critical violations have been fixed.
 
-**Required Actions Before Inquisitor:**
-1. Fix `workflow-status.ts` to query real data or return errors
-2. Fix `priority-alerts-row.tsx` to return empty array, not mock data
-3. Verify `simple-http-bridge.ts` status (production vs test-only)
+**Fixed:**
+1. ✅ `workflow-status.ts` - Now queries real audit logs, only uses mocks if `DEMO_MODE=true`
+2. ✅ `priority-alerts-row.tsx` - Returns empty array instead of mock data
+3. ✅ `simple-http-bridge.ts` - Marked as dev/test only, returns 501 errors instead of mocks
 
-**Estimated Fix Time:** 1-2 hours
+**Verification:**
+- All mock data fallbacks removed
+- Demo mode is opt-in only (requires `DEMO_MODE=true`)
+- Missing credentials return errors, not mock data
+- Empty states return empty arrays, not fake data
+
+**Status:** ✅ **READY FOR INQUISITOR REVIEW**
 
 ---
 
