@@ -359,7 +359,12 @@ export abstract class BaseEngine {
             isError: true,
           };
         }
-        return await module.execute(step.input || context);
+        // Merge step.input with context to ensure context variables are available
+        // Empty objects are truthy, so we need to check if step.input exists and merge properly
+        const moduleInput = step.input !== undefined 
+          ? { ...context, ...step.input }
+          : context;
+        return await module.execute(moduleInput);
 
       case 'tool':
         // Execute tool by name
@@ -367,7 +372,12 @@ export abstract class BaseEngine {
           // Try to get tool from registry first
           const tool = this.tools.get(step.target);
           if (tool) {
-            return await tool.execute(step.input || context);
+            // Merge step.input with context to ensure context variables are available
+            // Empty objects are truthy, so we need to check if step.input exists and merge properly
+            const toolInput = step.input !== undefined 
+              ? { ...context, ...step.input }
+              : context;
+            return await tool.execute(toolInput);
           }
 
           // If not in registry, try to import and execute directly
@@ -489,14 +499,12 @@ export abstract class BaseEngine {
             },
           });
 
-          const responseText = JSON.stringify({
-            response: aiResponse,
-            provider: provider, // Include which provider was used
-            wasAutoSelected: providerOrAuto === 'auto',
-          }, null, 2);
+          // Extract actual AI response text for ethics checks
+          // aiResponse is the actual text content, not a wrapper object
+          const aiResponseText = typeof aiResponse === 'string' ? aiResponse : JSON.stringify(aiResponse);
 
-          // Systemic ethics check on output
-          const ethicsCheck = await systemicEthicsService.checkOutput(responseText);
+          // Systemic ethics check on output (check actual AI response, not wrapper)
+          const ethicsCheck = await systemicEthicsService.checkOutput(aiResponseText);
           if (ethicsCheck.blocked) {
             await logicAuditService.capture({
               timestamp: new Date().toISOString(),
@@ -519,8 +527,9 @@ export abstract class BaseEngine {
           }
 
           // Professional duty check (if facts provided)
+          // Check actual AI response, not wrapper
           if (step.input?.facts) {
-            const dutyCheck = await responsibilityService.checkOutput(responseText, step.input.facts);
+            const dutyCheck = await responsibilityService.checkOutput(aiResponseText, step.input.facts);
             if (dutyCheck.blocked) {
               await logicAuditService.capture({
                 timestamp: new Date().toISOString(),
@@ -543,6 +552,13 @@ export abstract class BaseEngine {
             }
           }
 
+          // Create response wrapper for return value (after ethics checks pass)
+          const responseText = JSON.stringify({
+            response: aiResponse,
+            provider: provider, // Include which provider was used
+            wasAutoSelected: providerOrAuto === 'auto',
+          }, null, 2);
+
           return {
             content: [
               {
@@ -551,6 +567,8 @@ export abstract class BaseEngine {
               },
             ],
             metadata: {
+              provider,
+              wasAutoSelected: providerOrAuto === 'auto',
               ethicsWarnings: ethicsCheck.warnings,
             },
           };

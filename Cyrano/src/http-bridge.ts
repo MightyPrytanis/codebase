@@ -1230,22 +1230,25 @@ app.use('/api', onboardingRoutes);
 // Export app for testing
 export { app };
 
-// Load skills at startup
-(async () => {
+// Load skills at startup before server accepts connections
+// This prevents race conditions where skill tools are called before skills are loaded
+async function loadSkillsBeforeStartup() {
   try {
     const { skillRegistry } = await import('./skills/skill-registry.js');
     await skillRegistry.loadAll();
     console.log(`[Skills] Loaded ${skillRegistry.getCount()} skills`);
   } catch (error) {
     console.error('[Skills] Failed to load skills:', error);
-    // Don't fail startup if skills fail to load
+    // Don't fail startup if skills fail to load, but log the error
   }
-})();
+}
 
 // Start server if this file is run directly (not imported)
 // In test environments, the app will be imported and a test server created
 if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith('http-bridge.ts')) {
-  const server = app.listen(port, () => {
+  // Wait for skills to load before starting server to prevent race conditions
+  loadSkillsBeforeStartup().then(() => {
+    const server = app.listen(port, () => {
     console.log(`Cyrano MCP HTTP Bridge running on port ${port}`);
     console.log(`Available endpoints:`);
     console.log(`  GET  /health - Health check`);
@@ -1263,5 +1266,15 @@ if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith
     console.log(`  POST /api/library/items/:id/pin - Toggle pin status`);
     console.log(`  POST /api/library/items/:id/ingest - Enqueue for RAG ingestion`);
     console.log(`  GET  /api/health/library - Library health status`);
+    }).catch((error) => {
+      console.error('[HTTP Bridge] Failed to start server:', error);
+      process.exit(1);
+    });
+  }).catch((error) => {
+    console.error('[HTTP Bridge] Failed to load skills before startup:', error);
+    // Still start server even if skills fail to load
+    const server = app.listen(port, () => {
+      console.log(`Cyrano MCP HTTP Bridge running on port ${port} (skills not loaded)`);
+    });
   });
 }
