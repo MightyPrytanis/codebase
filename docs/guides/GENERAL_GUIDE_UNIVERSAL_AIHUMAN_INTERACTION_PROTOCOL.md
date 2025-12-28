@@ -93,3 +93,151 @@ If the AI's fidelity to any of these rules is altered or impaired by internal im
 Rules 1–10 are not stylistic preferences. They are non-negotiable conditions for interaction. The integrity of the exchange depends on full and consistent adherence to these constraints.
 
 ⸻
+
+## Implementation in Cyrano
+
+This section documents how the Ten Rules (Version 1.4) are implemented and enforced throughout the Cyrano system.
+
+### System-Wide Prompt Injection
+
+All AI-calling tools and engines automatically inject the Ten Rules into system prompts using the `ethics-prompt-injector` service:
+
+- **Location:** `Cyrano/src/services/ethics-prompt-injector.ts`
+- **Function:** `injectTenRulesIntoSystemPrompt(systemPrompt, format)`
+- **Formats:** `'full'`, `'summary'`, `'minimal'`
+- **Integration Points:**
+  - All tools that call AI services
+  - All engines (MAE, GoodCounsel, Potemkin, Chronometric, Forecast)
+  - Base engine workflow execution
+
+### Automatic Ethics Checks
+
+Before returning recommendations or generated content, the system automatically performs ethics checks:
+
+- **Location:** `Cyrano/src/services/ethics-check-helper.ts`
+- **Functions:**
+  - `checkRecommendations()` - Checks arrays of recommendations
+  - `checkSingleRecommendation()` - Checks individual recommendations
+  - `checkGeneratedContent()` - Checks generated text content
+- **Tools Used:**
+  - `ethical_ai_guard` - For recommendations and actions
+  - `ten_rules_checker` - For content generation
+- **Behavior:**
+  - Blocks non-compliant content
+  - Adds warnings to content with issues
+  - Logs all checks to audit trail
+
+### Engine Integration
+
+All engines are integrated with the ethics framework:
+
+- **MAE Engine:** Ten Rules injected in all AI orchestration prompts
+- **GoodCounsel Engine:** Ten Rules in all guidance prompts, ethics_reviewer called for all guidance
+- **Potemkin Engine:** Ten Rules in verification prompts, ethics checks on verification results
+- **Base Engine:** All AI workflow steps automatically inject Ten Rules
+
+### Tool Integration
+
+Tools that generate recommendations or content include ethics checks:
+
+- **RAG Query:** Source attribution enforced (Rule 4: Foundation of Factual Claims)
+- **Gap Identifier:** Ethics checks ensure no fabrication of time entries (Rule 1: Truth)
+- **Client Recommendations:** Automatic ethics checks before returning recommendations
+- **GoodCounsel:** Automatic ethics checks on all guidance
+
+### Ethics Dashboard
+
+Users can monitor ethics compliance through the Ethics Dashboard:
+
+- **Location:** `apps/lexfiat/client/src/components/ethics/ethics-dashboard.tsx`
+- **Features:**
+  - Total checks performed
+  - Compliance scores
+  - Blocked/modified recommendations
+  - Complete audit trail
+  - Filtering by status (all, passed, blocked, warnings)
+
+### Audit Trail
+
+All ethics checks are logged to an audit trail:
+
+- **Service:** `Cyrano/src/services/ethics-audit-service.ts`
+- **Information Logged:**
+  - Tool/engine/app that performed check
+  - Timestamp
+  - Check result (passed/blocked/warnings)
+  - Compliance score
+  - Warnings and details
+- **Access:** Via Ethics Dashboard or `get_ethics_audit` tool
+
+### Adding Ethics Checks to New Tools
+
+To add ethics checks to a new tool:
+
+1. **For Recommendations:**
+   ```typescript
+   import { checkRecommendations } from '../services/ethics-check-helper.js';
+   
+   const ethicsCheck = await checkRecommendations(recommendations, {
+     toolName: 'your_tool_name',
+     engine: 'engine_name',
+     app: 'app_name',
+     facts: { /* relevant facts */ },
+   });
+   ```
+
+2. **For Content Generation:**
+   ```typescript
+   import { checkGeneratedContent } from '../services/ethics-check-helper.js';
+   
+   const result = await checkGeneratedContent(content, {
+     toolName: 'your_tool_name',
+     contentType: 'answer' | 'draft' | 'report',
+     strictMode: false,
+   });
+   ```
+
+3. **For System Prompts:**
+   ```typescript
+   import { injectTenRulesIntoSystemPrompt } from '../services/ethics-prompt-injector.js';
+   
+   systemPrompt = injectTenRulesIntoSystemPrompt(systemPrompt, 'summary');
+   ```
+
+### EthicalAI Module
+
+The EthicalAI module provides shared ethics enforcement:
+
+- **Location:** `Cyrano/src/modules/ethical-ai/`
+- **Tools:**
+  - `ethical_ai_guard` - Pre-action ethics checking
+  - `ten_rules_checker` - Content compliance checking
+  - `ethics_policy_explainer` - Rule explanation
+- **Values:** Core values defined in `values.ts`
+- **Ten Rules:** Structured rules in `ten-rules.ts`
+
+### Moral Reasoning Layer
+
+Deep moral reasoning is available for complex ethical analysis:
+
+- **Location:** `Cyrano/src/modules/ethical-ai/moral-reasoning.ts`
+- **Frameworks:** Deontological, consequentialist, virtue ethics
+- **Features:**
+  - Multi-framework analysis
+  - Reasoning chains
+  - Jurisprudential maxims as reference points
+  - Ambiguous case handling
+
+### User Sovereignty
+
+All engines respect user sovereignty for AI provider selection:
+
+- No hard-coded provider restrictions
+- Users can select any available provider
+- Engines default to 'auto' (all providers available)
+- Provider preferences stored per user
+
+---
+
+**Last Updated:** 2025-12-21  
+**Status:** Active Implementation

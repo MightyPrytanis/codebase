@@ -162,18 +162,23 @@ Status: Active
   - `modules/arkiver/` - Document and LLM conversation extraction, processing components
     - **Extractors**: PDF, DOCX, Conversation (JSON/MD/TXT), Text/Markdown
     - **Processors**: Text, Email, Insight, Entity, Timeline
-  - `modules/chronometric/` - Time capture module
+  - `modules/forecast/` - Forecast modules (tax_forecast, child_support_forecast, qdro_forecast)
   - `modules/rag/` - RAG pipeline components
+  - `modules/ethical-ai/` - Ethical AI enforcement module
+  - `modules/billing-reconciliation/` - Billing reconciliation module
+  - `engines/chronometric/modules/` - Chronometric Engine sub-modules (time_reconstruction, pattern_learning, cost_estimation)
 
 ### Engines Layer
 - **Status:** ✅ Active
-- **Count:** 3 engines (goodcounsel, mae, potemkin)
+- **Count:** 5 engines (goodcounsel, mae, potemkin, forecast, chronometric)
 - **Base Class:** `src/engines/base-engine.ts` ✅
 - **Documentation:** `ARCHITECTURE_ARCHITECTURE_ENGINE_ARCHITECTURE.md`
 - **Examples:**
   - `engines/goodcounsel/` - Ethics and wellness engine
-  - `engines/mae/` - MAE engine
+  - `engines/mae/` - MAE engine (Multi-Agent Engine)
   - `engines/potemkin/` - Verification engine
+  - `engines/forecast/` - Forecast Engine (tax, child support, QDRO)
+  - `engines/chronometric/` - Chronometric Engine (time reconstruction, pattern learning, cost estimation)
 
 ---
 

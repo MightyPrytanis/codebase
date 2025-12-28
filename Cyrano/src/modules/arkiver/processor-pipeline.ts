@@ -116,7 +116,7 @@ export class ProcessorPipeline {
         context: input.source,
         threshold: 0.5,
         useLLM: input.extractionSettings.useLLM ?? (input.extractionSettings.extractionMode === 'deep'),
-        llmProvider: input.extractionSettings.llmProvider,
+        llmProvider: input.extractionSettings.llmProvider as 'openai' | 'anthropic' | 'google' | 'perplexity' | 'xai' | 'deepseek' | undefined,
         insightType: input.extractionSettings.insightType || 'general',
         customPrompt: input.extractionSettings.customPrompt,
         verifySources: true, // Enable source verification

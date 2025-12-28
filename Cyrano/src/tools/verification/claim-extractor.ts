@@ -412,14 +412,40 @@ export class ClaimExtractor extends BaseTool {
   }
 
   /**
-   * Load document from database (placeholder)
+   * Load document from database
    */
   private async loadDocument(documentId?: string): Promise<string> {
     if (!documentId) {
       throw new Error('Document ID required');
     }
-    // TODO: Load from database
-    throw new Error('Document loading not yet implemented');
+    
+    try {
+      // Import documents schema from LexFiat
+      const { documents } = await import('../../../../apps/lexfiat/shared/schema.js');
+      const { db } = await import('../../db.js');
+      const { eq } = await import('drizzle-orm');
+      
+      const [document] = await db
+        .select()
+        .from(documents)
+        .where(eq(documents.id, documentId))
+        .limit(1);
+
+      if (!document) {
+        throw new Error(`Document not found: ${documentId}`);
+      }
+
+      if (!document.content) {
+        throw new Error(`Document ${documentId} has no content`);
+      }
+
+      return document.content;
+    } catch (error) {
+      throw new Error(
+        `Failed to load document: ${error instanceof Error ? error.message : String(error)}. ` +
+        'Ensure document exists and database connection is properly configured.'
+      );
+    }
   }
 
   /**

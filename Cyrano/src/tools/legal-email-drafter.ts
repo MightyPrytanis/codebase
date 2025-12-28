@@ -18,6 +18,8 @@ import { z } from 'zod';
 import { aiService, AIProvider } from '../services/ai-service.js';
 import { apiValidator } from '../utils/api-validator.js';
 import { aiProviderSelector } from '../services/ai-provider-selector.js';
+import { injectTenRulesIntoSystemPrompt } from '../services/ethics-prompt-injector.js';
+import { checkGeneratedContent } from '../services/ethics-check-helper.js';
 
 // Schema for draft_legal_email tool
 const DraftLegalEmailSchema = z.object({
@@ -293,11 +295,19 @@ export const legalEmailDrafter = new (class extends BaseTool {
       // Draft the email
       const draft = await this.draftLegalEmail(validated, provider);
 
-      return this.createSuccessResult(JSON.stringify(draft, null, 2), {
+      // Add ethics metadata to response if present
+      const responseMetadata: any = {
         recipientType: validated.recipientType,
         tone: validated.tone,
         aiProvider: provider,
-      });
+      };
+      
+      if (draft._ethicsMetadata) {
+        responseMetadata.ethicsReviewed = true;
+        responseMetadata.ethicsComplianceScore = draft._ethicsMetadata.complianceScore;
+      }
+
+      return this.createSuccessResult(JSON.stringify(draft, null, 2), responseMetadata);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return this.createErrorResult(`Validation error: ${error.errors.map(e => e.message).join(', ')}`);
@@ -316,7 +326,7 @@ export const legalEmailDrafter = new (class extends BaseTool {
     const template = EMAIL_TEMPLATES[request.recipientType] || EMAIL_TEMPLATES.opposing_counsel;
     const toneGuidelines = this.getToneGuidelines(request.tone || 'professional');
 
-    const systemPrompt = `You are an expert legal email drafting assistant. Create professional, clear emails that:
+    let systemPrompt = `You are an expert legal email drafting assistant. Create professional, clear emails that:
 - Use precise legal terminology appropriately
 - Maintain a ${request.tone || 'professional'} tone
 - Are concise and direct
@@ -329,6 +339,9 @@ ${toneGuidelines}
 
 DO use these legal terms when appropriate: ${LEGAL_JARGON_GUIDELINES.acceptable_terms.join(', ')}
 DO NOT use these archaic terms: ${LEGAL_JARGON_GUIDELINES.avoid_jargon.join(', ')}`;
+    
+    // Inject Ten Rules into system prompt
+    systemPrompt = injectTenRulesIntoSystemPrompt(systemPrompt, 'summary');
 
     const userPrompt = `Draft a professional legal email with the following specifications:
 
@@ -357,7 +370,7 @@ Ensure the email is clear, concise, and professionally appropriate for a ${reque
       // Get CC recommendations
       const ccRecommendations = this.getCCRecommendations(request.recipientType);
 
-      return {
+      const draft = {
         to: request.recipientName || '[recipient-address]',
         subject: request.subject,
         body: emailBody,
@@ -365,6 +378,47 @@ Ensure the email is clear, concise, and professionally appropriate for a ${reque
         recipientType: request.recipientType,
         tone: request.tone,
         caseDetails: request.caseDetails,
+      };
+
+      // Ethics check: Ensure email content complies with Ten Rules
+      const emailText = `${draft.subject}\n\n${draft.body}`;
+      const ethicsCheck = await checkGeneratedContent(emailText, {
+        toolName: 'legal_email_drafter',
+        contentType: 'draft',
+        strictMode: true, // Strict for legal communications
+      });
+
+      // If blocked, return error
+      if (ethicsCheck.ethicsCheck.blocked) {
+        return {
+          to: request.recipientName || '[recipient-address]',
+          subject: request.subject,
+          body: '[Email draft blocked by ethics check. Does not meet Ten Rules compliance standards.]',
+          cc: [],
+          recipientType: request.recipientType,
+          tone: request.tone,
+          caseDetails: request.caseDetails,
+          _ethicsMetadata: {
+            reviewed: true,
+            blocked: true,
+            warnings: ethicsCheck.ethicsCheck.warnings,
+            complianceScore: ethicsCheck.ethicsCheck.complianceScore,
+            auditId: ethicsCheck.ethicsCheck.auditId,
+          },
+        };
+      }
+
+      // Add ethics metadata if warnings
+      return {
+        ...draft,
+        ...(ethicsCheck.ethicsCheck.warnings.length > 0 && {
+          _ethicsMetadata: {
+            reviewed: true,
+            warnings: ethicsCheck.ethicsCheck.warnings,
+            complianceScore: ethicsCheck.ethicsCheck.complianceScore,
+            auditId: ethicsCheck.ethicsCheck.auditId,
+          },
+        }),
       };
     } catch (error) {
       throw new Error(`AI call failed: ${error instanceof Error ? error.message : String(error)}`);

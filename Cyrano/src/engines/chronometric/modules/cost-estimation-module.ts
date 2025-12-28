@@ -8,6 +8,7 @@ import { BaseModule } from '../../../modules/base-module.js';
 import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { costEstimationService, MatterData, ProposalData } from '../services/cost-estimation.js';
 import { z } from 'zod';
+import { checkGeneratedContent } from '../../../services/ethics-check-helper.js';
 
 const CostEstimationInputSchema = z.object({
   action: z.enum([
@@ -48,7 +49,7 @@ export class CostEstimationModule extends BaseModule {
       resources: [
         {
           id: 'cost_estimation_service',
-          type: 'service',
+          type: 'api' as const,
           description: 'Cost estimation service with learning algorithm',
         },
       ],
@@ -127,20 +128,58 @@ export class CostEstimationModule extends BaseModule {
         input.attorney_id
       );
 
+      const estimateResult = {
+        matter_type: input.matter_type,
+        complexity: input.complexity,
+        attorney_id: input.attorney_id || 'firm-wide',
+        estimate,
+        note: estimate.confidence === 'low' 
+          ? 'Low confidence: Consider adding more historical data for better estimates'
+          : `Confidence: ${estimate.confidence}`,
+      };
+
+      // Ethics check: Ensure estimates are realistic (Rule 1: Truth Standard)
+      const estimateText = JSON.stringify(estimateResult, null, 2);
+      const ethicsCheck = await checkGeneratedContent(estimateText, {
+        toolName: 'cost_estimation',
+        contentType: 'report',
+        strictMode: true, // Strict for cost accuracy
+      });
+
+      // If blocked, return error
+      if (ethicsCheck.ethicsCheck.blocked) {
+        return {
+          content: [{
+            type: 'text',
+            text: 'Cost estimate blocked by ethics check. Estimate does not meet Ten Rules compliance standards.',
+          }],
+          isError: true,
+        };
+      }
+
+      // Add ethics metadata if warnings
+      const finalResult = {
+        ...estimateResult,
+        ...(ethicsCheck.ethicsCheck.warnings.length > 0 && {
+          _ethicsMetadata: {
+            reviewed: true,
+            warnings: ethicsCheck.ethicsCheck.warnings,
+            complianceScore: ethicsCheck.ethicsCheck.complianceScore,
+            auditId: ethicsCheck.ethicsCheck.auditId,
+          },
+        }),
+      };
+
       return {
         content: [{
           type: 'text',
-          text: JSON.stringify({
-            matter_type: input.matter_type,
-            complexity: input.complexity,
-            attorney_id: input.attorney_id || 'firm-wide',
-            estimate,
-            note: estimate.confidence === 'low' 
-              ? 'Low confidence: Consider adding more historical data for better estimates'
-              : `Confidence: ${estimate.confidence}`,
-          }, null, 2)
+          text: JSON.stringify(finalResult, null, 2)
         }],
         isError: false,
+        metadata: {
+          ethicsReviewed: true,
+          ethicsComplianceScore: ethicsCheck.ethicsCheck.complianceScore,
+        },
       };
     } catch (error) {
       return {
@@ -238,21 +277,59 @@ export class CostEstimationModule extends BaseModule {
 
       const proposal = await costEstimationService.generateProposal(proposalData);
 
+      const proposalResult = {
+        proposal,
+        metadata: {
+          matter_type: proposalData.matter_type,
+          complexity: proposalData.complexity,
+          estimated_hours: proposalData.estimated_hours,
+          estimated_cost: proposalData.estimated_cost,
+          generated_at: new Date().toISOString(),
+        },
+      };
+
+      // Ethics check: Ensure proposal is realistic and truthful (Rule 1: Truth Standard)
+      const proposalText = JSON.stringify(proposalResult, null, 2);
+      const ethicsCheck = await checkGeneratedContent(proposalText, {
+        toolName: 'cost_estimation',
+        contentType: 'report',
+        strictMode: true, // Strict for proposal accuracy
+      });
+
+      // If blocked, return error
+      if (ethicsCheck.ethicsCheck.blocked) {
+        return {
+          content: [{
+            type: 'text',
+            text: 'Proposal blocked by ethics check. Proposal does not meet Ten Rules compliance standards.',
+          }],
+          isError: true,
+        };
+      }
+
+      // Add ethics metadata if warnings
+      const finalResult = {
+        ...proposalResult,
+        ...(ethicsCheck.ethicsCheck.warnings.length > 0 && {
+          _ethicsMetadata: {
+            reviewed: true,
+            warnings: ethicsCheck.ethicsCheck.warnings,
+            complianceScore: ethicsCheck.ethicsCheck.complianceScore,
+            auditId: ethicsCheck.ethicsCheck.auditId,
+          },
+        }),
+      };
+
       return {
         content: [{
           type: 'text',
-          text: JSON.stringify({
-            proposal,
-            metadata: {
-              matter_type: proposalData.matter_type,
-              complexity: proposalData.complexity,
-              estimated_hours: proposalData.estimated_hours,
-              estimated_cost: proposalData.estimated_cost,
-              generated_at: new Date().toISOString(),
-            },
-          }, null, 2)
+          text: JSON.stringify(finalResult, null, 2)
         }],
         isError: false,
+        metadata: {
+          ethicsReviewed: true,
+          ethicsComplianceScore: ethicsCheck.ethicsCheck.complianceScore,
+        },
       };
     } catch (error) {
       return {

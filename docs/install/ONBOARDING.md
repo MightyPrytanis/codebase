@@ -1,11 +1,136 @@
-# Library + RAG Onboarding Guide
+# LexFiat Onboarding Guide
 
-**Version:** v551  
+**Version:** v552  
 **Created:** 2025-12-15 (2025-50)  
-**Last Updated:** 2025-12-15 (2025-50)  
+**Last Updated:** 2025-12-21 (2025-W51)  
 **Status:** Active
 
 ## Overview
+
+The LexFiat onboarding wizard guides new users through a comprehensive setup process to configure their practice profile, library storage, AI providers, time tracking, and integrations. This guide covers all 8 steps of the onboarding process and what happens after completion.
+
+## Onboarding Steps
+
+### Step 1: Jurisdiction & Practice Areas
+- **Primary Jurisdiction:** Select your main state/jurisdiction
+- **Additional Jurisdictions:** Optionally select additional jurisdictions where you practice
+- **Practice Areas:** Select one or more practice areas (Family Law, Criminal Defense, etc.)
+
+**Required:** Primary jurisdiction and at least one practice area must be selected.
+
+### Step 2: Counties & Courts
+- **Counties:** Add counties where you practice (can add custom counties)
+- **Courts:** Add specific courts where you practice (can add custom courts)
+
+**Required:** At least one county must be selected.
+
+### Step 3: Issue Tags
+- **Common Issues:** Select from predefined issue tags (divorce, custody, etc.)
+- **Custom Tags:** Add custom issue tags specific to your practice
+
+**Required:** At least one issue tag must be selected.
+
+### Step 4: Storage Locations (Library Setup)
+- **Local Storage Path:** Configure local filesystem path for documents
+- **Cloud Storage:** Enable OneDrive, Google Drive, or AWS S3 sync
+- **Cache Size:** Configure cache size in MB (default: 1024)
+- **Library Options:**
+  - Run initial library scan after setup
+  - Import seed data for your jurisdiction
+
+**Note:** Your practice profile settings (jurisdiction, practice areas, counties, courts, issue tags) from Step 1 will be used to pre-populate Library filters and help organize your documents.
+
+### Step 5: AI Provider Configuration
+- **LLM Provider:** Select primary AI provider (OpenAI, Anthropic, or Perplexity)
+- **API Key:** Enter and test your API key
+- **Research Provider:** Optionally select research provider (Westlaw, CourtListener)
+
+**Required:** LLM provider must be selected and API key tested successfully.
+
+### Step 6: Time Tracking Setup (Chronometric Baseline)
+- **Minimum Hours Per Week:** Set typical billable hours per week (default: 40)
+- **Use Baseline Until Enough Data:** Toggle to use baseline configuration until system learns your patterns
+
+**Note:** Chronometric can reconstruct your time from email, calendar, documents, and other artifacts using Workflow Archaeology.
+
+### Step 7: Integrations
+- **Clio Integration:** Connect to Clio for matter management and time tracking
+- **Email Integration:** Connect Gmail or Outlook for email processing
+- **Calendar Integration:** Connect Google Calendar or Outlook Calendar
+- **Research Providers:** Configure Westlaw and CourtListener API keys
+
+**Note:** All integrations are optional and can be configured later.
+
+### Step 8: Review & Complete
+- **Summary:** Review all settings with edit buttons to go back to any step
+- **What Happens Next:** Information about what will occur after completion
+- **Complete Setup:** Final button to complete onboarding
+
+## What Happens After Onboarding
+
+1. **Practice Profile Saved:** Your practice profile is saved to the database
+2. **Initial Library Scan:** If enabled, the system will scan configured storage locations
+3. **Chronometric Baseline:** Time tracking baseline is configured
+4. **Redirect:** You'll be redirected to the dashboard
+
+## Integration Setup Requirements
+
+### Clio Integration
+- Requires OAuth credentials from Clio
+- Instructions for obtaining OAuth credentials will be shown in the integration step
+
+### Email Integration
+- **Gmail:** Requires Google OAuth setup
+- **Outlook:** Requires Microsoft OAuth setup
+- Both require API credentials configured in environment variables
+
+### Calendar Integration
+- **Google Calendar:** Requires Google OAuth with calendar scope
+- **Outlook Calendar:** Requires Microsoft OAuth with calendar scope
+
+### Research Providers
+- **Westlaw:** Requires Westlaw API key
+- **CourtListener:** Optional, requires CourtListener API key
+
+## Troubleshooting
+
+### Onboarding Progress Not Saving
+- Check that the Cyrano HTTP bridge is running on port 5002
+- Verify API endpoints are accessible: `GET /api/onboarding/status`
+- Check browser console for errors
+
+### API Key Test Failing
+- Verify API key format is correct
+- Check that API key has sufficient credits/balance
+- Ensure network connectivity to API provider
+
+### Integration Connection Failing
+- Verify OAuth credentials are correctly configured
+- Check that redirect URIs match in OAuth provider settings
+- Ensure required scopes are requested
+
+### Library Scan Not Starting
+- Verify storage location paths are accessible
+- Check that practice profile is saved correctly
+- Review library health endpoint: `GET /api/health/library`
+
+## Resuming Onboarding
+
+If you need to resume onboarding:
+- Your progress is automatically saved as you complete each step
+- On returning to the onboarding page, your progress will be loaded
+- You can navigate to any step using the progress indicator or edit buttons
+
+## Skipping Onboarding
+
+For returning users:
+- You can skip onboarding if you've already completed it
+- Check onboarding status: `GET /api/onboarding/status?userId=<userId>`
+- If completed, you'll be redirected to the dashboard
+
+---
+
+## Library + RAG System Details
 
 The Library + RAG Onboarding system provides a comprehensive legal document management and retrieval system integrated with the Cyrano RAG (Retrieval-Augmented Generation) engine. It enables law firms to manage jurisdiction-specific legal resources, templates, and playbooks with AI-powered search and retrieval.
 
@@ -57,13 +182,13 @@ The Library + RAG Onboarding system provides a comprehensive legal document mana
 
 ### Frontend Components
 
-1. **Library Page** (`LexFiat/client/src/pages/library.tsx`)
+1. **Library Page** (`apps/lexfiat/client/src/pages/library.tsx`)
    - Document listing with filters
    - Source type, county, court, ingested/pinned filters
    - Health status display
    - Pin and ingest actions
 
-2. **API Client** (`LexFiat/client/src/lib/library-api.ts`)
+2. **API Client** (`apps/lexfiat/client/src/lib/library-api.ts`)
    - Type-safe API functions
    - Practice profile management
    - Library operations (fetch, pin, ingest)

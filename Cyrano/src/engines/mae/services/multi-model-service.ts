@@ -447,6 +447,7 @@ export class MultiModelService {
       google: { input: 0.075, output: 0.3 },
       xai: { input: 2.0, output: 10.0 },
       deepseek: { input: 0.14, output: 0.28 },
+      openrouter: { input: 0.1, output: 0.3 }, // Average across OpenRouter models
     };
     
     const providerCosts = costs[provider] || costs.perplexity;

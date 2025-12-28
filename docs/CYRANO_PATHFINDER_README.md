@@ -70,7 +70,7 @@ Located in: `Cyrano/src/tools/cyrano-pathfinder.ts`
 
 ### Frontend: CyranoChat Component
 
-**LexFiat:** `LexFiat/client/src/components/cyrano-chat.tsx`
+**LexFiat:** `apps/lexfiat/client/src/components/cyrano-chat.tsx`
 **Arkiver:** `apps/arkiver/frontend/src/components/CyranoChat.tsx`
 
 **Props:**
@@ -96,7 +96,7 @@ Located in: `Cyrano/src/tools/cyrano-pathfinder.ts`
 
 ### Frontend: CyranoChatDrawer Component
 
-**LexFiat:** `LexFiat/client/src/components/cyrano-chat-drawer.tsx`
+**LexFiat:** `apps/lexfiat/client/src/components/cyrano-chat-drawer.tsx`
 **Arkiver:** `apps/arkiver/frontend/src/components/CyranoChatDrawer.tsx`
 
 Provides a floating, expandable chat interface:
