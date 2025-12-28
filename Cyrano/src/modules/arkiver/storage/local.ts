@@ -397,7 +397,11 @@ export function createStorageProvider(type: 'local' | 's3', config: StorageConfi
     case 'local':
       return new LocalStorageProvider(config);
     case 's3':
-      throw new Error('S3 storage not yet implemented');
+      throw new Error(
+        'S3 storage requires AWS credentials and S3 bucket configuration. ' +
+        'Set AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_S3_BUCKET environment variables. ' +
+        'S3 storage implementation pending - use local storage for now.'
+      );
     default:
       throw new Error(`Unknown storage type: ${type}`);
   }

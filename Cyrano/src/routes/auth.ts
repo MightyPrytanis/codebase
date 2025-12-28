@@ -66,8 +66,27 @@ router.post('/logout', (req: Request, res: Response) => {
 
 router.post('/refresh', async (req: Request, res: Response) => {
   try {
+    // Validate request body
+    const RefreshTokenSchema = z.object({
+      refreshToken: z.string().optional(), // Optional if in cookie
+    });
+    
+    const validationResult = RefreshTokenSchema.safeParse(req.body);
+    if (!validationResult.success && req.body && Object.keys(req.body).length > 0) {
+      return res.status(400).json({
+        error: 'Invalid request body',
+        details: validationResult.error.errors,
+      });
+    }
+    
     const refreshToken = req.cookies?.refreshToken || req.body.refreshToken;
     if (!refreshToken) return res.status(401).json({ error: 'Missing refresh token' });
+    
+    // Validate token format (basic check)
+    if (typeof refreshToken !== 'string' || refreshToken.length < 10) {
+      return res.status(401).json({ error: 'Invalid token format' });
+    }
+    
     const payload = verifyToken(refreshToken);
     if (payload.type !== 'refresh') return res.status(401).json({ error: 'Invalid token type' });
     const newAccessToken = generateAccessToken({ userId: payload.userId, email: payload.email, role: payload.role });
@@ -80,8 +99,27 @@ router.post('/refresh', async (req: Request, res: Response) => {
 
 router.post('/verify', (req: Request, res: Response) => {
   try {
+    // Validate request body
+    const VerifyTokenSchema = z.object({
+      token: z.string().optional(), // Optional if in Authorization header
+    });
+    
+    const validationResult = VerifyTokenSchema.safeParse(req.body);
+    if (!validationResult.success && req.body && Object.keys(req.body).length > 0) {
+      return res.status(400).json({
+        error: 'Invalid request body',
+        details: validationResult.error.errors,
+      });
+    }
+    
     const token = req.body.token || req.headers.authorization?.substring(7);
     if (!token) return res.status(400).json({ error: 'Missing token' });
+    
+    // Validate token format (basic check)
+    if (typeof token !== 'string' || token.length < 10) {
+      return res.status(400).json({ error: 'Invalid token format' });
+    }
+    
     const payload = verifyToken(token);
     res.json({ valid: true, user: { userId: payload.userId, email: payload.email, role: payload.role } });
   } catch (error) {

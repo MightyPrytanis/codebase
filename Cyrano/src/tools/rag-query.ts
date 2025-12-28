@@ -7,6 +7,8 @@
 import { BaseTool } from './base-tool.js';
 import { z } from 'zod';
 import { RAGService } from '../services/rag-service.js';
+import { checkGeneratedContent } from '../services/ethics-check-helper.js';
+import { systemicEthicsService } from '../services/systemic-ethics-service.js';
 
 const RAGQuerySchema = z.object({
   action: z.enum(['query', 'ingest', 'ingest_batch', 'get_context', 'get_stats']).describe('Action to perform'),
@@ -156,13 +158,41 @@ All retrieved information includes source attribution for transparency and verif
             includeSourceInfo,
           });
           
-          // Format result with source notice
+          // Format result with source notice (Rule 4: Foundation of Factual Claims - ensure source attribution)
           const formattedResult = {
             ...result,
             notice: result.sourceNotice || 'Data source information is available in citations.',
           };
           
-          return this.createSuccessResult(JSON.stringify(formattedResult, null, 2));
+          // Ethics check: Ensure source attribution is present (Rule 4 compliance)
+          const resultText = JSON.stringify(formattedResult, null, 2);
+          const ethicsCheck = await checkGeneratedContent(resultText, {
+            toolName: 'rag_query',
+            contentType: 'answer',
+            strictMode: false, // RAG results have sources, so less strict
+          });
+          
+          // If blocked, return error; if warnings, add to result
+          if (ethicsCheck.ethicsCheck.blocked) {
+            return this.createErrorResult(
+              'Query result blocked by ethics check. Please ensure all sources are properly attributed.'
+            );
+          }
+          
+          // Add ethics metadata if warnings
+          const finalResult = {
+            ...formattedResult,
+            ...(ethicsCheck.ethicsCheck.warnings.length > 0 && {
+              _ethicsMetadata: {
+                reviewed: true,
+                warnings: ethicsCheck.ethicsCheck.warnings,
+                complianceScore: ethicsCheck.ethicsCheck.complianceScore,
+                auditId: ethicsCheck.ethicsCheck.auditId,
+              },
+            }),
+          };
+          
+          return this.createSuccessResult(JSON.stringify(finalResult, null, 2));
 
         case 'ingest':
           if (!document) {

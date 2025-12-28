@@ -40,8 +40,19 @@ export function GoodCounsel({ caseContext = "", timePressure = "medium" }: GoodC
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          tool: "good_counsel",
-          arguments: data,
+          tool: "goodcounsel_engine",
+          arguments: {
+            action: "execute_workflow",
+            workflow_id: "wellness_check", // Use wellness_check workflow for general guidance
+            input: {
+              context: data.context,
+              user_state: data.user_state,
+              time_pressure: data.time_pressure,
+              ethical_concerns: data.ethical_concerns,
+              ai_provider: data.ai_provider,
+            },
+            userId: "default-user", // TODO: Get from auth
+          },
         }),
       });
 

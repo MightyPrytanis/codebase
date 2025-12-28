@@ -25,6 +25,9 @@ const GoodCounselEngineSchema = z.object({
 /**
  * GoodCounsel Engine Wrapper Tool
  * Exposes the GoodCounsel engine functionality through MCP
+ * 
+ * Note: wellness_journal, wellness_trends, and burnout_check are available
+ * via the wellness_journal MCP tool (use that tool directly instead)
  */
 export const goodcounselEngineTool = new (class extends BaseTool {
   getToolDefinition() {

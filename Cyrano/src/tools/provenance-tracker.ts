@@ -73,14 +73,24 @@ export const provenanceTracker = new (class extends BaseTool {
         if (artifacts.emails) {
           artifacts.emails.forEach((email: any) => {
             if (email.date === time_entry.date && email.sent) {
-              provenance.direct_evidence.push({
+              const evidenceEntry: any = {
                 type: 'email',
                 id: email.id,
                 subject: email.subject,
-                evidence_type: 'direct',
+                evidence_type: email.evidence_type || 'direct',
                 source: 'email_artifact_collector',
                 timestamp: email.date,
-              });
+              };
+              
+              // Include court filing confirmation metadata if present (emails FROM MiFile/courts, not API integration)
+              if (email.mifile_confirmation) {
+                evidenceEntry.mifile_confirmation = true;
+                evidenceEntry.confirmation_type = email.confirmation_type;
+                evidenceEntry.case_number = email.case_number;
+                evidenceEntry.chronometric_priority = email.chronometric_priority || 'high';
+              }
+              
+              provenance.direct_evidence.push(evidenceEntry);
             }
           });
         }

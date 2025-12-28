@@ -58,13 +58,15 @@ export function GoodCounselJournaling({ userId }: JournalingProps) {
   const loadRecentEntries = async () => {
     setIsLoadingEntries(true);
     try {
-      // TODO: Replace with wellness_journal tool call
-      const userIdNum = userId ? parseInt(userId) : 1; // Default to 1 for now
-      const result = await executeCyranoTool('wellness_journal', {
-        action: 'get_entries',
-        userId: userIdNum,
-        limit: 5,
-        offset: 0,
+      // Use goodcounsel_engine with wellness_journal action
+      const result = await executeCyranoTool('goodcounsel_engine', {
+        action: 'wellness_journal',
+        input: {
+          action: 'get_entries',
+          limit: 5,
+          offset: 0,
+        },
+        userId: userId || 'default-user',
       });
       
       if (result.isError) {
@@ -90,15 +92,16 @@ export function GoodCounselJournaling({ userId }: JournalingProps) {
 
     setIsSubmitting(true);
     try {
-      const userIdNum = userId ? parseInt(userId) : 1; // Default to 1 for now
-      
-      // Create entry via wellness_journal tool
-      const result = await executeCyranoTool('wellness_journal', {
-        action: 'create_entry',
-        userId: userIdNum,
-        content: entry.trim(),
-        mood: mood.trim() || undefined,
-        tags: tags,
+      // Create entry via goodcounsel_engine with wellness_journal action
+      const result = await executeCyranoTool('goodcounsel_engine', {
+        action: 'wellness_journal',
+        input: {
+          action: 'create_entry',
+          content: entry.trim(),
+          mood: mood.trim() || undefined,
+          tags: tags,
+        },
+        userId: userId || 'default-user',
       });
       
       if (result.isError) {
@@ -134,11 +137,14 @@ export function GoodCounselJournaling({ userId }: JournalingProps) {
     
     setIsLoadingFeedback(true);
     try {
-      // Get feedback for the first entry ID
-      const result = await executeCyranoTool('wellness_journal', {
-        action: 'get_feedback',
-        userId: userId ? parseInt(userId) : 1,
-        entryId: entryIds[0],
+      // Get feedback via goodcounsel_engine with wellness_journal action
+      const result = await executeCyranoTool('goodcounsel_engine', {
+        action: 'wellness_journal',
+        input: {
+          action: 'get_feedback',
+          entryId: entryIds[0],
+        },
+        userId: userId || 'default-user',
       });
       
       if (result.isError) {

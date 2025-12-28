@@ -263,26 +263,28 @@ export class TaxForecastModule extends BaseModule {
    * Generate tax PDF with form filling
    */
   private async generateTaxPDF(input: any): Promise<CallToolResult> {
-    // Use PDF form filler tool if available
+    // Use PDF form filler tool (registered in module constructor)
     const pdfFiller = this.getTool('pdf_form_filler');
-    if (pdfFiller) {
-      return await pdfFiller.execute({
-        formType: 'tax_return',
-        formData: input,
-      });
+    if (!pdfFiller) {
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify({
+              error: 'PDF form filler tool not available in module',
+            }, null, 2),
+          },
+        ],
+        isError: true,
+      } as CallToolResult;
     }
 
-    return {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify({
-            error: 'PDF form filler tool not yet implemented',
-          }, null, 2),
-        },
-      ],
-      isError: true,
-    };
+    // Execute PDF form filling
+    return await pdfFiller.execute({
+      action: 'fill_form',
+      formType: 'tax_return',
+      formData: input,
+    });
   }
 
   async cleanup(): Promise<void> {

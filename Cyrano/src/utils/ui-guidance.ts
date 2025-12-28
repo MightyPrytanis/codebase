@@ -72,9 +72,9 @@ export const VERIFICATION_MODE_GUIDANCE: Record<VerificationMode, GuidanceInfo> 
       'May be overkill for simple claims'
     ],
     estimatedImpact: { 
-      accuracy: 'very_high', 
-      speed: 'slow', 
-      cost: 'high' 
+      accuracy: 'high' as const, 
+      speed: 'slow' as const, 
+      cost: 'high' as const
     }
   },
   custom: {
@@ -93,9 +93,9 @@ export const VERIFICATION_MODE_GUIDANCE: Record<VerificationMode, GuidanceInfo> 
       'Cost and time depend on configuration'
     ],
     estimatedImpact: { 
-      accuracy: 'variable', 
-      speed: 'variable', 
-      cost: 'variable' 
+      accuracy: 'medium' as const, 
+      speed: 'medium' as const, 
+      cost: 'medium' as const
     }
   },
 };
@@ -137,9 +137,9 @@ export const PROVIDER_STRATEGY_GUIDANCE: Record<ProviderStrategy, GuidanceInfo> 
       'Requires multiple API keys'
     ],
     estimatedImpact: { 
-      accuracy: 'variable', 
-      speed: 'slow', 
-      cost: 'high' 
+      accuracy: 'medium' as const, 
+      speed: 'slow' as const, 
+      cost: 'high' as const
     }
   },
 };

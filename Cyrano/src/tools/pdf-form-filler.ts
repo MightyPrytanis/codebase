@@ -7,7 +7,8 @@
 import { BaseTool } from './base-tool.js';
 import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
-import { PDFDocument, PDFFont, rgb, StandardFonts } from 'pdf-lib';
+import { PDFDocument, PDFFont, rgb, StandardFonts, PDFForm, PDFTextField, PDFCheckBox, degrees } from 'pdf-lib';
+import { getFormMappings, mapFormDataToFields } from './pdf-form-mappings.js';
 
 const PDFFormFillerSchema = z.object({
   action: z.enum(['fill_form', 'apply_branding', 'get_status']).describe('Action to perform'),
@@ -134,14 +135,87 @@ export const pdfFormFiller = new (class extends BaseTool {
 
     try {
       const pdfDoc = await PDFDocument.load(templateBuffer);
-      const pages = pdfDoc.getPages();
-      const firstPage = pages[0];
-      const { width, height } = firstPage.getSize();
-
-      // TODO: Implement actual form field mapping based on form type
-      // This is a placeholder - would need to map form data to specific PDF form fields
-      // For now, just return the template with branding applied
-
+      const form = pdfDoc.getForm();
+      const fields = form.getFields();
+      
+      // Get field mappings for this form type
+      const mappings = getFormMappings(formType || '');
+      const fieldValues = mapFormDataToFields(formType || '', formData || {}, mappings);
+      
+      // Create a map of field names to field objects for quick lookup
+      const fieldMap = new Map<string, any>();
+      fields.forEach(field => {
+        fieldMap.set(field.getName(), field);
+      });
+      
+      // Fill form fields
+      let fieldsFilled = 0;
+      let fieldsSkipped = 0;
+      const skippedFields: string[] = [];
+      
+      for (const [fieldName, value] of fieldValues.entries()) {
+        const field = fieldMap.get(fieldName);
+        
+        if (!field) {
+          // Try to find field by partial match (for array indices like c1_3[0])
+          const baseName = fieldName.replace(/\[\d+\]$/, '');
+          const matchingFields = Array.from(fieldMap.keys()).filter(name => 
+            name.startsWith(baseName) || name.includes(baseName)
+          );
+          
+          if (matchingFields.length > 0) {
+            // Handle checkbox arrays (e.g., filing status)
+            if (fieldName.includes('filingStatus') && typeof value === 'number') {
+              const checkboxField = fieldMap.get(matchingFields[value]);
+              if (checkboxField && checkboxField instanceof PDFCheckBox) {
+                checkboxField.check();
+                fieldsFilled++;
+              } else {
+                fieldsSkipped++;
+                skippedFields.push(fieldName);
+              }
+            } else {
+              // Use first matching field
+              const targetField = fieldMap.get(matchingFields[0]);
+              if (targetField) {
+                if (targetField instanceof PDFTextField) {
+                  targetField.setText(String(value));
+                  fieldsFilled++;
+                } else if (targetField instanceof PDFCheckBox && (value === true || value === 'true' || value === '1')) {
+                  targetField.check();
+                  fieldsFilled++;
+                } else {
+                  fieldsSkipped++;
+                  skippedFields.push(fieldName);
+                }
+              } else {
+                fieldsSkipped++;
+                skippedFields.push(fieldName);
+              }
+            }
+          } else {
+            fieldsSkipped++;
+            skippedFields.push(fieldName);
+          }
+        } else {
+          // Field found - fill it
+          if (field instanceof PDFTextField) {
+            field.setText(String(value));
+            fieldsFilled++;
+          } else if (field instanceof PDFCheckBox) {
+            if (value === true || value === 'true' || value === '1' || value === 'checked') {
+              field.check();
+            } else {
+              field.uncheck();
+            }
+            fieldsFilled++;
+          } else {
+            fieldsSkipped++;
+            skippedFields.push(fieldName);
+          }
+        }
+      }
+      
       const pdfBytes = await pdfDoc.save();
 
       return {
@@ -150,7 +224,10 @@ export const pdfFormFiller = new (class extends BaseTool {
             type: 'text',
             text: JSON.stringify({
               success: true,
-              message: 'Form filled (placeholder - field mapping not yet implemented)',
+              message: `Form filled: ${fieldsFilled} fields filled, ${fieldsSkipped} fields skipped`,
+              fieldsFilled,
+              fieldsSkipped,
+              skippedFields: skippedFields.length > 0 ? skippedFields.slice(0, 10) : [], // Limit to first 10
               pdfSize: pdfBytes.length,
             }, null, 2),
           },
@@ -227,7 +304,7 @@ export const pdfFormFiller = new (class extends BaseTool {
             color: rgb(1, 0.8, 0), // Yellow/orange warning color
           });
 
-          page.drawText(`${brandName} - HYPOTHETICAL FORECAST - NOT FILING READY`, {
+          page.drawText(`LexFiat Forecaster™ - HYPOTHETICAL FORECAST - NOT FILING READY`, {
             x: 10,
             y: height - 25,
             size: 10,
@@ -244,13 +321,13 @@ export const pdfFormFiller = new (class extends BaseTool {
           });
         } else if (presentationMode === 'watermark') {
           // Add watermark across page
-          page.drawText(`${brandName} - HYPOTHETICAL FORECAST`, {
+          page.drawText(`LexFiat Forecaster™ - HYPOTHETICAL FORECAST`, {
             x: width / 2 - 150,
             y: height / 2,
             size: 24,
             font: helveticaBoldFont,
             color: rgb(0.8, 0.8, 0.8), // Light gray
-            rotate: { angleRadians: -0.785 }, // 45 degree rotation
+            rotate: degrees(-45), // 45 degree rotation
             opacity: 0.3,
           });
         }

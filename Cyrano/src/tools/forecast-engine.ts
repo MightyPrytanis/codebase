@@ -5,6 +5,7 @@
  */
 
 import { BaseTool } from './base-tool.js';
+import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { engineRegistry } from '../engines/registry.js';
 
@@ -28,7 +29,7 @@ const ForecastEngineSchema = z.object({
  * Forecast Engine Wrapper Tool
  * Exposes the Forecast Engine functionality through MCP
  */
-export const forecastEngineTool = new (class extends BaseTool {
+class ForecastEngineTool extends BaseTool {
   getToolDefinition() {
     return {
       name: 'forecast_engine',
@@ -86,7 +87,7 @@ export const forecastEngineTool = new (class extends BaseTool {
         return {
           content: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: JSON.stringify({
                 success: false,
                 error: 'Forecast Engine not found in registry',
@@ -94,20 +95,45 @@ export const forecastEngineTool = new (class extends BaseTool {
             },
           ],
           isError: true,
-        };
+        } as CallToolResult;
       }
 
       // Execute action on Forecast Engine
-      return await forecastEngine.execute({
+      const result = await forecastEngine.execute({
         action: parsed.action,
         forecast_input: parsed.forecast_input,
         branding: parsed.branding,
       });
+      // Normalize result to match CallToolResult type - ensure content array has proper types
+      // The forecast engine returns CallToolResult, but TypeScript sees different type definitions
+      // We normalize the content array to ensure type compatibility
+      if (result && typeof result === 'object' && 'content' in result && Array.isArray(result.content)) {
+        const normalizedContent = result.content.map((item: any) => {
+          if (item && typeof item === 'object' && 'type' in item) {
+            if (item.type === 'text' || (typeof item.type === 'string' && 'text' in item)) {
+              return {
+                type: 'text' as const,
+                text: String(item.text || ''),
+                ...(item.annotations ? { annotations: item.annotations } : {}),
+                ...(item._meta ? { _meta: item._meta } : {}),
+              };
+            }
+          }
+          return item;
+        });
+        // Type assertion needed due to structural type mismatch between MCP SDK versions
+        return {
+          ...result,
+          content: normalizedContent,
+        } as CallToolResult;
+      }
+      // Type assertion needed due to structural type mismatch
+      return result as CallToolResult;
     } catch (error) {
       return {
         content: [
           {
-            type: 'text',
+            type: 'text' as const,
             text: JSON.stringify({
               success: false,
               error: error instanceof Error ? error.message : String(error),
@@ -115,8 +141,10 @@ export const forecastEngineTool = new (class extends BaseTool {
           },
         ],
         isError: true,
-      };
+      } as CallToolResult;
     }
   }
-});
+}
+
+export const forecastEngineTool = new ForecastEngineTool();
 

@@ -37,6 +37,10 @@ import { chronometricModuleTool } from './tools/chronometric-module.js';
 import { maeEngineTool } from './tools/mae-engine.js';
 import { goodcounselEngineTool } from './tools/goodcounsel-engine.js';
 import { ethicsReviewer } from './engines/goodcounsel/tools/ethics-reviewer.js';
+import { ethicalAIGuard } from './tools/ethical-ai-guard.js';
+import { tenRulesChecker } from './tools/ten-rules-checker.js';
+import { ethicsPolicyExplainer } from './tools/ethics-policy-explainer.js';
+import { getEthicsAuditTool, getEthicsStatsTool } from './tools/ethics-audit-tools.js';
 import { potemkinEngineTool } from './tools/potemkin-engine.js';
 import { forecastEngineTool } from './tools/forecast-engine.js';
 // Import shared verification tools
@@ -89,9 +93,11 @@ import { authTool } from './tools/auth.js';  // Add auth tool import
 import { syncManager } from './tools/sync-manager.js';
 import { redFlagFinder } from './tools/red-flag-finder.js';
 import { clioIntegration } from './tools/clio-integration.js';
+import { micourtQuery } from './tools/micourt-query.js';
 import { timeValueBilling } from './tools/time-value-billing.js';
 import { documentDrafterTool } from './tools/document-drafter.js';
 import { workflowStatusTool } from './tools/workflow-status.js';
+import { workflowArchaeology } from './tools/workflow-archaeology.js';
 import {
   getGoodCounselPromptsTool,
   dismissGoodCounselPromptTool,
@@ -115,6 +121,7 @@ import {
   createArkiverConfig
 } from './tools/arkiver-tools.js';
 import { cyranoPathfinder } from './tools/cyrano-pathfinder.js';
+import { skillExecutor } from './tools/skill-executor.js';
 
 class CyranoMCPServer {
   private server: Server;
@@ -133,6 +140,21 @@ class CyranoMCPServer {
     );
 
     this.setupToolHandlers();
+    this.loadSkills();
+  }
+
+  /**
+   * Load all skills at startup
+   */
+  private async loadSkills(): Promise<void> {
+    try {
+      const { skillRegistry } = await import('./skills/skill-registry.js');
+      await skillRegistry.loadAll();
+      console.error(`[Skills] Loaded ${skillRegistry.getCount()} skills`);
+    } catch (error) {
+      console.error('[Skills] Failed to load skills:', error);
+      // Don't fail startup if skills fail to load
+    }
   }
 
   private setupToolHandlers() {
@@ -175,10 +197,17 @@ class CyranoMCPServer {
           preFillLogic.getToolDefinition(),
           dupeCheck.getToolDefinition(),
           provenanceTracker.getToolDefinition(),
+          workflowArchaeology.getToolDefinition(),
           chronometricModuleTool.getToolDefinition(),
           maeEngineTool.getToolDefinition(),
           goodcounselEngineTool.getToolDefinition(),
           ethicsReviewer.getToolDefinition(),
+          // EthicalAI Tools
+          ethicalAIGuard.getToolDefinition(),
+          tenRulesChecker.getToolDefinition(),
+          ethicsPolicyExplainer.getToolDefinition(),
+          getEthicsAuditTool.getToolDefinition(),
+          getEthicsStatsTool.getToolDefinition(),
           potemkinEngineTool.getToolDefinition(),
           forecastEngineTool.getToolDefinition(),
           // Shared verification tools (used by Potemkin and Arkiver)
@@ -224,6 +253,8 @@ class CyranoMCPServer {
           wellnessJournalTool.getToolDefinition(),
           // Cyrano Pathfinder - Unified Chat Interface
           cyranoPathfinder.getToolDefinition(),
+          // Skills Executor
+          skillExecutor.getToolDefinition(),
         ],
       };
     });
@@ -285,6 +316,9 @@ class CyranoMCPServer {
         case 'clio_integration':
           result = await clioIntegration.execute(args);
           break;
+        case 'micourt_query':
+          result = await micourtQuery.execute(args);
+          break;
           case 'extract_conversations':
             result = await extractConversations.execute(args);
             break;
@@ -342,6 +376,9 @@ class CyranoMCPServer {
           case 'provenance_tracker':
             result = await provenanceTracker.execute(args);
             break;
+          case 'workflow_archaeology':
+            result = await workflowArchaeology.execute(args) as CallToolResult;
+            break;
           case 'chronometric_module':
             result = await chronometricModuleTool.execute(args);
             break;
@@ -354,11 +391,46 @@ class CyranoMCPServer {
           case 'ethics_reviewer':
             result = await ethicsReviewer.execute(args);
             break;
+          // EthicalAI Tools
+          case 'ethical_ai_guard':
+            result = await ethicalAIGuard.execute(args);
+            break;
+          case 'ten_rules_checker':
+            result = await tenRulesChecker.execute(args);
+            break;
+          case 'ethics_policy_explainer':
+            result = await ethicsPolicyExplainer.execute(args);
+            break;
+          case 'get_ethics_audit':
+            result = await getEthicsAuditTool.execute(args);
+            break;
+          case 'get_ethics_stats':
+            result = await getEthicsStatsTool.execute(args);
+            break;
           case 'potemkin_engine':
             result = await potemkinEngineTool.execute(args);
             break;
           case 'forecast_engine':
-            result = await forecastEngineTool.execute(args);
+            const forecastResult = await forecastEngineTool.execute(args);
+            // Normalize result to match CallToolResult type
+            if (forecastResult && typeof forecastResult === 'object' && 'content' in forecastResult && Array.isArray(forecastResult.content)) {
+              result = {
+                ...forecastResult,
+                content: forecastResult.content.map((item: any) => {
+                  if (item && typeof item === 'object' && 'type' in item && 'text' in item) {
+                    return {
+                      type: 'text' as const,
+                      text: item.text,
+                      ...(item.annotations ? { annotations: item.annotations } : {}),
+                      ...(item._meta ? { _meta: item._meta } : {}),
+                    };
+                  }
+                  return item;
+                }),
+              } as CallToolResult;
+            } else {
+              result = forecastResult as CallToolResult;
+            }
             break;
           // Shared verification tools
           case 'claim_extractor':
@@ -453,21 +525,24 @@ class CyranoMCPServer {
           case 'cyrano_pathfinder':
             result = await cyranoPathfinder.execute(args);
             break;
+          case 'skill_executor':
+            result = await skillExecutor.execute(args);
+            break;
           default:
             throw new Error(`Unknown tool: ${name}`);
         }
 
-        return result;
+        return result as CallToolResult;
       } catch (error) {
         return {
           content: [
             {
-              type: 'text',
+              type: 'text' as const,
               text: `Error executing tool ${name}: ${error instanceof Error ? error.message : String(error)}`,
             },
           ],
           isError: true,
-        };
+        } as CallToolResult;
       }
     });
   }

@@ -5,6 +5,7 @@
  */
 
 import fetch from 'node-fetch';
+import { injectTenRulesIntoSystemPrompt } from './ethics-prompt-injector.js';
 
 export interface PerplexityConfig {
   apiKey: string;
@@ -92,7 +93,10 @@ export class PerplexityService {
    * Analyze a legal document using Perplexity
    */
   async analyzeDocument(documentText: string, analysisType: string = 'comprehensive'): Promise<string> {
-    const systemPrompt = `You are a highly experienced legal AI assistant specializing in document analysis for family law and civil litigation. Your role is to identify key legal issues, assess risks, and provide actionable recommendations to attorneys.
+    // Import prompt injector
+    const { injectTenRulesIntoSystemPrompt } = await import('./ethics-prompt-injector.js');
+    
+    let systemPrompt = `You are a highly experienced legal AI assistant specializing in document analysis for family law and civil litigation. Your role is to identify key legal issues, assess risks, and provide actionable recommendations to attorneys.
 
 Key responsibilities:
 1. Identify unusual, significant, or unexpected elements in legal documents
@@ -102,6 +106,9 @@ Key responsibilities:
 5. Maintain professional legal standards and ethics
 
 Always provide analysis in a clear, structured format with specific legal insights.`;
+    
+    // Inject Ten Rules into system prompt
+    systemPrompt = injectTenRulesIntoSystemPrompt(systemPrompt, 'summary');
 
     const userPrompt = `Analyze this legal document and provide a ${analysisType} analysis:
 
@@ -134,7 +141,7 @@ Format your response in a clear, professional manner suitable for legal practice
    * Compare legal documents using Perplexity
    */
   async compareDocuments(documents: Array<{ text: string; title: string }>): Promise<string> {
-    const systemPrompt = `You are a legal document comparison specialist. Your role is to analyze multiple legal documents and identify similarities, differences, and potential conflicts or inconsistencies.
+    let systemPrompt = `You are a legal document comparison specialist. Your role is to analyze multiple legal documents and identify similarities, differences, and potential conflicts or inconsistencies.
 
 Key responsibilities:
 1. Identify overlapping provisions and terms
@@ -144,6 +151,9 @@ Key responsibilities:
 5. Provide recommendations for resolution
 
 Always provide analysis in a clear, structured format with specific legal insights.`;
+    
+    // Inject Ten Rules into system prompt
+    systemPrompt = injectTenRulesIntoSystemPrompt(systemPrompt, 'summary');
 
     const documentList = documents.map((doc, index) => 
       `Document ${index + 1}: ${doc.title}\n${doc.text}\n`
@@ -180,7 +190,7 @@ Format your response in a clear, professional manner suitable for legal practice
    * Generate GoodCounsel insights using Perplexity
    */
   async generateGoodCounselInsights(attorneyData: any): Promise<string> {
-    const systemPrompt = `You are GoodCounsel, a supportive AI assistant designed to help attorneys with wellness, professional development, and work-life balance. Your role is to provide insights, encouragement, and practical recommendations.
+    let systemPrompt = `You are GoodCounsel, a supportive AI assistant designed to help attorneys with wellness, professional development, and work-life balance. Your role is to provide insights, encouragement, and practical recommendations.
 
 Key principles:
 1. Always be supportive and non-judgmental
@@ -190,6 +200,9 @@ Key principles:
 5. Encourage healthy work practices
 
 Use warm, encouraging language that affirms the attorney's value and work.`;
+    
+    // Inject Ten Rules into system prompt
+    systemPrompt = injectTenRulesIntoSystemPrompt(systemPrompt, 'summary');
 
     const userPrompt = `Based on this attorney's profile and work patterns, provide supportive insights and recommendations:
 
@@ -223,7 +236,7 @@ Remember: GoodCounsel is about support, not criticism. Frame everything positive
    * Fact check content using Perplexity
    */
   async factCheck(content: string, sources?: string[]): Promise<string> {
-    const systemPrompt = `You are a legal fact-checking specialist. Your role is to verify legal claims, check citations, and identify potential inaccuracies in legal content.
+    let systemPrompt = `You are a legal fact-checking specialist. Your role is to verify legal claims, check citations, and identify potential inaccuracies in legal content.
 
 Key responsibilities:
 1. Verify legal citations and references
@@ -233,6 +246,9 @@ Key responsibilities:
 5. Provide confidence levels for your assessments
 
 Always provide analysis in a clear, professional manner with specific legal insights.`;
+    
+    // Inject Ten Rules into system prompt
+    systemPrompt = injectTenRulesIntoSystemPrompt(systemPrompt, 'summary');
 
     const userPrompt = `Fact-check this legal content and verify its accuracy:
 
@@ -267,7 +283,7 @@ Format your response in a clear, professional manner suitable for legal practice
    * Legal review using Perplexity
    */
   async legalReview(documentText: string, documentType: string): Promise<string> {
-    const systemPrompt = `You are a senior legal reviewer specializing in ${documentType} documents. Your role is to provide comprehensive legal review and analysis.
+    let systemPrompt = `You are a senior legal reviewer specializing in ${documentType} documents. Your role is to provide comprehensive legal review and analysis.
 
 Key responsibilities:
 1. Identify legal issues and potential problems
@@ -277,6 +293,9 @@ Key responsibilities:
 5. Provide recommendations for improvement
 
 Always provide analysis in a clear, professional manner with specific legal insights.`;
+    
+    // Inject Ten Rules into system prompt
+    systemPrompt = injectTenRulesIntoSystemPrompt(systemPrompt, 'summary');
 
     const userPrompt = `Review this ${documentType} document and provide a comprehensive legal analysis:
 
