@@ -43,11 +43,14 @@ export function GoodCounselRedesign({
       userState?: string;
       provider: string;
     }) => {
-      const result = await executeCyranoTool("good_counsel", {
-        action: "request_guidance",
-        context: data.context,
-        user_state: data.userState,
-        provider: data.provider,
+      const result = await executeCyranoTool("goodcounsel_engine", {
+        action: "wellness_check",
+        input: {
+          context: data.context,
+          user_state: data.userState,
+          ai_provider: data.provider,
+        },
+        userId: "default-user", // TODO: Get from auth
       });
       
       if (result.isError) {

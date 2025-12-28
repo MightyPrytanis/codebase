@@ -62,14 +62,14 @@ codebase/
 
 **Active Applications:**
 - ✅ `apps/arkiver/` - Active Arkiver frontend (correct location)
-- ✅ `apps/lexfiat/` - Legal workflow platform (moved from root level)
+- ✅ `apps/lexfiat/` - Legal workflow platform (correct location)
 - ✅ `apps/forecaster/` - Forecaster frontend (correct location)
 
 **MCP Server:**
 - ✅ `Cyrano/` - MCP server (correct location)
-- ✅ `Cyrano/src/engines/` - Engines (GoodCounsel, MAE, Potemkin, Forecast)
+- ✅ `Cyrano/src/engines/` - Engines (GoodCounsel, MAE, Potemkin, Forecast, Chronometric)
 - ✅ `Cyrano/src/modules/` - Modules (Arkiver, Chronometric, RAG, Forecast, Library)
-- ✅ `Cyrano/src/tools/` - MCP Tools (69 tools)
+- ✅ `Cyrano/src/tools/` - MCP Tools (71 tools)
 
 **Archived Code:**
 - ✅ `Legacy/old-codebase-artifacts/arkivermj/` - Original Base44 Arkiver (archived)
@@ -92,18 +92,18 @@ codebase/
 
 ### Issues Identified
 
-1. ✅ **LexFiat Location:** Moved to `apps/lexfiat/` for consistency with `apps/arkiver/`
+1. ✅ **LexFiat Location:** Located at `apps/lexfiat/` for consistency with `apps/arkiver/`
 2. **Miscellaneous Directory:** Contains duplicate UI components that should be archived
 3. **Root-Level Directories:** `Cosmos/` and `NewCodex/` at root level need review/archival
 4. **Legacy/ Exclusion:** Legacy/ should be excluded from code search tools to prevent confusion
 
 ### Recommendations
 
-1. ✅ Move `LexFiat/` → `apps/lexfiat/` (COMPLETE)
+1. ✅ LexFiat located at `apps/lexfiat/` (COMPLETE - root directory removed)
 2. Archive `Miscellaneous/` to `Legacy/` if not needed
 3. Review and archive `Cosmos/` and `NewCodex/` if not needed
 4. Update `.gitignore` and create `.cursorignore` to exclude `Legacy/` from searches
-5. ⚠️ Update all references to `LexFiat/` → `apps/lexfiat/` (IN PROGRESS)
+5. ✅ All references updated to `apps/lexfiat/` (COMPLETE)
 
 ## Branches
 
@@ -124,9 +124,9 @@ The following are intentionally excluded from git (see `.gitignore`):
 
 ### Cyrano
 MCP-compliant AI orchestration server with modular architecture:
-- **Engines:** GoodCounsel, MAE, Potemkin
-- **Modules:** Arkiver, Chronometric, RAG
-- **Tools:** 69 MCP tools for legal workflow automation
+- **Engines:** GoodCounsel, MAE, Potemkin, Forecast, Chronometric
+- **Modules:** Arkiver, Chronometric, RAG, Forecast (tax, child support, QDRO)
+- **Tools:** 71 MCP tools for legal workflow automation
 
 ### LexFiat
 Legal intelligence platform with adaptive workflow engine:

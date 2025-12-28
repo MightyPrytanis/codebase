@@ -4,10 +4,11 @@
  * See LICENSE.md for full license text
  */
 
-import { BaseTool } from '../../tools/base-tool.js';
+import { BaseTool } from '../../../tools/base-tool.js';
 import { z } from 'zod';
-import { apiValidator } from '../../utils/api-validator.js';
-import { aiService, AIProvider } from '../../services/ai-service.js';
+import { apiValidator } from '../../../utils/api-validator.js';
+import { aiService, AIProvider } from '../../../services/ai-service.js';
+import { injectTenRulesIntoSystemPrompt } from '../../../services/ethics-prompt-injector.js';
 
 const AIOrchestratorSchema = z.object({
   task_description: z.string().describe('Description of the task to orchestrate'),
@@ -179,8 +180,10 @@ export const aiOrchestrator = new (class extends BaseTool {
         : `Based on the previous analysis: ${JSON.stringify(previousResult)}\n\nContinue with: ${task}`;
       
       try {
+        let systemPrompt = this.getSystemPrompt(provider, 'sequential', i);
+        systemPrompt = injectTenRulesIntoSystemPrompt(systemPrompt, 'summary');
         const response = await aiService.call(provider, stepPrompt, {
-          systemPrompt: this.getSystemPrompt(provider, 'sequential', i),
+          systemPrompt,
           temperature: parameters?.temperature || 0.7,
           maxTokens: parameters?.maxTokens || 4000,
         });
@@ -231,8 +234,10 @@ export const aiOrchestrator = new (class extends BaseTool {
   ): Promise<any> {
     const promises = providers.map(async (provider, index) => {
       try {
+        let systemPrompt = this.getSystemPrompt(provider, 'parallel', index);
+        systemPrompt = injectTenRulesIntoSystemPrompt(systemPrompt, 'summary');
         const response = await aiService.call(provider, task, {
-          systemPrompt: this.getSystemPrompt(provider, 'parallel', index),
+          systemPrompt,
           temperature: parameters?.temperature || 0.7,
           maxTokens: parameters?.maxTokens || 4000,
         });
@@ -285,8 +290,10 @@ export const aiOrchestrator = new (class extends BaseTool {
     const analysisProviders = providers.slice(0, Math.min(2, providers.length));
     const analysisPromises = analysisProviders.map(async (provider, index) => {
       try {
+        let systemPrompt = 'You are an expert analyst. Provide a detailed analysis.';
+        systemPrompt = injectTenRulesIntoSystemPrompt(systemPrompt, 'summary');
         const response = await aiService.call(provider, `Analyze the following task: ${task}`, {
-          systemPrompt: 'You are an expert analyst. Provide a detailed analysis.',
+          systemPrompt,
           temperature: parameters?.temperature || 0.7,
           maxTokens: parameters?.maxTokens || 4000,
         });
@@ -317,9 +324,11 @@ export const aiOrchestrator = new (class extends BaseTool {
       const analysisSummary = validAnalysis.map(r => r.response).join('\n\n');
       
       try {
+        let systemPrompt = 'You are a critical reviewer. Identify strengths and weaknesses.';
+        systemPrompt = injectTenRulesIntoSystemPrompt(systemPrompt, 'summary');
         const verification = await aiService.call(verificationProvider, 
           `Verify and critique the following analysis:\n\n${analysisSummary}`, {
-          systemPrompt: 'You are a critical reviewer. Identify strengths and weaknesses.',
+          systemPrompt,
           temperature: parameters?.temperature || 0.7,
           maxTokens: parameters?.maxTokens || 4000,
         });
@@ -348,9 +357,11 @@ export const aiOrchestrator = new (class extends BaseTool {
 
     let synthesis: string | null = null;
     try {
+      let systemPrompt = 'You are a synthesis expert. Combine insights into a coherent final answer.';
+      systemPrompt = injectTenRulesIntoSystemPrompt(systemPrompt, 'summary');
       synthesis = await aiService.call(synthesisProvider,
         `Synthesize the following analyses into a comprehensive final answer:\n\n${allInputs}\n\nOriginal task: ${task}`, {
-        systemPrompt: 'You are a synthesis expert. Combine insights into a coherent final answer.',
+        systemPrompt,
         temperature: parameters?.temperature || 0.7,
         maxTokens: parameters?.maxTokens || 4000,
       });
@@ -396,7 +407,9 @@ export const aiOrchestrator = new (class extends BaseTool {
       'deepseek': 'You are DeepSeek, an expert AI assistant specializing in comprehensive legal analysis.',
     };
     
-    return prompts[provider] || 'You are an expert AI assistant.';
+    let basePrompt = prompts[provider] || 'You are an expert AI assistant.';
+    // Ten Rules will be injected at call site
+    return basePrompt;
   }
 
   /**

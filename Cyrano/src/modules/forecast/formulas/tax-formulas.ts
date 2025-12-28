@@ -31,6 +31,7 @@ export interface TaxInput {
   itemizedDeductions: number;
   personalExemptions?: number; // Pre-2018
   dependents: number;
+  estimatedWithholding?: number; // Estimated tax withholding
   credits: {
     earnedIncomeCredit?: number;
     childTaxCredit?: number;

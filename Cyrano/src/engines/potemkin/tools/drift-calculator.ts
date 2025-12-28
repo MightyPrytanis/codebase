@@ -18,6 +18,7 @@ import { BaseTool } from '../../../tools/base-tool.js';
 import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { AIService } from '../../../services/ai-service.js';
 import { Insight } from './history-retriever.js';
+import { injectTenRulesIntoSystemPrompt } from '../../../services/ethics-prompt-injector.js';
 
 /**
  * Input schema
@@ -196,7 +197,10 @@ Return your analysis as a JSON object with the following structure:
 }`;
 
       // Call AI service (Anthropic for structured analysis)
+      let systemPrompt = 'You are an expert AI auditor specializing in opinion drift detection.';
+      systemPrompt = injectTenRulesIntoSystemPrompt(systemPrompt, 'summary');
       const aiResponse = await this.aiService.call('anthropic', prompt, {
+        systemPrompt,
         maxTokens: 4000,
         temperature: 0.3, // Lower temperature for more consistent analysis
       });

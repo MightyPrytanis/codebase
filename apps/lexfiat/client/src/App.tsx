@@ -43,6 +43,7 @@ const MaeWorkflowsPage = lazy(() => import("@/pages/mae-workflows"));
 const WorkflowLibraryPage = lazy(() => import("@/pages/workflow-library"));
 const LibraryPage = lazy(() => import("@/pages/library"));
 const OnboardingPage = lazy(() => import("@/pages/onboarding"));
+const EthicsPage = lazy(() => import("@/pages/ethics"));
 
 // Loading fallback component
 const PageLoader = () => (
@@ -72,6 +73,7 @@ function Router() {
         <Route path="/workflow-library" component={WorkflowLibraryPage} />
         <Route path="/library" component={LibraryPage} />
         <Route path="/onboarding" component={OnboardingPage} />
+        <Route path="/ethics" component={EthicsPage} />
         <Route component={NotFound} />
       </Switch>
     </Suspense>

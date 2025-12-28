@@ -94,17 +94,8 @@ export function PriorityAlertsRow({
               });
             }
           } catch (e) {
-            // If not JSON, create mock alerts
-            alerts.push({
-              id: 'flag-1',
-              type: 'red_flag',
-              priority: 'critical',
-              client: 'Johnson',
-              matter: 'Johnson v Johnson',
-              item: 'Emergency Motion',
-              title: 'Critical red flag detected',
-              date: new Date().toISOString(),
-            });
+            // If not JSON, skip this alert (don't create mock data)
+            console.warn('Failed to parse red flags response:', e);
           }
         }
 
@@ -146,61 +137,17 @@ export function PriorityAlertsRow({
               });
             }
           } catch (e) {
-            // Fallback mock deadline
-            if (alerts.length === 0) {
-              alerts.push({
-                id: 'deadline-1',
-                type: 'deadline',
-                priority: 'critical',
-                client: 'Johnson',
-                matter: 'Johnson v Johnson',
-                item: 'TRO Response',
-                title: 'Due 5 PM tomorrow',
-                deadline: '2025-12-07T17:00:00',
-              });
-            }
+            // If not JSON, skip this alert (don't create mock data)
+            console.warn('Failed to parse workflow status response:', e);
           }
         }
 
-        // If no alerts, return mock data
-        if (alerts.length === 0) {
-          return [
-            {
-              id: 'alert-1',
-              type: 'deadline' as const,
-              priority: 'critical' as const,
-              client: 'Johnson',
-              matter: 'Johnson v Johnson',
-              item: 'TRO Response',
-              title: 'Due 5 PM tomorrow',
-              deadline: '2025-12-07T17:00:00',
-            },
-            {
-              id: 'alert-2',
-              type: 'red_flag' as const,
-              priority: 'high' as const,
-              client: 'Hartley',
-              matter: 'Hartley Estate',
-              item: 'Court Hearing Notice',
-              title: 'Court hearing notice received',
-              date: new Date().toISOString(),
-            },
-          ];
-        }
-
+        // Return alerts (empty array if none found - no mock data)
         return alerts;
       } catch (error) {
         console.error('Error fetching priority alerts:', error);
-        // Fail gracefully - return empty array but log transparently
-        return [
-          {
-            id: 'error-alert',
-            type: 'urgent' as const,
-            priority: 'medium' as const,
-            title: 'Service temporarily unavailable. Some alerts may not be displayed.',
-            date: new Date().toISOString(),
-          },
-        ];
+        // Fail gracefully - return empty array (no mock error alerts)
+        return [];
       }
     },
     refetchInterval: 30000,

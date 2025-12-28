@@ -123,7 +123,7 @@ const toolTests: Array<{
     name: 'ai_orchestrator',
     importPath: './src/engines/mae/tools/ai-orchestrator.js',
     exportName: 'aiOrchestrator',
-    testArgs: { prompt: 'What is 2+2?', providers: ['perplexity'] },
+    testArgs: { task_description: 'What is 2+2?', ai_providers: ['perplexity'], orchestration_mode: 'parallel' },
     category: 'Legal AI',
   },
   {

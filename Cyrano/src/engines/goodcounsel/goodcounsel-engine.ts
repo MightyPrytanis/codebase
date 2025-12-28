@@ -9,7 +9,7 @@ import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { z } from 'zod';
 import { clientRecommendationsTool } from './tools/client-recommendations.js';
 import { ethicsReviewer } from './tools/ethics-reviewer.js';
-import { ethicsRulesModule } from './services/ethics-rules-module.js';
+import { ethicsRulesService } from './services/ethics-rules-service.js';
 // Wellness features - temporarily disabled for build
 // import { wellnessJournalTool } from '../tools/wellness-journal.js';
 // import { wellness } from '../services/wellness-service.js';
@@ -51,7 +51,7 @@ export class GoodcounselEngine extends BaseEngine {
       name: 'goodcounsel',
       description: 'Ethics and Wellness Engine - Promotes attorney health, wellness, and ethical decision-making',
       version: '1.0.0',
-      aiProviders: ['openai', 'anthropic'], // AI providers for wellness recommendations
+      // aiProviders removed - default to 'auto' (all providers available) for user sovereignty
     });
   }
 
@@ -205,16 +205,15 @@ export class GoodcounselEngine extends BaseEngine {
             content: [
               {
                 type: 'text',
-                text: JSON.stringify({
-                  workflows: workflows.map(w => ({
-                    id: w.id,
-                    name: w.name,
-                    description: w.description,
-                    step_count: w.steps.length,
-                  })),
-                }, null, 2),
+                text: JSON.stringify(workflows.map(w => ({
+                  id: w.id,
+                  name: w.name,
+                  description: w.description,
+                  step_count: w.steps.length,
+                })), null, 2),
               },
             ],
+            isError: false,
           };
 
         case 'wellness_check':
@@ -223,24 +222,23 @@ export class GoodcounselEngine extends BaseEngine {
             ...(parsed.input && typeof parsed.input === 'object' ? parsed.input : {}),
           });
 
+        // Wellness actions - delegate to wellness_journal tool
         case 'wellness_journal':
-          // Wellness journal - feature in development
-          return {
-            content: [{ type: 'text', text: 'Wellness journal feature is currently in development' }],
-            isError: false,
-          };
-
         case 'wellness_trends':
-          // Wellness trends - feature in development
-          return {
-            content: [{ type: 'text', text: 'Wellness trends feature is currently in development' }],
-            isError: false,
-          };
-
         case 'burnout_check':
-          // Burnout check - feature in development
+          // These features are available via the wellness_journal MCP tool
+          // Return "feature in development" message for now
           return {
-            content: [{ type: 'text', text: 'Burnout check feature is currently in development' }],
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify({
+                  message: 'This feature is in development. Use the wellness_journal MCP tool directly for wellness tracking functionality.',
+                  action: parsed.action,
+                  availableVia: 'wellness_journal MCP tool',
+                }, null, 2),
+              },
+            ],
             isError: false,
           };
 
@@ -382,19 +380,60 @@ export class GoodcounselEngine extends BaseEngine {
         Object.assign(state, stepResult);
       }
 
+      // Ethics check: Ensure guidance/results comply with Ten Rules
+      const { checkGeneratedContent } = await import('../../services/ethics-check-helper.js');
+      const workflowResult = {
+        success: true,
+        workflowId,
+        workflowName: workflow.name,
+        results: state.results,
+        finalState: state,
+      };
+      
+      const resultText = JSON.stringify(workflowResult, null, 2);
+      const ethicsCheck = await checkGeneratedContent(resultText, {
+        toolName: `goodcounsel_${workflowId}`,
+        contentType: 'report',
+        strictMode: true,
+      });
+
+      // If blocked, return error
+      if (ethicsCheck.ethicsCheck.blocked) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: 'Guidance blocked by ethics check. Does not meet Ten Rules compliance standards.',
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      // Add ethics metadata
+      const finalResult = {
+        ...workflowResult,
+        ...(ethicsCheck.ethicsCheck.warnings.length > 0 && {
+          _ethicsMetadata: {
+            reviewed: true,
+            warnings: ethicsCheck.ethicsCheck.warnings,
+            complianceScore: ethicsCheck.ethicsCheck.complianceScore,
+            auditId: ethicsCheck.ethicsCheck.auditId,
+          },
+        }),
+      };
+
       return {
         content: [
           {
             type: 'text',
-            text: JSON.stringify({
-              success: true,
-              workflowId,
-              workflowName: workflow.name,
-              results: state.results,
-              finalState: state,
-            }, null, 2),
+            text: JSON.stringify(finalResult, null, 2),
           },
         ],
+        metadata: {
+          ethicsReviewed: true,
+          ethicsComplianceScore: ethicsCheck.ethicsCheck.complianceScore,
+        },
       };
     } catch (error) {
       return {
