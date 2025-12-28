@@ -3,144 +3,154 @@ Document ID: ACTIVE-DOCS-INDEX
 Title: Active Documentation Library Index
 Subject(s): Documentation | Index | Reference
 Project: Cyrano
-Version: v550
+Version: v551
 Created: 2025-11-28 (2025-W48)
-Last Substantive Revision: 2025-12-12 (2025-W50)
-Last Format Update: 2025-12-12 (2025-W50)
-Owner: David W Towne / Cognisint LLC
+Last Substantive Revision: 2025-12-21 (2025-W51)
+Last Format Update: 2025-12-21 (2025-W51)
+Owner: Director Agent / Cognisint LLC
 Copyright: © 2025 Cognisint LLC
-Summary: Complete index of all active documentation in the docs/ library, organized by category. See ACTIVE_DOCUMENTATION_SUMMARY.md for consolidation plan.
-Status: Active
+Summary: Complete index of all active documentation in the docs/ library, verified and cleaned for beta readiness.
+Status: Active - Beta Ready
 ---
 
 # Active Documentation Library Index
- **Total Active Documents:** 41 markdown files  
+
+**Total Active Documents:** 40 markdown files  
 **Location:** `/Users/davidtowne/Desktop/Coding/codebase/docs/`  
-**Last Updated:** 2025-12-12 (W50, v550)  
-**Summary:** See `docs/ACTIVE_DOCUMENTATION_SUMMARY.md` for complete list and consolidation plan  
-**Status:** All documents current - Ready for external review (AFTER security/audit) to prune to 12-15 essential documents
+**Last Updated:** 2025-12-21 (W51, v551)  
+**Status:** ✅ **VERIFIED AND CLEANED** - Ready for beta release  
+**Cleanup Date:** 2025-12-21 - All obsolete status reports archived
 
 ---
 
-## Architecture (6 documents)
+## Project Management (3 documents)
 
-1. `ARCHITECTURE_ARCHITECTURE_COPILOT_ARCHITECTURE_DECISIONS.md` - Copilot architecture decisions
-2. `ARCHITECTURE_ARCHITECTURE_ENGINE_ARCHITECTURE.md` - Engine layer architecture (Tools → Modules → Engines → Apps)
-4. `ARCHITECTURE_ARCHITECTURE_MODULE_ARCHITECTURE.md` - Module layer architecture
-5. `ARCHITECTURE_ARCHITECTURE_RAG_PIPELINE_ARCHITECTURE.md` - RAG pipeline architecture
-6. `ARKIVER_ARCHITECTURE_GUIDE.md` - **Authoritative source for Arkiver architecture**
+1. **`cyrano-master-plan-viii.plan.md`** - Master plan (Priorities 1-8)
+2. **`PROJECT_CHANGE_LOG.md`** - Consolidated change log (all project history)
+3. **`HUMAN_USER_TODOS_STEP_12.md`** - Human user tasks (security, configuration)
 
 ---
 
-## API (2 documents)
+## Policies & Guides (5 documents)
 
-1. `CYRANO_API_CYRANO_MCP_SERVER_-_INTEGRATION_EXAMPLES.md` - MCP server integration examples
-2. `GENERAL_API_INSTRUCTIONS_FOR_INTEGRATION_SPECIALIST.md` - Integration specialist instructions
+### Core Guides
+1. **`GENERAL_GUIDE_PROJECT_POLICIES.md`** - Project policies (versioning, documentation, work protocol, ethics)
+2. **`GENERAL_GUIDE_PRE_BETA_USER_CHECKLIST.md`** - Pre-beta user checklist
+3. **`GENERAL_GUIDE_REALISTIC_WORK_PLAN.md`** - Master work plan
+4. **`GENERAL_GUIDE_UNIVERSAL_AIHUMAN_INTERACTION_PROTOCOL.md`** - Ethics protocol (Version 1.4)
+5. **`GENERAL_GUIDE_BETA_RELEASE_PROJECT_TRACKING.md`** - Beta release project tracking
 
----
-
-## Guides (8 documents)
-
-### Core Guides (6)
-1. `GENERAL_GUIDE_BETA_RELEASE_PROJECT_TRACKING.md` - **Project tracking**
-2. `GENERAL_GUIDE_PRE_BETA_USER_CHECKLIST.md` - **User pre-beta checklist**
-3. `GENERAL_GUIDE_REALISTIC_WORK_PLAN.md` - **Master work plan**
-4. `GENERAL_GUIDE_SECURITY_POLICY.md` - Security policy
-5. `GENERAL_GUIDE_MONOREPO_STRUCTURE_WHERE_FILES_LIVE.md` - Monorepo structure
-6. `GENERAL_GUIDE_UNIVERSAL_AIHUMAN_INTERACTION_PROTOCOL.md` - **Ethics protocol**
-
-### Deployment Guides (2)
-1. `LEXFIAT_GUIDE_LEXFIAT_DEPLOYMENT_CHECKLIST.md` - LexFiat deployment
-2. `CYRANO_GUIDE_MCP_TOOL_REGISTRY_CHECKLIST.md` - MCP tool registry
-
-**Note:** Many guides have been archived. See `docs/archive/one-offs/2025-11-29-archive-cleanup/ARCHIVE_SUMMARY.md` for details.
+### Integration Guides
+6. **`guides/RAG_INTEGRATION_GUIDE.md`** - RAG integration guide (architecture + usage)
+7. **`guides/CYRANO_ENGINES_USER_GUIDE.md`** - Cyrano engines user guide
+8. **`guides/LEXFIAT_INTEGRATION_STATUS.md`** - LexFiat integration status
+9. **`guides/PRODUCTION_READINESS_ROADMAP.md`** - Production readiness roadmap
 
 ---
 
-## Reference (18 documents - README files)
+## Architecture (3 documents)
 
-### Arkiver READMEs (4)
-1. `ARKIVER_README_ARKIVER_-_UNIVERSAL_DATA_EXTRACTION_SYSTEM.md` - Labs/Arkiver (Python)
-2. `ARKIVER_README_ARKIVER_APPLICATION.md` - Arkiver app overview
-3. `ARKIVER_README_ARKIVER_MODULE.md` - **Processing components module** (clarified scope)
-4. `ARKIVER_README_ARKIVER_PROCESSING_COMPONENTS.md` - Processing components details
+1. **`architecture/ARCHITECTURE_ARCHITECTURE_ENGINE_ARCHITECTURE.md`** - Engine layer architecture (Tools → Modules → Engines → Apps)
+2. **`architecture/ARCHITECTURE_ARCHITECTURE_MODULE_ARCHITECTURE.md`** - Module layer architecture
+3. **`architecture/ARKIVER_ARCHITECTURE_GUIDE.md`** - **Authoritative source for Arkiver architecture**
 
-### Cyrano READMEs (1)
-1. `CYRANO_MCP_SERVER_README.md` - Cyrano MCP server implementation guide
-
-### LexFiat READMEs (1)
-1. `LEXFIAT_README_LEXFIAT.md` - LexFiat app overview
-
-### Engine READMEs (3)
-1. `GENERAL_README_GOODCOUNSEL_ENGINE.md` - GoodCounsel engine
-2. `GENERAL_README_MAE_ENGINE.md` - MAE engine
-3. `GENERAL_README_POTEMKIN_ENGINE.md` - Potemkin engine
-
-### Module READMEs (1)
-1. `GENERAL_README_CHRONOMETRIC_MODULE.md` - Chronometric module
-
-### Other READMEs (8)
-1. `GENERAL_README_COSMOS_-_P360_ENHANCEMENTS_DASHBOARD.md`
-2. `GENERAL_README_GETTING_STARTED_WITH_CREATE_REACT_APP.md`
-3. `GENERAL_README_MONOREPO_DIRECTORY.md`
-4. `GENERAL_README_MUSKIFICATION_METER.md`
-5. `GENERAL_README_POTEMKIN_STANDALONE_APP.md`
-6. `GENERAL_README_PROJECTS_WORKSPACE_OVERVIEW.md` - **Fixed: LexFiat backend references**
-7. `GENERAL_README_TASK_MANAGEMENT_COORDINATION_SYSTEM.md`
-8. `GENERAL_README_UNIVERSAL_INDEXER.md`
+### Skills Documentation
+4. **`architecture/SKILLS_IMPLEMENTATION.md`** - Skills system implementation documentation
 
 ---
 
-## UI (7 documents)
+## Security (6 documents)
 
-### Arkiver UI (1)
-1. `ARKIVER_UI_SPECIFICATION.md` - **Authoritative source for Arkiver UI**
+### Security Guides
+1. **`security/CODEBASE_SECURITY_REVIEW_AND_COMPREHENSIVE_CODE_AUDIT_GUIDE_AND_REPORTING.md`** - Comprehensive security guide
+2. **`security/guides/SECURITY_CONFIGURATION_WALKTHROUGH.md`** - Security configuration walkthrough
 
-### LexFiat UI (1)
-1. `LEXFIAT_UI_SPECIFICATION.md` - **Authoritative source for LexFiat UI**
-
-### Cyrano UI (1)
-1. `CYRANO_UI_CYRANO_MCP_SERVER_-_IMPLEMENTATION_GUIDE.md`
-
-### GoodCounsel UI (1)
-1. `UI_UI_GOODCOUNSEL_PHILOSOPHY_AND_DESIGN_INTENT.md` - **GoodCounsel philosophy document** ✅
-
-### Icon System (2)
-1. `ICON_SYSTEM_PROPOSAL.md`
-2. `icon-preview.html`
+### Security Reports
+3. **`security/reports/SECURITY_REVIEW_SUMMARY.md`** - Security review summary
+4. **`security/reports/HIPAA_COMPLIANCE_VERIFICATION_REPORT.md`** - HIPAA compliance verification
+5. **`security/reports/COMPREHENSIVE_CODE_AUDIT_REPORT.md`** - Code audit report
+6. **`security/reports/FINAL_SECURITY_REPORT_STEPS_13_15.md`** - Final security report (Steps 13-15)
 
 ---
 
-## Project Documentation (2 documents)
+## Reference - READMEs (6 documents)
 
-1. `PROJECT_CHANGE_LOG.md` - **Consolidated change log** (replaces all one-off status reports)
-2. `ACTIVE_DOCUMENTATION_INDEX.md` - This document
+### Engine READMEs
+1. **`reference/GENERAL_README_GOODCOUNSEL_ENGINE.md`** - GoodCounsel engine
+2. **`reference/GENERAL_README_POTEMKIN_ENGINE.md`** - Potemkin engine
+
+### Module READMEs
+3. **`reference/GENERAL_README_CHRONOMETRIC_MODULE.md`** - Chronometric module
+
+### Application READMEs
+4. **`reference/CYRANO_MCP_SERVER_README.md`** - Cyrano MCP server implementation guide
+5. **`reference/LEXFIAT_README_LEXFIAT.md`** - LexFiat architecture and overview
+6. **`reference/ARKIVER_README_ARKIVER_MODULE.md`** - Arkiver module (processing components)
+
+---
+
+## UI Specifications (4 documents)
+
+1. **`ui/ARKIVER_UI_SPECIFICATION.md`** - **Authoritative source for Arkiver UI**
+2. **`ui/LEXFIAT_UI_SPECIFICATION.md`** - **Authoritative source for LexFiat UI**
+3. **`ui/CYRANO_UI_CYRANO_MCP_SERVER_-_IMPLEMENTATION_GUIDE.md`** - Cyrano MCP server UI implementation
+4. **`ui/UI_UI_GOODCOUNSEL_PHILOSOPHY_AND_DESIGN_INTENT.md`** - **GoodCounsel philosophy document** ✅
+
+---
+
+## Installation & Setup (2 documents)
+
+1. **`install/ONBOARDING.md`** - Onboarding guide
+2. **`AI_INTEGRATIONS_SETUP.md`** - AI integrations setup guide
+
+---
+
+## Additional Documentation (3 documents)
+
+1. **`CYRANO_PATHFINDER_README.md`** - Cyrano Pathfinder README
+2. **`GoodCounsel.md`** - GoodCounsel documentation
+3. **`SETUP_CODACY.md`** - Codacy setup guide
+
+---
+
+## Index Documents (2 documents)
+
+1. **`ACTIVE_DOCUMENTATION_INDEX.md`** - This document
+2. **`ACTIVE_DOCUMENTATION_SUMMARY.md`** - Documentation summary (pre-consolidation)
 
 ---
 
 ## Authoritative Documents by Subject
 
 ### Arkiver
-- **Architecture:** `ARKIVER_ARCHITECTURE_GUIDE.md`
-- **UI:** `ARKIVER_UI_SPECIFICATION.md`
-- **Processing Components:** `ARKIVER_README_ARKIVER_MODULE.md`
+- **Architecture:** `architecture/ARKIVER_ARCHITECTURE_GUIDE.md`
+- **UI:** `ui/ARKIVER_UI_SPECIFICATION.md`
+- **Processing Components:** `reference/ARKIVER_README_ARKIVER_MODULE.md`
 
 ### LexFiat
-- **Architecture:** `LEXFIAT_README_LEXFIAT.md`
-- **UI:** `LEXFIAT_UI_SPECIFICATION.md`
+- **Architecture:** `reference/LEXFIAT_README_LEXFIAT.md`
+- **UI:** `ui/LEXFIAT_UI_SPECIFICATION.md`
+- **Integration Status:** `guides/LEXFIAT_INTEGRATION_STATUS.md`
 
 ### Cyrano Architecture
-- **Module Layer:** `ARCHITECTURE_ARCHITECTURE_MODULE_ARCHITECTURE.md`
-- **Engine Layer:** `ARCHITECTURE_ARCHITECTURE_ENGINE_ARCHITECTURE.md`
-- **Overall:** See Module and Engine architecture docs
+- **Module Layer:** `architecture/ARCHITECTURE_ARCHITECTURE_MODULE_ARCHITECTURE.md`
+- **Engine Layer:** `architecture/ARCHITECTURE_ARCHITECTURE_ENGINE_ARCHITECTURE.md`
+- **MCP Server:** `reference/CYRANO_MCP_SERVER_README.md`
+- **UI:** `ui/CYRANO_UI_CYRANO_MCP_SERVER_-_IMPLEMENTATION_GUIDE.md`
 
 ### Ethics/Philosophy
-- **Universal Protocol:** `GENERAL_GUIDE_UNIVERSAL_AIHUMAN_INTERACTION_PROTOCOL.md`
-- **GoodCounsel Philosophy:** `UI_UI_GOODCOUNSEL_PHILOSOPHY_AND_DESIGN_INTENT.md` ✅
+- **Universal Protocol:** `guides/GENERAL_GUIDE_UNIVERSAL_AIHUMAN_INTERACTION_PROTOCOL.md`
+- **GoodCounsel Philosophy:** `ui/UI_UI_GOODCOUNSEL_PHILOSOPHY_AND_DESIGN_INTENT.md` ✅
 
 ### Project Management
-- **Work Plan:** `GENERAL_GUIDE_REALISTIC_WORK_PLAN.md`
+- **Work Plan:** `guides/GENERAL_GUIDE_REALISTIC_WORK_PLAN.md`
+- **Master Plan:** `cyrano-master-plan-viii.plan.md`
 - **Change Log:** `PROJECT_CHANGE_LOG.md`
+
+### Security
+- **Comprehensive Guide:** `security/CODEBASE_SECURITY_REVIEW_AND_COMPREHENSIVE_CODE_AUDIT_GUIDE_AND_REPORTING.md`
+- **Configuration:** `security/guides/SECURITY_CONFIGURATION_WALKTHROUGH.md`
+- **Reports:** `security/reports/` (4 reports)
 
 ---
 
@@ -148,80 +158,35 @@ Status: Active
 
 ### Tools Layer
 - **Status:** ✅ Active
-- **Count:** ~40+ tool implementations (excluding base class)
-- **Base Class:** `src/tools/base-tool.ts` ✅
-- **Documentation:** `ARCHITECTURE_ARCHITECTURE_MODULE_ARCHITECTURE.md` (explains tool composition)
-- **Examples:** `tools/document-analyzer.ts`, `tools/arkiver-mcp-tools.ts`, `tools/legal-reviewer.ts`
+- **Count:** 69+ tool implementations (verified in codebase)
+- **Base Class:** `Cyrano/src/tools/base-tool.ts` ✅
+- **Documentation:** `architecture/ARCHITECTURE_ARCHITECTURE_MODULE_ARCHITECTURE.md` (explains tool composition)
 
 ### Modules Layer
 - **Status:** ✅ Active
-- **Count:** 3 modules (arkiver, chronometric, rag)
-- **Base Class:** `src/modules/base-module.ts` ✅
-- **Documentation:** `ARCHITECTURE_ARCHITECTURE_MODULE_ARCHITECTURE.md`
-- **Examples:** 
-  - `modules/arkiver/` - Document and LLM conversation extraction, processing components
-    - **Extractors**: PDF, DOCX, Conversation (JSON/MD/TXT), Text/Markdown
-    - **Processors**: Text, Email, Insight, Entity, Timeline
-  - `modules/forecast/` - Forecast modules (tax_forecast, child_support_forecast, qdro_forecast)
-  - `modules/rag/` - RAG pipeline components
-  - `modules/ethical-ai/` - Ethical AI enforcement module
-  - `modules/billing-reconciliation/` - Billing reconciliation module
-  - `engines/chronometric/modules/` - Chronometric Engine sub-modules (time_reconstruction, pattern_learning, cost_estimation)
+- **Count:** Multiple modules (arkiver, chronometric, rag, forecast, ethical-ai, billing-reconciliation)
+- **Base Class:** `Cyrano/src/modules/base-module.ts` ✅
+- **Documentation:** `architecture/ARCHITECTURE_ARCHITECTURE_MODULE_ARCHITECTURE.md`
 
 ### Engines Layer
 - **Status:** ✅ Active
 - **Count:** 5 engines (goodcounsel, mae, potemkin, forecast, chronometric)
-- **Base Class:** `src/engines/base-engine.ts` ✅
-- **Documentation:** `ARCHITECTURE_ARCHITECTURE_ENGINE_ARCHITECTURE.md`
-- **Examples:**
-  - `engines/goodcounsel/` - Ethics and wellness engine
-  - `engines/mae/` - MAE engine (Multi-Agent Engine)
-  - `engines/potemkin/` - Verification engine
-  - `engines/forecast/` - Forecast Engine (tax, child support, QDRO)
-  - `engines/chronometric/` - Chronometric Engine (time reconstruction, pattern learning, cost estimation)
+- **Base Class:** `Cyrano/src/engines/base-engine.ts` ✅
+- **Documentation:** `architecture/ARCHITECTURE_ARCHITECTURE_ENGINE_ARCHITECTURE.md`
+- **MAE = Multi-Agent Engine** (verified in code)
 
 ---
 
-## Conflicts Resolved
+## Cleanup Summary
 
-### ✅ Fixed Conflicts:
-1. **LexFiat Backend References** - `GENERAL_README_PROJECTS_WORKSPACE_OVERVIEW.md` updated to state LexFiat is thin client
-2. **Arkiver Module Terminology** - `ARKIVER_README_ARKIVER_MODULE.md` clarified to document processing components module, not the app
-3. **Source of Truth Scope** - All authoritative documents now specify their scope (Architecture, UI, etc.)
+**Archived Documents:** 35+ obsolete status reports, completion summaries, and assessment reports moved to `docs/archive/status-reports/2025-12-21-beta-prep/`
 
-### ✅ Source of Truth Documents Clarified:
-- `ARKIVER_ARCHITECTURE_GUIDE.md` - Authoritative for **Arkiver architecture**
-- `ARKIVER_UI_SPECIFICATION.md` - Authoritative for **Arkiver UI**
-- `LEXFIAT_UI_SPECIFICATION.md` - Authoritative for **LexFiat UI**
+**Remaining Active:** 40 essential documents for beta/production
 
----
-
-## GoodCounsel Philosophy Document
-
-**Status:** ✅ **INTACT**
-- **Location:** `docs/ui/UI_UI_GOODCOUNSEL_PHILOSOPHY_AND_DESIGN_INTENT.md`
-- **Content:** Complete philosophy document preserved
-- **Key Points:**
-  - "GoodCounsel exists to affirm, not to alarm"
-  - Gold and green color scheme (rarely red)
-  - Sanctuary for attorneys
-  - Unconditional support philosophy
-
----
-
-## README Documents Status
-
-**Total README files in active docs:** 18 files in `docs/reference/`
-
-All README documents were:
-- ✅ Moved to `docs/reference/` during reorganization
-- ✅ Given standardized headers
-- ✅ Renamed with descriptive prefixes (e.g., `ARKIVER_README_ARKIVER_APPLICATION.md`)
-- ✅ Preserved with original content
-
-**No README documents were lost or archived.**
+**Status:** ✅ **VERIFIED AND CLEANED** - Ready for beta release
 
 ---
 
 **This index is maintained as the master reference for all active documentation.**
 
+**Last Cleanup:** 2025-12-21 (Beta Preparation)

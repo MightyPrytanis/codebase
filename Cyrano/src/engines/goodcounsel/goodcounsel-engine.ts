@@ -10,9 +10,8 @@ import { z } from 'zod';
 import { clientRecommendationsTool } from './tools/client-recommendations.js';
 import { ethicsReviewer } from './tools/ethics-reviewer.js';
 import { ethicsRulesService } from './services/ethics-rules-service.js';
-// Wellness features - temporarily disabled for build
-// import { wellnessJournalTool } from '../tools/wellness-journal.js';
-// import { wellness } from '../services/wellness-service.js';
+import { wellnessJournalTool } from '../../tools/wellness-journal.js';
+import { wellness } from '../../services/wellness-service.js';
 
 const GoodCounselInputSchema = z.object({
   action: z.enum([
@@ -223,24 +222,115 @@ export class GoodcounselEngine extends BaseEngine {
           });
 
         // Wellness actions - delegate to wellness_journal tool
-        case 'wellness_journal':
-        case 'wellness_trends':
-        case 'burnout_check':
-          // These features are available via the wellness_journal MCP tool
-          // Return "feature in development" message for now
+        case 'wellness_journal': {
+          // Convert userId from string to number if provided
+          const userIdNum = parsed.userId ? parseInt(parsed.userId, 10) : undefined;
+          if (!userIdNum || isNaN(userIdNum)) {
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: 'Error: userId is required and must be a valid number for wellness_journal action',
+                },
+              ],
+              isError: true,
+            };
+          }
+
+          // Extract action parameters from input
+          const journalAction = parsed.input?.action || 'get_entries';
+          const journalInput = {
+            action: journalAction,
+            userId: userIdNum,
+            entryId: parsed.input?.entryId,
+            content: parsed.input?.content,
+            mood: parsed.input?.mood,
+            tags: parsed.input?.tags,
+            audioData: parsed.input?.audioData,
+            period: parsed.input?.period,
+            timeframe: parsed.input?.timeframe,
+          };
+
+          return await wellnessJournalTool.execute(journalInput);
+        }
+
+        case 'wellness_trends': {
+          // Convert userId from string to number if provided
+          const userIdNum = parsed.userId ? parseInt(parsed.userId, 10) : undefined;
+          if (!userIdNum || isNaN(userIdNum)) {
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: 'Error: userId is required and must be a valid number for wellness_trends action',
+                },
+              ],
+              isError: true,
+            };
+          }
+
+          // Get trends via wellness service
+          const period = parsed.input?.period || 'month';
+          const trends = await wellness.getWellnessTrends(userIdNum, period);
+          
+          if (!trends) {
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: JSON.stringify({
+                    message: 'No trends data available. Start journaling to generate trends.',
+                    period,
+                  }, null, 2),
+                },
+              ],
+              isError: false,
+            };
+          }
+
           return {
             content: [
               {
                 type: 'text',
-                text: JSON.stringify({
-                  message: 'This feature is in development. Use the wellness_journal MCP tool directly for wellness tracking functionality.',
-                  action: parsed.action,
-                  availableVia: 'wellness_journal MCP tool',
-                }, null, 2),
+                text: JSON.stringify(trends, null, 2),
               },
             ],
             isError: false,
           };
+        }
+
+        case 'burnout_check': {
+          // Convert userId from string to number if provided
+          const userIdNum = parsed.userId ? parseInt(parsed.userId, 10) : undefined;
+          if (!userIdNum || isNaN(userIdNum)) {
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: 'Error: userId is required and must be a valid number for burnout_check action',
+                },
+              ],
+              isError: true,
+            };
+          }
+
+          // Check burnout risk via wellness service
+          const timeframe = parsed.input?.timeframe || 'month';
+          const analysis = await wellness.detectBurnoutSignals(userIdNum, timeframe);
+
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify(analysis, null, 2),
+              },
+            ],
+            isError: false,
+            metadata: {
+              riskLevel: analysis.risk,
+            },
+          };
+        }
 
         case 'ethics_review':
           // Use ethics reviewer tool directly for rule-based evaluation

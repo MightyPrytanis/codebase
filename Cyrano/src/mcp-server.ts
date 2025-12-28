@@ -140,7 +140,7 @@ class CyranoMCPServer {
     );
 
     this.setupToolHandlers();
-    this.loadSkills();
+    // Skills will be loaded in run() method before server accepts connections
   }
 
   /**
@@ -548,6 +548,9 @@ class CyranoMCPServer {
   }
 
   async run() {
+    // Load skills before accepting connections to prevent race conditions
+    await this.loadSkills();
+    
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
     console.error('Cyrano MCP Server running on stdio');
