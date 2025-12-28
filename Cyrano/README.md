@@ -24,7 +24,38 @@ Related Documents: CYRANO-ARCHITECTURE, CYRANO-MCP-QUICKSTART
 
 **This repository currently contains MOCK/PROTOTYPE implementations that simulate AI functionality without actually connecting to real AI services.** 
 
+**Mock AI Scope:**
+- **Applies to:** AI-heavy workflows (document analysis, fact checking, legal research, content generation)
+- **Does NOT apply to:** RAG service (real vector embeddings), Arkiver processors (real text processing), security middleware (real JWT/CSRF/encryption), document processor (real redaction/PDF operations), Chronometric module (real time tracking)
+
 The tools return computed responses based on basic text processing, not real AI analysis. **Do not use in production where real AI capabilities are expected.**
+
+**Tool Categorization:** See `docs/TOOL_CATEGORIZATION.md` for accurate breakdown:
+- ~19 production-grade tools
+- ~15 mock AI tools  
+- ~10 credential-dependent tools
+- ~8 non-functional/placeholders
+
+## Required Credentials for Integrations
+
+**Clio API:**
+- `CLIO_API_KEY` - OAuth 2.0 required (see https://docs.clio.com/api)
+- Mock fallback enabled when not configured
+
+**Gmail:**
+- `GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`, `GMAIL_ACCESS_TOKEN` - OAuth 2.0 required
+- See: https://developers.google.com/gmail/api/quickstart/nodejs
+- NO mock fallback - requires valid OAuth credentials
+
+**Outlook:**
+- `OUTLOOK_CLIENT_ID`, `OUTLOOK_CLIENT_SECRET`, `OUTLOOK_ACCESS_TOKEN` - OAuth 2.0 required
+- See: https://learn.microsoft.com/en-us/graph/auth-v2-user
+- NO mock fallback - requires valid OAuth credentials
+
+**MiCourt:**
+- Light footprint integration - user-initiated docket queries only
+- No automated scraping or routine updates
+- See: `docs/MICOURT_INTEGRATION.md`
 
 ## Current Status
 

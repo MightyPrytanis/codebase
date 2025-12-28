@@ -62,6 +62,9 @@ export const emailArtifactCollector = new (class extends BaseTool {
       const errors: string[] = [];
 
       // Collect from Gmail if requested
+      // REQUIRED CREDENTIALS: GMAIL_CLIENT_ID, GMAIL_CLIENT_SECRET, GMAIL_ACCESS_TOKEN
+      // OAuth 2.0 required - See: https://developers.google.com/gmail/api/quickstart/nodejs
+      // NO mock fallback - Gmail integration requires valid OAuth credentials
       if (email_provider === 'gmail' || email_provider === 'both') {
         try {
           const gmailConfig = {
@@ -77,17 +80,21 @@ export const emailArtifactCollector = new (class extends BaseTool {
             const query = keywords ? keywords.join(' ') : undefined;
             const gmailEmails = await gmailService.getEmails(start_date, end_date, query);
             
-            emails.push(...gmailEmails.map(email => ({
-              id: `gmail_${email.id}`,
-              date: email.date,
-              subject: email.subject,
-              from: email.from,
-              to: email.to,
-              sent: true,
-              evidence_type: 'direct',
-              provider: 'gmail',
-              snippet: email.snippet,
-            })));
+            emails.push(...gmailEmails.map(email => {
+              const processedEmail = this.processEmail(email, 'gmail');
+              return {
+                id: `gmail_${email.id}`,
+                date: email.date,
+                subject: email.subject,
+                from: email.from,
+                to: email.to,
+                sent: true,
+                evidence_type: processedEmail.evidence_type || 'direct',
+                provider: 'gmail',
+                snippet: email.snippet,
+                ...processedEmail.metadata,
+              };
+            }));
           } else {
             errors.push('Gmail not configured (missing GMAIL_CLIENT_ID or GMAIL_ACCESS_TOKEN)');
           }
@@ -97,6 +104,9 @@ export const emailArtifactCollector = new (class extends BaseTool {
       }
 
       // Collect from Outlook if requested
+      // REQUIRED CREDENTIALS: OUTLOOK_CLIENT_ID, OUTLOOK_CLIENT_SECRET, OUTLOOK_ACCESS_TOKEN
+      // OAuth 2.0 required - See: https://learn.microsoft.com/en-us/graph/auth-v2-user
+      // NO mock fallback - Outlook integration requires valid OAuth credentials
       if (email_provider === 'outlook' || email_provider === 'both') {
         try {
           const outlookConfig = {
@@ -143,11 +153,15 @@ export const emailArtifactCollector = new (class extends BaseTool {
         );
       }
 
+      // Attempt to link MiFile confirmations to matters if case numbers found
+      const linkedEmails = await this.linkMiFileConfirmationsToMatters(filteredEmails, matter_id);
+
       const result = {
         period: { start_date, end_date },
         provider: email_provider,
-        emails_found: filteredEmails.length,
-        emails: filteredEmails,
+        emails_found: linkedEmails.length,
+        emails: linkedEmails,
+        mifile_confirmations: linkedEmails.filter((e: any) => e.mifile_confirmation).length,
         errors: errors.length > 0 ? errors : undefined,
         note: errors.length > 0 ? 'Some email providers not configured or failed' : undefined,
       };
@@ -158,5 +172,109 @@ export const emailArtifactCollector = new (class extends BaseTool {
         `Error in email_artifact_collector: ${error instanceof Error ? error.message : String(error)}`
       );
     }
+  }
+
+  /**
+   * Process email to detect court filing/service confirmation emails and extract metadata
+   * NOTE: This detects emails FROM MiFile/courts (not an API integration - just email detection)
+   */
+  private processEmail(email: { subject?: string; from?: string; snippet?: string; date?: string }, provider: string): {
+    evidence_type: 'direct' | 'circumstantial';
+    metadata: Record<string, any>;
+  } {
+    const subject = (email.subject || '').toLowerCase();
+    const from = (email.from || '').toLowerCase();
+    const snippet = (email.snippet || '').toLowerCase();
+    const combined = `${subject} ${snippet}`;
+
+    // Detect MiFile confirmation emails
+    const isMiFileConfirmation = 
+      subject.includes('mifile') ||
+      subject.includes('michigan') && (subject.includes('filing') || subject.includes('service') || subject.includes('confirmation')) ||
+      from.includes('mifile') ||
+      from.includes('courts.michigan.gov') ||
+      combined.includes('electronic filing confirmation') ||
+      combined.includes('service confirmation') ||
+      combined.includes('filing accepted') ||
+      combined.includes('filing received');
+
+    if (isMiFileConfirmation) {
+      // Extract case number (common patterns: 2024-CV-12345, 24-CV-12345, etc.)
+      const caseNumberMatch = combined.match(/(\d{2,4}[- ]?[A-Z]{2,4}[- ]?\d{4,})/i);
+      const caseNumber = caseNumberMatch ? caseNumberMatch[1].replace(/\s+/g, '-') : null;
+
+      // Determine confirmation type
+      const isFilingConfirmation = 
+        subject.includes('filing') || 
+        snippet.includes('filing') || 
+        snippet.includes('filed') ||
+        snippet.includes('accepted');
+      
+      const isServiceConfirmation = 
+        subject.includes('service') || 
+        snippet.includes('service') || 
+        snippet.includes('served');
+
+      // Extract dates (filing date, service date)
+      const dateMatch = combined.match(/(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/);
+      const extractedDate = dateMatch ? dateMatch[1] : null;
+
+      return {
+        evidence_type: 'direct', // Filing/service confirmations are direct evidence
+        metadata: {
+          mifile_confirmation: true,
+          confirmation_type: isFilingConfirmation ? 'filing' : isServiceConfirmation ? 'service' : 'general',
+          case_number: caseNumber,
+          extracted_date: extractedDate,
+          chronometric_priority: 'high', // High priority for time tracking
+          matter_linking_candidate: caseNumber ? true : false,
+        },
+      };
+    }
+
+    // Regular email - determine evidence type
+    const isDirectEvidence = 
+      subject.includes('sent') || 
+      subject.includes('filed') ||
+      snippet.includes('attached') ||
+      snippet.includes('enclosed');
+
+    return {
+      evidence_type: isDirectEvidence ? 'direct' : 'circumstantial',
+      metadata: {},
+    };
+  }
+
+  /**
+   * Link court filing confirmation emails to matters based on case numbers
+   * NOTE: These are emails FROM MiFile/courts (not an API integration - just email detection)
+   */
+  private async linkMiFileConfirmationsToMatters(emails: any[], matter_id?: string): Promise<any[]> {
+    // If matter_id provided, try to link confirmations to that matter
+    if (matter_id) {
+      return emails.map(email => {
+        if (email.mifile_confirmation && email.case_number) {
+          return {
+            ...email,
+            linked_matter_id: matter_id,
+            linking_method: 'explicit_matter_id',
+          };
+        }
+        return email;
+      });
+    }
+
+    // Otherwise, emails with case numbers are candidates for automatic linking
+    // (Actual linking would require case_manager integration - this is a placeholder)
+    return emails.map(email => {
+      if (email.mifile_confirmation && email.case_number) {
+        return {
+          ...email,
+          linking_candidate: true,
+          note: 'Case number extracted - can be linked to matter if case number matches',
+        };
+      }
+      return email;
+    });
   }
 })();

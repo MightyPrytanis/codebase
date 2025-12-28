@@ -20,3 +20,6 @@ export * from './schema-email-drafts.js';
 
 // Export wellness schema
 export * from './schema-wellness.js';
+
+// Export library schema
+export * from './schema-library.js';

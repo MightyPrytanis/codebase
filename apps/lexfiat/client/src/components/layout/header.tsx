@@ -10,6 +10,7 @@ import { LiaSwimmerSolid } from "react-icons/lia";
 import { AIIcon } from "@/components/ui/ai-icon";
 import { isDemoMode } from "@/lib/demo-service";
 import { ThemeSelector } from "@/components/theme/theme-selector";
+import HelpMenu from "@/components/dashboard/help-menu";
 import "@/styles/dashboard-html.css";
 
 interface HeaderProps {
@@ -17,17 +18,17 @@ interface HeaderProps {
     name: string;
     specialization?: string;
   };
-  onHelpClick?: () => void;
   onAdminClick?: () => void;
   onSettingsClick?: () => void;
   onProfileClick?: () => void;
 }
 
-export default function Header({ attorney, onHelpClick, onAdminClick, onSettingsClick, onProfileClick }: HeaderProps) {
+export default function Header({ attorney, onAdminClick, onSettingsClick, onProfileClick }: HeaderProps) {
   const [currentSlogan, setCurrentSlogan] = useState("The Power of Clarity");
   const [demoMode, setDemoMode] = useState(false);
   const [statusMenuOpen, setStatusMenuOpen] = useState(false);
   const [menuPanelOpen, setMenuPanelOpen] = useState(false);
+  const [showHelpMenu, setShowHelpMenu] = useState(false);
   
   const slogans = [
     'The Power of Clarity',
@@ -60,15 +61,6 @@ export default function Header({ attorney, onHelpClick, onAdminClick, onSettings
   const expandPanel = (panelType: string) => {
     const event = new CustomEvent('expand-panel', { detail: { panelType } });
     window.dispatchEvent(event);
-  };
-
-  const openHelpChat = () => {
-    if (onHelpClick) {
-      onHelpClick();
-    } else {
-      const event = new CustomEvent('open-help-chat');
-      window.dispatchEvent(event);
-    }
   };
 
   const toggleDemoMode = () => {
@@ -181,7 +173,7 @@ export default function Header({ attorney, onHelpClick, onAdminClick, onSettings
               onMouseEnter={() => setMenuPanelOpen(true)}
               onMouseLeave={() => setMenuPanelOpen(false)}
             >
-              <div className="menu-panel-item" onClick={openHelpChat}>
+              <div className="menu-panel-item" onClick={() => setShowHelpMenu(true)}>
                 <HelpCircle size={18} />
                 <span>Help</span>
               </div>
@@ -218,6 +210,7 @@ export default function Header({ attorney, onHelpClick, onAdminClick, onSettings
           </div>
         </div>
       </div>
+      {showHelpMenu && <HelpMenu onClose={() => setShowHelpMenu(false)} />}
     </div>
   );
 }

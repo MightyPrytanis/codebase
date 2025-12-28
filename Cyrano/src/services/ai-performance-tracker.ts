@@ -294,6 +294,7 @@ export class AIPerformanceTracker {
       google: 1800,
       xai: 2500,
       deepseek: 1500,
+      openrouter: 1800,
     };
     return defaults[provider] || 2000;
   }
@@ -307,6 +308,7 @@ export class AIPerformanceTracker {
       google: 0.001,
       xai: 0.005,
       deepseek: 0.001,
+      openrouter: 0.001,
     };
     return defaults[provider] || 0.01;
   }

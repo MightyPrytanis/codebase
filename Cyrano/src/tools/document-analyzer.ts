@@ -6,10 +6,10 @@
 
 import { BaseTool } from './base-tool.js';
 import { z } from 'zod';
-import OpenAI from 'openai';
-import Anthropic from '@anthropic-ai/sdk';
-import { PerplexityService } from '../services/perplexity.js';
+import { AIService, AIProvider } from '../services/ai-service.js';
 import { apiValidator } from '../utils/api-validator.js';
+import { injectTenRulesIntoSystemPrompt } from '../services/ethics-prompt-injector.js';
+import { checkGeneratedContent } from '../services/ethics-check-helper.js';
 
 const DocumentAnalyzerSchema = z.object({
   document_text: z.string().describe('The legal document text to analyze'),
@@ -65,8 +65,24 @@ export const documentAnalyzer = new (class extends BaseTool {
       
       try {
         if (perplexityKey) {
-          const perplexityService = new PerplexityService({ apiKey: perplexityKey });
-          const aiResponse = await perplexityService.analyzeDocument(document_text, analysis_type);
+          // ETHICS ENFORCEMENT: Use ai-service.call() for automatic Ten Rules injection, output checking, and audit logging
+          const aiService = new AIService();
+          const prompt = this.buildAnalysisPrompt(document_text, analysis_type, focus_areas);
+          const systemPrompt = injectTenRulesIntoSystemPrompt(
+            'You are an expert legal document analyst. Provide accurate, well-sourced analysis.',
+            'summary'
+          );
+          
+          const aiResponse = await aiService.call('perplexity', prompt, {
+            systemPrompt,
+            maxTokens: 4000,
+            temperature: 0.3,
+            metadata: {
+              toolName: 'document_analyzer',
+              actionType: 'content_generation',
+            },
+          });
+          
           analysis = this.parsePerplexityResponse(aiResponse, document_text, analysis_type, focus_areas);
           provider = 'perplexity';
         } else if (anthropicKey) {
@@ -80,11 +96,41 @@ export const documentAnalyzer = new (class extends BaseTool {
         return this.createErrorResult(`AI analysis failed: ${aiError instanceof Error ? aiError.message : String(aiError)}`);
       }
 
-      return this.createSuccessResult(JSON.stringify(analysis, null, 2), {
+      // Ethics check: Ensure analysis complies with Ten Rules (especially Rule 4: source attribution)
+      const analysisText = JSON.stringify(analysis, null, 2);
+      const ethicsCheck = await checkGeneratedContent(analysisText, {
+        toolName: 'document_analyzer',
+        contentType: 'report',
+        strictMode: true, // Strict for legal document analysis
+      });
+
+      // If blocked, return error
+      if (ethicsCheck.ethicsCheck.blocked) {
+        return this.createErrorResult(
+          'Document analysis blocked by ethics check. Analysis does not meet Ten Rules compliance standards.'
+        );
+      }
+
+      // Add ethics metadata if warnings
+      const finalAnalysis = {
+        ...analysis,
+        ...(ethicsCheck.ethicsCheck.warnings.length > 0 && {
+          _ethicsMetadata: {
+            reviewed: true,
+            warnings: ethicsCheck.ethicsCheck.warnings,
+            complianceScore: ethicsCheck.ethicsCheck.complianceScore,
+            auditId: ethicsCheck.ethicsCheck.auditId,
+          },
+        }),
+      };
+
+      return this.createSuccessResult(JSON.stringify(finalAnalysis, null, 2), {
         analysis_type,
         word_count: document_text.split(' ').length,
         focus_areas: focus_areas || [],
         ai_provider: provider,
+        ethicsReviewed: true,
+        ethicsComplianceScore: ethicsCheck.ethicsCheck.complianceScore,
       });
     } catch (error) {
       return this.createErrorResult(`Document analysis failed: ${error instanceof Error ? error.message : String(error)}`);
@@ -96,7 +142,10 @@ export const documentAnalyzer = new (class extends BaseTool {
     const paragraphCount = documentText.split('\n\n').length;
 
     // Create analysis prompt based on type
-    const prompt = this.buildAnalysisPrompt(documentText, analysisType, focusAreas);
+    let prompt = this.buildAnalysisPrompt(documentText, analysisType, focusAreas);
+    
+    // Inject Ten Rules into system prompt (will be used by AI service)
+    // Note: Actual injection happens in AI service call, but we prepare it here
 
     // Get AI response
     const aiResponse = await this.callAIProvider(prompt, provider);
@@ -152,37 +201,24 @@ export const documentAnalyzer = new (class extends BaseTool {
   }
 
   public async callAIProvider(prompt: string, provider: 'openai' | 'anthropic'): Promise<string> {
-    if (provider === 'anthropic') {
-      const anthropic = new Anthropic({
-        apiKey: process.env.ANTHROPIC_API_KEY,
-      });
+    // ETHICS ENFORCEMENT: Use ai-service.call() for automatic Ten Rules injection, output checking, and audit logging
+    const aiService = new AIService();
+    
+    // Prepare system prompt with Ten Rules injection (ai-service will check if already injected)
+    let systemPrompt = 'You are an expert legal document analyst. Provide accurate, well-sourced analysis.';
+    systemPrompt = injectTenRulesIntoSystemPrompt(systemPrompt, 'summary');
+    
+    // Use ai-service.call() - automatically enforces ethics at service layer
+    const response = await aiService.call(provider as AIProvider, prompt, {
+      systemPrompt, // Already has Ten Rules injected
+      maxTokens: 4000,
+      metadata: {
+        toolName: 'document_analyzer',
+        actionType: 'content_generation',
+      },
+    });
 
-      const response = await anthropic.messages.create({
-        model: 'claude-3-sonnet-20240229',
-        max_tokens: 4000,
-        messages: [{
-          role: 'user',
-          content: prompt,
-        }],
-      });
-
-      return response.content[0].type === 'text' ? response.content[0].text : 'Analysis failed';
-    } else {
-      const openai = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY,
-      });
-
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4',
-        messages: [{
-          role: 'user',
-          content: prompt,
-        }],
-        max_tokens: 4000,
-      });
-
-      return response.choices[0].message.content || 'Analysis failed';
-    }
+    return response;
   }
 
   public extractKeyPoints(text: string): string[] {

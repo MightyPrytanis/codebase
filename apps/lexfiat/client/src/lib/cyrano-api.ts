@@ -203,8 +203,12 @@ export async function getPriorityAlerts() {
  * Get GoodCounsel insights
  */
 export async function getGoodCounselInsights() {
-  const result = await executeTool('good_counsel', {
-    context: 'dashboard',
+  const result = await executeTool('goodcounsel_engine', {
+    action: 'client_recommendations',
+    input: {
+      context: 'dashboard',
+    },
+    userId: 'default-user', // TODO: Get from auth
   });
 
   if (result.isError) {

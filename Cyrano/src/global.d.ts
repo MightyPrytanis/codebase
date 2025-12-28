@@ -50,6 +50,20 @@ declare global {
       GEMINI_API_KEY?: string;
       /** Perplexity API key */
       PERPLEXITY_API_KEY?: string;
+      /** OpenRouter API key */
+      OPENROUTER_API_KEY?: string;
+      /** Site URL for OpenRouter (optional, for leaderboard ranking) */
+      SITE_URL?: string;
+      /** Site name for OpenRouter (optional, for leaderboard ranking) */
+      SITE_NAME?: string;
+      /** Clio API key */
+      CLIO_API_KEY?: string;
+      /** Clio OAuth access token */
+      CLIO_ACCESS_TOKEN?: string;
+      /** Clio OAuth refresh token */
+      CLIO_REFRESH_TOKEN?: string;
+      /** Clio region (US, CA, EU, AU) */
+      CLIO_REGION?: string;
       /** DeepSeek API key */
       DEEPSEEK_API_KEY?: string;
       /** xAI Grok API key */
