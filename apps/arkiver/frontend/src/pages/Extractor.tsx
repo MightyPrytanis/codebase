@@ -8,6 +8,9 @@ import { useState, useCallback } from 'react';
 import { Upload, FileText, X, CheckCircle, Clock, AlertCircle, Settings as SettingsIcon } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { uploadFile, processFile, getJobStatus } from '../lib/arkiver-api';
+import { WorkflowArchaeology, WorkflowArchaeologyResult } from '../components/workflow-archaeology';
+import { WorkflowTimeline } from '../components/workflow-timeline';
+import { ProcessingHistory } from '../components/processing-history';
 
 interface UploadedFile {
   file: File;
@@ -29,6 +32,9 @@ export default function Extractor() {
   const [useLLM, setUseLLM] = useState(false);
   const [llmProvider, setLlmProvider] = useState<'perplexity' | 'anthropic' | 'openai'>('perplexity');
   const [insightType, setInsightType] = useState<'general' | 'legal' | 'medical' | 'business'>('general');
+  const [workflowResult, setWorkflowResult] = useState<WorkflowArchaeologyResult | null>(null);
+  const [selectedFileId, setSelectedFileId] = useState<string | undefined>();
+  const [selectedJobId, setSelectedJobId] = useState<string | undefined>();
 
   const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -354,6 +360,30 @@ export default function Extractor() {
             {completedCount > 0 && <span className="text-green-600">{completedCount} completed</span>}
             {completedCount > 0 && processingCount > 0 && <span className="mx-2">•</span>}
             {processingCount > 0 && <span style={{ color: '#5B8FA3' }}>{processingCount} processing</span>}
+          </div>
+        )}
+
+        {/* Workflow Archaeology Section */}
+        {completedCount > 0 && (
+          <div className="mt-8 space-y-6">
+            <WorkflowArchaeology
+              fileId={selectedFileId}
+              jobId={selectedJobId}
+              onReconstruct={(result) => {
+                setWorkflowResult(result);
+              }}
+            />
+
+            {workflowResult && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <WorkflowTimeline result={workflowResult} />
+                <ProcessingHistory
+                  result={workflowResult}
+                  fileId={selectedFileId}
+                  jobId={selectedJobId}
+                />
+              </div>
+            )}
           </div>
         )}
       </div>

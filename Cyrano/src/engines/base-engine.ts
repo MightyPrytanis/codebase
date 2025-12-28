@@ -19,6 +19,9 @@ import { BaseModule } from '../modules/base-module.js';
 import { BaseTool } from '../tools/base-tool.js';
 import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import { moduleRegistry } from '../modules/registry.js';
+import { systemicEthicsService } from '../services/systemic-ethics-service.js';
+import { responsibilityService } from '../services/responsibility-service.js';
+import { logicAuditService } from '../services/logic-audit-service.js';
 
 export interface EngineConfig {
   name: string;
@@ -27,6 +30,11 @@ export interface EngineConfig {
   modules?: string[]; // Module names to orchestrate
   tools?: BaseTool[]; // Direct tools (if needed)
   aiProviders?: string[]; // AI providers this engine uses
+  expertiseContext?: {
+    skillId?: string;
+    domain?: string;
+    proficiency?: string[];
+  };
 }
 
 export interface WorkflowStep {
@@ -223,6 +231,15 @@ export abstract class BaseEngine {
         context.stepResults[step.id] = result;
 
         if (result.isError) {
+          // Capture reasoning state on failure
+          await logicAuditService.capture({
+            timestamp: new Date().toISOString(),
+            engine: this.config.name,
+            stepId: step.id,
+            input: step.input || context,
+            error: this.extractText(result),
+            metadata: { workflowId },
+          });
           currentStepId = step.onFailure || undefined;
         } else {
           // If onSuccess is not defined, automatically proceed to next step in sequence
@@ -236,6 +253,14 @@ export abstract class BaseEngine {
           }
         }
       } catch (error) {
+        await logicAuditService.capture({
+          timestamp: new Date().toISOString(),
+          engine: this.config.name,
+          stepId: step.id,
+          input: step.input || context,
+          error: error instanceof Error ? error.message : String(error),
+          metadata: { workflowId },
+        });
         return {
           content: [
             {
@@ -248,11 +273,69 @@ export abstract class BaseEngine {
       }
     }
 
+    // Ethics check: Ensure workflow results comply with Ten Rules
+    const workflowResult = context.stepResults;
+    const resultText = JSON.stringify(workflowResult, null, 2);
+    
+    // Check if this workflow generates recommendations or content that needs ethics review
+    const hasRecommendations = resultText.toLowerCase().includes('recommendation') || 
+                              resultText.toLowerCase().includes('suggestion') ||
+                              resultText.toLowerCase().includes('guidance');
+    
+    if (hasRecommendations) {
+      const { checkGeneratedContent } = await import('../services/ethics-check-helper.js');
+      const ethicsCheck = await checkGeneratedContent(resultText, {
+        toolName: `${this.config.name}_workflow`,
+        contentType: 'report',
+        strictMode: true,
+      });
+
+      // If blocked, return error
+      if (ethicsCheck.ethicsCheck.blocked) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: 'Workflow result blocked by ethics check. Does not meet Ten Rules compliance standards.',
+            },
+          ],
+          isError: true,
+          metadata: { ethicsCheck: ethicsCheck.ethicsCheck },
+        };
+      }
+
+      // Add ethics metadata if warnings
+      const finalResult = {
+        ...workflowResult,
+        ...(ethicsCheck.ethicsCheck.warnings.length > 0 && {
+          _ethicsMetadata: {
+            reviewed: true,
+            warnings: ethicsCheck.ethicsCheck.warnings,
+            complianceScore: ethicsCheck.ethicsCheck.complianceScore,
+            auditId: ethicsCheck.ethicsCheck.auditId,
+          },
+        }),
+      };
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(finalResult, null, 2),
+          },
+        ],
+        metadata: {
+          ethicsReviewed: true,
+          ethicsComplianceScore: ethicsCheck.ethicsCheck.complianceScore,
+        },
+      };
+    }
+
     return {
       content: [
         {
           type: 'text',
-          text: JSON.stringify(context.stepResults, null, 2),
+          text: JSON.stringify(workflowResult, null, 2),
         },
       ],
     };
@@ -337,15 +420,16 @@ export abstract class BaseEngine {
         // Execute AI provider call with auto-select support
         try {
           const { AIService } = await import('../services/ai-service.js');
+          type AIProvider = 'openai' | 'anthropic' | 'perplexity' | 'google' | 'xai' | 'deepseek' | 'openrouter';
           const { aiProviderSelector } = await import('../services/ai-provider-selector.js');
           const aiService = new AIService();
           
           // Extract prompt from step input
           const prompt = step.input?.prompt || step.input?.message || JSON.stringify(step.input);
-          const providerOrAuto = step.target as 'openai' | 'anthropic' | 'perplexity' | 'google' | 'xai' | 'deepseek' | 'auto';
+          const providerOrAuto = step.target as AIProvider | 'auto';
           
           // Resolve provider (handle 'auto' mode)
-          let provider: 'openai' | 'anthropic' | 'perplexity' | 'google' | 'xai' | 'deepseek';
+          let provider: AIProvider;
           
           if (providerOrAuto === 'auto') {
             // Use auto-select based on task profile
@@ -363,7 +447,7 @@ export abstract class BaseEngine {
             
             provider = aiProviderSelector.getProviderForTask(taskProfile);
           } else {
-            provider = providerOrAuto;
+            provider = providerOrAuto as AIProvider;
           }
           
           // Check if provider is available
@@ -383,25 +467,92 @@ export abstract class BaseEngine {
             };
           }
 
+          // Inject Ten Rules into system prompt
+          let systemPrompt = step.input?.systemPrompt || '';
+          if (systemPrompt || !step.input?.systemPrompt) {
+            const { injectTenRulesIntoSystemPrompt } = await import('../services/ethics-prompt-injector.js');
+            systemPrompt = injectTenRulesIntoSystemPrompt(systemPrompt || 'You are an expert AI assistant.', 'summary');
+          }
+
           // Make AI call
+          // Note: BaseEngine already injects Ten Rules and checks outputs, so skip duplicate checks in ai-service
           const aiResponse = await aiService.call(provider, prompt, {
             model: step.input?.model,
             maxTokens: step.input?.maxTokens,
             temperature: step.input?.temperature,
-            systemPrompt: step.input?.systemPrompt,
+            systemPrompt, // Already has Ten Rules injected
+            metadata: {
+              toolName: step.id,
+              engine: this.config.name,
+              actionType: 'content_generation',
+              skipEthicsCheck: true, // BaseEngine handles ethics checks separately
+            },
           });
+
+          const responseText = JSON.stringify({
+            response: aiResponse,
+            provider: provider, // Include which provider was used
+            wasAutoSelected: providerOrAuto === 'auto',
+          }, null, 2);
+
+          // Systemic ethics check on output
+          const ethicsCheck = await systemicEthicsService.checkOutput(responseText);
+          if (ethicsCheck.blocked) {
+            await logicAuditService.capture({
+              timestamp: new Date().toISOString(),
+              engine: this.config.name,
+              stepId: step.id,
+              input: step.input || context,
+              error: 'Systemic ethics blocked output',
+              metadata: ethicsCheck.details,
+            });
+            return {
+              content: [
+                {
+                  type: 'text',
+                  text: 'Output blocked by systemic ethics service. See metadata for details.',
+                },
+              ],
+              isError: true,
+              metadata: { ethicsCheck },
+            };
+          }
+
+          // Professional duty check (if facts provided)
+          if (step.input?.facts) {
+            const dutyCheck = await responsibilityService.checkOutput(responseText, step.input.facts);
+            if (dutyCheck.blocked) {
+              await logicAuditService.capture({
+                timestamp: new Date().toISOString(),
+                engine: this.config.name,
+                stepId: step.id,
+                input: step.input || context,
+                error: 'Professional duty check failed',
+                metadata: dutyCheck.details,
+              });
+              return {
+                content: [
+                  {
+                    type: 'text',
+                    text: 'Output blocked by professional responsibility service.',
+                  },
+                ],
+                isError: true,
+                metadata: { dutyCheck },
+              };
+            }
+          }
 
           return {
             content: [
               {
                 type: 'text',
-                text: JSON.stringify({
-                  response: aiResponse,
-                  provider: provider, // Include which provider was used
-                  wasAutoSelected: providerOrAuto === 'auto',
-                }, null, 2),
+                text: responseText,
               },
             ],
+            metadata: {
+              ethicsWarnings: ethicsCheck.warnings,
+            },
           };
         } catch (error) {
           return {
@@ -436,6 +587,17 @@ export abstract class BaseEngine {
       return this.state.get(key);
     }
     return Object.fromEntries(this.state);
+  }
+
+  /**
+   * Extract first text content from CallToolResult
+   */
+  protected extractText(result: CallToolResult): string {
+    const first = result.content?.[0];
+    if (first && first.type === 'text' && 'text' in first) {
+      return first.text;
+    }
+    return '';
   }
 
   /**

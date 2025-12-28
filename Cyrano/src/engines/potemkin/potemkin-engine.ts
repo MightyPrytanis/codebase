@@ -57,7 +57,7 @@ export class PotemkinEngine extends BaseEngine {
       name: 'potemkin',
       description: 'Verification and Integrity Engine - Truth and logic verification for AI-generated content',
       version: '1.0.0',
-      aiProviders: ['openai', 'anthropic'], // AI providers for verification
+      // aiProviders removed - default to 'auto' (all providers available) for user sovereignty
       // Register shared verification tools
       tools: [
         claimExtractor,
@@ -460,19 +460,60 @@ export class PotemkinEngine extends BaseEngine {
         Object.assign(state, stepResult);
       }
 
+      // Ethics check: Verify results comply with Ten Rules (especially for verification workflows)
+      const { checkGeneratedContent } = await import('../../services/ethics-check-helper.js');
+      const workflowResult = {
+        success: true,
+        workflowId,
+        workflowName: workflow.name,
+        results: state.results,
+        finalState: state,
+      };
+      
+      const resultText = JSON.stringify(workflowResult, null, 2);
+      const ethicsCheck = await checkGeneratedContent(resultText, {
+        toolName: `potemkin_${workflowId}`,
+        contentType: 'report',
+        strictMode: true, // Strict for verification results
+      });
+
+      // If blocked, return error
+      if (ethicsCheck.ethicsCheck.blocked) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: 'Workflow result blocked by ethics check. Verification does not meet Ten Rules compliance standards.',
+            },
+          ],
+          isError: true,
+        };
+      }
+
+      // Add ethics metadata
+      const finalResult = {
+        ...workflowResult,
+        ...(ethicsCheck.ethicsCheck.warnings.length > 0 && {
+          _ethicsMetadata: {
+            reviewed: true,
+            warnings: ethicsCheck.ethicsCheck.warnings,
+            complianceScore: ethicsCheck.ethicsCheck.complianceScore,
+            auditId: ethicsCheck.ethicsCheck.auditId,
+          },
+        }),
+      };
+
       return {
         content: [
           {
             type: 'text',
-            text: JSON.stringify({
-              success: true,
-              workflowId,
-              workflowName: workflow.name,
-              results: state.results,
-              finalState: state,
-            }, null, 2),
+            text: JSON.stringify(finalResult, null, 2),
           },
         ],
+        metadata: {
+          ethicsReviewed: true,
+          ethicsComplianceScore: ethicsCheck.ethicsCheck.complianceScore,
+        },
       };
     } catch (error) {
       return {

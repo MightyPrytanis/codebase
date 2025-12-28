@@ -10,10 +10,10 @@ import { z } from 'zod';
 import {
   claimExtractor,
   citationChecker,
-  citationFormatter,
   sourceVerifier,
   consistencyChecker,
 } from '../../tools/verification/index.js';
+import { citationFormatter } from '../../tools/verification/citation-formatter.js';
 
 const VerificationModuleInputSchema = z.object({
   action: z.enum([

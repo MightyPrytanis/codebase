@@ -14,6 +14,7 @@
 import { z } from 'zod';
 import { BaseTool } from '../../../tools/base-tool.js';
 import { ClientAnalyzer, AnalysisRequest } from '../services/client-analyzer.js';
+import { checkRecommendations } from '../../../services/ethics-check-helper.js';
 
 const ClientRecommendationsInputSchema = z.object({
   userId: z.string().optional().describe('Specific user/client ID to analyze'),
@@ -100,28 +101,48 @@ class ClientRecommendationsTool extends BaseTool {
         recommendations = await this.clientAnalyzer.getAllRecommendations(request);
       }
 
-      // Format response
+      // Format recommendations
+      const formattedRecommendations = recommendations.map(rec => ({
+        user: {
+          id: rec.userId,
+          name: rec.userName,
+        },
+        priority: rec.priority,
+        category: rec.category,
+        action: rec.action,
+        reasoning: rec.reasoning,
+        expectedOutcome: rec.expectedOutcome,
+        timeframe: rec.timeframe,
+        ethicsRule: rec.ethicsRule,
+        wellnessImpact: rec.wellnessImpact,
+        contactInfo: rec.contactInfo,
+      }));
+
+      // Automatic ethics check before returning recommendations
+      const ethicsCheckResult = await checkRecommendations(formattedRecommendations, {
+        toolName: 'client_recommendations',
+        engine: 'goodcounsel',
+        facts: {
+          // Add any relevant facts for professional ethics rules
+          hasClientData: formattedRecommendations.length > 0,
+        },
+      });
+
+      // Format response with ethics check metadata
       const response = {
         success: true,
         timestamp: new Date().toISOString(),
         requestedFilters: input,
-        totalRecommendations: recommendations.length,
-        recommendations: recommendations.map(rec => ({
-          user: {
-            id: rec.userId,
-            name: rec.userName,
-          },
-          priority: rec.priority,
-          category: rec.category,
-          action: rec.action,
-          reasoning: rec.reasoning,
-          expectedOutcome: rec.expectedOutcome,
-          timeframe: rec.timeframe,
-          ethicsRule: rec.ethicsRule,
-          wellnessImpact: rec.wellnessImpact,
-          contactInfo: rec.contactInfo,
-        })),
-        summary: this.generateSummary(recommendations),
+        totalRecommendations: ethicsCheckResult.recommendations.length,
+        recommendations: ethicsCheckResult.recommendations,
+        summary: this.generateSummary(ethicsCheckResult.recommendations),
+        ethicsCheck: {
+          reviewed: true,
+          passed: ethicsCheckResult.ethicsCheck.passed,
+          complianceScore: ethicsCheckResult.ethicsCheck.complianceScore,
+          warnings: ethicsCheckResult.ethicsCheck.warnings,
+          auditId: ethicsCheckResult.ethicsCheck.auditId,
+        },
       };
 
       return this.createSuccessResult(JSON.stringify(response, null, 2));

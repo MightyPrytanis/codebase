@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LexFiat GoodCounsel Beta</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #0a0a0a;
+            color: #e0e0e0;
+        }
+        .container {
+            background: #1a1a1a;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #00d4aa;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #b0b0b0;
+        }
+        textarea, select, input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #333;
+            border-radius: 6px;
+            background: #2a2a2a;
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        button {
+            background: #00d4aa;
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #00b894;
+        }
+        button:disabled {
+            background: #555;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 6px;
+            white-space: pre-wrap;
+        }
+        .success {
+            background: rgba(0, 212, 170, 0.1);
+            border: 1px solid #00d4aa;
+        }
+        .error {
+            background: rgba(255, 59, 48, 0.1);
+            border: 1px solid #ff3b30;
+        }
+        .loading {
+            text-align: center;
+            color: #00d4aa;
+        }
+        .provider-status {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .provider-badge {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .working { background: rgba(0, 212, 170, 0.2); color: #00d4aa; }
+        .needs-fix { background: rgba(255, 59, 48, 0.2); color: #ff3b30; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧠 LexFiat GoodCounsel Beta</h1>
+
+        <div class="provider-status">
+            <span class="provider-badge working">🔍 Perplexity ✅ Working</span>
+            <span class="provider-badge working">🤖 OpenAI ✅ Working</span>
+            <span class="provider-badge working">🧠 Claude ✅ Working</span>
+            <span class="provider-badge needs-fix">💎 Gemini ❌ API Key</span>
+            <span class="provider-badge needs-fix">🔥 Grok ❌ Credits</span>
+            <span class="provider-badge needs-fix">🧮 DeepSeek ❌ Balance</span>
+        </div>
+
+        <form id="counselForm">
+            <div class="form-group">
+                <label for="provider">AI Provider (Perplexity is default)</label>
+                <select id="provider" name="ai_provider">
+                    <option value="perplexity">🔍 Perplexity AI (Recommended)</option>
+                    <option value="anthropic">🧠 Claude (Anthropic)</option>
+                    <option value="openai">🤖 ChatGPT (OpenAI)</option>
+                    <option value="google">💎 Gemini (Google)</option>
+                    <option value="xai">🔥 Grok (xAI)</option>
+                    <option value="deepseek">🧮 DeepSeek</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="context">Legal Context or Situation *</label>
+                <textarea id="context" name="context" placeholder="Describe the legal case, workflow issue, or situation requiring guidance..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="userState">Your Current State (Optional)</label>
+                <textarea id="userState" name="user_state" placeholder="How are you feeling? Any stress, time pressure, or focus issues?"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="ethicalConcerns">Ethical Concerns (Optional)</label>
+                <input type="text" id="ethicalConcerns" name="ethical_concerns" placeholder="Any ethical issues (comma-separated)">
+            </div>
+
+            <div class="form-group">
+                <label for="timePressure">Time Pressure</label>
+                <select id="timePressure" name="time_pressure">
+                    <option value="low">Low - No rush</option>
+                    <option value="medium" selected>Medium - Normal timeline</option>
+                    <option value="high">High - Urgent</option>
+                    <option value="critical">Critical - Emergency</option>
+                </select>
+            </div>
+
+            <button type="submit" id="submitBtn">Get AI Counsel</button>
+        </form>
+
+        <div id="result" class="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('counselForm');
+        const resultDiv = document.getElementById('result');
+        const submitBtn = document.getElementById('submitBtn');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            const data = {
+                context: formData.get('context'),
+                ai_provider: formData.get('ai_provider') || 'perplexity',
+                user_state: formData.get('user_state') || undefined,
+                time_pressure: formData.get('time_pressure') || 'medium',
+                ethical_concerns: formData.get('ethical_concerns') ?
+                    formData.get('ethical_concerns').split(',').map(c => c.trim()).filter(c => c) :
+                    undefined
+            };
+
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Getting AI Counsel...';
+            resultDiv.style.display = 'none';
+
+            try {
+                const response = await fetch('http://localhost:5002/mcp/execute', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        tool: 'good_counsel',
+                        arguments: data
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const result = await response.json();
+
+                // Show success result
+                resultDiv.className = 'result success';
+                resultDiv.textContent = result.content?.[0]?.text || 'Counsel received successfully';
+                resultDiv.style.display = 'block';
+
+            } catch (error) {
+                // Show error result
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `Error: ${error.message}\n\nMake sure the Cyrano HTTP bridge is running on port 5002.`;
+                resultDiv.style.display = 'block';
+            } finally {
+                // Reset button
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Get AI Counsel';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -117,22 +117,18 @@ export const workflowArchaeology = new (class extends BaseTool {
         artifactSources
       );
 
-      return {
-        content: [{
-          type: 'text',
-          text: JSON.stringify({
-            workflow_archaeology_result: result,
-            usage_note: {
-              lexfiat: 'Use timeline events for time entry suggestions',
-              arkiver: 'Use timeline events for document processing workflow history',
-            },
-            note: result.confidence === 'low' 
-              ? 'Low confidence: Consider collecting more artifacts for better reconstruction'
-              : `Reconstruction confidence: ${result.confidence}`,
-          }, null, 2)
-        }],
-        isError: false,
-      };
+      const resultText = JSON.stringify({
+        workflow_archaeology_result: result,
+        usage_note: {
+          lexfiat: 'Use timeline events for time entry suggestions',
+          arkiver: 'Use timeline events for document processing workflow history',
+        },
+        note: result.confidence === 'low' 
+          ? 'Low confidence: Consider collecting more artifacts for better reconstruction'
+          : `Reconstruction confidence: ${result.confidence}`,
+      }, null, 2);
+
+      return this.createSuccessResult(resultText);
     } catch (error) {
       return this.createErrorResult(
         `Error in workflow archaeology: ${error instanceof Error ? error.message : String(error)}`

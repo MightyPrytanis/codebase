@@ -245,7 +245,36 @@ export class ArkiverInsightProcessorTool extends BaseTool {
       const validated = InsightProcessorSchema.parse(args);
       const result = await this.processor.process(validated);
       
-      return this.createSuccessResult(JSON.stringify(result, null, 2));
+      // Ethics check: AI-generated insights must comply with Ten Rules
+      const resultText = JSON.stringify(result, null, 2);
+      const { checkGeneratedContent } = await import('../services/ethics-check-helper.js');
+      const ethicsCheck = await checkGeneratedContent(resultText, {
+        toolName: 'arkiver_generate_insights',
+        contentType: 'report',
+        strictMode: true, // Strict mode for AI-generated content
+      });
+      
+      // If blocked, return error
+      if (ethicsCheck.ethicsCheck.blocked) {
+        return this.createErrorResult(
+          'Insight generation blocked by ethics check. Content does not meet Ten Rules compliance standards.'
+        );
+      }
+      
+      // Add ethics metadata if warnings
+      const finalResult = {
+        ...result,
+        ...(ethicsCheck.ethicsCheck.warnings.length > 0 && {
+          _ethicsMetadata: {
+            reviewed: true,
+            warnings: ethicsCheck.ethicsCheck.warnings,
+            complianceScore: ethicsCheck.ethicsCheck.complianceScore,
+            auditId: ethicsCheck.ethicsCheck.auditId,
+          },
+        }),
+      };
+      
+      return this.createSuccessResult(JSON.stringify(finalResult, null, 2));
     } catch (error) {
       if (error instanceof z.ZodError) {
         return this.createErrorResult(`Validation error: ${error.errors.map(e => e.message).join(', ')}`);

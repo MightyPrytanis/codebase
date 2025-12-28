@@ -64,24 +64,33 @@ export const gapIdentifier = new (class extends BaseTool {
       let timeEntries: any[] = [];
       if (billing_source === 'clio' || billing_source === 'both') {
         try {
-          // Use Clio integration to get time entries
-          // This is a placeholder - actual implementation would call Clio API
-          const clioResult = await clioIntegration.execute({
-            action: 'get_item_tracking',
-            parameters: {
-              start_date,
-              end_date,
-              matter_id,
-            },
+          // Use ClioAPIService to get time entries (activities)
+          const { ClioAPIService } = await import('../services/clio-api.js');
+          const clioService = new ClioAPIService({
+            apiKey: process.env.CLIO_API_KEY || '',
+            region: (process.env.CLIO_REGION as any) || 'US',
           });
           
-          if (!clioResult.isError && clioResult.content) {
-            // Parse Clio time entries
-            // Placeholder - actual parsing would depend on Clio API response format
-            timeEntries = [];
+          if (clioService.isConfigured()) {
+            const activities = await clioService.listActivities({
+              matter_id: matter_id ? parseInt(matter_id, 10) : undefined,
+              type: 'TimeEntry',
+              limit: 200,
+            });
+            
+            // Parse Clio time entries from activities
+            timeEntries = activities.data.map((activity: any) => ({
+              date: activity.date,
+              hours: activity.quantity,
+              description: activity.note || '',
+              matter_id: activity.matter_id?.toString(),
+              source: 'clio',
+            }));
           }
         } catch (error) {
           // Continue with manual entries if Clio fails
+          // Error is logged but doesn't block gap identification
+          console.warn('Clio time entry retrieval failed:', error);
         }
       }
       
@@ -140,7 +149,39 @@ export const gapIdentifier = new (class extends BaseTool {
         },
       };
       
-      return this.createSuccessResult(JSON.stringify(result, null, 2));
+      // Ethics check: Ensure no fabrication of time entries (Rule 1: Truth)
+      // Gap suggestions must be based on actual data, not fabricated
+      const { checkSingleRecommendation } = await import('../services/ethics-check-helper.js');
+      const ethicsCheck = await checkSingleRecommendation(
+        `Gap analysis suggests ${gaps.length} days with missing time entries totaling ${result.summary.total_gap_hours} hours`,
+        {
+          toolName: 'gap_identifier',
+          engine: 'chronometric',
+          app: 'lexfiat',
+          facts: {
+            gapsFound: gaps.length,
+            totalGapHours: result.summary.total_gap_hours,
+            basedOnActualData: timeEntries.length > 0 || billing_source === 'manual',
+          },
+        }
+      );
+      
+      // If ethics check blocks, return empty result
+      if (ethicsCheck.ethicsCheck.blocked) {
+        return this.createErrorResult('Ethics check failed: Gap suggestions must be based on actual recorded data, not fabricated');
+      }
+      
+      // Add ethics metadata to result
+      const resultWithEthics = {
+        ...result,
+        ethicsCheck: {
+          passed: ethicsCheck.ethicsCheck.passed,
+          warnings: ethicsCheck.ethicsCheck.warnings,
+          complianceScore: ethicsCheck.ethicsCheck.complianceScore,
+        },
+      };
+      
+      return this.createSuccessResult(JSON.stringify(resultWithEthics, null, 2));
     } catch (error) {
       return this.createErrorResult(
         `Error in gap_identifier: ${error instanceof Error ? error.message : String(error)}`

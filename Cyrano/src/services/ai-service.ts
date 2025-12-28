@@ -13,16 +13,30 @@
 import { Anthropic } from '@anthropic-ai/sdk';
 import { OpenAI } from 'openai';
 import { PerplexityService } from './perplexity.js';
+import { OpenRouterService } from './openrouter.js';
 import { APIValidator } from '../utils/api-validator.js';
 import { aiPerformanceTracker } from './ai-performance-tracker.js';
+import { injectTenRulesIntoSystemPrompt } from './ethics-prompt-injector.js';
+import { systemicEthicsService } from './systemic-ethics-service.js';
+import { ethicsAuditService } from './ethics-audit-service.js';
 
-export type AIProvider = 'openai' | 'anthropic' | 'perplexity' | 'google' | 'xai' | 'deepseek';
+export type AIProvider = 'openai' | 'anthropic' | 'perplexity' | 'google' | 'xai' | 'deepseek' | 'openrouter';
 
 export interface AICallOptions {
   model?: string;
   maxTokens?: number;
   temperature?: number;
   systemPrompt?: string;
+  /**
+   * Metadata for ethics audit logging
+   */
+  metadata?: {
+    toolName?: string;
+    engine?: string;
+    app?: string;
+    actionType?: 'recommendation' | 'suggestion' | 'content_generation' | 'data_processing';
+    skipEthicsCheck?: boolean; // Only for internal/system calls that already have checks
+  };
 }
 
 export class AIService {
@@ -35,6 +49,12 @@ export class AIService {
   /**
    * Call an AI provider with a prompt
    * Tracks performance metrics automatically
+   * 
+   * ETHICS ENFORCEMENT:
+   * - Automatically injects Ten Rules into system prompts (if not already injected)
+   * - Checks all outputs with systemic ethics service
+   * - Logs all ethics checks to audit trail
+   * - Blocks non-compliant outputs
    */
   async call(
     provider: AIProvider,
@@ -47,62 +67,89 @@ export class AIService {
       throw new Error(`AI provider ${provider} not configured: ${validation.error}`);
     }
 
+    // ETHICS ENFORCEMENT: Inject Ten Rules into system prompt if not already injected
+    let systemPrompt = options.systemPrompt || '';
+    if (systemPrompt && !systemPrompt.includes('Ten Rules for Ethical AI')) {
+      // Check if Ten Rules are already injected (avoid double injection)
+      systemPrompt = injectTenRulesIntoSystemPrompt(systemPrompt, 'summary');
+    } else if (!systemPrompt) {
+      // No system prompt provided, inject Ten Rules with default context
+      systemPrompt = injectTenRulesIntoSystemPrompt(
+        'You are an expert AI assistant.',
+        'summary'
+      );
+    }
+
     const startTime = Date.now();
     let inputTokens = 0;
     let outputTokens = 0;
     let cost = 0;
 
     try {
+      // Create options with injected system prompt
+      const optionsWithEthics = {
+        ...options,
+        systemPrompt,
+      };
+      
       let result: string;
       
       switch (provider) {
         case 'anthropic':
-          result = await this.callAnthropic(prompt, options);
+          result = await this.callAnthropic(prompt, optionsWithEthics);
           // Estimate tokens (rough: ~4 chars per token)
-          inputTokens = Math.ceil(prompt.length / 4);
+          inputTokens = Math.ceil((prompt.length + systemPrompt.length) / 4);
           outputTokens = Math.ceil(result.length / 4);
           // Rough cost estimate: $15 per 1M input tokens, $75 per 1M output tokens
           cost = (inputTokens / 1_000_000) * 15 + (outputTokens / 1_000_000) * 75;
           break;
         
         case 'openai':
-          result = await this.callOpenAI(prompt, options);
-          inputTokens = Math.ceil(prompt.length / 4);
+          result = await this.callOpenAI(prompt, optionsWithEthics);
+          inputTokens = Math.ceil((prompt.length + systemPrompt.length) / 4);
           outputTokens = Math.ceil(result.length / 4);
           // Rough cost estimate: $5 per 1M input tokens, $15 per 1M output tokens (gpt-4o)
           cost = (inputTokens / 1_000_000) * 5 + (outputTokens / 1_000_000) * 15;
           break;
         
         case 'perplexity':
-          result = await this.callPerplexity(prompt, options);
-          inputTokens = Math.ceil(prompt.length / 4);
+          result = await this.callPerplexity(prompt, optionsWithEthics);
+          inputTokens = Math.ceil((prompt.length + systemPrompt.length) / 4);
           outputTokens = Math.ceil(result.length / 4);
           // Rough cost estimate: $0.20 per 1M input tokens, $1.00 per 1M output tokens
           cost = (inputTokens / 1_000_000) * 0.2 + (outputTokens / 1_000_000) * 1.0;
           break;
         
         case 'google':
-          result = await this.callGoogle(prompt, options);
-          inputTokens = Math.ceil(prompt.length / 4);
+          result = await this.callGoogle(prompt, optionsWithEthics);
+          inputTokens = Math.ceil((prompt.length + systemPrompt.length) / 4);
           outputTokens = Math.ceil(result.length / 4);
           // Rough cost estimate: $0.075 per 1M input tokens, $0.30 per 1M output tokens (flash)
           cost = (inputTokens / 1_000_000) * 0.075 + (outputTokens / 1_000_000) * 0.3;
           break;
         
         case 'xai':
-          result = await this.callXAI(prompt, options);
-          inputTokens = Math.ceil(prompt.length / 4);
+          result = await this.callXAI(prompt, optionsWithEthics);
+          inputTokens = Math.ceil((prompt.length + systemPrompt.length) / 4);
           outputTokens = Math.ceil(result.length / 4);
           // Rough cost estimate: $2 per 1M input tokens, $10 per 1M output tokens
           cost = (inputTokens / 1_000_000) * 2 + (outputTokens / 1_000_000) * 10;
           break;
         
         case 'deepseek':
-          result = await this.callDeepSeek(prompt, options);
-          inputTokens = Math.ceil(prompt.length / 4);
+          result = await this.callDeepSeek(prompt, optionsWithEthics);
+          inputTokens = Math.ceil((prompt.length + systemPrompt.length) / 4);
           outputTokens = Math.ceil(result.length / 4);
           // Rough cost estimate: $0.14 per 1M input tokens, $0.28 per 1M output tokens
           cost = (inputTokens / 1_000_000) * 0.14 + (outputTokens / 1_000_000) * 0.28;
+          break;
+        
+        case 'openrouter':
+          result = await this.callOpenRouter(prompt, optionsWithEthics);
+          inputTokens = Math.ceil((prompt.length + systemPrompt.length) / 4);
+          outputTokens = Math.ceil(result.length / 4);
+          // Rough cost estimate: Varies by model (free models available), average $0.10 per 1M input, $0.30 per 1M output
+          cost = (inputTokens / 1_000_000) * 0.10 + (outputTokens / 1_000_000) * 0.30;
           break;
         
         default:
@@ -110,6 +157,42 @@ export class AIService {
       }
 
       const latency = Date.now() - startTime;
+      
+      // ETHICS ENFORCEMENT: Check output before returning (unless explicitly skipped)
+      if (!options.metadata?.skipEthicsCheck) {
+        const ethicsCheck = await systemicEthicsService.checkOutput(result);
+        
+        // Log ethics check to audit trail
+        const auditId = await ethicsAuditService.logEthicsCheck(
+          options.metadata?.toolName || 'ai_service',
+          options.metadata?.actionType || 'content_generation',
+          result.substring(0, 1000), // Truncate for storage
+          ethicsCheck.details || { passed: ethicsCheck.passed, blocked: ethicsCheck.blocked, warnings: ethicsCheck.warnings },
+          'ten_rules_checker',
+          {
+            engine: options.metadata?.engine,
+            app: options.metadata?.app,
+            provider,
+            promptLength: prompt.length,
+            outputLength: result.length,
+          }
+        );
+        
+        // Block output if ethics check failed
+        if (ethicsCheck.blocked) {
+          const latency = Date.now() - startTime;
+          aiPerformanceTracker.recordFailure(provider, latency);
+          
+          throw new Error(
+            `AI output blocked by ethics check (audit ID: ${auditId}). ` +
+            `Output violates Ten Rules for Ethical AI/Human Interactions. ` +
+            `Warnings: ${ethicsCheck.warnings.join('; ')}`
+          );
+        }
+        
+        // If warnings present but not blocked, include in result metadata
+        // (Note: This is logged in audit trail, but result is still returned)
+      }
       
       // Record successful request
       aiPerformanceTracker.recordSuccess(
@@ -394,10 +477,51 @@ export class AIService {
   }
 
   /**
+   * Call OpenRouter (OpenAI-compatible API gateway)
+   */
+  private async callOpenRouter(prompt: string, options: AICallOptions): Promise<string> {
+    const apiKey = process.env.OPENROUTER_API_KEY;
+    if (!apiKey) {
+      throw new Error('OPENROUTER_API_KEY not configured');
+    }
+
+    const openRouterService = new OpenRouterService({
+      apiKey,
+      siteUrl: process.env.SITE_URL || 'https://cyrano.legal',
+      siteName: process.env.SITE_NAME || 'Cyrano Legal AI',
+    });
+    
+    const systemPrompt = options.systemPrompt || 
+      'You are a helpful AI assistant providing accurate and useful information.';
+
+    const messages = [
+      {
+        role: 'system' as const,
+        content: systemPrompt,
+      },
+      {
+        role: 'user' as const,
+        content: prompt,
+      },
+    ];
+
+    // Use free model by default, or specified model
+    const model = options.model || 'google/gemma-2-9b-it:free';
+    
+    const result = await openRouterService.chat(messages, {
+      model,
+      max_tokens: options.maxTokens,
+      temperature: options.temperature,
+    });
+
+    return result;
+  }
+
+  /**
    * Get available providers
    */
   getAvailableProviders(): AIProvider[] {
-    const allProviders: AIProvider[] = ['openai', 'anthropic', 'perplexity', 'google', 'xai', 'deepseek'];
+    const allProviders: AIProvider[] = ['openai', 'anthropic', 'perplexity', 'google', 'xai', 'deepseek', 'openrouter'];
     return allProviders.filter(p => this.isProviderAvailable(p));
   }
 }

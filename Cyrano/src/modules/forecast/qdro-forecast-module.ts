@@ -220,45 +220,79 @@ export class QDROForecastModule extends BaseModule {
    * Generate QDRO PDF with form filling
    */
   private async generateQDROPDF(input: any): Promise<CallToolResult> {
-    // Use PDF form filler tool if available
+    // Use PDF form filler tool (registered in module constructor)
     const pdfFiller = this.getTool('pdf_form_filler');
-    if (pdfFiller) {
-      return await pdfFiller.execute({
-        formType: 'qdro',
-        formData: input,
-      });
+    if (!pdfFiller) {
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify({
+              error: 'PDF form filler tool not available in module',
+            }, null, 2),
+          },
+        ],
+        isError: true,
+      } as CallToolResult;
     }
 
-    return {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify({
-            error: 'PDF form filler tool not yet implemented',
-          }, null, 2),
-        },
-      ],
-      isError: true,
-    };
+    // Execute PDF form filling
+    return await pdfFiller.execute({
+      action: 'fill_form',
+      formType: 'qdro',
+      formData: input,
+    });
   }
 
   /**
    * Verify ERISA compliance
+   * Basic ERISA compliance checks for QDRO requirements
    */
   private async verifyERISACompliance(input: any): Promise<CallToolResult> {
-    // TODO: Implement ERISA compliance checking
+    const issues: string[] = [];
+    const warnings: string[] = [];
+    
+    // Basic ERISA QDRO requirements
+    if (!input.planName || !input.planName.trim()) {
+      issues.push('Plan name is required for ERISA compliance');
+    }
+    
+    if (!input.participantName || !input.participantName.trim()) {
+      issues.push('Participant name is required for ERISA compliance');
+    }
+    
+    if (!input.alternatePayeeName || !input.alternatePayeeName.trim()) {
+      issues.push('Alternate payee name is required for ERISA compliance');
+    }
+    
+    if (!input.amount || input.amount <= 0) {
+      issues.push('Valid payment amount is required for ERISA compliance');
+    }
+    
+    // Check for required QDRO language
+    const hasQDROLang = input.qdroLanguage || input.containsQDROLang;
+    if (!hasQDROLang) {
+      warnings.push('QDRO should contain standard ERISA language');
+    }
+    
+    const compliant = issues.length === 0;
+    
     return {
       content: [
         {
-          type: 'text',
+          type: 'text' as const,
           text: JSON.stringify({
-            compliant: true,
-            note: 'ERISA compliance verification not yet implemented',
+            compliant,
+            issues: issues.length > 0 ? issues : undefined,
+            warnings: warnings.length > 0 ? warnings : undefined,
+            note: compliant 
+              ? 'Basic ERISA compliance checks passed. Full legal review recommended.'
+              : 'ERISA compliance issues found. Address before filing.',
           }, null, 2),
         },
       ],
       isError: false,
-    };
+    } as CallToolResult;
   }
 
   async cleanup(): Promise<void> {

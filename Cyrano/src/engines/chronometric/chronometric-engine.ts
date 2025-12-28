@@ -57,7 +57,7 @@ export class ChronometricEngine extends BaseEngine {
       name: 'chronometric',
       description: 'Forensic Time Capture and Workflow Archaeology Engine - assists attorneys in retrospectively reconstructing lost or unentered billable time',
       version: '1.0.0',
-      modules: ['time_reconstruction', 'cost_estimation'], // Modules: time_reconstruction, cost_estimation (created), pattern_learning (pending)
+      modules: ['time_reconstruction', 'pattern_learning', 'cost_estimation'], // All three modules: time_reconstruction, pattern_learning, cost_estimation
       tools: [], // Tools are now in modules
       aiProviders: [], // Auto provider selection
     });
@@ -228,7 +228,7 @@ export class ChronometricEngine extends BaseEngine {
         case 'list_workflows':
           return this.listWorkflows();
         
-        // Legacy direct actions (for backward compatibility until modules are fully created)
+        // Legacy direct actions (delegate to time_reconstruction module for backward compatibility)
         case 'identify_gaps':
         case 'collect_artifacts':
         case 'reconstruct_time':
@@ -236,18 +236,51 @@ export class ChronometricEngine extends BaseEngine {
         case 'recollection_support':
         case 'pre_fill':
         case 'track_provenance':
-        case 'generate_report':
+          // Delegate to time_reconstruction module
+          const timeReconModule = this.modules.get('time_reconstruction');
+          if (timeReconModule) {
+            return await timeReconModule.execute({
+              action: parsed.action,
+              start_date: parsed.start_date,
+              end_date: parsed.end_date,
+              matter_id: parsed.matter_id,
+              include_artifacts: parsed.include_artifacts,
+              // Pass through any additional input
+              ...(parsed.input || {}),
+            });
+          }
           return {
             content: [{
               type: 'text',
               text: JSON.stringify({
-                message: `Action '${parsed.action}' will be handled by modules once they are created.`,
-                note: 'Use execute_workflow or execute_module actions for complete functionality.',
-                available_workflows: Array.from(this.workflows.keys()),
+                error: 'time_reconstruction module not available',
                 available_modules: Array.from(this.modules.keys()),
               }, null, 2)
             }],
-            isError: false,
+            isError: true,
+          };
+        
+        case 'generate_report':
+          // Delegate to billing_reconciliation module
+          const { moduleRegistry } = await import('../../modules/registry.js');
+          const billingModule = moduleRegistry.get('billing_reconciliation');
+          if (billingModule) {
+            return await billingModule.execute({
+              action: 'generate_reconciliation_report',
+              start_date: parsed.start_date,
+              end_date: parsed.end_date,
+              matter_id: parsed.matter_id,
+              include_artifacts: parsed.include_artifacts,
+            });
+          }
+          return {
+            content: [{
+              type: 'text',
+              text: JSON.stringify({
+                error: 'billing_reconciliation module not available',
+              }, null, 2)
+            }],
+            isError: true,
           };
         
         default:

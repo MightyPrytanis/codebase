@@ -5,26 +5,69 @@
  */
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
-import { app } from '../../src/http-bridge.js';
 import type { Server } from 'http';
 
+// Set environment variables before importing
+process.env.NODE_ENV = 'test';
+process.env.JWT_SECRET = 'test-jwt-secret-minimum-32-characters-long-for-testing';
+process.env.TRUST_PROXY_COUNT = '0'; // Disable trust proxy for tests
+
+// Import app after setting env vars
+import { app } from '../../src/http-bridge.js';
+
 describe('MCP HTTP Bridge Compliance', () => {
-  const baseUrl = 'http://localhost:5002';
+  // Use a different port for tests to avoid conflicts
+  const testPort = process.env.TEST_PORT ? parseInt(process.env.TEST_PORT) : 5003;
+  const baseUrl = `http://localhost:${testPort}`;
   let server: Server | null = null;
+  let csrfToken: string = '';
+  let sessionCookie: string = '';
 
   beforeAll(async () => {
     // Start the HTTP bridge server for testing
     const http = await import('http');
     server = http.createServer(app);
-    await new Promise<void>((resolve) => {
-      server!.listen(5002, () => {
-        console.log('Test HTTP server started on port 5002');
+    await new Promise<void>((resolve, reject) => {
+      server!.listen(testPort, () => {
+        console.log(`Test HTTP server started on port ${testPort}`);
         resolve();
+      });
+      server!.on('error', (err: any) => {
+        if (err.code === 'EADDRINUSE') {
+          console.warn(`Port ${testPort} in use, skipping server start`);
+          resolve(); // Continue without server if port is in use
+        } else {
+          reject(err);
+        }
       });
     });
     
     // Wait a bit for server to be fully ready
     await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Get CSRF token for POST requests
+    try {
+      const csrfResponse = await fetch(`${baseUrl}/csrf-token`);
+      if (csrfResponse.ok) {
+        const csrfData = await csrfResponse.json();
+        csrfToken = csrfData.csrfToken || '';
+        // Extract all cookies from response
+        const setCookieHeaders = csrfResponse.headers.getSetCookie();
+        if (setCookieHeaders && setCookieHeaders.length > 0) {
+          // Find sessionId cookie
+          for (const cookie of setCookieHeaders) {
+            const sessionMatch = cookie.match(/sessionId=([^;]+)/);
+            if (sessionMatch) {
+              sessionCookie = sessionMatch[1];
+              break;
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('Could not get CSRF token:', error);
+      // Continue without CSRF token - tests may fail but we'll see the actual error
+    }
   });
 
   afterAll(async () => {
@@ -42,6 +85,10 @@ describe('MCP HTTP Bridge Compliance', () => {
   describe('REST API Compliance', () => {
     it('should respond to GET /mcp/tools', async () => {
       const response = await fetch(`${baseUrl}/mcp/tools`);
+      if (response.status !== 200) {
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
+      }
       expect(response.status).toBe(200);
       const data = await response.json();
       expect(data).toHaveProperty('tools');
@@ -67,7 +114,11 @@ describe('MCP HTTP Bridge Compliance', () => {
     it('should respond to POST /mcp/execute', async () => {
       const response = await fetch(`${baseUrl}/mcp/execute`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken,
+          'Cookie': `sessionId=${sessionCookie}`
+        },
         body: JSON.stringify({
           tool: 'system_status',
           input: {}
@@ -81,7 +132,11 @@ describe('MCP HTTP Bridge Compliance', () => {
     it('should return CallToolResult format', async () => {
       const response = await fetch(`${baseUrl}/mcp/execute`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken,
+          'Cookie': `sessionId=${sessionCookie}`
+        },
         body: JSON.stringify({
           tool: 'system_status',
           input: {}
@@ -109,7 +164,11 @@ describe('MCP HTTP Bridge Compliance', () => {
     it('should handle invalid tool names', async () => {
       const response = await fetch(`${baseUrl}/mcp/execute`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken,
+          'Cookie': `sessionId=${sessionCookie}`
+        },
         body: JSON.stringify({
           tool: 'nonexistent_tool',
           input: {}
@@ -123,7 +182,11 @@ describe('MCP HTTP Bridge Compliance', () => {
     it('should handle invalid input schemas', async () => {
       const response = await fetch(`${baseUrl}/mcp/execute`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken,
+          'Cookie': `sessionId=${sessionCookie}`
+        },
         body: JSON.stringify({
           tool: 'document_analyzer',
           input: { invalid: 'data' }
@@ -136,7 +199,11 @@ describe('MCP HTTP Bridge Compliance', () => {
     it('should return errors in MCP format', async () => {
       const response = await fetch(`${baseUrl}/mcp/execute`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken,
+          'Cookie': `sessionId=${sessionCookie}`
+        },
         body: JSON.stringify({
           tool: 'nonexistent_tool',
           input: {}
@@ -160,7 +227,11 @@ describe('MCP HTTP Bridge Compliance', () => {
     it('should execute chronometric_module', async () => {
       const response = await fetch(`${baseUrl}/mcp/execute`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken,
+          'Cookie': `sessionId=${sessionCookie}`
+        },
         body: JSON.stringify({
           tool: 'chronometric_module',
           input: {
@@ -200,7 +271,11 @@ describe('MCP HTTP Bridge Compliance', () => {
     it('should execute mae_engine', async () => {
       const response = await fetch(`${baseUrl}/mcp/execute`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken,
+          'Cookie': `sessionId=${sessionCookie}`
+        },
         body: JSON.stringify({
           tool: 'mae_engine',
           input: {
