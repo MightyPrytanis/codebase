@@ -233,10 +233,10 @@ export async function getLibraryLocations(userId?: string): Promise<LibraryLocat
 }
 
 /**
- * Add or update a library location
+ * Create a new library location
  */
-export async function saveLibraryLocation(
-  location: Partial<LibraryLocation> & { type: string; name: string; path: string },
+export async function createLibraryLocation(
+  location: Partial<LibraryLocation> & { type: 'local' | 'onedrive' | 'gdrive' | 's3'; name: string; path: string },
   userId?: string
 ): Promise<LibraryLocation> {
   const response = await fetch(`${API_URL}/api/library/locations`, {
@@ -247,7 +247,38 @@ export async function saveLibraryLocation(
     body: JSON.stringify({ ...location, userId }),
   });
   if (!response.ok) {
-    throw new Error(`Failed to save library location: ${response.statusText}`);
+    throw new Error(`Failed to create library location: ${response.statusText}`);
+  }
+  return response.json();
+}
+
+/**
+ * Upload a document to the library
+ */
+export async function uploadLibraryDocument(
+  data: {
+    locationId: string;
+    file: File;
+    title: string;
+    description?: string;
+    sourceType?: 'rule' | 'standing-order' | 'template' | 'playbook' | 'case-law' | 'statute' | 'other';
+  },
+  userId?: string
+): Promise<LibraryItem> {
+  const formData = new FormData();
+  formData.append('file', data.file);
+  formData.append('locationId', data.locationId);
+  formData.append('title', data.title);
+  if (data.description) formData.append('description', data.description);
+  if (data.sourceType) formData.append('sourceType', data.sourceType);
+  if (userId) formData.append('userId', userId);
+
+  const response = await fetch(`${API_URL}/api/library/items/upload`, {
+    method: 'POST',
+    body: formData,
+  });
+  if (!response.ok) {
+    throw new Error(`Failed to upload document: ${response.statusText}`);
   }
   return response.json();
 }

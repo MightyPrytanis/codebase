@@ -71,9 +71,12 @@ export function GoodCounselEnhanced({
   const { data: insights, refetch: refetchInsights } = useQuery({
     queryKey: ["goodcounsel-insights"],
     queryFn: async () => {
-      const result = await executeCyranoTool("good_counsel", {
-        action: "get_insights",
-        context: context || "general practice overview",
+      const result = await executeCyranoTool("goodcounsel_engine", {
+        action: "client_recommendations",
+        input: {
+          context: context || "general practice overview",
+        },
+        userId: "default-user", // TODO: Get from auth
       });
       
       // Check for AI service errors
@@ -98,15 +101,25 @@ export function GoodCounselEnhanced({
     enabled: false, // Manual fetch
   });
 
-  const counselMutation = useMutation({
-    mutationFn: async (data: {
-      context: string;
-      ai_provider: string;
-      user_state?: string;
-      time_pressure: string;
-      ethical_concerns?: string[];
-    }) => {
-      const result = await executeCyranoTool("good_counsel", data);
+  const counselMutation = useMutation<string, Error, {
+    context: string;
+    ai_provider: string;
+    user_state?: string;
+    time_pressure: string;
+    ethical_concerns?: string[];
+  }>({
+    mutationFn: async (data) => {
+      const result = await executeCyranoTool("goodcounsel_engine", {
+        action: "wellness_check",
+        input: {
+          context: data.context,
+          user_state: data.user_state,
+          time_pressure: data.time_pressure,
+          ethical_concerns: data.ethical_concerns,
+          ai_provider: data.ai_provider,
+        },
+        userId: "default-user", // TODO: Get from auth
+      });
       
       // Check for AI service errors
       if (result.isError) {
@@ -126,7 +139,9 @@ export function GoodCounselEnhanced({
         throw new Error(errorText || 'AI service error');
       }
       
-      return result;
+      // Extract text content from result
+      const textContent = result.content?.[0]?.text || '';
+      return textContent;
     },
   });
 
@@ -377,9 +392,7 @@ export function GoodCounselEnhanced({
                   <div className="gc-response">
                     <h3 className="gc-response-title">Guidance Response</h3>
                     <div className="gc-response-content">
-                      {typeof counselMutation.data === 'string' 
-                        ? counselMutation.data 
-                        : (counselMutation.data as any)?.content?.[0]?.text || "No response received"}
+                      {counselMutation.data}
                     </div>
                   </div>
                 )}

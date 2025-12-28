@@ -48,16 +48,40 @@ export interface PracticeProfile {
       enabled: boolean;
       clientId?: string;
     };
-    miFile?: {
-      enabled: boolean;
-      enrolled?: boolean;
-    };
+    // MiFile removed - use micourt_query tool for user-initiated docket queries
+    // miFile?: {
+    //   enabled: boolean;
+    //   enrolled?: boolean;
+    // };
     outlook?: {
       enabled: boolean;
       authenticated?: boolean;
     };
     gmail?: {
       enabled: boolean;
+      authenticated?: boolean;
+    };
+    chronometric?: {
+      baseline?: {
+        minimumHoursPerWeek?: number;
+        minimumHoursPerDay?: number;
+        useBaselineUntilEnoughData?: boolean;
+        typicalSchedule?: Record<string, any>;
+        offDays?: string[];
+        configuredAt?: string;
+      };
+    };
+    onboarding?: {
+      completed?: boolean;
+      currentStep?: number;
+      completedSteps?: number[];
+    };
+    email?: {
+      enabled?: boolean;
+      authenticated?: boolean;
+    };
+    calendar?: {
+      enabled?: boolean;
       authenticated?: boolean;
     };
   };

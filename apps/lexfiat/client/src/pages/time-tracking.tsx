@@ -8,8 +8,14 @@ import React, { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Clock, Loader2, CheckCircle, AlertCircle, Calendar, FileText } from "lucide-react";
 import { executeCyranoTool } from "@/lib/cyrano-api";
+import { WorkflowArchaeology, WorkflowArchaeologyResult } from "@/components/time-tracking/workflow-archaeology";
+import { TimelineVisualization } from "@/components/time-tracking/timeline-visualization";
+import { EvidenceChain } from "@/components/time-tracking/evidence-chain";
 
 type ChronometricAction = 
+  | 'execute_workflow'
+  | 'execute_module'
+  | 'list_workflows'
   | 'identify_gaps'
   | 'collect_artifacts'
   | 'reconstruct_time'
@@ -17,7 +23,13 @@ type ChronometricAction =
   | 'recollection_support'
   | 'pre_fill'
   | 'track_provenance'
-  | 'generate_report';
+  | 'generate_report'
+  | 'setup_baseline'
+  | 'learn_patterns'
+  | 'analyze_profitability'
+  | 'estimate_cost'
+  | 'generate_reconciliation_report'
+  | 'compare_with_clio';
 
 export default function TimeTracking() {
   const [action, setAction] = useState<ChronometricAction>('identify_gaps');
@@ -25,6 +37,8 @@ export default function TimeTracking() {
   const [endDate, setEndDate] = useState('');
   const [matterId, setMatterId] = useState('');
   const [includeArtifacts, setIncludeArtifacts] = useState<string[]>([]);
+  const [workflowResult, setWorkflowResult] = useState<WorkflowArchaeologyResult | null>(null);
+  const [userId] = useState('user-1'); // TODO: Get from auth context
 
   const chronometricMutation = useMutation({
     mutationFn: async (params: any) => {
@@ -70,14 +84,15 @@ export default function TimeTracking() {
             Time Tracking
           </h1>
           <p className="text-secondary">
-            Forensic Time Capture - Reconstruct lost or unentered billable time
+            Forensic Time Capture - Reconstruct lost or unentered billable time using Chronometric Engine
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            <div className="bg-card-dark rounded-lg p-6 border border-border-gray">
-              <h2 className="text-xl font-bold text-primary mb-4">Chronometric Operations</h2>
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="lg:col-span-2 space-y-6">
+              <div className="bg-card-dark rounded-lg p-6 border border-border-gray">
+                <h2 className="text-xl font-bold text-primary mb-4">Chronometric Operations</h2>
               
               <div className="space-y-4">
                 <div>
@@ -89,14 +104,32 @@ export default function TimeTracking() {
                     onChange={(e) => setAction(e.target.value as ChronometricAction)}
                     className="w-full bg-primary-dark border border-border-gray rounded-lg px-4 py-2 text-primary focus:outline-none focus:ring-2 focus:ring-accent-gold"
                   >
-                    <option value="identify_gaps">Identify Gaps</option>
-                    <option value="collect_artifacts">Collect Artifacts</option>
-                    <option value="reconstruct_time">Reconstruct Time</option>
-                    <option value="check_duplicates">Check Duplicates</option>
-                    <option value="recollection_support">Recollection Support</option>
-                    <option value="pre_fill">Pre-fill Entries</option>
-                    <option value="track_provenance">Track Provenance</option>
-                    <option value="generate_report">Generate Report</option>
+                    <optgroup label="Time Reconstruction">
+                      <option value="identify_gaps">Identify Gaps</option>
+                      <option value="collect_artifacts">Collect Artifacts</option>
+                      <option value="reconstruct_time">Reconstruct Time</option>
+                      <option value="check_duplicates">Check Duplicates</option>
+                      <option value="recollection_support">Recollection Support</option>
+                      <option value="pre_fill">Pre-fill Entries</option>
+                      <option value="track_provenance">Track Provenance</option>
+                    </optgroup>
+                    <optgroup label="Pattern Learning & Analytics">
+                      <option value="setup_baseline">Setup Baseline</option>
+                      <option value="learn_patterns">Learn Patterns</option>
+                      <option value="analyze_profitability">Analyze Profitability</option>
+                    </optgroup>
+                    <optgroup label="Cost Estimation">
+                      <option value="estimate_cost">Estimate Cost</option>
+                    </optgroup>
+                    <optgroup label="Billing Reconciliation">
+                      <option value="generate_reconciliation_report">Generate Reconciliation Report</option>
+                      <option value="compare_with_clio">Compare with Clio</option>
+                    </optgroup>
+                    <optgroup label="Engine Actions">
+                      <option value="execute_workflow">Execute Workflow</option>
+                      <option value="execute_module">Execute Module</option>
+                      <option value="list_workflows">List Workflows</option>
+                    </optgroup>
                   </select>
                 </div>
 
@@ -188,9 +221,23 @@ export default function TimeTracking() {
                   Results
                 </h3>
                 <div className="space-y-4">
-                  <pre className="text-xs text-secondary overflow-auto max-h-96 bg-primary-dark p-4 rounded border border-border-gray">
-                    {JSON.stringify(chronometricMutation.data, null, 2)}
-                  </pre>
+                  {/* Format results based on action type */}
+                  {action === 'list_workflows' && chronometricMutation.data.workflows ? (
+                    <div className="space-y-2">
+                      <h4 className="font-semibold text-primary">Available Workflows:</h4>
+                      <ul className="list-disc list-inside space-y-1 text-secondary">
+                        {chronometricMutation.data.workflows.map((wf: any) => (
+                          <li key={wf.id}>
+                            <span className="font-medium">{wf.name}</span>: {wf.description} ({wf.steps} steps)
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : (
+                    <pre className="text-xs text-secondary overflow-auto max-h-96 bg-primary-dark p-4 rounded border border-border-gray">
+                      {JSON.stringify(chronometricMutation.data, null, 2)}
+                    </pre>
+                  )}
                 </div>
               </div>
             )}
@@ -209,6 +256,30 @@ export default function TimeTracking() {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Workflow Archaeology Section */}
+        <div className="space-y-6">
+          <WorkflowArchaeology
+            userId={userId}
+            onReconstruct={(result) => {
+              setWorkflowResult(result);
+            }}
+          />
+
+          {workflowResult && (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <TimelineVisualization
+                result={workflowResult}
+                onTimeEntrySuggestion={(entry) => {
+                  // TODO: Integrate with time entry creation flow
+                  console.log('Time entry suggestion:', entry);
+                  alert(`Time Entry Suggestion:\nDate: ${entry.date}\nHours: ${entry.hours}\nDescription: ${entry.description}\nConfidence: ${entry.confidence}`);
+                }}
+              />
+              <EvidenceChain result={workflowResult} />
+            </div>
+          )}
         </div>
       </div>
     </div>

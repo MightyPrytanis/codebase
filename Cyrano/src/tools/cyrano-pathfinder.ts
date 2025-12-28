@@ -10,6 +10,7 @@ import { aiService, AIProvider } from '../services/ai-service.js';
 import { apiValidator } from '../utils/api-validator.js';
 import { ragQuery } from './rag-query.js';
 import { workflowManager } from './workflow-manager.js';
+import { injectTenRulesIntoSystemPrompt } from '../services/ethics-prompt-injector.js';
 import {
   arkiverTextProcessor,
   arkiverEmailProcessor,
@@ -119,7 +120,10 @@ The Cyrano Pathfinder is the autonomous assistant of the Cyrano MCP server, prov
       }
 
       // Build system prompt with Cyrano Pathfinder branding
-      const systemPrompt = this.buildSystemPrompt(app, mode, context);
+      let systemPrompt = this.buildSystemPrompt(app, mode, context);
+      
+      // Inject Ten Rules into system prompt
+      systemPrompt = injectTenRulesIntoSystemPrompt(systemPrompt, 'summary');
 
       // Build full prompt with context
       const fullPrompt = this.buildPrompt(message, context, mode);

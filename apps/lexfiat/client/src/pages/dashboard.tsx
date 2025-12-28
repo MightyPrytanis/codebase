@@ -8,7 +8,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Clock } from "lucide-react";
 import { LiaSwimmerSolid } from "react-icons/lia";
 import Header from "@/components/layout/header";
- import TestingSidebar from "@/components/dashboard/testing-sidebar-html";
+import TestingSidebar from "@/components/dashboard/testing-sidebar-html";
 import FooterBanner from "@/components/layout/footer-banner-html";
 import { GoodCounselEnhanced } from "@/components/dashboard/good-counsel-enhanced";
 import ExpandedPanel from "@/components/dashboard/expanded-panel";
@@ -17,7 +17,6 @@ import IntakePanel from "@/components/dashboard/intake-panel";
 import AnalysisPanel from "@/components/dashboard/analysis-panel";
 import DraftPrepPanel from "@/components/dashboard/draft-prep-panel";
 import AttorneyReviewPanel from "@/components/dashboard/attorney-review-panel";
-import HelpChatPanel from "@/components/dashboard/help-chat-panel";
 import AdminPanel from "@/components/dashboard/admin-panel";
 import SettingsPanel from "@/components/dashboard/settings-panel";
 import ProfilePanel from "@/components/dashboard/profile-panel";
@@ -46,6 +45,7 @@ import {
 } from "@cyrano/shared-assets/icon-components";
 import { SearchCheck, Send, MessageSquare, TrendingUp } from "lucide-react";
 import { executeCyranoTool } from "@/lib/cyrano-api";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export default function Dashboard() {
   const [currentTickerIndex, setCurrentTickerIndex] = useState(0);
@@ -54,7 +54,6 @@ export default function Dashboard() {
   const [currentPanel, setCurrentPanel] = useState<string | null>(null);
   const [trackingCardOpen, setTrackingCardOpen] = useState(false);
   const [trackingCardData, setTrackingCardData] = useState<any>(null);
-  const [helpChatOpen, setHelpChatOpen] = useState(false);
   const [reportModalOpen, setReportModalOpen] = useState(false);
   const [browserWarningOpen, setBrowserWarningOpen] = useState(false);
   const [chromeAdvisoryOpen, setChromeAdvisoryOpen] = useState(false);
@@ -165,20 +164,6 @@ export default function Dashboard() {
     setTrackingCardData(null);
   };
 
-  const openHelpChat = () => {
-    setHelpChatOpen(true);
-  };
-
-  useEffect(() => {
-    const handleOpenHelpChat = () => setHelpChatOpen(true);
-    window.addEventListener('open-help-chat', handleOpenHelpChat);
-    return () => window.removeEventListener('open-help-chat', handleOpenHelpChat);
-  }, []);
-
-  const closeHelpChat = () => {
-    setHelpChatOpen(false);
-  };
-
   const handleDragStart = (stageId: string) => {
     setDraggedStage(stageId);
   };
@@ -241,7 +226,6 @@ export default function Dashboard() {
     <>
       <Header 
         attorney={{ name: "Mekel S. Miller", specialization: "Family Law" }}
-        onHelpClick={() => setHelpChatOpen(true)}
         onAdminClick={() => expandPanel('admin')}
         onSettingsClick={() => expandPanel('settings')}
         onProfileClick={() => expandPanel('profile')}
@@ -410,10 +394,17 @@ export default function Dashboard() {
           <div style={{ display: 'grid', width: '100%', maxWidth: '100%', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '1.5rem', boxSizing: 'border-box' }}>
           <div className="widget background-widget" onClick={() => expandPanel('chronometric')}>
             <div className="widget-header">
-              <h3 className="widget-title flex items-center gap-2" style={{ color: 'rgba(255, 255, 255, 0.9)', fontWeight: '600' }}>
-                <Clock className="widget-icon" style={{ width: '18px', height: '18px' }} />
-                <span className="ml-1">Chronometric</span>
-              </h3>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <h3 className="widget-title flex items-center gap-2" style={{ color: 'rgba(255, 255, 255, 0.9)', fontWeight: '600' }}>
+                    <Clock className="widget-icon" style={{ width: '18px', height: '18px' }} />
+                    <span className="ml-1">Chronometric</span>
+                  </h3>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  Reconstruct past time and fill billing gaps using email, calendar, and document activity.
+                </TooltipContent>
+              </Tooltip>
             </div>
             <div className="widget-content">
               <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.875rem' }}>Time tracking and analytics</p>
@@ -421,14 +412,21 @@ export default function Dashboard() {
           </div>
           <div className="widget background-widget" onClick={() => expandPanel('mae')}>
             <div className="widget-header">
-              <h3 className="widget-title flex items-center gap-2" style={{ color: 'rgba(255, 255, 255, 0.9)', fontWeight: '600' }}>
-                <div className="multi-agent-icon-group" style={{ width: '18px', height: '18px', position: 'relative' }}>
-                  <LiaSwimmerSolid style={{ width: '14px', height: '14px', position: 'absolute', top: '0px', left: '0px', opacity: 0.5 }} />
-                  <LiaSwimmerSolid style={{ width: '14px', height: '14px', position: 'absolute', top: '4px', left: '4px', opacity: 0.7 }} />
-                  <LiaSwimmerSolid style={{ width: '14px', height: '14px', position: 'absolute', top: '8px', left: '8px', opacity: 0.9 }} />
-                </div>
-                <span className="ml-1">MAE (Multi-Agent Engine)</span>
-              </h3>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <h3 className="widget-title flex items-center gap-2" style={{ color: 'rgba(255, 255, 255, 0.9)', fontWeight: '600' }}>
+                    <div className="multi-agent-icon-group" style={{ width: '18px', height: '18px', position: 'relative' }}>
+                      <LiaSwimmerSolid style={{ width: '14px', height: '14px', position: 'absolute', top: '0px', left: '0px', opacity: 0.5 }} />
+                      <LiaSwimmerSolid style={{ width: '14px', height: '14px', position: 'absolute', top: '4px', left: '4px', opacity: 0.7 }} />
+                      <LiaSwimmerSolid style={{ width: '14px', height: '14px', position: 'absolute', top: '8px', left: '8px', opacity: 0.9 }} />
+                    </div>
+                    <span className="ml-1">MAE (Multi-Agent Engine)</span>
+                  </h3>
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  Coordinate multiple AI agents to run complex workflows (analyze, draft, critique, compare).
+                </TooltipContent>
+              </Tooltip>
             </div>
             <div className="widget-content">
               <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.875rem' }}>Agent coordination and execution</p>
@@ -476,9 +474,6 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-
-      {/* Help Chat Panel - Slide out from left */}
-      <HelpChatPanel isOpen={helpChatOpen} onClose={closeHelpChat} />
 
       {/* Expanded Panel Overlays */}
       <GoodCounselEnhanced 

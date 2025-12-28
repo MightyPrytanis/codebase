@@ -16,6 +16,8 @@ import { officeIntegration } from '../services/office-integration.js';
 import { AIService, AIProvider } from '../services/ai-service.js';
 import { aiProviderSelector } from '../services/ai-provider-selector.js';
 import { apiValidator } from '../utils/api-validator.js';
+import { injectTenRulesIntoSystemPrompt } from '../services/ethics-prompt-injector.js';
+import { checkGeneratedContent } from '../services/ethics-check-helper.js';
 
 const DocumentDrafterSchema = z.object({
   prompt: z.string().describe('Description of the document to draft'),
@@ -108,12 +110,39 @@ export class DocumentDrafterTool extends BaseTool {
       const aiService = new AIService();
       const aiPrompt = `Draft a ${validated.documentType} legal document. ${validated.prompt}${validated.caseContext ? ` Case: ${validated.caseContext}` : ''}${validated.jurisdiction ? ` Jurisdiction: ${validated.jurisdiction}` : ''}. Format as a professional legal document with proper structure, headings, and sections.`;
 
+      // Prepare system prompt with Ten Rules injection
+      let systemPrompt = `You are an expert legal document drafter. Create accurate, well-structured legal documents.`;
+      systemPrompt = injectTenRulesIntoSystemPrompt(systemPrompt, 'summary');
+
+      // Note: ai-service now automatically injects Ten Rules and checks outputs
+      // We still do our own check for tool-specific validation, but pass metadata for audit trail
       const aiResponse = await aiService.call(provider, aiPrompt, {
+        systemPrompt, // Already has Ten Rules injected
         maxTokens: 2000,
+        metadata: {
+          toolName: 'document_drafter',
+          actionType: 'content_generation',
+          skipEthicsCheck: false, // Let ai-service do initial check, we'll do tool-specific check after
+        },
       });
 
       if (!aiResponse || typeof aiResponse !== 'string') {
         return this.createErrorResult('AI service failed to generate document content');
+      }
+
+      // Tool-specific ethics check: Ensure drafted content complies with Ten Rules
+      // (ai-service already checked, but we do additional tool-specific validation)
+      const ethicsCheck = await checkGeneratedContent(aiResponse, {
+        toolName: 'document_drafter',
+        contentType: 'draft',
+        strictMode: true, // Strict for legal documents
+      });
+
+      // If blocked, return error
+      if (ethicsCheck.ethicsCheck.blocked) {
+        return this.createErrorResult(
+          'Document draft blocked by ethics check. Draft does not meet Ten Rules compliance standards.'
+        );
       }
 
       const documentContent = aiResponse;

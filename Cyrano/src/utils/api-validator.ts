@@ -20,6 +20,7 @@ export interface APIConfig {
   perplexity?: string;
   xai?: string;
   deepseek?: string;
+  openrouter?: string;
 }
 
 export class APIValidator {
@@ -38,6 +39,14 @@ export class APIValidator {
     return APIValidator.instance;
   }
 
+  /**
+   * Reset the singleton instance (useful for testing)
+   * This allows tests to reload config with different environment variables
+   */
+  public static resetInstance(): void {
+    APIValidator.instance = undefined as any;
+  }
+
   private loadConfig(): void {
     this.config = {
       openai: process.env.OPENAI_API_KEY,
@@ -47,6 +56,7 @@ export class APIValidator {
       perplexity: process.env.PERPLEXITY_API_KEY,
       xai: process.env.XAI_API_KEY,
       deepseek: process.env.DEEPSEEK_API_KEY,
+      openrouter: process.env.OPENROUTER_API_KEY,
     };
   }
 
@@ -108,8 +118,18 @@ export class APIValidator {
         }
         return { valid: true };
 
+      case 'openrouter':
+        if (!this.config.openrouter) {
+          return { valid: false, error: 'OPENROUTER_API_KEY environment variable is required for OpenRouter integration' };
+        }
+        // OpenRouter keys can start with various prefixes, so we just check it exists
+        if (!this.config.openrouter || this.config.openrouter.length < 10) {
+          return { valid: false, error: 'Invalid OpenRouter API key format' };
+        }
+        return { valid: true };
+
       default:
-        return { valid: false, error: `Unknown AI provider: ${provider}. Supported providers: openai, anthropic, google, perplexity, xai, deepseek` };
+        return { valid: false, error: `Unknown AI provider: ${provider}. Supported providers: openai, anthropic, google, perplexity, xai, deepseek, openrouter` };
     }
   }
 
@@ -147,7 +167,7 @@ export class APIValidator {
   }
 
   public getConfigSummary(): { configured: string[]; missing: string[]; total: number } {
-    const allProviders = ['openai', 'anthropic', 'google', 'perplexity', 'xai', 'deepseek'];
+    const allProviders = ['openai', 'anthropic', 'google', 'perplexity', 'xai', 'deepseek', 'openrouter'];
     const configured = this.getAvailableProviders();
     const missing = allProviders.filter(p => !configured.includes(p));
     

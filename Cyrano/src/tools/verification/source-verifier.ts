@@ -443,25 +443,76 @@ export class SourceVerifier extends BaseTool {
       const url = new URL(source);
       const domain = url.hostname;
 
-      // Note: In a real implementation, we would use fetch() or axios
-      // For MVP, we'll simulate based on domain characteristics
-      
-      // Simulate accessibility check
-      // TODO: Replace with actual HTTP request
-      const isAccessible = this.simulateAccessibilityCheck(source);
+      // Perform actual HTTP request to verify source accessibility
+      try {
+        const response = await fetch(source, {
+          method: 'HEAD',
+          signal: AbortSignal.timeout(10000), // 10 second timeout
+          headers: {
+            'User-Agent': 'Cyrano-Legal-Verification/1.0',
+          },
+        });
 
-      if (isAccessible) {
+        if (!response.ok) {
+          issues.push(`HTTP ${response.status}: ${response.statusText}`);
+          return {
+            status: AccessibilityStatus.NOT_FOUND,
+            domain,
+            issues,
+          };
+        }
+
+        // Extract title from HTML if GET request succeeds
+        let title: string | undefined;
+        if (response.headers.get('content-type')?.includes('text/html')) {
+          try {
+            const htmlResponse = await fetch(source, {
+              signal: AbortSignal.timeout(10000),
+              headers: {
+                'User-Agent': 'Cyrano-Legal-Verification/1.0',
+              },
+            });
+            const html = await htmlResponse.text();
+            const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+            title = titleMatch ? titleMatch[1].trim() : undefined;
+          } catch {
+            // Title extraction failed, continue without it
+          }
+        }
+
+        // Check content match if expected content provided
+        let contentMatch: number | undefined;
+        if (expectedContent && response.headers.get('content-type')?.includes('text/html')) {
+          try {
+            const htmlResponse = await fetch(source, {
+              signal: AbortSignal.timeout(10000),
+              headers: {
+                'User-Agent': 'Cyrano-Legal-Verification/1.0',
+              },
+            });
+            const html = await htmlResponse.text();
+            const expectedLower = expectedContent.toLowerCase();
+            const htmlLower = html.toLowerCase();
+            // Simple keyword matching for content relevance
+            const expectedWords = expectedLower.split(/\W+/).filter(w => w.length > 3);
+            const matchingWords = expectedWords.filter(w => htmlLower.includes(w));
+            contentMatch = expectedWords.length > 0 ? matchingWords.length / expectedWords.length : undefined;
+          } catch {
+            // Content matching failed
+          }
+        }
+
         return {
           status: AccessibilityStatus.ACCESSIBLE,
           domain,
-          title: 'Source Title', // Would be extracted from HTML
-          contentMatch: expectedContent ? Math.random() * 0.3 + 0.7 : undefined,
+          title,
+          contentMatch,
           issues,
         };
-      } else {
-        issues.push('Source appears to be inaccessible');
+      } catch (fetchError) {
+        issues.push(`Network error: ${fetchError instanceof Error ? fetchError.message : 'Unknown error'}`);
         return {
-          status: AccessibilityStatus.NOT_FOUND,
+          status: AccessibilityStatus.ERROR,
           domain,
           issues,
         };
@@ -475,14 +526,6 @@ export class SourceVerifier extends BaseTool {
     }
   }
 
-  /**
-   * Simulate accessibility check (placeholder for real HTTP request)
-   */
-  private simulateAccessibilityCheck(source: string): boolean {
-    // For now, assume most sources are accessible
-    // Real implementation would use fetch()
-    return !source.includes('broken') && !source.includes('404');
-  }
 
   /**
    * Get MCP tool definition

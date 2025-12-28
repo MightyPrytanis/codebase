@@ -50,7 +50,7 @@ export class ForecastEngine extends BaseEngine {
       description: 'Forecast Engine - Generates hypothetical forecasts (tax returns, child support, QDROs) with mandatory LexFiat Forecaster™ branding',
       version: '1.0.0',
       modules: ['tax_forecast', 'child_support_forecast', 'qdro_forecast'],
-      aiProviders: ['openai', 'anthropic'],
+      // aiProviders removed - default to 'auto' (all providers available) for user sovereignty
     });
   }
 
@@ -69,6 +69,94 @@ export class ForecastEngine extends BaseEngine {
     for (const module of modules) {
       await module.initialize();
     }
+
+    // Register workflows for skill-based execution
+    this.registerWorkflow({
+      id: 'qdro_forecast_v1',
+      name: 'QDRO Forecast Workflow v1',
+      description: 'Multi-step QDRO/EDRO forecast workflow supporting all plan types and participant roles',
+      steps: [
+        {
+          id: 'validate_input',
+          type: 'condition',
+          target: 'validate',
+          condition: (context: any) => {
+            // Validate required fields
+            return context.matter_id && 
+                   context.plan_type && 
+                   context.participant_role &&
+                   (context.plan_type === 'defined_contribution' || context.plan_type === 'defined_benefit');
+          },
+          onSuccess: 'gather_plan_data',
+          onFailure: 'error_handler',
+        },
+        {
+          id: 'gather_plan_data',
+          type: 'module',
+          target: 'qdro_forecast',
+          input: {
+            action: 'get_status',
+            input: {}, // Will be populated from context by executeStep
+          },
+          onSuccess: 'calculate_division',
+          onFailure: 'error_handler',
+        },
+        {
+          id: 'calculate_division',
+          type: 'module',
+          target: 'qdro_forecast',
+          input: {
+            action: 'calculate',
+            input: {}, // Will be populated from context by executeStep
+          },
+          onSuccess: 'check_erisa_compliance',
+          onFailure: 'error_handler',
+        },
+        {
+          id: 'check_erisa_compliance',
+          type: 'module',
+          target: 'qdro_forecast',
+          input: {
+            action: 'verify_erisa',
+            input: {}, // Will use stepResults from previous step
+          },
+          onSuccess: 'generate_scenarios',
+          onFailure: 'flag_compliance_issues',
+        },
+        {
+          id: 'flag_compliance_issues',
+          type: 'ai',
+          target: 'auto',
+          input: {
+            prompt: 'The QDRO forecast has ERISA compliance issues. Review the compliance check results and generate risk flags.',
+            taskType: 'analysis',
+            subjectMatter: 'ERISA compliance',
+          },
+          onSuccess: 'generate_scenarios',
+        },
+        {
+          id: 'generate_scenarios',
+          type: 'module',
+          target: 'qdro_forecast',
+          input: {
+            action: 'calculate',
+            input: {}, // Will be populated from context
+          },
+          onSuccess: undefined, // End of workflow
+        },
+        {
+          id: 'error_handler',
+          type: 'ai',
+          target: 'auto',
+          input: {
+            prompt: 'An error occurred in the QDRO forecast workflow. Generate a user-friendly error message with guidance on how to fix the issue.',
+            taskType: 'error_handling',
+          },
+          onSuccess: undefined,
+        },
+      ],
+      initialState: {},
+    });
   }
 
   async execute(input: any): Promise<CallToolResult> {

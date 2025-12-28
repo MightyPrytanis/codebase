@@ -17,17 +17,8 @@ import {
 } from './workflow-utils.js';
 import { aiProviderSelector } from '../../services/ai-provider-selector.js';
 import { AIProvider } from '../../services/ai-service.js';
-import { aiOrchestrator } from './services/ai-orchestrator.js';
+import { aiOrchestrator } from './tools/ai-orchestrator.js';
 import { multiModelService } from './services/multi-model-service.js';
-// Import common tools for MAE workflows
-import { documentAnalyzer } from '../../tools/document-analyzer.js';
-import { factChecker } from '../../tools/fact-checker.js';
-import { workflowManager } from '../../tools/workflow-manager.js';
-import { caseManager } from '../../tools/case-manager.js';
-import { documentProcessor } from '../../tools/document-processor.js';
-import { documentDrafterTool } from '../../tools/document-drafter.js';
-import { clioIntegration } from '../../tools/clio-integration.js';
-import { syncManager } from '../../tools/sync-manager.js';
 
 const MaeInputSchema = z.object({
   action: z.enum([
@@ -47,7 +38,7 @@ const MaeInputSchema = z.object({
  * 
  * This engine coordinates workflows that may involve:
  * - Multiple AI providers (OpenAI, Anthropic, etc.)
- * - Multiple modules (Chronometric, etc.)
+ * - Multiple modules (time_reconstruction, cost_estimation, etc.)
  * - Complex multi-step processes
  * 
  * MAE Tools:
@@ -55,6 +46,10 @@ const MaeInputSchema = z.object({
  * 
  * MAE Services:
  * - Multi-Model Service: Role-based parallel multi-model verification with weighted confidence scoring
+ * 
+ * Note: Chronometric is now an Engine (not a Module). To use Chronometric functionality,
+ * workflows should call the chronometric engine via the chronometric_module tool,
+ * or use the chronometric engine modules (time_reconstruction, cost_estimation) directly.
  */
 export class MaeEngine extends BaseEngine {
   constructor() {
@@ -62,39 +57,10 @@ export class MaeEngine extends BaseEngine {
       name: 'mae',
       description: 'Multi-Agent Engine - Orchestrates multiple AI assistants/agents and modules for complex workflows',
       version: '1.0.0',
-      modules: [
-        'ark_extractor',
-        'ark_processor',
-        'ark_analyst',
-        'rag',
-        'verification',
-        'legal_analysis',
-        // Note: 'chronometric' is now an Engine (src/engines/chronometric), not a Module
-      ], // Modules this engine orchestrates
-      tools: [
-        aiOrchestrator,
-        // Commonly used tools accessible via MAE
-        documentAnalyzer,
-        factChecker,
-        workflowManager,
-        caseManager,
-        documentProcessor,
-        documentDrafterTool,
-        clioIntegration,
-        syncManager,
-        // Note: Engine-specific tools (Potemkin, GoodCounsel, Chronometric) are accessed via engines
-      ],
-      // Remove hard-coded aiProviders - default to 'auto' (all providers available)
-      // User sovereignty: users can select any provider via UI
+      modules: [], // Chronometric is now an engine, not a module. Use chronometric modules (time_reconstruction, cost_estimation) or chronometric engine via tool.
+      tools: [aiOrchestrator], // MAE tools - AI Orchestrator for generic multi-provider orchestration
+      // aiProviders removed - default to 'auto' (all providers available) for user sovereignty
     });
-  }
-
-  /**
-   * Get AI Orchestrator Service
-   * Utility service for generic multi-provider orchestration
-   */
-  getAIOrchestrator() {
-    return aiOrchestrator;
   }
 
   /**
@@ -140,7 +106,7 @@ export class MaeEngine extends BaseEngine {
       const parsed = MaeInputSchema.parse(input);
       
       switch (parsed.action) {
-        case 'execute_workflow':
+        case 'execute_workflow': {
           if (!parsed.workflow_id) {
             return {
               content: [
@@ -183,8 +149,9 @@ export class MaeEngine extends BaseEngine {
             ],
             isError: true,
           };
+        }
         
-        case 'list_workflows':
+        case 'list_workflows': {
           // Aggregate workflows from all engines (MAE, Potemkin, GoodCounsel, etc.)
           const maeWorkflows = await this.getWorkflows();
           const allWorkflows: Array<{ id: string; name: string; description: string; step_count: number; engine: string }> = [];
@@ -200,11 +167,11 @@ export class MaeEngine extends BaseEngine {
             });
           });
           
-          // Get workflows from all other engines via registry
-          const { engineRegistry: registry } = await import('../registry.js');
-          const allEngines = registry.getAll();
+          // Get workflows from all other engines via registry (reuse registry from above)
+          const { engineRegistry: registry2 } = await import('../registry.js');
+          const allEngines2 = registry2.getAll();
           
-          for (const engine of allEngines) {
+          for (const engine of allEngines2) {
             if (engine.getEngineInfo().name !== 'mae') {
               const engineWorkflows = await engine.getWorkflows();
               engineWorkflows.forEach(w => {
@@ -235,6 +202,7 @@ export class MaeEngine extends BaseEngine {
             ],
             isError: false,
           };
+        }
         
         case 'create_workflow':
           if (!parsed.workflow) {
@@ -441,21 +409,78 @@ export class MaeEngine extends BaseEngine {
       }
     }
 
+    // Ethics check: Ensure workflow results comply with Ten Rules
+    const workflowResult = {
+      success: true,
+      workflowId,
+      executionPlan: executionPlan.map(p => ({
+        step: p.step,
+        nodeId: p.nodeId,
+        dependencies: p.dependencies,
+      })),
+      results: executionResults,
+      finalContext: context.stepResults,
+    };
+    
+    const resultText = JSON.stringify(workflowResult, null, 2);
+    const hasRecommendations = resultText.toLowerCase().includes('recommendation') || 
+                              resultText.toLowerCase().includes('suggestion') ||
+                              resultText.toLowerCase().includes('guidance');
+    
+    if (hasRecommendations) {
+      const { checkGeneratedContent } = await import('../../services/ethics-check-helper.js');
+      const ethicsCheck = await checkGeneratedContent(resultText, {
+        toolName: `mae_${workflowId}`,
+        contentType: 'report',
+        strictMode: true,
+      });
+
+      // If blocked, return error
+      if (ethicsCheck.ethicsCheck.blocked) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: 'Workflow result blocked by ethics check. Does not meet Ten Rules compliance standards.',
+            },
+          ],
+          isError: true,
+          metadata: { ethicsCheck: ethicsCheck.ethicsCheck },
+        };
+      }
+
+      // Add ethics metadata if warnings
+      const finalResult = {
+        ...workflowResult,
+        ...(ethicsCheck.ethicsCheck.warnings.length > 0 && {
+          _ethicsMetadata: {
+            reviewed: true,
+            warnings: ethicsCheck.ethicsCheck.warnings,
+            complianceScore: ethicsCheck.ethicsCheck.complianceScore,
+            auditId: ethicsCheck.ethicsCheck.auditId,
+          },
+        }),
+      };
+
+      return {
+        content: [
+          {
+            type: 'text',
+            text: JSON.stringify(finalResult, null, 2),
+          },
+        ],
+        metadata: {
+          ethicsReviewed: true,
+          ethicsComplianceScore: ethicsCheck.ethicsCheck.complianceScore,
+        },
+      };
+    }
+
     return {
       content: [
         {
           type: 'text',
-          text: JSON.stringify({
-            success: true,
-            workflowId,
-            executionPlan: executionPlan.map(p => ({
-              step: p.step,
-              nodeId: p.nodeId,
-              dependencies: p.dependencies,
-            })),
-            results: executionResults,
-            finalContext: context.stepResults,
-          }, null, 2),
+          text: JSON.stringify(workflowResult, null, 2),
         },
       ],
     };
@@ -497,6 +522,9 @@ export class MaeEngine extends BaseEngine {
    */
   private registerDefaultWorkflows(): void {
     // Time reconstruction workflow using Chronometric engine
+    // NOTE: This workflow needs to be updated to use chronometric engine via tool call
+    // or use chronometric modules (time_reconstruction, cost_estimation) once they're available
+    // TODO: Update this workflow to use chronometric_module tool or chronometric engine modules
     this.registerWorkflow({
       id: 'time_reconstruction',
       name: 'Time Reconstruction Workflow',
@@ -504,48 +532,48 @@ export class MaeEngine extends BaseEngine {
       steps: [
         {
           id: 'identify_gaps',
-          type: 'engine',
-          target: 'chronometric',
+          type: 'tool',
+          target: 'chronometric_module',
           input: { action: 'identify_gaps' },
           onSuccess: 'collect_artifacts',
           onFailure: 'end',
         },
         {
           id: 'collect_artifacts',
-          type: 'engine',
-          target: 'chronometric',
+          type: 'tool',
+          target: 'chronometric_module',
           input: { action: 'collect_artifacts' },
           onSuccess: 'recollection_support',
           onFailure: 'end',
         },
         {
           id: 'recollection_support',
-          type: 'engine',
-          target: 'chronometric',
+          type: 'tool',
+          target: 'chronometric_module',
           input: { action: 'recollection_support' },
           onSuccess: 'pre_fill',
           onFailure: 'end',
         },
         {
           id: 'pre_fill',
-          type: 'engine',
-          target: 'chronometric',
+          type: 'tool',
+          target: 'chronometric_module',
           input: { action: 'pre_fill' },
           onSuccess: 'check_duplicates',
           onFailure: 'end',
         },
         {
           id: 'check_duplicates',
-          type: 'engine',
-          target: 'chronometric',
+          type: 'tool',
+          target: 'chronometric_module',
           input: { action: 'check_duplicates' },
           onSuccess: 'generate_report',
           onFailure: 'end',
         },
         {
           id: 'generate_report',
-          type: 'engine',
-          target: 'chronometric',
+          type: 'tool',
+          target: 'chronometric_module',
           input: { action: 'generate_report' },
         },
       ],
@@ -741,8 +769,8 @@ export class MaeEngine extends BaseEngine {
         },
         {
           id: 'capture_time',
-          type: 'engine',
-          target: 'chronometric',
+          type: 'tool',
+          target: 'chronometric_module',
           input: { 
             action: 'pre_fill',
             artifacts: '{{workflow_artifacts}}',
@@ -1587,7 +1615,7 @@ export class MaeEngine extends BaseEngine {
     this.registerWorkflow({
       id: 'tax_return_forecast',
       name: 'Tax Return Forecast',
-      description: 'Generate hypothetical tax return forecasts using official IRS and state forms (PLACEHOLDER: PDF form filling needed)',
+      description: 'Generate hypothetical tax return forecasts using official IRS and state forms. PDF form filling implemented via document_processor.fill_pdf_forms action.',
       steps: [
         {
           id: 'gather_financial_data',
@@ -1671,7 +1699,7 @@ export class MaeEngine extends BaseEngine {
     this.registerWorkflow({
       id: 'child_support_forecast',
       name: 'Child Support Forecast',
-      description: 'Generate hypothetical child support forecasts using Friend of the Court standard forms (PLACEHOLDER: PDF form filling needed)',
+      description: 'Generate hypothetical child support forecasts using Friend of the Court standard forms. PDF form filling implemented via document_processor.fill_pdf_forms action.',
       steps: [
         {
           id: 'gather_income_data',
@@ -1755,7 +1783,7 @@ export class MaeEngine extends BaseEngine {
     this.registerWorkflow({
       id: 'qdro_forecast',
       name: 'QDRO Forecast',
-      description: 'Generate hypothetical QDRO forecasts using ERISA-compliant templates (PLACEHOLDER: PDF form filling needed)',
+      description: 'Generate hypothetical QDRO forecasts using ERISA-compliant templates. PDF form filling implemented via document_processor.fill_pdf_forms action.',
       steps: [
         {
           id: 'gather_retirement_data',
@@ -1842,54 +1870,6 @@ export class MaeEngine extends BaseEngine {
         },
       ],
     });
-  }
-
-  /**
-   * Override executeStep to add support for 'engine' step type
-   * Allows MAE workflows to call other engines (Potemkin, GoodCounsel, etc.)
-   */
-  protected async executeStep(step: WorkflowStep, context: any): Promise<CallToolResult> {
-    // Handle 'engine' step type for calling other engines
-    if (step.type === 'engine') {
-      try {
-        const { engineRegistry: registry } = await import('../registry.js');
-        const targetEngine = registry.get(step.target);
-        
-        if (!targetEngine) {
-          return {
-            content: [
-              {
-                type: 'text',
-                text: `Error: Engine ${step.target} not found in registry`,
-              },
-            ],
-            isError: true,
-          };
-        }
-        
-        // Execute the engine with the provided input
-        // Merge context into input for template variable resolution
-        const engineInput = {
-          ...context,
-          ...step.input,  // step.input takes precedence over context
-        };
-        
-        return await targetEngine.execute(engineInput);
-      } catch (error) {
-        return {
-          content: [
-            {
-              type: 'text',
-              text: `Error calling engine ${step.target}: ${error instanceof Error ? error.message : String(error)}`,
-            },
-          ],
-          isError: true,
-        };
-      }
-    }
-    
-    // Fall back to base implementation for other step types
-    return await super.executeStep(step, context);
   }
 
   /**

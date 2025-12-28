@@ -4,7 +4,6 @@
  * See LICENSE.md for full license text
  */
 
-export { TimeReconstructionModule, timeReconstructionModule } from './time-reconstruction-module.js';
-export { CostEstimationModule, costEstimationModule } from './cost-estimation-module.js';
-export * from './time-reconstruction-module.js';
-export * from './cost-estimation-module.js';
+export { timeReconstructionModule } from './time-reconstruction-module.js';
+export { costEstimationModule } from './cost-estimation-module.js';
+export { patternLearningModule } from './pattern-learning-module.js';

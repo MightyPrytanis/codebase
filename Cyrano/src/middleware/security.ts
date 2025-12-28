@@ -12,15 +12,15 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import helmet from 'helmet';
 import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import createDOMPurify from 'dompurify';
 import { JSDOM } from 'jsdom';
 
-const window = new JSDOM('').window as unknown as Window;
-const DOMPurify = createDOMPurify(window);
+const window = new JSDOM('').window as any;
+const DOMPurify = createDOMPurify(window as any);
 
 // ============================================================================
 // JWT Authentication
@@ -235,6 +235,14 @@ export const authenticatedLimiter = rateLimit({
   message: 'Too many requests from this user, please try again later',
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => {
+    // Use user ID if authenticated, otherwise use IP with IPv6 support
+    if ((req as any).user?.id) {
+      return (req as any).user.id;
+    }
+    // Use ipKeyGenerator helper for proper IPv6 handling
+    return ipKeyGenerator(req as any);
+  },
   skip: (req) => {
     // Only apply to authenticated requests
     return !(req as any).user;
@@ -250,6 +258,10 @@ export const unauthenticatedLimiter = rateLimit({
   message: 'Too many requests from this IP, please try again later',
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => {
+    // Use IP address for unauthenticated users with IPv6 support
+    return ipKeyGenerator(req as any);
+  },
   skip: (req) => {
     // Only apply to unauthenticated requests
     return !!(req as any).user;
@@ -265,6 +277,10 @@ export const authLimiter = rateLimit({
   message: 'Too many authentication attempts, please try again later',
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: (req) => {
+    // Use IP address for auth endpoints with IPv6 support
+    return ipKeyGenerator(req as any);
+  },
 });
 
 // ============================================================================
@@ -320,13 +336,17 @@ export function setAuthCookies(
   accessToken: string,
   refreshToken: string
 ) {
+  // Use dynamic secure flag based on current NODE_ENV
+  const isProduction = process.env.NODE_ENV === 'production';
   res.cookie('accessToken', accessToken, {
     ...secureCookieOptions,
+    secure: isProduction,
     maxAge: 15 * 60 * 1000, // 15 minutes
   });
   
   res.cookie('refreshToken', refreshToken, {
     ...secureCookieOptions,
+    secure: isProduction,
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
   });
 }
@@ -348,7 +368,18 @@ export function clearAuthCookies(res: Response) {
  * Sanitize string input to prevent XSS
  */
 export function sanitizeString(input: string): string {
-  const sanitized = DOMPurify.sanitize(input, {
+  if (typeof input !== 'string') {
+    return input;
+  }
+  
+  // Remove javascript: protocol
+  let sanitized = input.replace(/javascript:/gi, '');
+  
+  // Remove event handlers (onclick, onerror, etc.)
+  sanitized = sanitized.replace(/on\w+\s*=/gi, '');
+  
+  // Use DOMPurify for additional sanitization
+  sanitized = DOMPurify.sanitize(sanitized, {
     ALLOWED_TAGS: [],
     ALLOWED_ATTR: [],
   });
