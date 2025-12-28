@@ -6,10 +6,10 @@
 
 import { BaseTool } from './base-tool.js';
 import { z } from 'zod';
-import OpenAI from 'openai';
-import Anthropic from '@anthropic-ai/sdk';
+import { AIService, AIProvider } from '../services/ai-service.js';
 import { PerplexityService } from '../services/perplexity.js';
 import { CosmosIntegration } from '../services/cosmos-integration.js';
+import { injectTenRulesIntoSystemPrompt } from '../services/ethics-prompt-injector.js';
 
 const GoodCounselSchema = z.object({
   context: z.string().describe('Current case context, workflow status, or situation requiring guidance'),
@@ -147,6 +147,20 @@ export const goodCounsel = new (class extends BaseTool {
     // Get automation opportunities
     const automationOpportunities = this.cosmosIntegration.getAutomationOpportunities(context);
 
+    // Extract recommendations
+    const extractedRecommendations = this.extractRecommendations(aiResponse);
+    
+    // Automatic ethics check on recommendations
+    const { checkRecommendations } = await import('../services/ethics-check-helper.js');
+    const ethicsCheckResult = await checkRecommendations(extractedRecommendations, {
+      toolName: 'goodcounsel',
+      provider: provider,
+      facts: {
+        hasEthicalConcerns: (ethicalConcerns?.length || 0) > 0,
+        timePressure: timePressure,
+      },
+    });
+
     // Parse and structure the guidance
     return {
       context_analysis: this.analyzeContext(context),
@@ -156,16 +170,28 @@ export const goodCounsel = new (class extends BaseTool {
       ai_guidance: aiResponse,
       next_actions: nextActions,  // Cosmos integration
       automation_opportunities: automationOpportunities,  // Cosmos integration
-      recommendations: this.extractRecommendations(aiResponse),
+      recommendations: ethicsCheckResult.recommendations,
       habit_insights: this.identifyHabitPatterns(context, userState),
       workflow_optimization: this.generateWorkflowOptimizations(aiResponse, timePressure),
       timestamp: new Date().toISOString(),
       ai_provider: provider,
+      ethicsCheck: {
+        reviewed: true,
+        passed: ethicsCheckResult.ethicsCheck.passed,
+        complianceScore: ethicsCheckResult.ethicsCheck.complianceScore,
+        warnings: ethicsCheckResult.ethicsCheck.warnings,
+        auditId: ethicsCheckResult.ethicsCheck.auditId,
+      },
     };
   }
 
   public buildGuidancePrompt(context: string, userState?: string, timePressure: string = 'medium', ethicalConcerns?: string[]): string {
-    let prompt = `You are an expert legal practice counselor providing AI-powered ethical guidance and workflow optimization.
+    let systemPrompt = `You are an expert legal practice counselor providing AI-powered ethical guidance and workflow optimization.`;
+    
+    // Inject Ten Rules into system prompt
+    systemPrompt = injectTenRulesIntoSystemPrompt(systemPrompt, 'summary');
+    
+    let prompt = `${systemPrompt}
 
 Current Situation:
 ${context}
@@ -206,148 +232,45 @@ Be specific, practical, and focused on improving legal practice effectiveness wh
   }
 
   public async callAIProvider(prompt: string, provider: 'perplexity' | 'openai' | 'anthropic' | 'google' | 'xai' | 'deepseek'): Promise<string> {
+    // ETHICS ENFORCEMENT: Use ai-service.call() for automatic Ten Rules injection, output checking, and audit logging
+    const aiService = new AIService();
+    
+    // Perplexity has special handling via PerplexityService (which should also use ai-service internally)
+    // For now, we'll use ai-service for all providers to ensure ethics enforcement
     if (provider === 'perplexity') {
-      const perplexityService = new PerplexityService({ apiKey: process.env.PERPLEXITY_API_KEY! });
-      return await perplexityService.generateGoodCounselInsights({ context: prompt });
-    } else if (provider === 'anthropic') {
-      const anthropic = new Anthropic({
-        apiKey: process.env.ANTHROPIC_API_KEY,
-      });
-
-      const response = await anthropic.messages.create({
-        model: 'claude-sonnet-4-5-20250929',
-        max_tokens: 4000,
-        messages: [{
-          role: 'user',
-          content: prompt,
-        }],
-      });
-
-      return response.content[0].type === 'text' ? response.content[0].text : 'Guidance generation failed';
-    } else if (provider === 'google') {
-      // Google Gemini API integration - try multiple model options and API keys
-      const models = ['gemini-1.5-pro-latest', 'gemini-1.5-flash-latest', 'gemini-pro'];
-      const apiKeys = [process.env.GEMINI_API_KEY, process.env.GOOGLE_API_KEY].filter(Boolean);
-
-      for (const apiKey of apiKeys) {
-        for (const model of models) {
-          try {
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({
-                contents: [{
-                  parts: [{
-                    text: prompt,
-                  }],
-                }],
-                generationConfig: {
-                  temperature: 0.1,
-                  maxOutputTokens: 4000,
-                },
-              }),
-            });
-
-            if (response.ok) {
-              const data = await response.json();
-              return data.candidates?.[0]?.content?.parts?.[0]?.text || 'Guidance generation failed';
-            }
-
-            // If 404, try next model; if other error, try next key
-            if (response.status !== 404) {
-              const errorText = await response.text();
-              if (response.status === 403) {
-                // Permission denied, try next key
-                continue;
-              }
-              throw new Error(`Google Gemini API error: ${response.status} ${response.statusText} - ${errorText}`);
-            }
-          } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : String(error);
-            if (!errorMessage.includes('404') && !errorMessage.includes('403')) {
-              throw error;
-            }
-          }
-        }
-      }
-
-      throw new Error('Google Gemini API error: No available models or valid API keys found. Please check your GEMINI_API_KEY and GOOGLE_API_KEY.');
-    } else if (provider === 'xai') {
-      // xAI Grok API integration
-      const response = await fetch('https://api.x.ai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${process.env.XAI_API_KEY}`,
-          'Content-Type': 'application/json',
+      // PerplexityService.generateGoodCounselInsights should be updated to use ai-service internally
+      // For now, use ai-service directly to ensure ethics enforcement
+      const systemPrompt = injectTenRulesIntoSystemPrompt(
+        'You are an expert ethical guide providing practical, actionable guidance for legal practice.',
+        'summary'
+      );
+      
+      return await aiService.call('perplexity', prompt, {
+        systemPrompt,
+        maxTokens: 4000,
+        temperature: 0.1,
+        metadata: {
+          toolName: 'good_counsel',
+          actionType: 'recommendation',
         },
-        body: JSON.stringify({
-          model: 'grok-2-1212',
-          messages: [{
-            role: 'user',
-            content: prompt,
-          }],
-          max_tokens: 4000,
-          temperature: 0.1,
-        }),
       });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        if (response.status === 403 && errorText.includes('credits')) {
-          throw new Error(`xAI Grok API error: Your xAI account has no credits. Please add credits to your xAI account at https://console.x.ai/team to use Grok.`);
-        }
-        throw new Error(`xAI Grok API error: ${response.status} ${response.statusText} - ${errorText}`);
-      }
-
-      const data = await response.json();
-      return data.choices?.[0]?.message?.content || 'Guidance generation failed';
-    } else if (provider === 'deepseek') {
-      // DeepSeek API integration
-      const response = await fetch('https://api.deepseek.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'deepseek-chat',
-          messages: [{
-            role: 'user',
-            content: prompt,
-          }],
-          max_tokens: 4000,
-          temperature: 0.1,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        if (response.status === 402 && errorText.includes('balance')) {
-          throw new Error(`DeepSeek API error: Insufficient account balance. Please add credits to your DeepSeek account at https://platform.deepseek.com/ to continue using the service.`);
-        }
-        throw new Error(`DeepSeek API error: ${response.status} ${response.statusText} - ${errorText}`);
-      }
-
-      const data = await response.json();
-      return data.choices?.[0]?.message?.content || 'Guidance generation failed';
-    } else {
-      const openai = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY,
-      });
-
-      const response = await openai.chat.completions.create({
-        model: 'gpt-4',
-        messages: [{
-          role: 'user',
-          content: prompt,
-        }],
-        max_tokens: 4000,
-      });
-
-      return response.choices[0].message.content || 'Guidance generation failed';
     }
+    
+    // All other providers use ai-service.call() - automatically enforces ethics at service layer
+    const systemPrompt = injectTenRulesIntoSystemPrompt(
+      'You are an expert ethical guide providing practical, actionable guidance for legal practice.',
+      'summary'
+    );
+    
+    return await aiService.call(provider as AIProvider, prompt, {
+      systemPrompt, // Already has Ten Rules injected
+      maxTokens: 4000,
+      temperature: 0.1,
+      metadata: {
+        toolName: 'good_counsel',
+        actionType: 'recommendation',
+      },
+    });
   }
 
   public analyzeContext(context: string): any {

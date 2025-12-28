@@ -179,9 +179,30 @@ export const wellnessJournalTool = new (class extends BaseTool {
 
           const recommendations = feedback?.wellnessRecommendations || [];
 
+          // Ethics check: Wellness recommendations must comply with Ten Rules
+          const { checkRecommendations } = await import('../services/ethics-check-helper.js');
+          const ethicsCheckResult = await checkRecommendations(recommendations, {
+            toolName: 'wellness_journal',
+            facts: {
+              hasUserData: !!userId,
+              wellnessContext: true,
+            },
+          });
+
+          // If blocked, return empty recommendations
+          if (ethicsCheckResult.ethicsCheck.blocked) {
+            return this.createSuccessResult(JSON.stringify({
+              recommendations: [],
+              source: 'latest_entry_feedback',
+              message: 'Recommendations blocked by ethics check.',
+            }, null, 2));
+          }
+
           return this.createSuccessResult(JSON.stringify({
-            recommendations,
+            recommendations: ethicsCheckResult.recommendations,
             source: 'latest_entry_feedback',
+            ethicsReviewed: true,
+            ethicsComplianceScore: ethicsCheckResult.ethicsCheck.complianceScore,
           }, null, 2));
         }
 

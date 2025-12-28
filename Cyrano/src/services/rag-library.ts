@@ -17,19 +17,26 @@ import { LibraryItem } from '../modules/library/library-model.js';
 /**
  * Ingest a library item into the RAG system
  * @param libraryItem - The library item to ingest
+ * @param documentText - The extracted document text (if not provided, will use placeholder)
  * @returns Array of vector IDs created in the vector store
  */
-export async function ingestLibraryItem(libraryItem: LibraryItem): Promise<string[]> {
+export async function ingestLibraryItem(
+  libraryItem: LibraryItem,
+  documentText?: string
+): Promise<string[]> {
   const ragService = new RAGService();
   
-  // TODO: Extract actual document text from file
-  // For now, use a placeholder based on metadata
-  const documentText = generatePlaceholderText(libraryItem);
+  // Use provided text or generate placeholder
+  const text = documentText || generatePlaceholderText(libraryItem);
+  
+  if (!text || text.trim().length === 0) {
+    throw new Error(`No text content available for library item ${libraryItem.id}`);
+  }
   
   // Create RAG document with library-specific metadata
   const document: Document = {
     id: libraryItem.id,
-    text: documentText,
+    text,
     type: libraryItem.sourceType,
     source: `library:${libraryItem.locationId}`,
     sourceType: 'user-upload',

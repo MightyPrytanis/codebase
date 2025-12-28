@@ -2,27 +2,16 @@
  * Potemkin Tools Integration Tests
  * Tests bias-detector, integrity-monitor, and other Potemkin-specific tools
  */
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { biasDetector } from '../../../src/engines/potemkin/tools/bias-detector.js';
-import { integrityMonitor } from '../../../src/engines/potemkin/tools/integrity-monitor.js';
-
-// Mock AI Service
-vi.mock('../../../src/services/ai-service.js', () => ({
-  AIService: class {
-    async call(provider: string, prompt: string, options: any) {
-      // Return mock AI response
-      return JSON.stringify({
-        bias_detected: true,
-        bias_score: 65,
-        bias_patterns: ['Pattern 1: Language bias', 'Pattern 2: Selection bias'],
-        neutrality_assessment: 'Moderate bias detected in the content',
-        recommendations: ['Use more neutral language', 'Diversify sources'],
-      });
-    }
-  },
-}));
+import { describe, it, expect, beforeEach } from 'vitest';
+// Use REAL components - no mocks
+import { biasDetector } from '../../src/engines/potemkin/tools/index.js';
+import { integrityMonitor } from '../../src/engines/potemkin/tools/index.js';
 
 describe('Potemkin Tools Integration', () => {
+  beforeEach(() => {
+    // No mocks - using real components
+  });
+
   describe('BiasDetector', () => {
     it('should have correct tool definition', () => {
       const definition = biasDetector.getToolDefinition();

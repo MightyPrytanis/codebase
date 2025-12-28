@@ -37,15 +37,25 @@ export const clioIntegration = new (class extends BaseTool {
   constructor() {
     super();
     this.clioApiKey = process.env.CLIO_API_KEY || '';
-    if (!this.clioApiKey && !isDemoModeEnabled()) {
-      console.warn('CLIO_API_KEY not set. Clio integration will use demo/mock data.');
-    }
+    // Note: Clio API key not available until approval from Clio developers program
+    // When not available, integration returns errors or N/A status
+    // Demo mode is opt-in only via DEMO_MODE=true
+  }
+
+  /**
+   * Get error message for missing Clio API key
+   */
+  private getClioApiKeyError(): string {
+    return 'Clio API key not configured. CLIO_API_KEY environment variable required. ' +
+      'Clio API access pending approval from Clio developers program. ' +
+      'Set DEMO_MODE=true to enable demo mode with simulated data.';
   }
 
   getToolDefinition() {
     return {
       name: 'clio_integration',
-      description: 'Integration with Clio practice management software for matter tracking, client info, and workflow status',
+      description: 'Integration with Clio practice management software for matter tracking, client info, and workflow status. ' +
+        'Requires CLIO_API_KEY. Returns errors when not configured (demo mode opt-in only via DEMO_MODE=true).',
       inputSchema: {
         type: 'object',
         properties: {
@@ -137,221 +147,253 @@ export const clioIntegration = new (class extends BaseTool {
   }
 
   public async getItemTracking(itemId: string) {
-    if (!this.clioApiKey || isDemoModeEnabled()) {
-      return this.getMockItemTracking(itemId);
+    // Demo mode is opt-in only
+    if (isDemoModeEnabled()) {
+      return this.getDemoItemTracking(itemId);
+    }
+    
+    if (!this.clioApiKey) {
+      return this.createErrorResult(this.getClioApiKeyError());
     }
 
     try {
-      // Real Clio API call would go here
-      const response = await fetch(`${this.clioBaseUrl}/matters/${itemId}`, {
-        headers: {
-          'Authorization': `Bearer ${this.clioApiKey}`,
-          'Content-Type': 'application/json',
-        },
+      // Real Clio API call using ClioAPIService
+      const { ClioAPIService } = await import('../services/clio-api.js');
+      const clioService = new ClioAPIService({
+        apiKey: this.clioApiKey,
+        region: (process.env.CLIO_REGION as any) || 'US',
       });
-
-      if (!response.ok) {
-        throw new Error(`Clio API error: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      const formatted = this.formatTrackingData(data);
+      
+      // Use ClioAPIService to get matter info
+      const matterData = await clioService.getMatter(parseInt(itemId, 10));
+      const formatted = this.formatTrackingData(matterData.data);
       return this.createSuccessResult(JSON.stringify(formatted, null, 2));
     } catch (error) {
-      console.error('Clio API error:', error);
-      return this.getMockItemTracking(itemId);
+      return this.createErrorResult(
+        `Clio API error: ${error instanceof Error ? error.message : String(error)}. ` +
+        'Set DEMO_MODE=true to enable demo mode with simulated data.'
+      );
     }
   }
 
   public async getMatterInfo(matterId: string) {
+    if (isDemoModeEnabled()) {
+      return this.getDemoMatterInfo(matterId);
+    }
+    
     if (!this.clioApiKey) {
-      return this.getMockMatterInfo(matterId);
+      return this.createErrorResult(this.getClioApiKeyError());
     }
 
     try {
-      const response = await fetch(`${this.clioBaseUrl}/matters/${matterId}`, {
-        headers: {
-          'Authorization': `Bearer ${this.clioApiKey}`,
-          'Content-Type': 'application/json',
-        },
+      const { ClioAPIService } = await import('../services/clio-api.js');
+      const clioService = new ClioAPIService({
+        apiKey: this.clioApiKey,
+        region: (process.env.CLIO_REGION as any) || 'US',
       });
-
-      if (!response.ok) {
-        throw new Error(`Clio API error: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      const formatted = this.formatMatterInfo(data);
+      
+      const matterData = await clioService.getMatter(parseInt(matterId, 10));
+      const formatted = this.formatMatterInfo(matterData.data);
       return this.createSuccessResult(JSON.stringify(formatted, null, 2));
     } catch (error) {
-      console.error('Clio API error:', error);
-      return this.getMockMatterInfo(matterId);
+      return this.createErrorResult(
+        `Clio API error: ${error instanceof Error ? error.message : String(error)}. ` +
+        'Set DEMO_MODE=true to enable demo mode with simulated data.'
+      );
     }
   }
 
   public async getWorkflowStatus(itemId: string) {
+    if (isDemoModeEnabled()) {
+      return this.getDemoWorkflowStatus(itemId);
+    }
+    
     if (!this.clioApiKey) {
-      return this.getMockWorkflowStatus(itemId);
+      return this.createErrorResult(this.getClioApiKeyError());
     }
 
     try {
-      // This would integrate with Clio's task/activity system
-      const response = await fetch(`${this.clioBaseUrl}/matters/${itemId}/activities`, {
-        headers: {
-          'Authorization': `Bearer ${this.clioApiKey}`,
-          'Content-Type': 'application/json',
-        },
+      // Use Clio's activities endpoint to determine workflow status
+      const { ClioAPIService } = await import('../services/clio-api.js');
+      const clioService = new ClioAPIService({
+        apiKey: this.clioApiKey,
+        region: (process.env.CLIO_REGION as any) || 'US',
       });
-
-      if (!response.ok) {
-        throw new Error(`Clio API error: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      const formatted = this.formatWorkflowStatus(data);
+      
+      const activities = await clioService.listActivities({
+        matter_id: parseInt(itemId, 10),
+        limit: 10,
+      });
+      
+      const formatted = this.formatWorkflowStatus(activities);
       return this.createSuccessResult(JSON.stringify(formatted, null, 2));
     } catch (error) {
-      console.error('Clio API error:', error);
-      return this.getMockWorkflowStatus(itemId);
+      return this.createErrorResult(
+        `Clio API error: ${error instanceof Error ? error.message : String(error)}. ` +
+        'Set DEMO_MODE=true to enable demo mode with simulated data.'
+      );
     }
   }
 
   public async getClientInfo(clientId: string) {
-    if (!this.clioApiKey) {
+    if (isDemoModeEnabled()) {
       return this.getMockClientInfo(clientId);
+    }
+    
+    if (!this.clioApiKey) {
+      return this.createErrorResult(this.getClioApiKeyError());
     }
 
     try {
-      const response = await fetch(`${this.clioBaseUrl}/contacts/${clientId}`, {
-        headers: {
-          'Authorization': `Bearer ${this.clioApiKey}`,
-          'Content-Type': 'application/json',
-        },
+      const { ClioAPIService } = await import('../services/clio-api.js');
+      const clioService = new ClioAPIService({
+        apiKey: this.clioApiKey,
+        region: (process.env.CLIO_REGION as any) || 'US',
       });
-
-      if (!response.ok) {
-        throw new Error(`Clio API error: ${response.status} ${response.statusText}`);
+      
+      const contacts = await clioService.listContacts({
+        query: clientId,
+        limit: 1,
+      });
+      
+      if (contacts.data.length === 0) {
+        return this.createErrorResult(`Client not found: ${clientId}`);
       }
-
-      const data = await response.json();
-      const formatted = this.formatClientInfo(data);
+      
+      const formatted = this.formatClientInfo(contacts.data[0]);
       return this.createSuccessResult(JSON.stringify(formatted, null, 2));
     } catch (error) {
-      console.error('Clio API error:', error);
-      return this.getMockClientInfo(clientId);
+      return this.createErrorResult(
+        `Clio API error: ${error instanceof Error ? error.message : String(error)}. ` +
+        'Set DEMO_MODE=true to enable demo mode with simulated data.'
+      );
     }
   }
 
   public async getDocumentInfo(documentId: string) {
+    if (isDemoModeEnabled()) {
+      return this.getDemoDocumentInfo(documentId);
+    }
+    
     if (!this.clioApiKey) {
-      return this.getMockDocumentInfo(documentId);
+      return this.createErrorResult(this.getClioApiKeyError());
     }
 
     try {
-      const response = await fetch(`${this.clioBaseUrl}/documents/${documentId}`, {
-        headers: {
-          'Authorization': `Bearer ${this.clioApiKey}`,
-          'Content-Type': 'application/json',
-        },
+      const { ClioAPIService } = await import('../services/clio-api.js');
+      const clioService = new ClioAPIService({
+        apiKey: this.clioApiKey,
+        region: (process.env.CLIO_REGION as any) || 'US',
       });
-
-      if (!response.ok) {
-        throw new Error(`Clio API error: ${response.status} ${response.statusText}`);
+      
+      const documents = await clioService.listDocuments({
+        query: documentId,
+        limit: 1,
+      });
+      
+      if (documents.data.length === 0) {
+        return this.createErrorResult(`Document not found: ${documentId}`);
       }
-
-      const data = await response.json();
-      const formatted = this.formatDocumentInfo(data);
+      
+      const formatted = this.formatDocumentInfo(documents.data[0]);
       return this.createSuccessResult(JSON.stringify(formatted, null, 2));
     } catch (error) {
-      console.error('Clio API error:', error);
-      return this.getMockDocumentInfo(documentId);
+      return this.createErrorResult(
+        `Clio API error: ${error instanceof Error ? error.message : String(error)}. ` +
+        'Set DEMO_MODE=true to enable demo mode with simulated data.'
+      );
     }
   }
 
   public async getCalendarEvents(parameters: any) {
-    if (!this.clioApiKey) {
+    if (isDemoModeEnabled()) {
       return this.getMockCalendarEvents();
+    }
+    
+    if (!this.clioApiKey) {
+      return this.createErrorResult(this.getClioApiKeyError());
     }
 
     try {
-      const queryParams = new URLSearchParams(parameters || {});
-      const response = await fetch(`${this.clioBaseUrl}/calendar_entries?${queryParams}`, {
-        headers: {
-          'Authorization': `Bearer ${this.clioApiKey}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`Clio API error: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      const formatted = this.formatCalendarEvents(data);
-      return this.createSuccessResult(JSON.stringify(formatted, null, 2));
+      // Note: Clio API v4 may not have direct calendar_entries endpoint
+      // This may need to use activities or a different endpoint
+      // For now, return error indicating this needs Clio API documentation
+      return this.createErrorResult(
+        'Calendar events endpoint requires Clio API v4 documentation. ' +
+        'Set DEMO_MODE=true to enable demo mode with simulated data.'
+      );
     } catch (error) {
-      console.error('Clio API error:', error);
-      return this.getMockCalendarEvents();
+      return this.createErrorResult(
+        `Clio API error: ${error instanceof Error ? error.message : String(error)}. ` +
+        'Set DEMO_MODE=true to enable demo mode with simulated data.'
+      );
     }
   }
 
   public async searchMatters(parameters: any) {
+    if (isDemoModeEnabled()) {
+      return this.getDemoMatters();
+    }
+    
     if (!this.clioApiKey) {
-      return this.getMockMatters();
+      return this.createErrorResult(this.getClioApiKeyError());
     }
 
     try {
-      const queryParams = new URLSearchParams(parameters || {});
-      const response = await fetch(`${this.clioBaseUrl}/matters?${queryParams}`, {
-        headers: {
-          'Authorization': `Bearer ${this.clioApiKey}`,
-          'Content-Type': 'application/json',
-        },
+      const { ClioAPIService } = await import('../services/clio-api.js');
+      const clioService = new ClioAPIService({
+        apiKey: this.clioApiKey,
+        region: (process.env.CLIO_REGION as any) || 'US',
       });
-
-      if (!response.ok) {
-        throw new Error(`Clio API error: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      const formatted = this.formatMatters(data);
+      
+      const matters = await clioService.listMatters({
+        status: parameters?.status,
+        query: parameters?.query,
+        limit: parameters?.limit || 20,
+        fields: parameters?.fields,
+        cursor: parameters?.cursor,
+      });
+      
+      const formatted = this.formatMatters(matters);
       return this.createSuccessResult(JSON.stringify(formatted, null, 2));
     } catch (error) {
-      console.error('Clio API error:', error);
-      return this.getMockMatters();
+      return this.createErrorResult(
+        `Clio API error: ${error instanceof Error ? error.message : String(error)}. ` +
+        'Set DEMO_MODE=true to enable demo mode with simulated data.'
+      );
     }
   }
 
   public async getRedFlags(parameters: any) {
-    if (!this.clioApiKey) {
+    if (isDemoModeEnabled()) {
       return this.getMockRedFlags();
+    }
+    
+    if (!this.clioApiKey) {
+      return this.createErrorResult(this.getClioApiKeyError());
     }
 
     try {
-      // This would search for urgent items across Clio
-      const queryParams = new URLSearchParams({
-        ...parameters,
-        urgent: 'true',
-        due_soon: 'true'
+      // Search for urgent activities/tasks
+      const { ClioAPIService } = await import('../services/clio-api.js');
+      const clioService = new ClioAPIService({
+        apiKey: this.clioApiKey,
+        region: (process.env.CLIO_REGION as any) || 'US',
       });
       
-      const response = await fetch(`${this.clioBaseUrl}/activities?${queryParams}`, {
-        headers: {
-          'Authorization': `Bearer ${this.clioApiKey}`,
-          'Content-Type': 'application/json',
-        },
+      // Get tasks with pending status and due soon
+      const tasks = await clioService.listTasks({
+        status: 'pending',
+        limit: 50,
       });
-
-      if (!response.ok) {
-        throw new Error(`Clio API error: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      const formatted = this.formatRedFlags(data);
+      
+      const formatted = this.formatRedFlags(tasks);
       return this.createSuccessResult(JSON.stringify(formatted, null, 2));
     } catch (error) {
-      console.error('Clio API error:', error);
-      return this.getMockRedFlags();
+      return this.createErrorResult(
+        `Clio API error: ${error instanceof Error ? error.message : String(error)}. ` +
+        'Set DEMO_MODE=true to enable demo mode with simulated data.'
+      );
     }
   }
 
@@ -359,29 +401,35 @@ export const clioIntegration = new (class extends BaseTool {
    * Get tasks from Clio
    */
   public async getTasks(parameters: any) {
+    if (isDemoModeEnabled()) {
+      return this.getDemoTasks();
+    }
+    
     if (!this.clioApiKey) {
-      return this.getMockTasks();
+      return this.createErrorResult(this.getClioApiKeyError());
     }
 
     try {
-      const queryParams = new URLSearchParams(parameters || {});
-      const response = await fetch(`${this.clioBaseUrl}/tasks?${queryParams}`, {
-        headers: {
-          'Authorization': `Bearer ${this.clioApiKey}`,
-          'Content-Type': 'application/json',
-        },
+      const { ClioAPIService } = await import('../services/clio-api.js');
+      const clioService = new ClioAPIService({
+        apiKey: this.clioApiKey,
+        region: (process.env.CLIO_REGION as any) || 'US',
       });
-
-      if (!response.ok) {
-        throw new Error(`Clio API error: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      const formatted = this.formatTasks(data);
+      
+      const tasks = await clioService.listTasks({
+        matter_id: parameters?.matter_id ? parseInt(parameters.matter_id, 10) : undefined,
+        status: parameters?.status,
+        limit: parameters?.limit || 20,
+        cursor: parameters?.cursor,
+      });
+      
+      const formatted = this.formatTasks(tasks);
       return this.createSuccessResult(JSON.stringify(formatted, null, 2));
     } catch (error) {
-      console.error('Clio API error:', error);
-      return this.getMockTasks();
+      return this.createErrorResult(
+        `Clio API error: ${error instanceof Error ? error.message : String(error)}. ` +
+        'Set DEMO_MODE=true to enable demo mode with simulated data.'
+      );
     }
   }
 
@@ -389,29 +437,35 @@ export const clioIntegration = new (class extends BaseTool {
    * Get contacts from Clio
    */
   public async getContacts(parameters: any) {
-    if (!this.clioApiKey) {
+    if (isDemoModeEnabled()) {
       return this.getMockContacts();
+    }
+    
+    if (!this.clioApiKey) {
+      return this.createErrorResult(this.getClioApiKeyError());
     }
 
     try {
-      const queryParams = new URLSearchParams(parameters || {});
-      const response = await fetch(`${this.clioBaseUrl}/contacts?${queryParams}`, {
-        headers: {
-          'Authorization': `Bearer ${this.clioApiKey}`,
-          'Content-Type': 'application/json',
-        },
+      const { ClioAPIService } = await import('../services/clio-api.js');
+      const clioService = new ClioAPIService({
+        apiKey: this.clioApiKey,
+        region: (process.env.CLIO_REGION as any) || 'US',
       });
-
-      if (!response.ok) {
-        throw new Error(`Clio API error: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      const formatted = this.formatContacts(data);
+      
+      const contacts = await clioService.listContacts({
+        type: parameters?.type,
+        query: parameters?.query,
+        limit: parameters?.limit || 20,
+        cursor: parameters?.cursor,
+      });
+      
+      const formatted = this.formatContacts(contacts);
       return this.createSuccessResult(JSON.stringify(formatted, null, 2));
     } catch (error) {
-      console.error('Clio API error:', error);
-      return this.getMockContacts();
+      return this.createErrorResult(
+        `Clio API error: ${error instanceof Error ? error.message : String(error)}. ` +
+        'Set DEMO_MODE=true to enable demo mode with simulated data.'
+      );
     }
   }
 
@@ -419,28 +473,29 @@ export const clioIntegration = new (class extends BaseTool {
    * Get case status (enhanced matter status)
    */
   public async getCaseStatus(matterId: string) {
+    if (isDemoModeEnabled()) {
+      return this.getDemoCaseStatus(matterId);
+    }
+    
     if (!this.clioApiKey) {
-      return this.getMockCaseStatus(matterId);
+      return this.createErrorResult(this.getClioApiKeyError());
     }
 
     try {
-      const response = await fetch(`${this.clioBaseUrl}/matters/${matterId}`, {
-        headers: {
-          'Authorization': `Bearer ${this.clioApiKey}`,
-          'Content-Type': 'application/json',
-        },
+      const { ClioAPIService } = await import('../services/clio-api.js');
+      const clioService = new ClioAPIService({
+        apiKey: this.clioApiKey,
+        region: (process.env.CLIO_REGION as any) || 'US',
       });
-
-      if (!response.ok) {
-        throw new Error(`Clio API error: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      const formatted = this.formatCaseStatus(data);
+      
+      const matterData = await clioService.getMatter(parseInt(matterId, 10));
+      const formatted = this.formatCaseStatus(matterData.data);
       return this.createSuccessResult(JSON.stringify(formatted, null, 2));
     } catch (error) {
-      console.error('Clio API error:', error);
-      return this.getMockCaseStatus(matterId);
+      return this.createErrorResult(
+        `Clio API error: ${error instanceof Error ? error.message : String(error)}. ` +
+        'Set DEMO_MODE=true to enable demo mode with simulated data.'
+      );
     }
   }
 
@@ -448,34 +503,41 @@ export const clioIntegration = new (class extends BaseTool {
    * Search documents in Clio
    */
   public async searchDocuments(parameters: any) {
+    if (isDemoModeEnabled()) {
+      return this.getDemoDocuments();
+    }
+    
     if (!this.clioApiKey) {
-      return this.getMockDocuments();
+      return this.createErrorResult(this.getClioApiKeyError());
     }
 
     try {
-      const queryParams = new URLSearchParams(parameters || {});
-      const response = await fetch(`${this.clioBaseUrl}/documents?${queryParams}`, {
-        headers: {
-          'Authorization': `Bearer ${this.clioApiKey}`,
-          'Content-Type': 'application/json',
-        },
+      const { ClioAPIService } = await import('../services/clio-api.js');
+      const clioService = new ClioAPIService({
+        apiKey: this.clioApiKey,
+        region: (process.env.CLIO_REGION as any) || 'US',
       });
-
-      if (!response.ok) {
-        throw new Error(`Clio API error: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      const formatted = this.formatDocuments(data);
+      
+      const documents = await clioService.listDocuments({
+        matter_id: parameters?.matter_id ? parseInt(parameters.matter_id, 10) : undefined,
+        query: parameters?.query,
+        limit: parameters?.limit || 20,
+        cursor: parameters?.cursor,
+      });
+      
+      const formatted = this.formatDocuments(documents);
       return this.createSuccessResult(JSON.stringify(formatted, null, 2));
     } catch (error) {
-      console.error('Clio API error:', error);
-      return this.getMockDocuments();
+      return this.createErrorResult(
+        `Clio API error: ${error instanceof Error ? error.message : String(error)}. ` +
+        'Set DEMO_MODE=true to enable demo mode with simulated data.'
+      );
     }
   }
 
-  // Mock data methods for when API key is not available (DEMO MODE)
-  public getMockItemTracking(itemId: string) {
+  // Demo data methods - ONLY used when DEMO_MODE=true (opt-in)
+  // These provide simulated data for demonstration/onboarding purposes only
+  public getDemoItemTracking(itemId: string) {
     const baseData = {
       id: itemId,
       type: 'Emergency Motion',
@@ -503,7 +565,7 @@ export const clioIntegration = new (class extends BaseTool {
     return this.createSuccessResult(JSON.stringify(mockData, null, 2));
   }
 
-  public getMockMatterInfo(matterId: string) {
+  public getDemoMatterInfo(matterId: string) {
     const mockData = {
       id: matterId,
       name: 'Smith v. Jones - Contract Dispute',
@@ -514,11 +576,12 @@ export const clioIntegration = new (class extends BaseTool {
       billing_rate: 350,
       description: 'Breach of contract dispute involving software licensing agreement'
     };
-    return this.createSuccessResult(JSON.stringify(mockData, null, 2));
+    const markedData = markAsDemo({ ...mockData }, 'Clio Integration');
+    return this.createSuccessResult(JSON.stringify(markedData, null, 2));
   }
 
-  public getMockWorkflowStatus(itemId: string) {
-    const mockData = {
+  public getDemoWorkflowStatus(itemId: string) {
+    const demoData = {
       item_id: itemId,
       current_stage: 'Attorney Review',
       progress_percentage: 60,
@@ -526,7 +589,8 @@ export const clioIntegration = new (class extends BaseTool {
       blockers: [],
       next_actions: ['Review AI-generated draft', 'Add case law citations', 'Prepare for filing']
     };
-    return this.createSuccessResult(JSON.stringify(mockData, null, 2));
+    const markedData = markAsDemo(demoData, 'Clio Integration');
+    return this.createSuccessResult(JSON.stringify(markedData, null, 2));
   }
 
   public getMockClientInfo(clientId: string) {
@@ -539,11 +603,12 @@ export const clioIntegration = new (class extends BaseTool {
       matter_count: 3,
       total_billed: 15750.00
     };
-    return this.createSuccessResult(JSON.stringify(mockData, null, 2));
+    const demoData = markAsDemo(mockData, 'Clio Integration');
+    return this.createSuccessResult(JSON.stringify(demoData, null, 2));
   }
 
-  public getMockDocumentInfo(documentId: string) {
-    const mockData = {
+  public getDemoDocumentInfo(documentId: string) {
+    const baseData = {
       id: documentId,
       name: 'Motion for TRO - Smith v Jones.pdf',
       matter_id: 'matter_123',
@@ -553,7 +618,8 @@ export const clioIntegration = new (class extends BaseTool {
       document_type: 'Motion',
       status: 'Draft'
     };
-    return this.createSuccessResult(JSON.stringify(mockData, null, 2));
+    const demoData = markAsDemo(baseData, 'Clio Integration');
+    return this.createSuccessResult(JSON.stringify(demoData, null, 2));
   }
 
   public getMockCalendarEvents() {
@@ -569,11 +635,12 @@ export const clioIntegration = new (class extends BaseTool {
         }
       ]
     };
-    return this.createSuccessResult(JSON.stringify(mockData, null, 2));
+    const demoData = markAsDemo(mockData, 'Clio Integration');
+    return this.createSuccessResult(JSON.stringify(demoData, null, 2));
   }
 
-  public getMockMatters() {
-    const mockData = {
+  public getDemoMatters() {
+    const baseData = {
       matters: [
         {
           id: 'matter_123',
@@ -584,7 +651,8 @@ export const clioIntegration = new (class extends BaseTool {
         }
       ]
     };
-    return this.createSuccessResult(JSON.stringify(mockData, null, 2));
+    const demoData = markAsDemo(baseData, 'Clio Integration');
+    return this.createSuccessResult(JSON.stringify(demoData, null, 2));
   }
 
   public getMockRedFlags() {
@@ -601,12 +669,13 @@ export const clioIntegration = new (class extends BaseTool {
         }
       ]
     };
-    return this.createSuccessResult(JSON.stringify(mockData, null, 2));
+    const demoData = markAsDemo(mockData, 'Clio Integration');
+    return this.createSuccessResult(JSON.stringify(demoData, null, 2));
   }
 
-  // Mock data methods for new actions
-  public getMockTasks() {
-    const mockData = {
+  // Demo data methods for new actions
+  public getDemoTasks() {
+    const baseData = {
       tasks: [
         {
           id: 'task_001',
@@ -619,7 +688,8 @@ export const clioIntegration = new (class extends BaseTool {
         }
       ]
     };
-    return this.createSuccessResult(JSON.stringify(mockData, null, 2));
+    const demoData = markAsDemo(baseData, 'Clio Integration');
+    return this.createSuccessResult(JSON.stringify(demoData, null, 2));
   }
 
   public getMockContacts() {
@@ -635,11 +705,12 @@ export const clioIntegration = new (class extends BaseTool {
         }
       ]
     };
-    return this.createSuccessResult(JSON.stringify(mockData, null, 2));
+    const demoData = markAsDemo(mockData, 'Clio Integration');
+    return this.createSuccessResult(JSON.stringify(demoData, null, 2));
   }
 
-  public getMockCaseStatus(matterId: string) {
-    const mockData = {
+  public getDemoCaseStatus(matterId: string) {
+    const baseData = {
       matter_id: matterId,
       status: 'Active',
       last_activity: '2025-01-14T16:00:00Z',
@@ -648,11 +719,12 @@ export const clioIntegration = new (class extends BaseTool {
       next_hearing: '2025-01-20T10:00:00Z',
       billing_status: 'current'
     };
-    return this.createSuccessResult(JSON.stringify(mockData, null, 2));
+    const demoData = markAsDemo(baseData, 'Clio Integration');
+    return this.createSuccessResult(JSON.stringify(demoData, null, 2));
   }
 
-  public getMockDocuments() {
-    const mockData = {
+  public getDemoDocuments() {
+    const baseData = {
       documents: [
         {
           id: 'doc_001',
@@ -664,7 +736,8 @@ export const clioIntegration = new (class extends BaseTool {
         }
       ]
     };
-    return this.createSuccessResult(JSON.stringify(mockData, null, 2));
+    const demoData = markAsDemo(baseData, 'Clio Integration');
+    return this.createSuccessResult(JSON.stringify(demoData, null, 2));
   }
 
   // Data formatting methods

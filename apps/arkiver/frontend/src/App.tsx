@@ -14,10 +14,13 @@ import Visualizations from './pages/Visualizations';
 import AiAssistant from './pages/AiAssistant';
 import AiIntegrity from './pages/AiIntegrity';
 import HomePage from './pages/HomePage';
-import { Upload, Lightbulb, Settings as SettingsIcon, BarChart3, Shield, Home } from 'lucide-react';
+import Onboarding from './pages/onboarding';
+import { Upload, Lightbulb, Settings as SettingsIcon, BarChart3, Shield, Home, HelpCircle } from 'lucide-react';
 import { AIIcon } from './components/AIIcon';
 import { ToastProvider } from './components/ui/toast';
 import { CyranoChatDrawer } from './components/CyranoChatDrawer';
+import { NavigationHelpTooltip } from './components/NavigationHelpTooltip';
+import HelpMenu from './components/help-menu';
 import arkiverLogo from './Arkiver Main.png';
 
 const queryClient = new QueryClient({
@@ -31,15 +34,16 @@ const queryClient = new QueryClient({
 
 function Navigation() {
   const location = useLocation();
+  const [showHelpMenu, setShowHelpMenu] = useState(false);
 
   const navItems = [
-    { path: '/dashboard', label: 'Dashboard', icon: Home },
-    { path: '/extractor', label: 'Extractor', icon: Upload },
-    { path: '/insights', label: 'Insights', icon: Lightbulb },
-    { path: '/visualizations', label: 'Visualizations', icon: BarChart3 },
-    { path: '/ai-assistant', label: 'AI Assistant', icon: AIIcon },
-    { path: '/ai-integrity', label: 'AI Integrity', icon: Shield },
-    { path: '/settings', label: 'Settings', icon: SettingsIcon },
+    { path: '/dashboard', label: 'Dashboard', icon: Home, description: 'Overview of key metrics and recent activity.' },
+    { path: '/extractor', label: 'Extractor', icon: Upload, description: 'Upload and process documents for structured extraction.' },
+    { path: '/insights', label: 'Insights', icon: Lightbulb, description: 'Review AI-generated insights from processed documents.' },
+    { path: '/visualizations', label: 'Visualizations', icon: BarChart3, description: 'Explore charts and visual summaries of your data.' },
+    { path: '/ai-assistant', label: 'AI Assistant', icon: AIIcon, description: 'Chat with the Cyrano Pathfinder about Arkiver.' },
+    { path: '/ai-integrity', label: 'AI Integrity', icon: Shield, description: 'Run integrity and drift checks on AI outputs.' },
+    { path: '/settings', label: 'Settings', icon: SettingsIcon, description: 'Configure Arkiver and integration settings.' },
   ];
 
   // Check if current path matches (handle root redirect)
@@ -80,13 +84,25 @@ function Navigation() {
                   ) : (
                     <Icon className="w-4 h-4" style={{ color: active ? '#2C3E50' : '#D89B6A' }} />
                   )}
-                  <span className="hidden sm:inline">{item.label}</span>
+                  <span className="hidden sm:inline">
+                    <NavigationHelpTooltip label={item.label} description={item.description} />
+                  </span>
                 </Link>
               );
             })}
+            <button
+              onClick={() => setShowHelpMenu(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors text-gray-300 hover:text-white"
+              style={{ color: '#D89B6A' }}
+              aria-label="Open help menu"
+            >
+              <HelpCircle className="w-4 h-4" />
+              <span className="hidden sm:inline">Help</span>
+            </button>
           </div>
         </div>
       </div>
+      {showHelpMenu && <HelpMenu onClose={() => setShowHelpMenu(false)} />}
     </nav>
   );
 }
@@ -101,6 +117,7 @@ function App() {
           <main>
             <Routes>
               <Route path="/" element={<HomePage />} />
+              <Route path="/onboarding" element={<Onboarding />} />
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/extractor" element={<Extractor />} />
               <Route path="/insights" element={<Insights />} />

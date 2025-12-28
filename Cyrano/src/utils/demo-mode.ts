@@ -18,26 +18,15 @@ export interface DemoModeConfig {
 
 /**
  * Check if demo mode should be enabled
- * Demo mode is enabled when:
- * 1. DEMO_MODE environment variable is set to 'true'
- * 2. Required API keys are missing
+ * Demo mode is OPT-IN ONLY - enabled ONLY when:
+ * 1. DEMO_MODE environment variable is explicitly set to 'true'
+ * 
+ * Demo mode is NOT auto-enabled when API keys are missing.
+ * Missing credentials should return errors or N/A status, not mock data.
  */
 export function isDemoModeEnabled(): boolean {
-  // Explicit demo mode flag
-  if (process.env.DEMO_MODE === 'true') {
-    return true;
-  }
-  
-  // Auto-enable if critical API keys are missing
-  const hasAnyApiKey = !!(
-    process.env.OPENAI_API_KEY ||
-    process.env.ANTHROPIC_API_KEY ||
-    process.env.PERPLEXITY_API_KEY ||
-    process.env.CLIO_API_KEY
-  );
-  
-  // If no API keys at all, enable demo mode
-  return !hasAnyApiKey;
+  // Explicit demo mode flag ONLY - no auto-enable
+  return process.env.DEMO_MODE === 'true';
 }
 
 /**
@@ -58,9 +47,7 @@ export function getDemoModeConfig(): DemoModeConfig {
   return {
     enabled,
     reason: enabled 
-      ? (process.env.DEMO_MODE === 'true' 
-          ? 'Explicitly enabled via DEMO_MODE environment variable'
-          : 'Auto-enabled: No API keys configured')
+      ? 'Explicitly enabled via DEMO_MODE environment variable (opt-in only)'
       : undefined,
     apiKeysConfigured,
   };

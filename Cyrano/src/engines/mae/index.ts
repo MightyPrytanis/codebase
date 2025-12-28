@@ -4,4 +4,5 @@
  * See LICENSE.md for full license text
  */
 
+export { MaeEngine, maeEngine } from './mae-engine.js';
 export * from './mae-engine.js';

@@ -1,10 +1,22 @@
 /**
  * Ethics Reviewer Tool
  * 
- * Uses JSON Rules Engine to evaluate ethics compliance
+ * PROFESSIONAL RESPONSIBILITY REVIEWER (NOT AI Ethics)
+ * 
+ * Uses JSON Rules Engine to evaluate compliance with PROFESSIONAL ETHICS RULES:
+ * - Model Rules of Professional Conduct (MRPC)
+ * - State bar ethics rules
+ * - Attorney-client relationship rules
+ * - Conflict of interest rules
+ * - Confidentiality and privilege rules
+ * 
+ * This tool evaluates ATTORNEY BEHAVIOR, not AI behavior.
+ * For AI Ethics evaluation (Ten Rules), use ethical_ai_guard tool.
+ * 
  * Integrates with GoodCounsel engine
  * 
  * Created: 2025-11-26
+ * Updated: 2025-12-21 (clarified distinction from AI Ethics)
  */
 /*
  * Copyright 2025 Cognisint LLC
@@ -14,7 +26,7 @@
 
 import { BaseTool } from '../../../tools/base-tool.js';
 import { z } from 'zod';
-import { ethicsRulesModule, EthicsReviewResult } from '../services/ethics-rules-module.js';
+import { ethicsRulesService, EthicsReviewResult } from '../services/ethics-rules-service.js';
 
 const EthicsReviewerSchema = z.object({
   userId: z.string().optional().describe('User ID for ethics review'),
@@ -55,7 +67,7 @@ export const ethicsReviewer = new (class extends BaseTool {
       const { userId, facts, includeWarnings } = EthicsReviewerSchema.parse(args);
 
       // Run ethics review
-      const result: EthicsReviewResult = await ethicsRulesModule.runReview(facts, userId);
+      const result: EthicsReviewResult = await ethicsRulesService.runReview(facts, userId);
 
       // Filter warnings if not requested
       const filteredResult = includeWarnings

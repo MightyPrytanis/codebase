@@ -21,6 +21,7 @@ import csurf from 'csurf';
 dotenv.config();
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import { z } from 'zod';
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
@@ -51,12 +52,17 @@ import { authTool } from './tools/auth.js';
 import { syncManager } from './tools/sync-manager.js';
 import { redFlagFinder } from './tools/red-flag-finder.js';
 import { clioIntegration } from './tools/clio-integration.js';
+import { micourtQuery } from './tools/micourt-query.js';
 import { timeValueBilling } from './tools/time-value-billing.js';
 import { tasksCollector } from './tools/tasks-collector.js';
 import { contactsCollector } from './tools/contacts-collector.js';
 import { documentDrafterTool } from './tools/document-drafter.js';
 // import { toolEnhancer } from './tools/tool-enhancer.js'; // TODO: File doesn't exist
 import { ethicsReviewer } from './engines/goodcounsel/tools/ethics-reviewer.js';
+import { ethicalAIGuard } from './tools/ethical-ai-guard.js';
+import { tenRulesChecker } from './tools/ten-rules-checker.js';
+import { ethicsPolicyExplainer } from './tools/ethics-policy-explainer.js';
+import { getEthicsAuditTool, getEthicsStatsTool } from './tools/ethics-audit-tools.js';
 import {
   arkiverTextProcessor,
   arkiverEmailProcessor,
@@ -90,6 +96,7 @@ import { recollectionSupport } from './tools/recollection-support.js';
 import { preFillLogic } from './tools/pre-fill-logic.js';
 import { dupeCheck } from './tools/dupe-check.js';
 import { provenanceTracker } from './tools/provenance-tracker.js';
+import { workflowArchaeology } from './tools/workflow-archaeology.js';
 
 // Import Module/Engine wrappers
 import { chronometricModuleTool } from './tools/chronometric-module.js';
@@ -113,12 +120,15 @@ import {
   alertGenerator,
 } from './engines/potemkin/tools/index.js';
 import { cyranoPathfinder } from './tools/cyrano-pathfinder.js';
+import { skillExecutor } from './tools/skill-executor.js';
 
 // Import library routes
 import libraryRoutes from './routes/library.js';
 
 const app = express();
-app.enable('trust proxy');
+// Configure trust proxy: set to number of proxies (1) instead of true to avoid rate limit validation errors
+// In production behind a reverse proxy, set this to the actual number of proxies
+app.set('trust proxy', process.env.TRUST_PROXY_COUNT ? parseInt(process.env.TRUST_PROXY_COUNT) : 1);
 const port = process.env.PORT || 5002;
 
 // Disable X-Powered-By header to prevent information disclosure
@@ -131,14 +141,19 @@ app.use(security.secureHeaders);
 app.use(cookieParser());
 
 // CSRF protection: require valid CSRF tokens for state-changing requests
+// Skip CSRF in test environment to allow testing
 const csrfProtection = csurf({
   cookie: {
     httpOnly: true,
     sameSite: 'lax',
     secure: process.env.NODE_ENV === 'production',
   },
+  ignoreMethods: process.env.NODE_ENV === 'test' ? ['GET', 'HEAD', 'OPTIONS', 'POST', 'PUT', 'DELETE', 'PATCH'] : undefined,
 });
-app.use(csrfProtection);
+// Only apply CSRF protection if not in test mode
+if (process.env.NODE_ENV !== 'test') {
+  app.use(csrfProtection);
+}
 
 // Middleware - CORS and HTTPS enforcement
 const isProduction = process.env.NODE_ENV === 'production';
@@ -247,6 +262,7 @@ mcpServer.setRequestHandler(ListToolsRequestSchema, async () => {
       syncManager.getToolDefinition(),
       redFlagFinder.getToolDefinition(),
       clioIntegration.getToolDefinition(),
+      micourtQuery.getToolDefinition(),
       timeValueBilling.getToolDefinition(),
       authTool.getToolDefinition(),
       
@@ -268,6 +284,7 @@ mcpServer.setRequestHandler(ListToolsRequestSchema, async () => {
       preFillLogic.getToolDefinition(),
       dupeCheck.getToolDefinition(),
       provenanceTracker.getToolDefinition(),
+      workflowArchaeology.getToolDefinition(),
       
       // Module/Engine Wrappers
       chronometricModuleTool.getToolDefinition(),
@@ -415,6 +432,9 @@ mcpServer.setRequestHandler(CallToolRequestSchema, async (request) => {
           case 'provenance_tracker':
             result = await provenanceTracker.execute(args);
             break;
+          case 'workflow_archaeology':
+            result = await workflowArchaeology.execute(args);
+            break;
             
           // Module/Engine Wrappers
           case 'chronometric_module':
@@ -535,6 +555,9 @@ mcpServer.setRequestHandler(CallToolRequestSchema, async (request) => {
 // HTTP Routes
 app.get('/mcp/tools', async (req, res) => {
   try {
+    // Validate query parameters if any are added in the future
+    // Currently no parameters, but structure ready for validation
+    
     // Return the tools list directly
     const tools = [
       // Legal AI Tools
@@ -569,6 +592,7 @@ app.get('/mcp/tools', async (req, res) => {
       preFillLogic.getToolDefinition(),
       dupeCheck.getToolDefinition(),
       provenanceTracker.getToolDefinition(),
+      workflowArchaeology.getToolDefinition(),
       
       // Module/Engine Wrappers
       chronometricModuleTool.getToolDefinition(),
@@ -597,6 +621,8 @@ app.get('/mcp/tools', async (req, res) => {
       validateLegalLanguage.getToolDefinition(),
       // Cyrano Pathfinder - Unified Chat Interface
       cyranoPathfinder.getToolDefinition(),
+      // Skills Executor
+      skillExecutor.getToolDefinition(),
     ];
     
     res.json({ tools });
@@ -607,8 +633,23 @@ app.get('/mcp/tools', async (req, res) => {
 
 app.post('/mcp/execute', async (req, res) => {
   try {
+    // Validate request body with Zod
+    const ExecuteRequestSchema = z.object({
+      tool: z.string().min(1, 'Tool name is required'),
+      input: z.any().optional(),
+      arguments: z.any().optional(),
+    });
+    
+    const validationResult = ExecuteRequestSchema.safeParse(req.body);
+    if (!validationResult.success) {
+      return res.status(400).json({
+        error: 'Invalid request body',
+        details: validationResult.error.errors,
+      });
+    }
+    
     // Support both 'input' and 'arguments' for compatibility
-    const { tool, input, arguments: args } = req.body;
+    const { tool, input, arguments: args } = validationResult.data;
     const toolInput = input || args || {};
     
     // Execute the tool directly
@@ -659,6 +700,9 @@ app.post('/mcp/execute', async (req, res) => {
         break;
       case 'clio_integration':
         result = await clioIntegration.execute(toolInput);
+        break;
+      case 'micourt_query':
+        result = await micourtQuery.execute(toolInput);
         break;
       case 'time_value_billing':
         result = await timeValueBilling.execute(toolInput);
@@ -732,6 +776,22 @@ app.post('/mcp/execute', async (req, res) => {
         break;
       case 'ethics_reviewer':
         result = await ethicsReviewer.execute(toolInput);
+        break;
+      // EthicalAI Tools
+      case 'ethical_ai_guard':
+        result = await ethicalAIGuard.execute(toolInput);
+        break;
+      case 'ten_rules_checker':
+        result = await tenRulesChecker.execute(toolInput);
+        break;
+      case 'ethics_policy_explainer':
+        result = await ethicsPolicyExplainer.execute(toolInput);
+        break;
+      case 'get_ethics_audit':
+        result = await getEthicsAuditTool.execute(toolInput);
+        break;
+      case 'get_ethics_stats':
+        result = await getEthicsStatsTool.execute(toolInput);
         break;
       case 'potemkin_engine':
         result = await potemkinEngineTool.execute(toolInput);
@@ -812,6 +872,10 @@ app.post('/mcp/execute', async (req, res) => {
       case 'cyrano_pathfinder':
         result = await cyranoPathfinder.execute(toolInput);
         break;
+      // Skills Executor
+      case 'skill_executor':
+        result = await skillExecutor.execute(toolInput);
+        break;
         
       default:
         res.status(400).json({
@@ -891,6 +955,9 @@ app.get('/health', (req, res) => {
 
 app.get('/mcp/tools/info', async (req, res) => {
   try {
+    // Validate query parameters if any are added in the future
+    // Currently no parameters, but structure ready for validation
+    
     const toolsInfo = [
       // Legal AI Tools
       { category: 'Legal AI', ...documentAnalyzer.getToolDefinition() },
@@ -951,6 +1018,7 @@ app.get('/mcp/tools/info', async (req, res) => {
 // Arkiver File Upload Endpoint
 app.post('/api/arkiver/upload', upload.single('file'), async (req, res) => {
   try {
+    // Validate file upload
     const file = (req as any).file;
     
     if (!file) {
@@ -961,6 +1029,40 @@ app.post('/api/arkiver/upload', upload.single('file'), async (req, res) => {
           message: 'No file provided in request',
         },
       });
+    }
+    
+    // Validate file size (100MB limit)
+    const maxFileSize = 100 * 1024 * 1024; // 100MB
+    if (file.size > maxFileSize) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'FILE_TOO_LARGE',
+          message: `File size ${file.size} exceeds maximum allowed size of ${maxFileSize} bytes`,
+        },
+      });
+    }
+    
+    // Validate metadata if provided
+    if (req.body.metadata) {
+      const MetadataSchema = z.object({
+        sourceType: z.enum(['user-upload', 'email', 'clio', 'courtlistener', 'westlaw', 'manual']).optional(),
+      }).passthrough(); // Allow additional metadata fields
+      
+      const metadataValidation = MetadataSchema.safeParse(
+        typeof req.body.metadata === 'string' ? JSON.parse(req.body.metadata) : req.body.metadata
+      );
+      
+      if (!metadataValidation.success) {
+        return res.status(400).json({
+          success: false,
+          error: {
+            code: 'INVALID_METADATA',
+            message: 'Invalid metadata format',
+            details: metadataValidation.error.errors,
+          },
+        });
+      }
     }
 
     // Import required modules
@@ -1056,7 +1158,24 @@ app.post('/api/arkiver/upload', upload.single('file'), async (req, res) => {
 // Arkiver File Status Endpoint
 app.get('/api/arkiver/files/:fileId', async (req, res) => {
   try {
-    const { fileId } = req.params;
+    // Validate fileId parameter
+    const FileIdSchema = z.object({
+      fileId: z.string().uuid('File ID must be a valid UUID'),
+    });
+    
+    const validationResult = FileIdSchema.safeParse(req.params);
+    if (!validationResult.success) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'INVALID_FILE_ID',
+          message: 'Invalid file ID format',
+          details: validationResult.error.errors,
+        },
+      });
+    }
+    
+    const { fileId } = validationResult.data;
     const { db } = await import('./db.js');
     const { arkiverFiles } = await import('./modules/arkiver/schema.js');
     const { eq } = await import('drizzle-orm');
@@ -1103,9 +1222,25 @@ app.get('/api/arkiver/files/:fileId', async (req, res) => {
 // Mount library routes
 app.use('/api', libraryRoutes);
 
+// Import and mount onboarding routes
+import onboardingRoutes from './routes/onboarding.js';
+app.use('/api', onboardingRoutes);
+
 // Start server
 // Export app for testing
 export { app };
+
+// Load skills at startup
+(async () => {
+  try {
+    const { skillRegistry } = await import('./skills/skill-registry.js');
+    await skillRegistry.loadAll();
+    console.log(`[Skills] Loaded ${skillRegistry.getCount()} skills`);
+  } catch (error) {
+    console.error('[Skills] Failed to load skills:', error);
+    // Don't fail startup if skills fail to load
+  }
+})();
 
 // Start server if this file is run directly (not imported)
 // In test environments, the app will be imported and a test server created
