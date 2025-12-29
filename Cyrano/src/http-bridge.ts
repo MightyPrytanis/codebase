@@ -121,6 +121,7 @@ import {
 } from './engines/potemkin/tools/index.js';
 import { cyranoPathfinder } from './tools/cyrano-pathfinder.js';
 import { skillExecutor } from './tools/skill-executor.js';
+import { mcrValidator } from './tools/mcr-validator.js';
 
 // Import library routes
 import libraryRoutes from './routes/library.js';
@@ -623,6 +624,8 @@ app.get('/mcp/tools', async (req, res) => {
       cyranoPathfinder.getToolDefinition(),
       // Skills Executor
       skillExecutor.getToolDefinition(),
+      // MCR Compliance Validator
+      mcrValidator.getToolDefinition(),
     ];
     
     res.json({ tools });
@@ -1016,7 +1019,7 @@ app.get('/mcp/tools/info', async (req, res) => {
 });
 
 // Arkiver File Upload Endpoint
-app.post('/api/arkiver/upload', upload.single('file'), async (req, res) => {
+app.post('/api/arkiver/upload', security.authenticateJWT, upload.single('file'), async (req, res) => {
   try {
     // Validate file upload
     const file = (req as any).file;
@@ -1106,8 +1109,19 @@ app.post('/api/arkiver/upload', upload.single('file'), async (req, res) => {
       });
     }
 
-    // Get user ID (for now, use default user ID 1 - should be from auth)
-    const userId = 1; // TODO: Get from authentication
+    // Get user ID from authenticated session
+    const user = (req as any).user;
+    const userId = user?.userId;
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: {
+          code: 'AUTH_REQUIRED',
+          message: 'Authentication required to upload files',
+        },
+      });
+    }
 
     // Save file record to database
     const [savedFile] = await db

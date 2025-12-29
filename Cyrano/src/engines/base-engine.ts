@@ -552,12 +552,85 @@ export abstract class BaseEngine {
             }
           }
 
+          // MRPC Compliance Check for AI-generated legal content
+          // Check if this is legal content that requires MRPC compliance
+          const isLegalContent = step.input?.documentType || 
+                                 step.input?.isLegalDocument || 
+                                 context.isLegalDocument ||
+                                 this.config.name === 'mae' && step.input?.workflow_id?.includes('legal');
+          
+          let mrpcWarnings: string[] = [];
+          if (isLegalContent) {
+            try {
+              const { legalEthicsFramework } = await import('../modules/ethical-ai/ethical-frameworks.js');
+              const mrpcContext = {
+                ...step.input,
+                ...context,
+                usesAIAssistance: true,
+                hasAttorneySupervision: context.hasAttorneySupervision !== false, // Default to true if not specified
+                aiGeneratedWorkProduct: true,
+                attorneyReviewed: false, // Will be reviewed by attorney
+              };
+              
+              const mrpcAnalysis = legalEthicsFramework.analyze(
+                `AI-generated ${step.input?.documentType || 'legal document'}`,
+                mrpcContext
+              );
+
+              // Collect MRPC warnings
+              mrpcAnalysis.mrpcRules.forEach(rule => {
+                if (rule.applies && rule.compliance !== 'compliant') {
+                  mrpcWarnings.push(`MRPC ${rule.number} (${rule.rule}): ${rule.compliance} - ${rule.reasoning}`);
+                }
+              });
+
+              // If conclusion is impermissible, block the output
+              if (mrpcAnalysis.conclusion === 'impermissible') {
+                await logicAuditService.capture({
+                  timestamp: new Date().toISOString(),
+                  engine: this.config.name,
+                  stepId: step.id,
+                  input: step.input || context,
+                  error: 'MRPC compliance check failed - impermissible action',
+                  metadata: { mrpcAnalysis },
+                });
+                return {
+                  content: [
+                    {
+                      type: 'text',
+                      text: 'Output blocked by MRPC compliance check. Action is impermissible under Michigan Rules of Professional Conduct.',
+                    },
+                  ],
+                  isError: true,
+                  metadata: { mrpcAnalysis },
+                };
+              }
+            } catch (error) {
+              // Log error but don't block - MRPC check failure shouldn't prevent document generation
+              console.error('MRPC compliance check error:', error);
+            }
+          }
+
           // Create response wrapper for return value (after ethics checks pass)
           const responseText = JSON.stringify({
             response: aiResponse,
             provider: provider, // Include which provider was used
             wasAutoSelected: providerOrAuto === 'auto',
           }, null, 2);
+
+          // Standard attorney review warning for all AI-generated content
+          const attorneyReviewWarning = '⚠️ ATTORNEY REVIEW REQUIRED: This AI-generated content has not been reviewed by a licensed attorney. All legal documents, calculations, and research results must be reviewed and verified by a qualified attorney before use. The system and its developers disclaim all liability for any errors, omissions, or inaccuracies in AI-generated content.';
+
+          // Collect all warnings
+          const allWarnings: string[] = [];
+          if (ethicsCheck.warnings && ethicsCheck.warnings.length > 0) {
+            allWarnings.push(...ethicsCheck.warnings);
+          }
+          if (mrpcWarnings.length > 0) {
+            allWarnings.push(...mrpcWarnings);
+          }
+          // Always include attorney review warning for AI-generated content
+          allWarnings.push(attorneyReviewWarning);
 
           return {
             content: [
@@ -570,6 +643,10 @@ export abstract class BaseEngine {
               provider,
               wasAutoSelected: providerOrAuto === 'auto',
               ethicsWarnings: ethicsCheck.warnings,
+              mrpcWarnings: mrpcWarnings.length > 0 ? mrpcWarnings : undefined,
+              attorneyReviewRequired: true, // Always require attorney review for AI-generated content
+              warnings: allWarnings,
+              standardWarning: attorneyReviewWarning,
             },
           };
         } catch (error) {

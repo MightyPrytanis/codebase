@@ -18,6 +18,8 @@ import { aiProviderSelector } from '../services/ai-provider-selector.js';
 import { apiValidator } from '../utils/api-validator.js';
 import { injectTenRulesIntoSystemPrompt } from '../services/ethics-prompt-injector.js';
 import { checkGeneratedContent } from '../services/ethics-check-helper.js';
+import { mcrComplianceService, DocumentMetadata } from '../services/mcr-compliance-service.js';
+import { hipaaCompliance } from '../services/hipaa-compliance.js';
 
 const DocumentDrafterSchema = z.object({
   prompt: z.string().describe('Description of the document to draft'),
@@ -74,6 +76,28 @@ export class DocumentDrafterTool extends BaseTool {
   async execute(args: any): Promise<CallToolResult> {
     try {
       const validated = DocumentDrafterSchema.parse(args);
+      
+      // Extract user context for audit logging
+      const userId = (args as any).userId || (args as any).user_id || null;
+      const ipAddress = (args as any).ipAddress || (args as any).ip_address;
+      const userAgent = (args as any).userAgent || (args as any).user_agent;
+      const documentId = (args as any).documentId || (args as any).document_id || `draft_${Date.now()}`;
+      
+      // Log privileged document access (document drafting accesses client data)
+      if (userId) {
+        try {
+          await hipaaCompliance.logAccess(
+            userId,
+            documentId,
+            'create', // Drafting creates a new document
+            ipAddress,
+            userAgent
+          );
+        } catch (auditError) {
+          // Don't fail the operation if audit logging fails
+          console.warn('Failed to log document drafter access:', auditError);
+        }
+      }
       
       // Resolve provider (handle 'auto' mode with user sovereignty)
       let provider: AIProvider;
@@ -147,6 +171,46 @@ export class DocumentDrafterTool extends BaseTool {
 
       const documentContent = aiResponse;
       
+      // MCR Compliance Validation before finalization
+      const metadata: DocumentMetadata = {
+        title: validated.prompt.substring(0, 100),
+        caseNumber: validated.caseContext,
+        court: validated.jurisdiction ? `${validated.jurisdiction} Court` : undefined,
+        filingType: validated.documentType,
+        format: validated.format,
+      };
+
+      const mcrValidation = mcrComplianceService.validateDocument(documentContent, metadata, {
+        checkFormat: true,
+        checkEFiling: validated.format === 'pdf',
+        checkCitations: true,
+      });
+
+      // Collect warnings and violations
+      const warnings: string[] = [];
+      const violations: string[] = [];
+
+      if (mcrValidation.overall.violations.length > 0) {
+        mcrValidation.overall.violations.forEach(v => {
+          violations.push(`[${v.rule}] ${v.description}${v.fix ? ` - Fix: ${v.fix}` : ''}`);
+        });
+      }
+
+      if (mcrValidation.overall.warnings.length > 0) {
+        mcrValidation.overall.warnings.forEach(w => {
+          warnings.push(`[${w.rule}] ${w.description} - ${w.recommendation}`);
+        });
+      }
+
+      // If critical violations exist, include them in response but don't block
+      // (Attorney review will catch these, but we flag them)
+      const mcrStatus = {
+        compliant: mcrValidation.overall.compliant,
+        violations: violations,
+        warnings: warnings,
+        recommendations: mcrValidation.overall.recommendations,
+      };
+      
       // Generate document in requested format
       const result = await officeIntegration.draftDocument(
         documentContent,
@@ -165,6 +229,8 @@ export class DocumentDrafterTool extends BaseTool {
           format: validated.format,
           documentType: validated.documentType,
           message: `Document generated successfully at ${result.filePath}`,
+          mcrCompliance: mcrStatus,
+          attorneyReviewRequired: !mcrValidation.overall.compliant || violations.length > 0,
         })
       );
     } catch (error) {

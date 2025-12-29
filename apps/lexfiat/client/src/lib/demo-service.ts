@@ -10,6 +10,7 @@
  */
 
 import { DEMO_CASES, MOCK_PLEADINGS, getAllDemoCases, getAllDemoDocuments } from './demo-data';
+import { safeSetJSON, safeGetJSON, safeRemoveItem, safeGetItem } from './secure-storage';
 
 export interface DemoLoadResult {
   casesLoaded: number;
@@ -32,8 +33,8 @@ export async function loadDemoScenario(scenarioId: string): Promise<DemoLoadResu
       loadedAt: new Date().toISOString(),
     };
 
-    localStorage.setItem('lexfiat_demo_data', JSON.stringify(demoData));
-    localStorage.setItem('lexfiat_demo_mode', 'true');
+    safeSetJSON('lexfiat_demo_data', demoData);
+    safeSetItem('lexfiat_demo_mode', 'true');
 
     // Generate red flags based on demo cases
     const redFlags = generateDemoRedFlags(demoData.cases);
@@ -61,23 +62,22 @@ export async function loadDemoScenario(scenarioId: string): Promise<DemoLoadResu
  * Clear demo data
  */
 export function clearDemoData(): void {
-  localStorage.removeItem('lexfiat_demo_data');
-  localStorage.removeItem('lexfiat_demo_mode');
+  safeRemoveItem('lexfiat_demo_data');
+  safeRemoveItem('lexfiat_demo_mode');
 }
 
 /**
  * Check if demo mode is active
  */
 export function isDemoMode(): boolean {
-  return localStorage.getItem('lexfiat_demo_mode') === 'true';
+  return safeGetItem('lexfiat_demo_mode') === 'true';
 }
 
 /**
  * Get demo data from localStorage
  */
 export function getDemoData(): any {
-  const data = localStorage.getItem('lexfiat_demo_data');
-  return data ? JSON.parse(data) : null;
+  return safeGetJSON('lexfiat_demo_data');
 }
 
 /**

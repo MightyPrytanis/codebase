@@ -122,6 +122,7 @@ import {
 } from './tools/arkiver-tools.js';
 import { cyranoPathfinder } from './tools/cyrano-pathfinder.js';
 import { skillExecutor } from './tools/skill-executor.js';
+import { mcrValidator } from './tools/mcr-validator.js';
 
 class CyranoMCPServer {
   private server: Server;
@@ -255,6 +256,8 @@ class CyranoMCPServer {
           cyranoPathfinder.getToolDefinition(),
           // Skills Executor
           skillExecutor.getToolDefinition(),
+          // MCR Compliance Validator
+          mcrValidator.getToolDefinition(),
         ],
       };
     });

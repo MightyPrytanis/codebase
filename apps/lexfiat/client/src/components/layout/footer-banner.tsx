@@ -54,8 +54,7 @@ export default function FooterBanner() {
           <div className="flex items-center justify-between gap-4">
             <div className="flex-1 text-xs text-secondary text-center">
               <p className="leading-tight">
-                <strong className="text-primary">AI-generated content is subject to error</strong> and may be incomplete or inaccurate. 
-                Always verify all information before use. 
+                <strong className="text-primary">⚠️ ATTORNEY REVIEW REQUIRED:</strong> This AI-generated content has not been reviewed by a licensed attorney. All legal documents, calculations, and research results must be reviewed and verified by a qualified attorney before use. The system and its developers disclaim all liability for any errors, omissions, or inaccuracies in AI-generated content.
                 <span className="text-accent-gold"> Copyright 2025 Cognisint LLC</span>
               </p>
             </div>

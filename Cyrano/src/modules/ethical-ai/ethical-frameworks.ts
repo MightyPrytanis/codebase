@@ -581,6 +581,20 @@ export class LegalEthicsFramework {
         reasoning: this.reasonMRPC('1.1', action, context),
       },
       {
+        rule: 'Communication',
+        number: '1.4',
+        applies: context.hasClient || context.requiresCommunication || false,
+        compliance: this.assessMRPCCompliance('1.4', action, context),
+        reasoning: this.reasonMRPC('1.4', action, context),
+      },
+      {
+        rule: 'Fees',
+        number: '1.5',
+        applies: context.involvesFees || context.billingActivity || false,
+        compliance: this.assessMRPCCompliance('1.5', action, context),
+        reasoning: this.reasonMRPC('1.5', action, context),
+      },
+      {
         rule: 'Confidentiality',
         number: '1.6',
         applies: context.hasConfidentiality || false,
@@ -593,6 +607,13 @@ export class LegalEthicsFramework {
         applies: context.hasConflictCheck || false,
         compliance: this.assessMRPCCompliance('1.7', action, context),
         reasoning: this.reasonMRPC('1.7', action, context),
+      },
+      {
+        rule: 'Supervision of Nonlawyer Assistants',
+        number: '5.3',
+        applies: context.usesAIAssistance || context.usesNonlawyerAssistance || false,
+        compliance: this.assessMRPCCompliance('5.3', action, context),
+        reasoning: this.reasonMRPC('5.3', action, context),
       },
     ];
 
@@ -626,10 +647,88 @@ export class LegalEthicsFramework {
     action: string,
     context: Record<string, any>
   ): 'compliant' | 'non_compliant' | 'ambiguous' {
-    // Simplified - would check actual MRPC rules
+    // MRPC 1.1: Competence
+    if (ruleNumber === '1.1') {
+      // Check if AI assistance is properly supervised
+      if (context.usesAIAssistance && !context.hasAttorneySupervision) {
+        return 'ambiguous'; // Requires attorney supervision
+      }
+      // Check if action requires legal knowledge
+      if (action.toLowerCase().includes('legal') && !context.hasLegalCompetence) {
+        return 'non_compliant';
+      }
+    }
+
+    // MRPC 1.4: Communication
+    if (ruleNumber === '1.4') {
+      // Check if client communication is required but missing
+      if (context.requiresClientCommunication && !context.clientInformed) {
+        return 'non_compliant';
+      }
+      // Check if communication is timely
+      if (context.communicationDelay && context.communicationDelay > 7) {
+        return 'ambiguous'; // May violate timeliness requirement
+      }
+    }
+
+    // MRPC 1.5: Fees
+    if (ruleNumber === '1.5') {
+      // Check if fees are reasonable
+      if (context.feeAmount && context.feeAmount > context.reasonableFeeThreshold) {
+        return 'ambiguous'; // May be unreasonable
+      }
+      // Check if fee agreement is in writing (required for certain fee arrangements)
+      if (context.requiresWrittenFeeAgreement && !context.hasWrittenFeeAgreement) {
+        return 'non_compliant';
+      }
+    }
+
+    // MRPC 1.6: Confidentiality
+    if (ruleNumber === '1.6') {
+      // Check if confidential information is being disclosed
+      if (action.toLowerCase().includes('disclose') && context.hasConfidentialInfo) {
+        if (!context.hasClientConsent && !context.authorizedByLaw) {
+          return 'non_compliant';
+        }
+      }
+      // Check if data security measures are in place
+      if (context.hasConfidentialInfo && !context.hasDataSecurity) {
+        return 'ambiguous'; // Security measures should be verified
+      }
+    }
+
+    // MRPC 1.7: Conflict of Interest
+    if (ruleNumber === '1.7') {
+      // Check for conflicts
+      if (context.hasConflict && !context.hasInformedConsent) {
+        return 'non_compliant';
+      }
+    }
+
+    // MRPC 5.3: Supervision of Nonlawyer Assistants
+    if (ruleNumber === '5.3') {
+      // AI systems are considered nonlawyer assistants
+      if (context.usesAIAssistance) {
+        // Attorney must supervise AI use
+        if (!context.hasAttorneySupervision) {
+          return 'non_compliant';
+        }
+        // Attorney must ensure AI work is compatible with professional obligations
+        if (!context.aiWorkCompatibleWithObligations) {
+          return 'ambiguous';
+        }
+        // Attorney must review AI-generated work product
+        if (context.aiGeneratedWorkProduct && !context.attorneyReviewed) {
+          return 'ambiguous'; // Review should be required
+        }
+      }
+    }
+
+    // General check for violations
     if (action.toLowerCase().includes('violate') || action.toLowerCase().includes('breach')) {
       return 'non_compliant';
     }
+
     return 'compliant';
   }
 

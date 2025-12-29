@@ -51,10 +51,17 @@ export const calendarArtifactCollector = new (class extends BaseTool {
 
   async execute(args: any) {
     try {
+      // Beta limitation: Calendar API not implemented
+      // This tool depends on email OAuth (Gmail/Outlook) for calendar access
+      // See docs/BETA_LIMITATIONS.md for details
+      
       const { start_date, end_date, calendar_provider, include_cancelled } = CalendarArtifactCollectorSchema.parse(args);
       
       const events: any[] = [];
       const errors: string[] = [];
+      
+      // Beta warning
+      const betaWarning = '⚠️ CALENDAR FEATURES UNAVAILABLE: Calendar API integration is not available in beta release. This tool depends on Gmail/Outlook OAuth for calendar access. See docs/BETA_LIMITATIONS.md for details.';
 
       // Collect from Google Calendar if requested
       if (calendar_provider === 'google' || calendar_provider === 'both') {

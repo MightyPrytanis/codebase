@@ -7,6 +7,7 @@
 import { BaseTool } from './base-tool.js';
 import { z } from 'zod';
 import { pdfFormFiller } from './pdf-form-filler.js';
+import { hipaaCompliance } from '../services/hipaa-compliance.js';
 
 const DocumentProcessorSchema = z.object({
   document_text: z.string().optional().describe('The document text to process'),
@@ -118,6 +119,28 @@ export const documentProcessor = new (class extends BaseTool {
   async execute(args: any) {
     try {
       const parsed = DocumentProcessorSchema.parse(args);
+      
+      // Extract user context for audit logging
+      const userId = (args as any).userId || (args as any).user_id || null;
+      const ipAddress = (args as any).ipAddress || (args as any).ip_address;
+      const userAgent = (args as any).userAgent || (args as any).user_agent;
+      const documentId = (args as any).documentId || (args as any).document_id || null;
+      
+      // Log privileged document access
+      if (userId) {
+        try {
+          await hipaaCompliance.logAccess(
+            userId,
+            documentId,
+            'view', // Document processing is a form of viewing/accessing
+            ipAddress,
+            userAgent
+          );
+        } catch (auditError) {
+          // Don't fail the operation if audit logging fails
+          console.warn('Failed to log document processor access:', auditError);
+        }
+      }
       
       // Handle new action-based API
       if (parsed.action) {

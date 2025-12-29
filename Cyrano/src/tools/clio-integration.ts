@@ -55,7 +55,8 @@ export const clioIntegration = new (class extends BaseTool {
     return {
       name: 'clio_integration',
       description: 'Integration with Clio practice management software for matter tracking, client info, and workflow status. ' +
-        'Requires CLIO_API_KEY. Returns errors when not configured (demo mode opt-in only via DEMO_MODE=true).',
+        'Requires CLIO_API_KEY environment variable. Returns errors when not configured. ' +
+        'Demo mode available via DEMO_MODE=true (opt-in only, clearly marked in responses).',
       inputSchema: {
         type: 'object',
         properties: {
@@ -236,11 +237,10 @@ export const clioIntegration = new (class extends BaseTool {
   }
 
   public async getClientInfo(clientId: string) {
-    if (isDemoModeEnabled()) {
-      return this.getMockClientInfo(clientId);
-    }
-    
     if (!this.clioApiKey) {
+      if (isDemoModeEnabled()) {
+        return this.getDemoClientInfo(clientId);
+      }
       return this.createErrorResult(this.getClioApiKeyError());
     }
 
@@ -306,11 +306,10 @@ export const clioIntegration = new (class extends BaseTool {
   }
 
   public async getCalendarEvents(parameters: any) {
-    if (isDemoModeEnabled()) {
-      return this.getMockCalendarEvents();
-    }
-    
     if (!this.clioApiKey) {
+      if (isDemoModeEnabled()) {
+        return this.getDemoCalendarEvents();
+      }
       return this.createErrorResult(this.getClioApiKeyError());
     }
 
@@ -365,11 +364,10 @@ export const clioIntegration = new (class extends BaseTool {
   }
 
   public async getRedFlags(parameters: any) {
-    if (isDemoModeEnabled()) {
-      return this.getMockRedFlags();
-    }
-    
     if (!this.clioApiKey) {
+      if (isDemoModeEnabled()) {
+        return this.getDemoRedFlags();
+      }
       return this.createErrorResult(this.getClioApiKeyError());
     }
 
@@ -437,11 +435,10 @@ export const clioIntegration = new (class extends BaseTool {
    * Get contacts from Clio
    */
   public async getContacts(parameters: any) {
-    if (isDemoModeEnabled()) {
-      return this.getMockContacts();
-    }
-    
     if (!this.clioApiKey) {
+      if (isDemoModeEnabled()) {
+        return this.getDemoContacts();
+      }
       return this.createErrorResult(this.getClioApiKeyError());
     }
 
@@ -593,8 +590,8 @@ export const clioIntegration = new (class extends BaseTool {
     return this.createSuccessResult(JSON.stringify(markedData, null, 2));
   }
 
-  public getMockClientInfo(clientId: string) {
-    const mockData = {
+  public getDemoClientInfo(clientId: string) {
+    const demoData = {
       id: clientId,
       name: 'Smith, John',
       email: 'john.smith@email.com',
@@ -603,8 +600,8 @@ export const clioIntegration = new (class extends BaseTool {
       matter_count: 3,
       total_billed: 15750.00
     };
-    const demoData = markAsDemo(mockData, 'Clio Integration');
-    return this.createSuccessResult(JSON.stringify(demoData, null, 2));
+    const markedData = markAsDemo(demoData, 'Clio Integration');
+    return this.createSuccessResult(JSON.stringify(markedData, null, 2));
   }
 
   public getDemoDocumentInfo(documentId: string) {
@@ -622,8 +619,8 @@ export const clioIntegration = new (class extends BaseTool {
     return this.createSuccessResult(JSON.stringify(demoData, null, 2));
   }
 
-  public getMockCalendarEvents() {
-    const mockData = {
+  public getDemoCalendarEvents() {
+    const demoData = {
       events: [
         {
           id: 'cal_001',
@@ -635,8 +632,8 @@ export const clioIntegration = new (class extends BaseTool {
         }
       ]
     };
-    const demoData = markAsDemo(mockData, 'Clio Integration');
-    return this.createSuccessResult(JSON.stringify(demoData, null, 2));
+    const markedData = markAsDemo(demoData, 'Clio Integration');
+    return this.createSuccessResult(JSON.stringify(markedData, null, 2));
   }
 
   public getDemoMatters() {
@@ -655,8 +652,8 @@ export const clioIntegration = new (class extends BaseTool {
     return this.createSuccessResult(JSON.stringify(demoData, null, 2));
   }
 
-  public getMockRedFlags() {
-    const mockData = {
+  public getDemoRedFlags() {
+    const demoData = {
       red_flags: [
         {
           id: 'rf_001',
@@ -669,8 +666,8 @@ export const clioIntegration = new (class extends BaseTool {
         }
       ]
     };
-    const demoData = markAsDemo(mockData, 'Clio Integration');
-    return this.createSuccessResult(JSON.stringify(demoData, null, 2));
+    const markedData = markAsDemo(demoData, 'Clio Integration');
+    return this.createSuccessResult(JSON.stringify(markedData, null, 2));
   }
 
   // Demo data methods for new actions
@@ -692,8 +689,8 @@ export const clioIntegration = new (class extends BaseTool {
     return this.createSuccessResult(JSON.stringify(demoData, null, 2));
   }
 
-  public getMockContacts() {
-    const mockData = {
+  public getDemoContacts() {
+    const demoData = {
       contacts: [
         {
           id: 'contact_001',
@@ -705,8 +702,8 @@ export const clioIntegration = new (class extends BaseTool {
         }
       ]
     };
-    const demoData = markAsDemo(mockData, 'Clio Integration');
-    return this.createSuccessResult(JSON.stringify(demoData, null, 2));
+    const markedData = markAsDemo(demoData, 'Clio Integration');
+    return this.createSuccessResult(JSON.stringify(markedData, null, 2));
   }
 
   public getDemoCaseStatus(matterId: string) {
