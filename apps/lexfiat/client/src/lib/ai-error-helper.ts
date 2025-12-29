@@ -4,7 +4,7 @@
  * See LICENSE.md for full license text
  */
 
-import { createAIOfflineErrorHandler, getAIOfflineErrorMessage } from '../../../../Cyrano/shared-assets/ai-error-helper';
+import { createAIOfflineErrorHandler, getAIOfflineErrorMessage } from '@cyrano/shared-assets/ai-error-helper';
 import { toast } from '@/hooks/use-toast';
 
 /**

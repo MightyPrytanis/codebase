@@ -11,9 +11,14 @@ export default defineConfig({
       "@": path.resolve(import.meta.dirname, "client", "src"),
       "@shared": path.resolve(import.meta.dirname, "shared"),
       "@assets": path.resolve(import.meta.dirname, "attached_assets"),
-      "@cyrano": path.resolve(import.meta.dirname, "..", "Cyrano"),
+      "@cyrano": path.resolve(import.meta.dirname, "..", "..", "Cyrano"),
+      "@cyrano/shared-assets": path.resolve(import.meta.dirname, "..", "..", "Cyrano", "shared-assets"),
     },
     dedupe: ["lucide-react", "react", "react-dom"],
+    extensions: [".ts", ".tsx", ".js", ".jsx", ".json"],
+  },
+  optimizeDeps: {
+    include: ["@cyrano/shared-assets"],
   },
   root: path.resolve(import.meta.dirname, "client"),
   build: {
@@ -36,8 +41,8 @@ export default defineConfig({
   },
   server: {
     fs: {
-      strict: true,
-      deny: ["**/.*"],
+      strict: false,
+      allow: ['..'],
     },
     headers: {
       // Hardened CSP: Remove unsafe-inline and unsafe-eval where possible
