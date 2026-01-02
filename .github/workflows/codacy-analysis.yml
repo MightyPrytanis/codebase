@@ -1,51 +1,28 @@
 name: Codacy analysis & coverage
 
-permissions:
-  contents: read
-
 on:
   push:
     branches: [ main ]
   pull_request:
-    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  security-events: write
 
 jobs:
-  test-and-report:
-    name: Test, collect coverage, and report to Codacy
+  codacy-analysis:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-        with:
-          submodules: false
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Use Node.js
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: '22'
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run tests with coverage
-        # adapt to your test script if it's different
-        run: npm test -- --coverage
-        env:
-          CI: true
-
-      - name: Upload coverage to Codacy
-        # Works if Codacy GitHub App is installed; otherwise set CODACY_PROJECT_TOKEN in repo secrets
-        uses: codacy/codacy-coverage-reporter-action@v1
-        # If you have a project token, uncomment the 'with:' block below and set it as a repository secret named CODACY_PROJECT_TOKEN
-        # with:
-        #   token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-        #   coverage_reporter_version: '1.0.0'  # optional
-        env:
-          # Fallback: if you have private token, put it in repo secrets as CODACY_PROJECT_TOKEN
-          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
-
-      - name: Run Codacy Analysis CLI (optional)
-        # Optional: run Codacy analysis CLI to upload issues — works with GitHub App or CODACY_PROJECT_TOKEN
-        uses: codacy/codacy-analysis-cli-action@v4
+      - name: Run Codacy Analysis CLI
+        uses: codacy/codacy-analysis-cli-action@d840f886c4bd4edc059706d09c6a1586111c540b
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           verbose: true
@@ -54,3 +31,9 @@ jobs:
           gh-code-scanning-compat: true
           max-allowed-issues: 2147483647
           tool: eslint,eslint-typescript,jest,shellcheck
+          exclude: '.cursor/**,.gitmodules'
+
+      - name: Upload SARIF to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
