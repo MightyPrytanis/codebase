@@ -274,7 +274,6 @@ export default function TimeTracking() {
                 onTimeEntrySuggestion={(entry) => {
                   // TODO: Integrate with time entry creation flow
                   console.log('Time entry suggestion:', entry);
-                  alert(`Time Entry Suggestion:\nDate: ${entry.date}\nHours: ${entry.hours}\nDescription: ${entry.description}\nConfidence: ${entry.confidence}`);
                 }}
               />
               <EvidenceChain result={workflowResult} />
@@ -282,6 +281,7 @@ export default function TimeTracking() {
           )}
         </div>
       </div>
+    </div>
     </div>
   );
 }
