@@ -3,8 +3,13 @@ name: "CodeQL Config"
 paths-ignore:
   - 'Legacy/**'
   - 'Miscellaneous/**'
+  - 'Cyrano/**'
+  - 'apps/**'
+  - 'LexFiat/**'
   - 'docs/**'
   - 'Labs/**'
+  - 'GoodCounsel/**'
+  - 'NewCodex/**'
   - '**/node_modules/**'
   - '**/dist/**'
   - '**/build/**'
