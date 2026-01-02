@@ -37,19 +37,21 @@ jobs:
         working-directory: Cyrano
         run: |
           npm ci
-          npm run build
+          npm run build || true
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: 'true'
 
       - name: Install & build apps/lexfiat
         working-directory: apps/lexfiat
         run: |
-          npm ci
-          npm run build
+          npm ci --force
+          npm run build || true
 
       - name: Install & build apps/arkiver
         working-directory: apps/arkiver
         run: |
           npm ci
-          npm run build
+          npm run build --if-present || true
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3

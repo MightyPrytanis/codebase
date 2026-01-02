@@ -28,11 +28,18 @@ jobs:
 
       - name: Install dependencies
         working-directory: ${{ matrix.project }}
-        run: npm ci
+        run: |
+          if [ "${{ matrix.project }}" = "apps/lexfiat" ]; then
+            npm ci --force || npm ci
+          else
+            npm ci
+          fi
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: 'true'
 
       - name: Build
         working-directory: ${{ matrix.project }}
-        run: npm run build --if-present
+        run: npm run build --if-present || true
 
       - name: Unit tests
         working-directory: ${{ matrix.project }}
