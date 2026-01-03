@@ -33,7 +33,7 @@
     "wouter": "^3.7.1"
   },
   "devDependencies": {
-    "@esbuild/darwin-arm64": "^0.27.1",
+    "@esbuild/darwin-arm64": "^0.27.2",
     "@tailwindcss/postcss": "^4.1.14",
     "@types/express": "^5.0.3",
     "@types/node": "^24.5.2",
