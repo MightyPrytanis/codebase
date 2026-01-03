@@ -47,7 +47,7 @@
     "jsdom": "^27.3.0",
     "json-rules-engine": "^7.3.1",
     "jsonwebtoken": "^9.0.3",
-    "lucide-react": "^0.555.0",
+    "lucide-react": "^0.562.0",
     "mammoth": "^1.11.0",
     "marked": "^17.0.1",
     "multer": "^2.0.2",
