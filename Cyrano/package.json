@@ -76,7 +76,7 @@
     "csv-parse": "^6.1.0",
     "drizzle-kit": "^0.31.5",
     "imapflow": "^1.1.1",
-    "tsx": "^4.16.2",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vitest": "^4.0.13"
   }
