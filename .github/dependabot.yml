@@ -1,0 +1,83 @@
+# Dependabot configuration for Cyrano ecosystem
+# Scans only specific directories and excludes Legacy directory
+version: 2
+updates:
+  # Cyrano main package
+  - package-ecosystem: "npm"
+    directory: "/Cyrano"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "cyrano"
+
+  # Cyrano auth-server
+  - package-ecosystem: "npm"
+    directory: "/Cyrano/auth-server"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "cyrano"
+      - "auth-server"
+
+  # LexFiat app
+  - package-ecosystem: "npm"
+    directory: "/apps/lexfiat"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "lexfiat"
+
+  # Arkiver app
+  - package-ecosystem: "npm"
+    directory: "/apps/arkiver"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "arkiver"
+
+  # Arkiver frontend
+  - package-ecosystem: "npm"
+    directory: "/apps/arkiver/frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "arkiver"
+
+  # Labs - Potemkin app
+  - package-ecosystem: "npm"
+    directory: "/Labs/Potemkin/app"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "labs"
+      - "potemkin"
+
+  # Labs - Potemkin moral_reasoner
+  - package-ecosystem: "npm"
+    directory: "/Labs/Potemkin/moral_reasoner"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "labs"
+      - "potemkin"
