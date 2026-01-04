@@ -25,7 +25,7 @@ const IntegrityTestSchema = z.object({
   insightIds: z.array(z.string()).optional().describe('Specific insight IDs to test (if not provided, uses insights from targetLLM)'),
   fileId: z.string().optional().describe('File ID to test insights from'),
   llmSource: z.string().describe('Source LLM to test (e.g., "ChatGPT", "Claude", "Gemini")'),
-  parameters: z.record(z.any()).optional().describe('Additional test-specific parameters'),
+  parameters: z.record(z.string(), z.any()).optional().describe('Additional test-specific parameters'),
 });
 
 /**

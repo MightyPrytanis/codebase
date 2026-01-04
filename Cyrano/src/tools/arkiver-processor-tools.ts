@@ -74,7 +74,7 @@ export class ArkiverTextProcessorTool extends BaseTool {
       }, null, 2));
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return this.createErrorResult(`Validation error: ${error.errors.map(e => e.message).join(', ')}`);
+        return this.createErrorResult(`Validation error: ${error.issues.map(e => e.message).join(', ')}`);
       }
       return this.createErrorResult(`Text processing failed: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -129,7 +129,7 @@ export class ArkiverEmailProcessorTool extends BaseTool {
       return this.createSuccessResult(JSON.stringify(result, null, 2));
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return this.createErrorResult(`Validation error: ${error.errors.map(e => e.message).join(', ')}`);
+        return this.createErrorResult(`Validation error: ${error.issues.map(e => e.message).join(', ')}`);
       }
       return this.createErrorResult(`Email processing failed: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -187,7 +187,7 @@ export class ArkiverEntityProcessorTool extends BaseTool {
       return this.createSuccessResult(JSON.stringify(result, null, 2));
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return this.createErrorResult(`Validation error: ${error.errors.map(e => e.message).join(', ')}`);
+        return this.createErrorResult(`Validation error: ${error.issues.map(e => e.message).join(', ')}`);
       }
       return this.createErrorResult(`Entity extraction failed: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -277,7 +277,7 @@ export class ArkiverInsightProcessorTool extends BaseTool {
       return this.createSuccessResult(JSON.stringify(finalResult, null, 2));
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return this.createErrorResult(`Validation error: ${error.errors.map(e => e.message).join(', ')}`);
+        return this.createErrorResult(`Validation error: ${error.issues.map(e => e.message).join(', ')}`);
       }
       return this.createErrorResult(`Insight generation failed: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -339,7 +339,7 @@ export class ArkiverTimelineProcessorTool extends BaseTool {
       return this.createSuccessResult(JSON.stringify(result, null, 2));
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return this.createErrorResult(`Validation error: ${error.errors.map(e => e.message).join(', ')}`);
+        return this.createErrorResult(`Validation error: ${error.issues.map(e => e.message).join(', ')}`);
       }
       return this.createErrorResult(`Timeline extraction failed: ${error instanceof Error ? error.message : String(error)}`);
     }

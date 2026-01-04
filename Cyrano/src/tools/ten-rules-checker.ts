@@ -75,7 +75,7 @@ export interface TenRulesCheckResult {
   };
 }
 
-export const tenRulesChecker = new (class extends BaseTool {
+export const tenRulesChecker: BaseTool = new (class extends BaseTool {
   getToolDefinition() {
     return {
       name: 'ten_rules_checker',
