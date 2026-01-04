@@ -6,8 +6,22 @@ permissions:
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'Cyrano/**'
+      - 'Labs/Potemkin/**'
+      - 'apps/lexfiat/**'
+      - 'apps/arkiver/**'
+      - 'docs/**'
+      - '.github/workflows/codacy-analysis.yml'
   pull_request:
     types: [opened, synchronize, reopened]
+    paths:
+      - 'Cyrano/**'
+      - 'Labs/Potemkin/**'
+      - 'apps/lexfiat/**'
+      - 'apps/arkiver/**'
+      - 'docs/**'
+      - '.github/workflows/codacy-analysis.yml'
 
 jobs:
   test-and-report:

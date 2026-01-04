@@ -1,13 +1,16 @@
 name: "CodeQL Config"
 
+# Scan only active project directories; ignore legacy, build artifacts, and test files
+paths:
+  - 'Cyrano'
+  - 'Labs/Potemkin'
+  - 'apps/lexfiat'
+  - 'apps/arkiver'
+  - 'docs'
+
 paths-ignore:
   - 'Legacy/**'
   - 'Miscellaneous/**'
-  - 'Cyrano/**'
-  - 'apps/**'
-  - 'LexFiat/**'
-  - 'docs/**'
-  - 'Labs/**'
   - 'GoodCounsel/**'
   - 'NewCodex/**'
   - '**/node_modules/**'
