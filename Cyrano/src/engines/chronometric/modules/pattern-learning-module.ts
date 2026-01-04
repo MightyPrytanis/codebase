@@ -27,7 +27,7 @@ const PatternLearningInputSchema = z.object({
   userId: z.string().describe('User ID'),
   minimumHoursPerWeek: z.number().optional().describe('Minimum hours per week'),
   minimumHoursPerDay: z.number().optional().describe('Minimum hours per day'),
-  typicalSchedule: z.record(z.number()).optional().describe('Typical schedule by day of week'),
+  typicalSchedule: z.record(z.string(), z.number()).optional().describe('Typical schedule by day of week'),
   offDays: z.array(z.string()).optional().describe('Off days (YYYY-MM-DD)'),
   useBaselineUntilDataAvailable: z.boolean().optional().describe('Use baseline until enough data available'),
   matterId: z.string().optional().describe('Matter ID for profitability analysis'),

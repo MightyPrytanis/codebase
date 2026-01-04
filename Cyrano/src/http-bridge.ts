@@ -644,7 +644,7 @@ app.post('/mcp/execute', async (req, res) => {
     if (!validationResult.success) {
       return res.status(400).json({
         error: 'Invalid request body',
-        details: validationResult.error.errors,
+        details: validationResult.error.issues,
       });
     }
     
@@ -1059,7 +1059,7 @@ app.post('/api/arkiver/upload', upload.single('file'), async (req, res) => {
           error: {
             code: 'INVALID_METADATA',
             message: 'Invalid metadata format',
-            details: metadataValidation.error.errors,
+            details: metadataValidation.error.issues,
           },
         });
       }
@@ -1170,7 +1170,7 @@ app.get('/api/arkiver/files/:fileId', async (req, res) => {
         error: {
           code: 'INVALID_FILE_ID',
           message: 'Invalid file ID format',
-          details: validationResult.error.errors,
+          details: validationResult.error.issues,
         },
       });
     }

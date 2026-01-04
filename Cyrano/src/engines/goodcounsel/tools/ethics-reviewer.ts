@@ -30,7 +30,7 @@ import { ethicsRulesService, EthicsReviewResult } from '../services/ethics-rules
 
 const EthicsReviewerSchema = z.object({
   userId: z.string().optional().describe('User ID for ethics review'),
-  facts: z.record(z.any()).describe('Facts to evaluate against ethics rules'),
+  facts: z.record(z.string(), z.any()).describe('Facts to evaluate against ethics rules'),
   includeWarnings: z.boolean().default(true).describe('Include warnings in results'),
 });
 

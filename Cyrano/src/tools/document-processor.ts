@@ -12,7 +12,7 @@ const DocumentProcessorSchema = z.object({
   document_text: z.string().optional().describe('The document text to process'),
   processing_type: z.enum(['extract', 'transform', 'validate', 'format']).optional().describe('Type of processing to perform'),
   action: z.enum(['fill_pdf_forms', 'apply_forecast_branding', 'redact']).optional().describe('Action to perform (for PDF and redaction operations)'),
-  options: z.record(z.any()).optional().describe('Processing options'),
+  options: z.record(z.string(), z.any()).optional().describe('Processing options'),
   // PDF form filling parameters
   form_type: z.enum(['tax_return', 'child_support', 'qdro']).optional().describe('Type of form to fill'),
   form_data: z.any().optional().describe('Data to fill into form'),
@@ -35,7 +35,7 @@ const DocumentProcessorSchema = z.object({
   }).optional().describe('Redaction rules configuration'),
 });
 
-export const documentProcessor = new (class extends BaseTool {
+export const documentProcessor: BaseTool = new (class extends BaseTool {
   getToolDefinition() {
     return {
       name: 'document_processor',

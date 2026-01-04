@@ -14,7 +14,7 @@ name: "CodeQL Advanced"
 on:
   push:
     branches: [ "main" ]
-    exclude_paths:
+    paths-ignore:
       - 'Legacy/**'
       - 'Cyrano/**'
       - 'apps/**'
@@ -22,13 +22,13 @@ on:
       - 'docs/**'
       - 'Miscellaneous/**'
       - 'node_modules/**'
-      - '. cursor/**'
+      - '.cursor/**'
       - '.cursorignore'
-      - '. gitmodules'
+      - '.gitmodules'
       - 'Labs/**'
   pull_request:
     branches: [ "main" ]
-     exclude_paths:
+    paths-ignore:
       - 'Legacy/**'
       - 'Cyrano/**'
       - 'apps/**'
@@ -36,9 +36,9 @@ on:
       - 'docs/**'
       - 'Miscellaneous/**'
       - 'node_modules/**'
-      - '. cursor/**'
+      - '.cursor/**'
       - '.cursorignore'
-      - '. gitmodules'
+      - '.gitmodules'
       - 'Labs/**'
   schedule:
     - cron: '25 14 * * 4'

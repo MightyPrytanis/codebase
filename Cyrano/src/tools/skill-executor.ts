@@ -13,8 +13,8 @@ import { skillDispatcher } from '../skills/skill-dispatcher.js';
 
 const SkillExecutorSchema = z.object({
   skill_id: z.string().describe('Skill ID (e.g., "forensic-finance:dro-weatherpro-skill")'),
-  input: z.record(z.any()).describe('Input data matching the skill\'s input_schema'),
-  context: z.record(z.any()).optional().describe('Additional context (matter_id, user_id, etc.)'),
+  input: z.record(z.string(), z.any()).describe('Input data matching the skill\'s input_schema'),
+  context: z.record(z.string(), z.any()).optional().describe('Additional context (matter_id, user_id, etc.)'),
 });
 
 export const skillExecutor = new (class extends BaseTool {
