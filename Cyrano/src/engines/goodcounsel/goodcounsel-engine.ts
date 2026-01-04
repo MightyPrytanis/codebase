@@ -198,7 +198,7 @@ export class GoodcounselEngine extends BaseEngine {
           }
           return await this.executeWorkflow(parsed.workflow_id, parsed.input || {});
 
-        case 'list_workflows':
+        case 'list_workflows': {
           const workflows = await this.getWorkflows();
           return {
             content: [
@@ -214,6 +214,7 @@ export class GoodcounselEngine extends BaseEngine {
             ],
             isError: false,
           };
+        }
 
         case 'wellness_check':
           return await this.executeWorkflow('wellness_check', {
