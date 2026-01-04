@@ -125,7 +125,7 @@ class WellnessService {
       contentEncrypted,
       contentType,
       mood: moodEncrypted || null,
-      tags: (tagsEncrypted && Array.isArray(tagsEncrypted)) ? tagsEncrypted : [],
+      tags: tagsEncrypted || null, // Store encrypted string directly (not array check - tagsEncrypted is always a string)
       voiceAudioPath: voiceAudioPathEncrypted || null,
       transcriptionEncrypted: transcriptionEncrypted || null,
       sentimentScore,

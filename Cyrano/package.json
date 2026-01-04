@@ -10,6 +10,8 @@
     "dev": "tsx src/index.ts",
     "mcp": "tsx src/mcp-server.ts",
     "http": "tsx src/http-bridge.ts",
+    "http:simple": "tsx src/simple-http-bridge.ts",
+    "http:full": "tsx src/http-bridge.ts",
     "test": "./test-integration.sh",
     "test:unit": "vitest run",
     "test:coverage": "vitest run --coverage",

@@ -72,6 +72,10 @@ const tools = [
 ];
 
 // Routes
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', server: 'cyrano-simple-bridge' });
+});
+
 app.get('/mcp/tools', (req, res) => {
   res.json({ tools, _warning: 'This is a development/test bridge with mock responses. Use http-bridge.ts for production.' });
 });
@@ -110,6 +114,7 @@ app.get('/mcp/status', (req, res) => {
 app.listen(port, () => {
   console.log(`Cyrano Simple HTTP Bridge running on port ${port}`);
   console.log(`Available endpoints:`);
+  console.log(`  GET  /health - Health check`);
   console.log(`  GET  /mcp/tools - List available tools`);
   console.log(`  POST /mcp/execute - Execute a tool`);
   console.log(`  GET  /mcp/status - Server status`);

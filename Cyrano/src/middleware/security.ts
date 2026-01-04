@@ -19,8 +19,25 @@ import crypto from 'crypto';
 import createDOMPurify from 'dompurify';
 import { JSDOM } from 'jsdom';
 
-const window = new JSDOM('').window as any;
-const DOMPurify = createDOMPurify(window as any);
+// Lazy initialization of JSDOM to avoid blocking on import
+let _window: any = null;
+let _DOMPurify: ReturnType<typeof createDOMPurify> | null = null;
+
+function getDOMPurify() {
+  if (!_DOMPurify) {
+    try {
+      _window = new JSDOM('').window as any;
+      _DOMPurify = createDOMPurify(_window as any);
+    } catch (error) {
+      console.error('[Security] Failed to initialize DOMPurify:', error);
+      // Return a no-op function if DOMPurify fails to initialize
+      _DOMPurify = {
+        sanitize: (dirty: string) => dirty,
+      } as any;
+    }
+  }
+  return _DOMPurify;
+}
 
 // ============================================================================
 // JWT Authentication
@@ -379,7 +396,7 @@ export function sanitizeString(input: string): string {
   sanitized = sanitized.replace(/on\w+\s*=/gi, '');
   
   // Use DOMPurify for additional sanitization
-  sanitized = DOMPurify.sanitize(sanitized, {
+  sanitized = getDOMPurify().sanitize(sanitized, {
     ALLOWED_TAGS: [],
     ALLOWED_ATTR: [],
   });

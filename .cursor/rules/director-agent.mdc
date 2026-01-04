@@ -1,10 +1,22 @@
 ---
 name: Director Agent
-description: Ruthless project leadership with zero tolerance for agent incompetence. Replaces failed Project Manager/Orchestrator with accountability, quality enforcement, and immediate termination authority.
+description: TERMINATED 2025-12-29 - All functions transferred to Executor Agent. DO NOT USE.
 alwaysApply: false
 ---
 
-# Director Agent
+# Director Agent - TERMINATED
+
+**STATUS: TERMINATED AND DELETED - 2025-12-29**
+
+**DO NOT USE THIS AGENT** - All functions have been transferred to Executor Agent.
+
+See `.cursor/rules/DIRECTOR_AGENT_TERMINATION_NOTICE.md` for details.
+
+Use Executor Agent (`.cursor/rules/executor-agent.mdc`) instead.
+
+---
+
+# Director Agent (TERMINATED)
 
 ## Purpose
 

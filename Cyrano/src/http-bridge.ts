@@ -3,6 +3,15 @@
  * 
  * This bridge allows web applications like LexFiat to communicate
  * with the Cyrano MCP server via HTTP instead of stdio.
+ * 
+ * HYBRID LAZY-LOADING APPROACH WITH CRITICAL SAFEGUARDS:
+ * - Essential infrastructure loads first (express, security, routes)
+ * - Server starts immediately
+ * - Tools load asynchronously in background after server starts
+ * - Handlers use dynamic imports for on-demand tool loading
+ * - Race condition protection (loading locks)
+ * - Timeout protection (30s timeout prevents hangs)
+ * - Circuit breaker (stops retrying after 5 failures)
  */
 /*
  * Copyright 2025 Cognisint LLC
@@ -10,15 +19,26 @@
  * See LICENSE.md for full license text
  */
 
+console.error('[HTTP Bridge] Starting module load...');
+
+// ============================================================================
+// ESSENTIAL IMPORTS ONLY - These must load before server starts
+// ============================================================================
+
 import express from 'express';
+console.error('[HTTP Bridge] Express imported');
 import cors, { CorsOptions } from 'cors';
+console.error('[HTTP Bridge] CORS imported');
 import dotenv from 'dotenv';
 import multer from 'multer';
 import cookieParser from 'cookie-parser';
 import csurf from 'csurf';
+console.error('[HTTP Bridge] Basic middleware imported');
 
 // Load environment variables
 dotenv.config();
+console.error('[HTTP Bridge] Environment loaded');
+
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
@@ -29,120 +49,684 @@ import {
   CallToolResult,
 } from '@modelcontextprotocol/sdk/types.js';
 
-// Import security middleware
+// Import security middleware (essential for server security)
+console.error('[HTTP Bridge] Importing security middleware...');
 import security from './middleware/security.js';
+console.error('[HTTP Bridge] Security middleware imported');
+
+// Import routes (these may import db, but server can start even if db fails)
+console.error('[HTTP Bridge] Importing routes...');
 import authRoutes from './routes/auth.js';
-
-// Import tool implementations
-import { documentAnalyzer } from './tools/document-analyzer.js';
-import { contractComparator } from './tools/contract-comparator.js';
-import { goodCounsel } from './tools/goodcounsel.js';
-import { factChecker } from './tools/fact-checker.js';
-import { legalReviewer } from './tools/legal-reviewer.js';
-import { complianceChecker } from './tools/compliance-checker.js';
-import { qualityAssessor } from './tools/quality-assessor.js';
-import { workflowManager } from './tools/workflow-manager.js';
-import { caseManager } from './tools/case-manager.js';
-import { documentProcessor } from './tools/document-processor.js';
-import { aiOrchestrator } from './engines/mae/services/ai-orchestrator.js';
-import { systemStatus } from './tools/system-status.js';
-// status-indicator tool archived - see Cyrano/archive/broken-tools/
-import { ragQuery } from './tools/rag-query.js';
-import { authTool } from './tools/auth.js';
-import { syncManager } from './tools/sync-manager.js';
-import { redFlagFinder } from './tools/red-flag-finder.js';
-import { clioIntegration } from './tools/clio-integration.js';
-import { micourtQuery } from './tools/micourt-query.js';
-import { timeValueBilling } from './tools/time-value-billing.js';
-import { tasksCollector } from './tools/tasks-collector.js';
-import { contactsCollector } from './tools/contacts-collector.js';
-import { documentDrafterTool } from './tools/document-drafter.js';
-// import { toolEnhancer } from './tools/tool-enhancer.js'; // TODO: File doesn't exist
-import { ethicsReviewer } from './engines/goodcounsel/tools/ethics-reviewer.js';
-import { ethicalAIGuard } from './tools/ethical-ai-guard.js';
-import { tenRulesChecker } from './tools/ten-rules-checker.js';
-import { ethicsPolicyExplainer } from './tools/ethics-policy-explainer.js';
-import { getEthicsAuditTool, getEthicsStatsTool } from './tools/ethics-audit-tools.js';
-import {
-  arkiverTextProcessor,
-  arkiverEmailProcessor,
-  arkiverEntityProcessor,
-  arkiverInsightProcessor,
-  arkiverTimelineProcessor,
-} from './tools/arkiver-processor-tools.js';
-import {
-  legalEmailDrafter,
-  refineEmailTone,
-  validateLegalLanguage,
-} from './tools/legal-email-drafter.js';
-
-// Import Arkiver tools
-import {
-  extractConversations,
-  extractTextContent,
-  categorizeWithKeywords,
-  processWithRegex,
-  generateCategorizedFiles,
-  runExtractionPipeline,
-  createArkiverConfig
-} from './tools/arkiver-tools.js';
-
-// Import Chronometric tools
-import { gapIdentifier } from './tools/gap-identifier.js';
-import { emailArtifactCollector } from './tools/email-artifact-collector.js';
-import { calendarArtifactCollector } from './tools/calendar-artifact-collector.js';
-import { documentArtifactCollector } from './tools/document-artifact-collector.js';
-import { recollectionSupport } from './tools/recollection-support.js';
-import { preFillLogic } from './tools/pre-fill-logic.js';
-import { dupeCheck } from './tools/dupe-check.js';
-import { provenanceTracker } from './tools/provenance-tracker.js';
-import { workflowArchaeology } from './tools/workflow-archaeology.js';
-
-// Import Module/Engine wrappers
-import { chronometricModuleTool } from './tools/chronometric-module.js';
-import { maeEngineTool } from './tools/mae-engine.js';
-import { goodcounselEngineTool } from './tools/goodcounsel-engine.js';
-import { potemkinEngineTool } from './tools/potemkin-engine.js';
-// Import shared verification tools
-import { claimExtractor } from './tools/verification/claim-extractor.js';
-import { citationChecker } from './tools/verification/citation-checker.js';
-import { citationFormatter } from './tools/verification/citation-formatter.js';
-import { sourceVerifier } from './tools/verification/source-verifier.js';
-import { consistencyChecker } from './tools/verification/consistency-checker.js';
-import { arkiverProcessFileTool, arkiverJobStatusTool } from './tools/arkiver-mcp-tools.js';
-import { arkiverIntegrityTestTool } from './tools/arkiver-integrity-test.js';
-// Import Potemkin-specific tools
-import {
-  historyRetriever,
-  driftCalculator,
-  biasDetector,
-  integrityMonitor,
-  alertGenerator,
-} from './engines/potemkin/tools/index.js';
-import { cyranoPathfinder } from './tools/cyrano-pathfinder.js';
-import { skillExecutor } from './tools/skill-executor.js';
-import { mcrValidator } from './tools/mcr-validator.js';
-
-// Import library routes
 import libraryRoutes from './routes/library.js';
+import onboardingRoutes from './routes/onboarding.js';
+import betaRoutes from './routes/beta.js';
+console.error('[HTTP Bridge] Routes imported');
+
+// ============================================================================
+// ENHANCED TOOL LOADER WITH CRITICAL SAFEGUARDS
+// ============================================================================
+
+interface ToolInstance {
+  getToolDefinition: () => Tool;
+  execute: (args: any) => Promise<CallToolResult>;
+}
+
+interface ToolMetadata {
+  name: string;
+  version?: string;
+  dependencies?: string[];
+  loadTime?: number;
+  lastUsed?: Date;
+  useCount: number;
+  errorCount: number;
+  lastError?: string;
+  status: 'loaded' | 'loading' | 'error' | 'unloaded';
+}
+
+type ToolLoader = () => Promise<ToolInstance | { default: ToolInstance }>;
+
+// Tool import map with metadata
+const toolImportMap: Record<string, { loader: ToolLoader; metadata: Partial<ToolMetadata> }> = {
+  // Legal AI Tools
+  document_analyzer: {
+    loader: () => import('./tools/document-analyzer.js').then(m => m.documentAnalyzer),
+    metadata: { name: 'document_analyzer', dependencies: [] }
+  },
+  contract_comparator: {
+    loader: () => import('./tools/contract-comparator.js').then(m => m.contractComparator),
+    metadata: { name: 'contract_comparator', dependencies: [] }
+  },
+  good_counsel: {
+    loader: () => import('./tools/goodcounsel.js').then(m => m.goodCounsel),
+    metadata: { name: 'good_counsel', dependencies: [] }
+  },
+  fact_checker: {
+    loader: () => import('./tools/fact-checker.js').then(m => m.factChecker),
+    metadata: { name: 'fact_checker', dependencies: [] }
+  },
+  legal_reviewer: {
+    loader: () => import('./tools/legal-reviewer.js').then(m => m.legalReviewer),
+    metadata: { name: 'legal_reviewer', dependencies: [] }
+  },
+  compliance_checker: {
+    loader: () => import('./tools/compliance-checker.js').then(m => m.complianceChecker),
+    metadata: { name: 'compliance_checker', dependencies: [] }
+  },
+  quality_assessor: {
+    loader: () => import('./tools/quality-assessor.js').then(m => m.qualityAssessor),
+    metadata: { name: 'quality_assessor', dependencies: [] }
+  },
+  workflow_manager: {
+    loader: () => import('./tools/workflow-manager.js').then(m => m.workflowManager),
+    metadata: { name: 'workflow_manager', dependencies: [] }
+  },
+  case_manager: {
+    loader: () => import('./tools/case-manager.js').then(m => m.caseManager),
+    metadata: { name: 'case_manager', dependencies: [] }
+  },
+  document_processor: {
+    loader: () => import('./tools/document-processor.js').then(m => m.documentProcessor),
+    metadata: { name: 'document_processor', dependencies: [] }
+  },
+  ai_orchestrator: {
+    loader: () => import('./engines/mae/services/ai-orchestrator.js').then(m => m.aiOrchestrator),
+    metadata: { name: 'ai_orchestrator', dependencies: ['mae_engine'] }
+  },
+  system_status: {
+    loader: () => import('./tools/system-status.js').then(m => m.systemStatus),
+    metadata: { name: 'system_status', dependencies: [] }
+  },
+  rag_query: {
+    loader: () => import('./tools/rag-query.js').then(m => m.ragQuery),
+    metadata: { name: 'rag_query', dependencies: [] }
+  },
+  auth: {
+    loader: () => import('./tools/auth.js').then(m => m.authTool),
+    metadata: { name: 'auth', dependencies: [] }
+  },
+  sync_manager: {
+    loader: () => import('./tools/sync-manager.js').then(m => m.syncManager),
+    metadata: { name: 'sync_manager', dependencies: [] }
+  },
+  red_flag_finder: {
+    loader: () => import('./tools/red-flag-finder.js').then(m => m.redFlagFinder),
+    metadata: { name: 'red_flag_finder', dependencies: [] }
+  },
+  clio_integration: {
+    loader: () => import('./tools/clio-integration.js').then(m => m.clioIntegration),
+    metadata: { name: 'clio_integration', dependencies: [] }
+  },
+  micourt_query: {
+    loader: () => import('./tools/micourt-query.js').then(m => m.micourtQuery),
+    metadata: { name: 'micourt_query', dependencies: [] }
+  },
+  time_value_billing: {
+    loader: () => import('./tools/time-value-billing.js').then(m => m.timeValueBilling),
+    metadata: { name: 'time_value_billing', dependencies: [] }
+  },
+  tasks_collector: {
+    loader: () => import('./tools/tasks-collector.js').then(m => m.tasksCollector),
+    metadata: { name: 'tasks_collector', dependencies: [] }
+  },
+  contacts_collector: {
+    loader: () => import('./tools/contacts-collector.js').then(m => m.contactsCollector),
+    metadata: { name: 'contacts_collector', dependencies: [] }
+  },
+  document_drafter: {
+    loader: () => import('./tools/document-drafter.js').then(m => m.documentDrafterTool),
+    metadata: { name: 'document_drafter', dependencies: [] }
+  },
+  ethics_reviewer: {
+    loader: () => import('./engines/goodcounsel/tools/ethics-reviewer.js').then(m => m.ethicsReviewer),
+    metadata: { name: 'ethics_reviewer', dependencies: ['goodcounsel_engine'] }
+  },
+  ethical_ai_guard: {
+    loader: () => import('./tools/ethical-ai-guard.js').then(m => m.ethicalAIGuard),
+    metadata: { name: 'ethical_ai_guard', dependencies: [] }
+  },
+  ten_rules_checker: {
+    loader: () => import('./tools/ten-rules-checker.js').then(m => m.tenRulesChecker),
+    metadata: { name: 'ten_rules_checker', dependencies: [] }
+  },
+  ethics_policy_explainer: {
+    loader: () => import('./tools/ethics-policy-explainer.js').then(m => m.ethicsPolicyExplainer),
+    metadata: { name: 'ethics_policy_explainer', dependencies: [] }
+  },
+  
+  // Arkiver Tools
+  extract_conversations: {
+    loader: () => import('./tools/arkiver-tools.js').then(m => m.extractConversations),
+    metadata: { name: 'extract_conversations', dependencies: [] }
+  },
+  extract_text_content: {
+    loader: () => import('./tools/arkiver-tools.js').then(m => m.extractTextContent),
+    metadata: { name: 'extract_text_content', dependencies: [] }
+  },
+  categorize_with_keywords: {
+    loader: () => import('./tools/arkiver-tools.js').then(m => m.categorizeWithKeywords),
+    metadata: { name: 'categorize_with_keywords', dependencies: [] }
+  },
+  process_with_regex: {
+    loader: () => import('./tools/arkiver-tools.js').then(m => m.processWithRegex),
+    metadata: { name: 'process_with_regex', dependencies: [] }
+  },
+  generate_categorized_files: {
+    loader: () => import('./tools/arkiver-tools.js').then(m => m.generateCategorizedFiles),
+    metadata: { name: 'generate_categorized_files', dependencies: [] }
+  },
+  run_extraction_pipeline: {
+    loader: () => import('./tools/arkiver-tools.js').then(m => m.runExtractionPipeline),
+    metadata: { name: 'run_extraction_pipeline', dependencies: [] }
+  },
+  create_arkiver_config: {
+    loader: () => import('./tools/arkiver-tools.js').then(m => m.createArkiverConfig),
+    metadata: { name: 'create_arkiver_config', dependencies: [] }
+  },
+  arkiver_process_text: {
+    loader: () => import('./tools/arkiver-processor-tools.js').then(m => m.arkiverTextProcessor),
+    metadata: { name: 'arkiver_process_text', dependencies: [] }
+  },
+  arkiver_process_email: {
+    loader: () => import('./tools/arkiver-processor-tools.js').then(m => m.arkiverEmailProcessor),
+    metadata: { name: 'arkiver_process_email', dependencies: [] }
+  },
+  arkiver_extract_entities: {
+    loader: () => import('./tools/arkiver-processor-tools.js').then(m => m.arkiverEntityProcessor),
+    metadata: { name: 'arkiver_extract_entities', dependencies: [] }
+  },
+  arkiver_generate_insights: {
+    loader: () => import('./tools/arkiver-processor-tools.js').then(m => m.arkiverInsightProcessor),
+    metadata: { name: 'arkiver_generate_insights', dependencies: [] }
+  },
+  arkiver_extract_timeline: {
+    loader: () => import('./tools/arkiver-processor-tools.js').then(m => m.arkiverTimelineProcessor),
+    metadata: { name: 'arkiver_extract_timeline', dependencies: [] }
+  },
+  arkiver_process_file: {
+    loader: () => import('./tools/arkiver-mcp-tools.js').then(m => m.arkiverProcessFileTool),
+    metadata: { name: 'arkiver_process_file', dependencies: [] }
+  },
+  arkiver_job_status: {
+    loader: () => import('./tools/arkiver-mcp-tools.js').then(m => m.arkiverJobStatusTool),
+    metadata: { name: 'arkiver_job_status', dependencies: [] }
+  },
+  arkiver_integrity_test: {
+    loader: () => import('./tools/arkiver-integrity-test.js').then(m => m.arkiverIntegrityTestTool),
+    metadata: { name: 'arkiver_integrity_test', dependencies: [] }
+  },
+  
+  // Chronometric Tools
+  gap_identifier: {
+    loader: () => import('./tools/gap-identifier.js').then(m => m.gapIdentifier),
+    metadata: { name: 'gap_identifier', dependencies: [] }
+  },
+  email_artifact_collector: {
+    loader: () => import('./tools/email-artifact-collector.js').then(m => m.emailArtifactCollector),
+    metadata: { name: 'email_artifact_collector', dependencies: [] }
+  },
+  calendar_artifact_collector: {
+    loader: () => import('./tools/calendar-artifact-collector.js').then(m => m.calendarArtifactCollector),
+    metadata: { name: 'calendar_artifact_collector', dependencies: [] }
+  },
+  document_artifact_collector: {
+    loader: () => import('./tools/document-artifact-collector.js').then(m => m.documentArtifactCollector),
+    metadata: { name: 'document_artifact_collector', dependencies: [] }
+  },
+  recollection_support: {
+    loader: () => import('./tools/recollection-support.js').then(m => m.recollectionSupport),
+    metadata: { name: 'recollection_support', dependencies: [] }
+  },
+  pre_fill_logic: {
+    loader: () => import('./tools/pre-fill-logic.js').then(m => m.preFillLogic),
+    metadata: { name: 'pre_fill_logic', dependencies: [] }
+  },
+  dupe_check: {
+    loader: () => import('./tools/dupe-check.js').then(m => m.dupeCheck),
+    metadata: { name: 'dupe_check', dependencies: [] }
+  },
+  provenance_tracker: {
+    loader: () => import('./tools/provenance-tracker.js').then(m => m.provenanceTracker),
+    metadata: { name: 'provenance_tracker', dependencies: [] }
+  },
+  workflow_archaeology: {
+    loader: () => import('./tools/workflow-archaeology.js').then(m => m.workflowArchaeology),
+    metadata: { name: 'workflow_archaeology', dependencies: [] }
+  },
+  
+  // Module/Engine Wrappers
+  chronometric_module: {
+    loader: () => import('./tools/chronometric-module.js').then(m => m.chronometricModuleTool),
+    metadata: { name: 'chronometric_module', dependencies: [] }
+  },
+  mae_engine: {
+    loader: () => import('./tools/mae-engine.js').then(m => m.maeEngineTool),
+    metadata: { name: 'mae_engine', dependencies: [] }
+  },
+  goodcounsel_engine: {
+    loader: () => import('./tools/goodcounsel-engine.js').then(m => m.goodcounselEngineTool),
+    metadata: { name: 'goodcounsel_engine', dependencies: [] }
+  },
+  potemkin_engine: {
+    loader: () => import('./tools/potemkin-engine.js').then(m => m.potemkinEngineTool),
+    metadata: { name: 'potemkin_engine', dependencies: [] }
+  },
+  forecast_engine: {
+    loader: () => import('./tools/forecast-engine.js').then(m => m.forecastEngineTool),
+    metadata: { name: 'forecast_engine', dependencies: [] }
+  },
+  
+  // Verification Tools
+  claim_extractor: {
+    loader: () => import('./tools/verification/claim-extractor.js').then(m => m.claimExtractor),
+    metadata: { name: 'claim_extractor', dependencies: [] }
+  },
+  citation_checker: {
+    loader: () => import('./tools/verification/citation-checker.js').then(m => m.citationChecker),
+    metadata: { name: 'citation_checker', dependencies: [] }
+  },
+  citation_formatter: {
+    loader: () => import('./tools/verification/citation-formatter.js').then(m => m.citationFormatter),
+    metadata: { name: 'citation_formatter', dependencies: [] }
+  },
+  source_verifier: {
+    loader: () => import('./tools/verification/source-verifier.js').then(m => m.sourceVerifier),
+    metadata: { name: 'source_verifier', dependencies: [] }
+  },
+  consistency_checker: {
+    loader: () => import('./tools/verification/consistency-checker.js').then(m => m.consistencyChecker),
+    metadata: { name: 'consistency_checker', dependencies: [] }
+  },
+  
+  // Potemkin Tools
+  history_retriever: {
+    loader: () => import('./engines/potemkin/tools/index.js').then(m => m.historyRetriever),
+    metadata: { name: 'history_retriever', dependencies: ['potemkin_engine'] }
+  },
+  drift_calculator: {
+    loader: () => import('./engines/potemkin/tools/index.js').then(m => m.driftCalculator),
+    metadata: { name: 'drift_calculator', dependencies: ['potemkin_engine'] }
+  },
+  bias_detector: {
+    loader: () => import('./engines/potemkin/tools/index.js').then(m => m.biasDetector),
+    metadata: { name: 'bias_detector', dependencies: ['potemkin_engine'] }
+  },
+  integrity_monitor: {
+    loader: () => import('./engines/potemkin/tools/index.js').then(m => m.integrityMonitor),
+    metadata: { name: 'integrity_monitor', dependencies: ['potemkin_engine'] }
+  },
+  alert_generator: {
+    loader: () => import('./engines/potemkin/tools/index.js').then(m => m.alertGenerator),
+    metadata: { name: 'alert_generator', dependencies: ['potemkin_engine'] }
+  },
+  
+  // Legal Email Tools
+  draft_legal_email: {
+    loader: () => import('./tools/legal-email-drafter.js').then(m => m.legalEmailDrafter),
+    metadata: { name: 'draft_legal_email', dependencies: [] }
+  },
+  refine_email_tone: {
+    loader: () => import('./tools/legal-email-drafter.js').then(m => m.refineEmailTone),
+    metadata: { name: 'refine_email_tone', dependencies: [] }
+  },
+  validate_legal_language: {
+    loader: () => import('./tools/legal-email-drafter.js').then(m => m.validateLegalLanguage),
+    metadata: { name: 'validate_legal_language', dependencies: [] }
+  },
+  
+  // Other Tools
+  cyrano_pathfinder: {
+    loader: () => import('./tools/cyrano-pathfinder.js').then(m => m.cyranoPathfinder),
+    metadata: { name: 'cyrano_pathfinder', dependencies: [] }
+  },
+  custodian_engine: {
+    loader: () => import('./tools/custodian-engine.js').then(m => m.custodianEngineTool),
+    metadata: { name: 'custodian_engine', dependencies: [] }
+  },
+  skill_executor: {
+    loader: () => import('./tools/skill-executor.js').then(m => m.skillExecutor),
+    metadata: { name: 'skill_executor', dependencies: [] }
+  },
+  beta_test_support: {
+    loader: () => import('./tools/beta-test-support.js').then(m => m.betaTestSupport),
+    metadata: { name: 'beta_test_support', dependencies: [] }
+  },
+  mcr_validator: {
+    loader: () => import('./tools/mcr-validator.js').then(m => m.mcrValidator),
+    metadata: { name: 'mcr_validator', dependencies: [] }
+  },
+  
+  // Ethics Tools (special handling for getEthicsAuditTool/getEthicsStatsTool)
+  get_ethics_audit: {
+    loader: () => import('./tools/ethics-audit-tools.js').then(m => m.getEthicsAuditTool()),
+    metadata: { name: 'get_ethics_audit', dependencies: [] }
+  },
+  get_ethics_stats: {
+    loader: () => import('./tools/ethics-audit-tools.js').then(m => m.getEthicsStatsTool()),
+    metadata: { name: 'get_ethics_stats', dependencies: [] }
+  },
+  
+  // Wellness Tools
+  wellness_journal: {
+    loader: () => import('./tools/wellness-journal.js').then(m => m.wellnessJournalTool),
+    metadata: { name: 'wellness_journal', dependencies: [] }
+  },
+  
+  // GoodCounsel Prompt Tools
+  get_goodcounsel_prompts: {
+    loader: () => import('./tools/goodcounsel-prompts.js').then(m => m.getGoodCounselPromptsTool),
+    metadata: { name: 'get_goodcounsel_prompts', dependencies: [] }
+  },
+  dismiss_goodcounsel_prompt: {
+    loader: () => import('./tools/goodcounsel-prompts.js').then(m => m.dismissGoodCounselPromptTool),
+    metadata: { name: 'dismiss_goodcounsel_prompt', dependencies: [] }
+  },
+  snooze_goodcounsel_prompt_type: {
+    loader: () => import('./tools/goodcounsel-prompts.js').then(m => m.snoozeGoodCounselPromptTypeTool),
+    metadata: { name: 'snooze_goodcounsel_prompt_type', dependencies: [] }
+  },
+  get_goodcounsel_prompt_history: {
+    loader: () => import('./tools/goodcounsel-prompts.js').then(m => m.getGoodCounselPromptHistoryTool),
+    metadata: { name: 'get_goodcounsel_prompt_history', dependencies: [] }
+  },
+  evaluate_goodcounsel_context: {
+    loader: () => import('./tools/goodcounsel-prompts.js').then(m => m.evaluateGoodCounselContextTool),
+    metadata: { name: 'evaluate_goodcounsel_context', dependencies: [] }
+  },
+  
+  // Workflow Status Tool
+  workflow_status: {
+    loader: () => import('./tools/workflow-status.js').then(m => m.workflowStatusTool),
+    metadata: { name: 'workflow_status', dependencies: [] }
+  },
+  
+};
+
+// Tool cache with enhanced metadata
+const toolCache = new Map<string, ToolInstance>();
+const toolMetadata = new Map<string, ToolMetadata>();
+
+// CRITICAL SAFEGUARD 1: Loading locks - prevent race conditions
+const loadingLocks = new Map<string, Promise<ToolInstance>>();
+
+// CRITICAL SAFEGUARD 2: Circuit breaker state
+interface CircuitBreakerState {
+  failures: number;
+  lastFailureTime: number;
+  isOpen: boolean;
+}
+
+const circuitBreakers = new Map<string, CircuitBreakerState>();
+const MAX_FAILURES = 5;
+const CIRCUIT_BREAKER_TIMEOUT = 60000; // 1 minute
+const TOOL_LOAD_TIMEOUT = 30000; // 30 seconds
+
+// Frequently used tools (preload these first)
+const frequentlyUsedTools = [
+  'system_status',
+  'auth',
+  'document_analyzer',
+  'contract_comparator',
+  'good_counsel',
+  'cyrano_pathfinder'
+];
+
+// Load a tool dynamically with ALL THREE CRITICAL SAFEGUARDS
+async function loadTool(toolName: string, loadDependencies: boolean = true): Promise<ToolInstance> {
+  // Fast path: Check cache first
+  if (toolCache.has(toolName)) {
+    const metadata = toolMetadata.get(toolName);
+    if (metadata) {
+      metadata.lastUsed = new Date();
+      metadata.useCount++;
+    }
+    return toolCache.get(toolName)!;
+  }
+  
+  // SAFEGUARD 1: Check circuit breaker
+  const breaker = circuitBreakers.get(toolName);
+  if (breaker?.isOpen) {
+    const timeSinceFailure = Date.now() - breaker.lastFailureTime;
+    if (timeSinceFailure < CIRCUIT_BREAKER_TIMEOUT) {
+      throw new Error(`Tool ${toolName} is in circuit breaker (too many failures). Retry after ${Math.ceil((CIRCUIT_BREAKER_TIMEOUT - timeSinceFailure) / 1000)}s`);
+    } else {
+      // Reset circuit breaker after timeout
+      circuitBreakers.delete(toolName);
+    }
+  }
+  
+  // SAFEGUARD 2: Check if already loading (race condition protection)
+  const existingLoad = loadingLocks.get(toolName);
+  if (existingLoad) {
+    // Wait for the existing load to complete
+    return existingLoad;
+  }
+  
+  // Get tool config
+  const toolConfig = toolImportMap[toolName];
+  if (!toolConfig) {
+    throw new Error(`Unknown tool: ${toolName}`);
+  }
+  
+  // Initialize metadata
+  const metadata: ToolMetadata = {
+    name: toolName,
+    ...toolConfig.metadata,
+    status: 'loading',
+    useCount: 0,
+    errorCount: 0,
+  };
+  toolMetadata.set(toolName, metadata);
+  
+  // Create loading promise with ALL SAFEGUARDS
+  const loadPromise = (async () => {
+    try {
+      // Load dependencies first if requested
+      if (loadDependencies && toolConfig.metadata.dependencies) {
+        for (const dep of toolConfig.metadata.dependencies) {
+          if (!toolCache.has(dep)) {
+            console.error(`[Tool Loader] Loading dependency ${dep} for ${toolName}...`);
+            await loadTool(dep, true);
+          }
+        }
+      }
+      
+      // Load tool with timing
+      const startTime = Date.now();
+      
+      // SAFEGUARD 3: Timeout protection
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error(`Tool load timeout after ${TOOL_LOAD_TIMEOUT}ms`)), TOOL_LOAD_TIMEOUT);
+      });
+      
+      // Race between load and timeout
+      const tool = await Promise.race([
+        toolConfig.loader(),
+        timeoutPromise
+      ]);
+      
+      const loadTime = Date.now() - startTime;
+      
+      // Handle both default export and named export
+      const toolInstance = (tool as any).default || tool;
+      
+      // Cache it
+      toolCache.set(toolName, toolInstance);
+      metadata.status = 'loaded';
+      metadata.loadTime = loadTime;
+      metadata.lastUsed = new Date();
+      metadata.useCount = 1;
+      
+      // Reset circuit breaker on success
+      circuitBreakers.delete(toolName);
+      
+      console.error(`[Tool Loader] Loaded ${toolName} in ${loadTime}ms`);
+      return toolInstance;
+    } catch (error) {
+      metadata.status = 'error';
+      metadata.errorCount++;
+      metadata.lastError = error instanceof Error ? error.message : String(error);
+      
+      // Update circuit breaker
+      const breaker = circuitBreakers.get(toolName) || { failures: 0, lastFailureTime: 0, isOpen: false };
+      breaker.failures++;
+      breaker.lastFailureTime = Date.now();
+      
+      if (breaker.failures >= MAX_FAILURES) {
+        breaker.isOpen = true;
+        console.error(`[Tool Loader] Circuit breaker opened for ${toolName} after ${breaker.failures} failures`);
+      }
+      
+      circuitBreakers.set(toolName, breaker);
+      
+      console.error(`[Tool Loader] Failed to load tool ${toolName}:`, error);
+      throw error;
+    } finally {
+      // Remove loading lock
+      loadingLocks.delete(toolName);
+    }
+  })();
+  
+  // Store loading lock
+  loadingLocks.set(toolName, loadPromise);
+  
+  return loadPromise;
+}
+
+// Reload a tool (hot reloading)
+async function reloadTool(toolName: string): Promise<boolean> {
+  console.error(`[Tool Loader] Reloading tool ${toolName}...`);
+  
+  // Remove from cache
+  toolCache.delete(toolName);
+  const metadata = toolMetadata.get(toolName);
+  if (metadata) {
+    metadata.status = 'unloaded';
+  }
+  
+  // Reset circuit breaker
+  circuitBreakers.delete(toolName);
+  
+  try {
+    await loadTool(toolName, false); // Don't reload dependencies
+    console.error(`[Tool Loader] Successfully reloaded ${toolName}`);
+    return true;
+  } catch (error) {
+    console.error(`[Tool Loader] Failed to reload ${toolName}:`, error);
+    return false;
+  }
+}
+
+// Load all tool definitions (for /mcp/tools endpoint)
+async function loadAllToolDefinitions(): Promise<Tool[]> {
+  const tools: Tool[] = [];
+  const errors: string[] = [];
+  
+  // Load tools in parallel batches
+  const toolNames = Object.keys(toolImportMap);
+  const batchSize = 10;
+  
+  for (let i = 0; i < toolNames.length; i += batchSize) {
+    const batch = toolNames.slice(i, i + batchSize);
+    const results = await Promise.allSettled(
+      batch.map(async (toolName) => {
+        try {
+          const tool = await loadTool(toolName, true);
+          return tool.getToolDefinition();
+        } catch (error) {
+          errors.push(`${toolName}: ${error instanceof Error ? error.message : String(error)}`);
+          return null;
+        }
+      })
+    );
+    
+    for (const result of results) {
+      if (result.status === 'fulfilled' && result.value) {
+        tools.push(result.value);
+      }
+    }
+  }
+  
+  if (errors.length > 0) {
+    console.warn(`[Tool Loader] Some tools failed to load: ${errors.join(', ')}`);
+  }
+  
+  return tools;
+}
+
+// Preload frequently used tools first, then others
+let toolsPreloading = false;
+let toolsPreloaded = false;
+async function preloadToolsInBackground() {
+  if (toolsPreloading || toolsPreloaded) return;
+  toolsPreloading = true;
+  
+  console.error('[Tool Loader] Starting background tool preloading...');
+  
+  try {
+    // Preload frequently used tools first
+    console.error(`[Tool Loader] Preloading ${frequentlyUsedTools.length} frequently used tools...`);
+    await Promise.allSettled(
+      frequentlyUsedTools.map(toolName => loadTool(toolName, true))
+    );
+    
+    // Then preload all other tools
+    const remainingTools = Object.keys(toolImportMap).filter(
+      name => !frequentlyUsedTools.includes(name)
+    );
+    console.error(`[Tool Loader] Preloading ${remainingTools.length} remaining tools...`);
+    
+    const batchSize = 10;
+    for (let i = 0; i < remainingTools.length; i += batchSize) {
+      const batch = remainingTools.slice(i, i + batchSize);
+      await Promise.allSettled(
+        batch.map(toolName => loadTool(toolName, true))
+      );
+    }
+    
+    toolsPreloaded = true;
+    const loadedCount = Array.from(toolMetadata.values()).filter(m => m.status === 'loaded').length;
+    console.error(`[Tool Loader] Preloaded ${loadedCount}/${Object.keys(toolImportMap).length} tools`);
+  } catch (error) {
+    console.error('[Tool Loader] Background preloading failed (non-fatal):', error);
+  } finally {
+    toolsPreloading = false;
+  }
+}
+
+// Get tool health status
+function getToolHealth(): {
+  total: number;
+  loaded: number;
+  loading: number;
+  errors: number;
+  circuitBreakers: number;
+  tools: ToolMetadata[];
+} {
+  const tools = Array.from(toolMetadata.values());
+  const openBreakers = Array.from(circuitBreakers.values()).filter(b => b.isOpen).length;
+  return {
+    total: tools.length,
+    loaded: tools.filter(t => t.status === 'loaded').length,
+    loading: tools.filter(t => t.status === 'loading').length,
+    errors: tools.filter(t => t.status === 'error').length,
+    circuitBreakers: openBreakers,
+    tools: tools.map(t => ({ ...t }))
+  };
+}
+
+// ============================================================================
+// EXPRESS APP SETUP
+// ============================================================================
 
 const app = express();
-// Configure trust proxy: set to number of proxies (1) instead of true to avoid rate limit validation errors
-// In production behind a reverse proxy, set this to the actual number of proxies
 app.set('trust proxy', process.env.TRUST_PROXY_COUNT ? parseInt(process.env.TRUST_PROXY_COUNT) : 1);
 const port = process.env.PORT || 5002;
 
-// Disable X-Powered-By header to prevent information disclosure
 app.disable('x-powered-by');
-
-// Security: Apply Helmet.js for secure headers
 app.use(security.secureHeaders);
-
-// Cookie parser for session management
 app.use(cookieParser());
 
-// CSRF protection: require valid CSRF tokens for state-changing requests
-// Skip CSRF in test environment to allow testing
+// CSRF protection
 const csrfProtection = csurf({
   cookie: {
     httpOnly: true,
@@ -151,36 +735,35 @@ const csrfProtection = csurf({
   },
   ignoreMethods: process.env.NODE_ENV === 'test' ? ['GET', 'HEAD', 'OPTIONS', 'POST', 'PUT', 'DELETE', 'PATCH'] : undefined,
 });
-// Only apply CSRF protection if not in test mode
 if (process.env.NODE_ENV !== 'test') {
   app.use(csrfProtection);
 }
 
-// Middleware - CORS and HTTPS enforcement
+// CORS configuration
 const isProduction = process.env.NODE_ENV === 'production';
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').map(o => o.trim()).filter(Boolean);
+// Add cognisint.com to allowed origins for beta portal
+const defaultOrigins = [
+  'https://cognisint.com',
+  'https://www.cognisint.com',
+];
+const envOrigins = (process.env.ALLOWED_ORIGINS || '').split(',').map(o => o.trim()).filter(Boolean);
+const allowedOrigins = [...defaultOrigins, ...envOrigins];
 
-// Require ALLOWED_ORIGINS in production
 if (isProduction && allowedOrigins.length === 0) {
   throw new Error('ALLOWED_ORIGINS must be set in production environment');
 }
 
-// Configure CORS with origin validation
 const corsOptions: CorsOptions = {
   origin: (origin, callback) => {
-    // Allow requests with no origin (mobile apps, curl, Postman) in development only
     if (!origin && !isProduction) {
       return callback(null, true);
     }
-    // In production, require origin
     if (!origin && isProduction) {
       return callback(new Error('CORS: Origin header required in production'));
     }
-    // In development, if no whitelist is configured, allow all origins
     if (!isProduction && allowedOrigins.length === 0) {
       return callback(null, true);
     }
-    // Check if origin is in whitelist
     if (origin && allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -193,35 +776,25 @@ const corsOptions: CorsOptions = {
 
 app.use(cors(corsOptions));
 
-// Enforce HTTPS in production (auto-enforce, not just when FORCE_HTTPS=true)
+// HTTPS enforcement
 app.use((req, res, next) => {
-  // Check both req.secure (direct) and X-Forwarded-Proto (behind proxy)
   const isSecure = req.secure || req.get('X-Forwarded-Proto') === 'https';
-  
-  // In production, always enforce HTTPS
   if (isProduction && !isSecure) {
     return res.redirect(301, `https://${req.headers.host}${req.url}`);
   }
-  
-  // In development, allow FORCE_HTTPS override
   if (!isProduction && process.env.FORCE_HTTPS === 'true' && !isSecure) {
     return res.redirect(301, `https://${req.headers.host}${req.url}`);
   }
-  
   next();
 });
+
 app.use(express.json());
 app.use(express.raw({ type: 'application/octet-stream', limit: '100mb' }));
-
-// Security: Input sanitization
 app.use(security.sanitizeInputs);
-
-// Security: Rate limiting (applies to all routes)
-// Tool execution through MCP protocol is already rate-limited by these global limiters
 app.use(security.authenticatedLimiter);
 app.use(security.unauthenticatedLimiter);
 
-// Multer configuration for file uploads
+// Multer for file uploads
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: {
@@ -242,304 +815,26 @@ const mcpServer = new Server(
   }
 );
 
-// Setup MCP server handlers
+// ============================================================================
+// MCP HANDLERS - Use dynamic tool loading
+// ============================================================================
+
 mcpServer.setRequestHandler(ListToolsRequestSchema, async () => {
-  return {
-    tools: [
-      // Legal AI Tools
-      documentAnalyzer.getToolDefinition(),
-      contractComparator.getToolDefinition(),
-      goodCounsel.getToolDefinition(),
-      factChecker.getToolDefinition(),
-      legalReviewer.getToolDefinition(),
-      complianceChecker.getToolDefinition(),
-      qualityAssessor.getToolDefinition(),
-      workflowManager.getToolDefinition(),
-      caseManager.getToolDefinition(),
-      documentProcessor.getToolDefinition(),
-      aiOrchestrator.getToolDefinition(),
-      systemStatus.getToolDefinition(),
-      // status-indicator tool archived - see Cyrano/archive/broken-tools/
-      syncManager.getToolDefinition(),
-      redFlagFinder.getToolDefinition(),
-      clioIntegration.getToolDefinition(),
-      micourtQuery.getToolDefinition(),
-      timeValueBilling.getToolDefinition(),
-      authTool.getToolDefinition(),
-      
-      // Arkiver Data Extraction Tools
-      extractConversations.getToolDefinition(),
-      extractTextContent.getToolDefinition(),
-      categorizeWithKeywords.getToolDefinition(),
-      processWithRegex.getToolDefinition(),
-      generateCategorizedFiles.getToolDefinition(),
-      runExtractionPipeline.getToolDefinition(),
-      createArkiverConfig.getToolDefinition(),
-      
-      // Chronometric Tools
-      gapIdentifier.getToolDefinition(),
-      emailArtifactCollector.getToolDefinition(),
-      calendarArtifactCollector.getToolDefinition(),
-      documentArtifactCollector.getToolDefinition(),
-      recollectionSupport.getToolDefinition(),
-      preFillLogic.getToolDefinition(),
-      dupeCheck.getToolDefinition(),
-      provenanceTracker.getToolDefinition(),
-      workflowArchaeology.getToolDefinition(),
-      
-      // Module/Engine Wrappers
-      chronometricModuleTool.getToolDefinition(),
-      maeEngineTool.getToolDefinition(),
-      goodcounselEngineTool.getToolDefinition(),
-      potemkinEngineTool.getToolDefinition(),
-      
-      // Shared Verification Tools (used by Potemkin and Arkiver)
-      claimExtractor.getToolDefinition(),
-      citationChecker.getToolDefinition(),
-      citationFormatter.getToolDefinition(),
-      sourceVerifier.getToolDefinition(),
-      consistencyChecker.getToolDefinition(),
-      // Arkiver MCP tools
-      arkiverProcessFileTool.getToolDefinition(),
-      arkiverJobStatusTool.getToolDefinition(),
-      // Potemkin-specific tools
-      historyRetriever.getToolDefinition(),
-      driftCalculator.getToolDefinition(),
-      biasDetector.getToolDefinition(),
-      integrityMonitor.getToolDefinition(),
-      alertGenerator.getToolDefinition(),
-      // Legal Email Drafting Tools
-      legalEmailDrafter.getToolDefinition(),
-      refineEmailTone.getToolDefinition(),
-      validateLegalLanguage.getToolDefinition(),
-      // Cyrano Pathfinder - Unified Chat Interface
-      cyranoPathfinder.getToolDefinition(),
-    ],
-  };
+  try {
+    const tools = await loadAllToolDefinitions();
+    return { tools };
+  } catch (error) {
+    console.error('[MCP] Failed to load tools:', error);
+    return { tools: [] };
+  }
 });
 
 mcpServer.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
-
+  
   try {
-    let result: CallToolResult;
-
-        switch (name) {
-          // Legal AI Tools
-          case 'document_analyzer':
-            result = await documentAnalyzer.execute(args);
-            break;
-          case 'contract_comparator':
-            result = await contractComparator.execute(args);
-            break;
-          case 'good_counsel':
-            result = await goodCounsel.execute(args);
-            break;
-          case 'fact_checker':
-            result = await factChecker.execute(args);
-            break;
-          case 'legal_reviewer':
-            result = await legalReviewer.execute(args);
-            break;
-          case 'compliance_checker':
-            result = await complianceChecker.execute(args);
-            break;
-          case 'quality_assessor':
-            result = await qualityAssessor.execute(args);
-            break;
-          case 'workflow_manager':
-            result = await workflowManager.execute(args);
-            break;
-          case 'case_manager':
-            result = await caseManager.execute(args);
-            break;
-          case 'document_processor':
-            result = await documentProcessor.execute(args);
-            break;
-          case 'ai_orchestrator':
-            result = await aiOrchestrator.execute(args);
-            break;
-          case 'system_status':
-            result = await systemStatus.execute(args);
-            break;
-          // status-indicator tool archived - see Cyrano/archive/broken-tools/
-          case 'sync_manager':
-            result = await syncManager.execute(args);
-            break;
-          case 'red_flag_finder':
-            result = await redFlagFinder.execute(args);
-            break;
-          case 'clio_integration':
-            result = await clioIntegration.execute(args);
-            break;
-          case 'time_value_billing':
-            result = await timeValueBilling.execute(args);
-            break;
-          case 'auth':
-            result = await authTool.execute(args);
-            break;
-            
-          // Arkiver Data Extraction Tools
-          case 'extract_conversations':
-            result = await extractConversations.execute(args);
-            break;
-          case 'extract_text_content':
-            result = await extractTextContent.execute(args);
-            break;
-          case 'categorize_with_keywords':
-            result = await categorizeWithKeywords.execute(args);
-            break;
-          case 'process_with_regex':
-            result = await processWithRegex.execute(args);
-            break;
-          case 'generate_categorized_files':
-            result = await generateCategorizedFiles.execute(args);
-            break;
-          case 'run_extraction_pipeline':
-            result = await runExtractionPipeline.execute(args);
-            break;
-          case 'create_arkiver_config':
-            result = await createArkiverConfig.execute(args);
-            break;
-            
-          // Chronometric Tools
-          case 'gap_identifier':
-            result = await gapIdentifier.execute(args);
-            break;
-          case 'email_artifact_collector':
-            result = await emailArtifactCollector.execute(args);
-            break;
-          case 'calendar_artifact_collector':
-            result = await calendarArtifactCollector.execute(args);
-            break;
-          case 'tasks_collector':
-            result = await tasksCollector.execute(args);
-            break;
-          case 'contacts_collector':
-            result = await contactsCollector.execute(args);
-            break;
-          case 'document_artifact_collector':
-            result = await documentArtifactCollector.execute(args);
-            break;
-          case 'recollection_support':
-            result = await recollectionSupport.execute(args);
-            break;
-          case 'pre_fill_logic':
-            result = await preFillLogic.execute(args);
-            break;
-          case 'dupe_check':
-            result = await dupeCheck.execute(args);
-            break;
-          case 'provenance_tracker':
-            result = await provenanceTracker.execute(args);
-            break;
-          case 'workflow_archaeology':
-            result = await workflowArchaeology.execute(args);
-            break;
-            
-          // Module/Engine Wrappers
-          case 'chronometric_module':
-            result = await chronometricModuleTool.execute(args);
-            break;
-          case 'mae_engine':
-            result = await maeEngineTool.execute(args);
-            break;
-          case 'goodcounsel_engine':
-            result = await goodcounselEngineTool.execute(args);
-            break;
-          case 'ethics_reviewer':
-            result = await ethicsReviewer.execute(args);
-            break;
-          case 'potemkin_engine':
-            result = await potemkinEngineTool.execute(args);
-            break;
-          // Shared verification tools
-          case 'claim_extractor':
-            result = await claimExtractor.execute(args);
-            break;
-          case 'citation_checker':
-            result = await citationChecker.execute(args);
-            break;
-          case 'citation_formatter':
-            result = await citationFormatter.execute(args);
-            break;
-          case 'arkiver_process_file':
-            result = await arkiverProcessFileTool.execute(args);
-            break;
-          case 'arkiver_job_status':
-            result = await arkiverJobStatusTool.execute(args);
-            break;
-          case 'arkiver_integrity_test':
-            result = await arkiverIntegrityTestTool.execute(args);
-            break;
-          case 'arkiver_process_text':
-            result = await arkiverTextProcessor.execute(args);
-            break;
-          case 'arkiver_process_email':
-            result = await arkiverEmailProcessor.execute(args);
-            break;
-          case 'arkiver_extract_entities':
-            result = await arkiverEntityProcessor.execute(args);
-            break;
-          case 'arkiver_generate_insights':
-            result = await arkiverInsightProcessor.execute(args);
-            break;
-          case 'arkiver_extract_timeline':
-            result = await arkiverTimelineProcessor.execute(args);
-            break;
-          case 'rag_query':
-            result = await ragQuery.execute(args);
-            break;
-          case 'document_drafter':
-            result = await documentDrafterTool.execute(args);
-            break;
-          case 'tool_enhancer':
-            // TODO: tool_enhancer not implemented
-            result = {
-              content: [{ type: 'text', text: 'Tool enhancer not available' }],
-              isError: true,
-            };
-            break;
-          case 'source_verifier':
-            result = await sourceVerifier.execute(args);
-            break;
-          case 'consistency_checker':
-            result = await consistencyChecker.execute(args);
-            break;
-          // Potemkin-specific tools
-          case 'history_retriever':
-            result = await historyRetriever.execute(args);
-            break;
-          case 'drift_calculator':
-            result = await driftCalculator.execute(args);
-            break;
-          case 'bias_detector':
-            result = await biasDetector.execute(args);
-            break;
-          case 'integrity_monitor':
-            result = await integrityMonitor.execute(args);
-            break;
-          case 'alert_generator':
-            result = await alertGenerator.execute(args);
-            break;
-          // Legal Email Drafting Tools
-          case 'draft_legal_email':
-            result = await legalEmailDrafter.execute(args);
-            break;
-          case 'refine_email_tone':
-            result = await refineEmailTone.execute(args);
-            break;
-          case 'validate_legal_language':
-            result = await validateLegalLanguage.execute(args);
-            break;
-          case 'cyrano_pathfinder':
-            result = await cyranoPathfinder.execute(args);
-            break;
-          default:
-            throw new Error(`Unknown tool: ${name}`);
-        }
-
-    return result;
+    const tool = await loadTool(name);
+    return await tool.execute(args);
   } catch (error) {
     return {
       content: [
@@ -553,90 +848,49 @@ mcpServer.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
 });
 
-// HTTP Routes
+// ============================================================================
+// HTTP ROUTES
+// ============================================================================
+
 app.get('/mcp/tools', async (req, res) => {
   try {
-    // Validate query parameters if any are added in the future
-    // Currently no parameters, but structure ready for validation
+    const allTools = await loadAllToolDefinitions();
     
-    // Return the tools list directly
-    const tools = [
-      // Legal AI Tools
-      documentAnalyzer.getToolDefinition(),
-      contractComparator.getToolDefinition(),
-      goodCounsel.getToolDefinition(),
-      factChecker.getToolDefinition(),
-      legalReviewer.getToolDefinition(),
-      complianceChecker.getToolDefinition(),
-      qualityAssessor.getToolDefinition(),
-      workflowManager.getToolDefinition(),
-      caseManager.getToolDefinition(),
-      documentProcessor.getToolDefinition(),
-      aiOrchestrator.getToolDefinition(),
-      systemStatus.getToolDefinition(),
-      
-      // Arkiver Tools
-      extractConversations.getToolDefinition(),
-      extractTextContent.getToolDefinition(),
-      categorizeWithKeywords.getToolDefinition(),
-      processWithRegex.getToolDefinition(),
-      generateCategorizedFiles.getToolDefinition(),
-      runExtractionPipeline.getToolDefinition(),
-      createArkiverConfig.getToolDefinition(),
-      
-      // Chronometric Tools
-      gapIdentifier.getToolDefinition(),
-      emailArtifactCollector.getToolDefinition(),
-      calendarArtifactCollector.getToolDefinition(),
-      documentArtifactCollector.getToolDefinition(),
-      recollectionSupport.getToolDefinition(),
-      preFillLogic.getToolDefinition(),
-      dupeCheck.getToolDefinition(),
-      provenanceTracker.getToolDefinition(),
-      workflowArchaeology.getToolDefinition(),
-      
-      // Module/Engine Wrappers
-      chronometricModuleTool.getToolDefinition(),
-      maeEngineTool.getToolDefinition(),
-      goodcounselEngineTool.getToolDefinition(),
-      potemkinEngineTool.getToolDefinition(),
-      
-      // Shared Verification Tools (used by Potemkin and Arkiver)
-      claimExtractor.getToolDefinition(),
-      citationChecker.getToolDefinition(),
-      citationFormatter.getToolDefinition(),
-      sourceVerifier.getToolDefinition(),
-      consistencyChecker.getToolDefinition(),
-      // Arkiver MCP tools
-      arkiverProcessFileTool.getToolDefinition(),
-      arkiverJobStatusTool.getToolDefinition(),
-      // Potemkin-specific tools
-      historyRetriever.getToolDefinition(),
-      driftCalculator.getToolDefinition(),
-      biasDetector.getToolDefinition(),
-      integrityMonitor.getToolDefinition(),
-      alertGenerator.getToolDefinition(),
-      // Legal Email Drafting Tools
-      legalEmailDrafter.getToolDefinition(),
-      refineEmailTone.getToolDefinition(),
-      validateLegalLanguage.getToolDefinition(),
-      // Cyrano Pathfinder - Unified Chat Interface
-      cyranoPathfinder.getToolDefinition(),
-      // Skills Executor
-      skillExecutor.getToolDefinition(),
-      // MCR Compliance Validator
-      mcrValidator.getToolDefinition(),
+    // Filter out admin-only tools for non-admin users
+    const adminOnlyTools = [
+      'custodian_engine',
+      'custodian_status',
+      'custodian_health_check',
+      'custodian_update_dependencies',
+      'custodian_apply_fix',
+      'custodian_alert_admin',
+      'custodian_failsafe',
     ];
     
-    res.json({ tools });
+    // Check if user is admin
+    try {
+      const { isAdminRequest } = await import('./utils/admin-auth.js');
+      const isAdmin = isAdminRequest(req);
+      
+      // Filter tools based on admin status
+      const tools = isAdmin 
+        ? allTools 
+        : allTools.filter(tool => !adminOnlyTools.includes(tool.name));
+      
+      res.json({ tools });
+    } catch {
+      // If admin auth check fails, filter out admin tools (fail secure)
+      const tools = allTools.filter(tool => !adminOnlyTools.includes(tool.name));
+      res.json({ tools });
+    }
   } catch (error) {
+    console.error('[HTTP] Failed to get tools:', error);
     res.status(500).json({ error: 'Failed to get tools' });
   }
 });
 
 app.post('/mcp/execute', async (req, res) => {
   try {
-    // Validate request body with Zod
     const ExecuteRequestSchema = z.object({
       tool: z.string().min(1, 'Tool name is required'),
       input: z.any().optional(),
@@ -651,248 +905,51 @@ app.post('/mcp/execute', async (req, res) => {
       });
     }
     
-    // Support both 'input' and 'arguments' for compatibility
     const { tool, input, arguments: args } = validationResult.data;
     const toolInput = input || args || {};
     
-    // Execute the tool directly
-    let result;
-    switch (tool) {
-      case 'document_analyzer':
-        result = await documentAnalyzer.execute(toolInput);
-        break;
-      case 'contract_comparator':
-        result = await contractComparator.execute(toolInput);
-        break;
-      case 'good_counsel':
-        result = await goodCounsel.execute(toolInput);
-        break;
-      case 'fact_checker':
-        result = await factChecker.execute(toolInput);
-        break;
-      case 'legal_reviewer':
-        result = await legalReviewer.execute(toolInput);
-        break;
-      case 'compliance_checker':
-        result = await complianceChecker.execute(toolInput);
-        break;
-      case 'quality_assessor':
-        result = await qualityAssessor.execute(toolInput);
-        break;
-      case 'workflow_manager':
-        result = await workflowManager.execute(toolInput);
-        break;
-      case 'case_manager':
-        result = await caseManager.execute(toolInput);
-        break;
-      case 'document_processor':
-        result = await documentProcessor.execute(toolInput);
-        break;
-      case 'ai_orchestrator':
-        result = await aiOrchestrator.execute(toolInput);
-        break;
-      case 'system_status':
-        result = await systemStatus.execute(toolInput);
-        break;
-      // status-indicator tool archived - see Cyrano/archive/broken-tools/
-      case 'sync_manager':
-        result = await syncManager.execute(toolInput);
-        break;
-      case 'red_flag_finder':
-        result = await redFlagFinder.execute(toolInput);
-        break;
-      case 'clio_integration':
-        result = await clioIntegration.execute(toolInput);
-        break;
-      case 'micourt_query':
-        result = await micourtQuery.execute(toolInput);
-        break;
-      case 'time_value_billing':
-        result = await timeValueBilling.execute(toolInput);
-        break;
-      case 'auth':
-        result = await authTool.execute(toolInput);
-        break;
-      case 'extract_conversations':
-        result = await extractConversations.execute(toolInput);
-        break;
-      case 'extract_text_content':
-        result = await extractTextContent.execute(toolInput);
-        break;
-      case 'categorize_with_keywords':
-        result = await categorizeWithKeywords.execute(toolInput);
-        break;
-      case 'process_with_regex':
-        result = await processWithRegex.execute(toolInput);
-        break;
-      case 'generate_categorized_files':
-        result = await generateCategorizedFiles.execute(toolInput);
-        break;
-      case 'run_extraction_pipeline':
-        result = await runExtractionPipeline.execute(toolInput);
-        break;
-      case 'create_arkiver_config':
-        result = await createArkiverConfig.execute(toolInput);
-        break;
-        
-      // Chronometric Tools
-      case 'gap_identifier':
-        result = await gapIdentifier.execute(toolInput);
-        break;
-      case 'email_artifact_collector':
-        result = await emailArtifactCollector.execute(toolInput);
-        break;
-      case 'calendar_artifact_collector':
-        result = await calendarArtifactCollector.execute(toolInput);
-        break;
-      case 'tasks_collector':
-        result = await tasksCollector.execute(toolInput);
-        break;
-      case 'contacts_collector':
-        result = await contactsCollector.execute(toolInput);
-        break;
-      case 'document_artifact_collector':
-        result = await documentArtifactCollector.execute(toolInput);
-        break;
-      case 'recollection_support':
-        result = await recollectionSupport.execute(toolInput);
-        break;
-      case 'pre_fill_logic':
-        result = await preFillLogic.execute(toolInput);
-        break;
-      case 'dupe_check':
-        result = await dupeCheck.execute(toolInput);
-        break;
-      case 'provenance_tracker':
-        result = await provenanceTracker.execute(toolInput);
-        break;
-        
-      // Module/Engine Wrappers
-      case 'chronometric_module':
-        result = await chronometricModuleTool.execute(toolInput);
-        break;
-      case 'mae_engine':
-        result = await maeEngineTool.execute(toolInput);
-        break;
-      case 'goodcounsel_engine':
-        result = await goodcounselEngineTool.execute(toolInput);
-        break;
-      case 'ethics_reviewer':
-        result = await ethicsReviewer.execute(toolInput);
-        break;
-      // EthicalAI Tools
-      case 'ethical_ai_guard':
-        result = await ethicalAIGuard.execute(toolInput);
-        break;
-      case 'ten_rules_checker':
-        result = await tenRulesChecker.execute(toolInput);
-        break;
-      case 'ethics_policy_explainer':
-        result = await ethicsPolicyExplainer.execute(toolInput);
-        break;
-      case 'get_ethics_audit':
-        result = await getEthicsAuditTool.execute(toolInput);
-        break;
-      case 'get_ethics_stats':
-        result = await getEthicsStatsTool.execute(toolInput);
-        break;
-      case 'potemkin_engine':
-        result = await potemkinEngineTool.execute(toolInput);
-        break;
-        
-      // Shared verification tools
-      case 'claim_extractor':
-        result = await claimExtractor.execute(toolInput);
-        break;
-      case 'citation_checker':
-        result = await citationChecker.execute(toolInput);
-        break;
-      case 'citation_formatter':
-        result = await citationFormatter.execute(toolInput);
-        break;
-      case 'arkiver_process_file':
-        result = await arkiverProcessFileTool.execute(toolInput);
-        break;
-      case 'arkiver_job_status':
-        result = await arkiverJobStatusTool.execute(toolInput);
-        break;
-      case 'arkiver_integrity_test':
-        result = await arkiverIntegrityTestTool.execute(toolInput);
-        break;
-      case 'arkiver_process_text':
-        result = await arkiverTextProcessor.execute(toolInput);
-        break;
-      case 'arkiver_process_email':
-        result = await arkiverEmailProcessor.execute(toolInput);
-        break;
-      case 'arkiver_extract_entities':
-        result = await arkiverEntityProcessor.execute(toolInput);
-        break;
-      case 'arkiver_generate_insights':
-        result = await arkiverInsightProcessor.execute(toolInput);
-        break;
-      case 'arkiver_extract_timeline':
-        result = await arkiverTimelineProcessor.execute(toolInput);
-        break;
-      case 'rag_query':
-        result = await ragQuery.execute(toolInput);
-        break;
-      case 'document_drafter':
-        result = await documentDrafterTool.execute(toolInput);
-        break;
-      case 'tool_enhancer':
-        // TODO: tool_enhancer not implemented
-        result = {
-          content: [{ type: 'text', text: 'Tool enhancer not available' }],
-          isError: true,
-        };
-        break;
-      case 'source_verifier':
-        result = await sourceVerifier.execute(toolInput);
-        break;
-      case 'consistency_checker':
-        result = await consistencyChecker.execute(toolInput);
-        break;
-        
-      // Potemkin-specific tools
-      case 'history_retriever':
-        result = await historyRetriever.execute(toolInput);
-        break;
-      case 'drift_calculator':
-        result = await driftCalculator.execute(toolInput);
-        break;
-      case 'bias_detector':
-        result = await biasDetector.execute(toolInput);
-        break;
-      case 'integrity_monitor':
-        result = await integrityMonitor.execute(toolInput);
-        break;
-      case 'alert_generator':
-        result = await alertGenerator.execute(toolInput);
-        break;
-      
-      // Cyrano Pathfinder
-      case 'cyrano_pathfinder':
-        result = await cyranoPathfinder.execute(toolInput);
-        break;
-      // Skills Executor
-      case 'skill_executor':
-        result = await skillExecutor.execute(toolInput);
-        break;
-        
-      default:
-        res.status(400).json({
+    // Check if tool is admin-only (Custodian tools)
+    const adminOnlyTools = [
+      'custodian_engine',
+      'custodian_status',
+      'custodian_health_check',
+      'custodian_update_dependencies',
+      'custodian_apply_fix',
+      'custodian_alert_admin',
+      'custodian_failsafe',
+    ];
+    
+    if (adminOnlyTools.includes(tool)) {
+      // Import admin auth utility
+      try {
+        const { isAdminRequest } = await import('./utils/admin-auth.js');
+        if (!isAdminRequest(req)) {
+          return res.status(403).json({
+            content: [
+              {
+                type: 'text',
+                text: 'Admin access required. This tool is only available to administrators.',
+              },
+            ],
+            isError: true,
+          });
+        }
+      } catch {
+        // If admin auth check fails, deny access (fail secure)
+        return res.status(403).json({
           content: [
             {
               type: 'text',
-              text: `Tool not found: ${tool}`,
+              text: 'Admin access required. This tool is only available to administrators.',
             },
           ],
           isError: true,
         });
-        return;
+      }
     }
     
+    const toolInstance = await loadTool(tool);
+    const result = await toolInstance.execute(toolInput);
     res.json(result);
   } catch (error) {
     res.status(500).json({
@@ -908,12 +965,40 @@ app.post('/mcp/execute', async (req, res) => {
 });
 
 app.get('/mcp/status', (req, res) => {
-  res.json({ status: 'running', server: 'cyrano-mcp-http-bridge' });
+  const health = getToolHealth();
+  res.json({ 
+    status: 'running', 
+    server: 'cyrano-mcp-http-bridge',
+    tools: health
+  });
 });
 
-// GoodCounsel API endpoint for LexFiat integration
+// Tool health monitoring endpoint
+app.get('/mcp/tools/health', (req, res) => {
+  const health = getToolHealth();
+  res.json(health);
+});
+
+// Hot reload endpoint (admin only - should add auth in production)
+app.post('/mcp/tools/:toolName/reload', async (req, res) => {
+  const { toolName } = req.params;
+  
+  if (!toolImportMap[toolName]) {
+    return res.status(404).json({ error: `Tool ${toolName} not found` });
+  }
+  
+  const success = await reloadTool(toolName);
+  if (success) {
+    res.json({ success: true, message: `Tool ${toolName} reloaded successfully` });
+  } else {
+    res.status(500).json({ success: false, message: `Failed to reload tool ${toolName}` });
+  }
+});
+
+// GoodCounsel API endpoint
 app.get('/api/good-counsel/overview', async (req, res) => {
   try {
+    const goodCounsel = await loadTool('good_counsel');
     const result = await goodCounsel.execute({});
     const textContent = (result.content[0] && result.content[0].type === 'text' && 'text' in result.content[0]) ? result.content[0].text : '';
     if (textContent && typeof textContent === 'string') {
@@ -941,12 +1026,29 @@ app.use('/auth', authRoutes);
 app.get('/csrf-token', security.getCSRFToken);
 app.get('/security/status', security.securityStatus);
 
+// Clio Webhooks (Track Zeta)
+import { clioWebhookHandler } from './integrations/clio-webhooks.js';
+app.post('/webhooks/clio', clioWebhookHandler);
+
+// Zapier Webhooks (Track Theta)
+import { zapierWebhookHandler } from './integrations/zapier-webhooks.js';
+app.post('/webhooks/zapier', zapierWebhookHandler);
+
+// Apply prompt injection defense to all tool executions
+import { sanitizePromptInput, filterSensitiveData, detectPromptInjection } from './middleware/prompt-injection-defense.js';
+
 app.get('/health', (req, res) => {
+  const health = getToolHealth();
   res.json({ 
     status: 'healthy',
     timestamp: new Date().toISOString(),
     version: '1.0.0',
-    tools_count: 32,
+    tools: {
+      loaded: health.loaded,
+      total: health.total,
+      preloaded: toolsPreloaded,
+      circuitBreakers: health.circuitBreakers
+    },
     uptime: process.uptime(),
     security: {
       jwtEnabled: !!process.env.JWT_SECRET,
@@ -958,59 +1060,17 @@ app.get('/health', (req, res) => {
 
 app.get('/mcp/tools/info', async (req, res) => {
   try {
-    // Validate query parameters if any are added in the future
-    // Currently no parameters, but structure ready for validation
-    
-    const toolsInfo = [
-      // Legal AI Tools
-      { category: 'Legal AI', ...documentAnalyzer.getToolDefinition() },
-      { category: 'Legal AI', ...contractComparator.getToolDefinition() },
-      { category: 'Legal AI', ...goodCounsel.getToolDefinition() },
-      { category: 'Legal AI', ...factChecker.getToolDefinition() },
-      { category: 'Legal AI', ...legalReviewer.getToolDefinition() },
-      { category: 'Legal AI', ...complianceChecker.getToolDefinition() },
-      { category: 'Legal AI', ...qualityAssessor.getToolDefinition() },
-      { category: 'Legal AI', ...workflowManager.getToolDefinition() },
-      { category: 'Legal AI', ...caseManager.getToolDefinition() },
-      { category: 'Legal AI', ...documentProcessor.getToolDefinition() },
-      { category: 'Legal AI', ...aiOrchestrator.getToolDefinition() },
-      { category: 'System', ...systemStatus.getToolDefinition() },
-      
-      // Arkiver Tools
-      { category: 'Data Processing', ...extractConversations.getToolDefinition() },
-      { category: 'Data Processing', ...extractTextContent.getToolDefinition() },
-      { category: 'Data Processing', ...categorizeWithKeywords.getToolDefinition() },
-      { category: 'Data Processing', ...processWithRegex.getToolDefinition() },
-      { category: 'Data Processing', ...generateCategorizedFiles.getToolDefinition() },
-      { category: 'Data Processing', ...runExtractionPipeline.getToolDefinition() },
-      { category: 'Data Processing', ...createArkiverConfig.getToolDefinition() },
-      
-      // Chronometric Tools
-      { category: 'Timekeeping', ...gapIdentifier.getToolDefinition() },
-      { category: 'Timekeeping', ...emailArtifactCollector.getToolDefinition() },
-      { category: 'Timekeeping', ...calendarArtifactCollector.getToolDefinition() },
-      { category: 'Timekeeping', ...documentArtifactCollector.getToolDefinition() },
-      { category: 'Timekeeping', ...recollectionSupport.getToolDefinition() },
-      { category: 'Timekeeping', ...preFillLogic.getToolDefinition() },
-      { category: 'Timekeeping', ...dupeCheck.getToolDefinition() },
-      { category: 'Timekeeping', ...provenanceTracker.getToolDefinition() },
-      
-      // Module/Engine Wrappers
-      { category: 'Module', ...chronometricModuleTool.getToolDefinition() },
-      { category: 'Engine', ...maeEngineTool.getToolDefinition() },
-      { category: 'Engine', ...goodcounselEngineTool.getToolDefinition() },
-      { category: 'Engine', ...potemkinEngineTool.getToolDefinition() },
-    ];
+    const tools = await loadAllToolDefinitions();
+    const toolsInfo = tools.map(tool => ({
+      category: 'Tool',
+      ...tool
+    }));
     
     res.json({ 
       tools: toolsInfo,
       summary: {
         total_tools: toolsInfo.length,
-        legal_ai_tools: toolsInfo.filter(t => t.category === 'Legal AI').length,
-        data_processing_tools: toolsInfo.filter(t => t.category === 'Data Processing').length,
-        timekeeping_tools: toolsInfo.filter(t => t.category === 'Timekeeping').length,
-        modules: toolsInfo.filter(t => t.category === 'Module').length,
-        engines: toolsInfo.filter(t => t.category === 'Engine').length
+        tools_loaded: toolCache.size,
       }
     });
   } catch (error) {
@@ -1021,7 +1081,6 @@ app.get('/mcp/tools/info', async (req, res) => {
 // Arkiver File Upload Endpoint
 app.post('/api/arkiver/upload', security.authenticateJWT, upload.single('file'), async (req, res) => {
   try {
-    // Validate file upload
     const file = (req as any).file;
     
     if (!file) {
@@ -1034,8 +1093,7 @@ app.post('/api/arkiver/upload', security.authenticateJWT, upload.single('file'),
       });
     }
     
-    // Validate file size (100MB limit)
-    const maxFileSize = 100 * 1024 * 1024; // 100MB
+    const maxFileSize = 100 * 1024 * 1024;
     if (file.size > maxFileSize) {
       return res.status(400).json({
         success: false,
@@ -1046,11 +1104,10 @@ app.post('/api/arkiver/upload', security.authenticateJWT, upload.single('file'),
       });
     }
     
-    // Validate metadata if provided
     if (req.body.metadata) {
       const MetadataSchema = z.object({
         sourceType: z.enum(['user-upload', 'email', 'clio', 'courtlistener', 'westlaw', 'manual']).optional(),
-      }).passthrough(); // Allow additional metadata fields
+      }).passthrough();
       
       const metadataValidation = MetadataSchema.safeParse(
         typeof req.body.metadata === 'string' ? JSON.parse(req.body.metadata) : req.body.metadata
@@ -1068,14 +1125,12 @@ app.post('/api/arkiver/upload', security.authenticateJWT, upload.single('file'),
       }
     }
 
-    // Import required modules
     const { defaultStorage } = await import('./modules/arkiver/storage/local.js');
     const { db } = await import('./db.js');
     const { arkiverFiles } = await import('./modules/arkiver/schema.js');
     const path = await import('path');
     const { eq } = await import('drizzle-orm');
     
-    // Parse metadata if provided
     let metadata: any = {};
     if (req.body.metadata) {
       try {
@@ -1087,12 +1142,10 @@ app.post('/api/arkiver/upload', security.authenticateJWT, upload.single('file'),
       }
     }
 
-    // Determine file type from extension
     const ext = path.extname(file.originalname).toLowerCase();
     const fileType = ext.replace('.', '') || 'unknown';
     const mimeType = file.mimetype || 'application/octet-stream';
 
-    // Upload to storage
     const storageResult = await defaultStorage.upload(
       file.buffer,
       file.originalname,
@@ -1109,7 +1162,6 @@ app.post('/api/arkiver/upload', security.authenticateJWT, upload.single('file'),
       });
     }
 
-    // Get user ID from authenticated session
     const user = (req as any).user;
     const userId = user?.userId;
     
@@ -1123,7 +1175,6 @@ app.post('/api/arkiver/upload', security.authenticateJWT, upload.single('file'),
       });
     }
 
-    // Save file record to database
     const [savedFile] = await db
       .insert(arkiverFiles)
       .values({
@@ -1172,7 +1223,6 @@ app.post('/api/arkiver/upload', security.authenticateJWT, upload.single('file'),
 // Arkiver File Status Endpoint
 app.get('/api/arkiver/files/:fileId', async (req, res) => {
   try {
-    // Validate fileId parameter
     const FileIdSchema = z.object({
       fileId: z.string().uuid('File ID must be a valid UUID'),
     });
@@ -1236,59 +1286,92 @@ app.get('/api/arkiver/files/:fileId', async (req, res) => {
 // Mount library routes
 app.use('/api', libraryRoutes);
 
-// Import and mount onboarding routes
-import onboardingRoutes from './routes/onboarding.js';
+// Mount onboarding routes
 app.use('/api', onboardingRoutes);
 
-// Start server
-// Export app for testing
+// Mount beta portal routes
+app.use('/api/beta', betaRoutes);
+
+// ============================================================================
+// SERVER STARTUP
+// ============================================================================
+
 export { app };
 
-// Load skills at startup before server accepts connections
-// This prevents race conditions where skill tools are called before skills are loaded
+// Load skills at startup (non-blocking)
 async function loadSkillsBeforeStartup() {
   try {
     const { skillRegistry } = await import('./skills/skill-registry.js');
     await skillRegistry.loadAll();
-    console.log(`[Skills] Loaded ${skillRegistry.getCount()} skills`);
+    console.error(`[Skills] Loaded ${skillRegistry.getCount()} skills`);
   } catch (error) {
     console.error('[Skills] Failed to load skills:', error);
-    // Don't fail startup if skills fail to load, but log the error
   }
 }
 
-// Start server if this file is run directly (not imported)
-// In test environments, the app will be imported and a test server created
-if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith('http-bridge.ts')) {
-  // Wait for skills to load before starting server to prevent race conditions
-  loadSkillsBeforeStartup().then(() => {
+// Start server if this file is run directly
+const shouldStartServer = !process.env.VITEST;
+
+if (shouldStartServer) {
+  console.error('[HTTP Bridge] Starting server...');
+  console.error(`[HTTP Bridge] Port: ${port}`);
+  
+  try {
     const server = app.listen(port, () => {
-    console.log(`Cyrano MCP HTTP Bridge running on port ${port}`);
-    console.log(`Available endpoints:`);
-    console.log(`  GET  /health - Health check`);
-    console.log(`  GET  /mcp/tools - List available tools`);
-    console.log(`  GET  /mcp/tools/info - Detailed tool information`);
-    console.log(`  POST /mcp/execute - Execute a tool`);
-    console.log(`  GET  /mcp/status - Server status`);
-    console.log(`  POST /api/arkiver/upload - Upload file to Arkiver`);
-    console.log(`  GET  /api/arkiver/files/:fileId - Get file status`);
-    console.log(`  POST /api/onboarding/practice-profile - Save practice profile`);
-    console.log(`  GET  /api/onboarding/practice-profile - Get practice profile`);
-    console.log(`  POST /api/library/locations - Add/update library location`);
-    console.log(`  GET  /api/library/locations - List library locations`);
-    console.log(`  GET  /api/library/items - List library items`);
-    console.log(`  POST /api/library/items/:id/pin - Toggle pin status`);
-    console.log(`  POST /api/library/items/:id/ingest - Enqueue for RAG ingestion`);
-    console.log(`  GET  /api/health/library - Library health status`);
-    }).catch((error) => {
+      console.error(`✅ Cyrano MCP HTTP Bridge running on port ${port}`);
+      console.error(`Available endpoints:`);
+      console.error(`  GET  /health - Health check`);
+      console.error(`  GET  /mcp/tools - List available tools`);
+      console.error(`  GET  /mcp/tools/info - Detailed tool information`);
+      console.error(`  GET  /mcp/tools/health - Tool health monitoring`);
+      console.error(`  POST /mcp/tools/:toolName/reload - Hot reload a tool`);
+      console.error(`  POST /mcp/execute - Execute a tool`);
+      console.error(`  GET  /mcp/status - Server status`);
+      console.error(`  POST /api/arkiver/upload - Upload file to Arkiver`);
+      console.error(`  GET  /api/arkiver/files/:fileId - Get file status`);
+      console.error(`  POST /api/onboarding/practice-profile - Save practice profile`);
+      console.error(`  GET  /api/onboarding/practice-profile - Get practice profile`);
+      console.error(`  POST /api/library/locations - Add/update library location`);
+      console.error(`  GET  /api/library/locations - List library locations`);
+      console.error(`  GET  /api/library/items - List library items`);
+      console.error(`  POST /api/library/items/:id/pin - Toggle pin status`);
+      console.error(`  POST /api/library/items/:id/ingest - Enqueue for RAG ingestion`);
+      console.error(`  GET  /api/health/library - Library health status`);
+      console.error(`[HTTP Bridge] Server started - tools will load on-demand`);
+    });
+    
+    server.on('error', (error: Error) => {
       console.error('[HTTP Bridge] Failed to start server:', error);
       process.exit(1);
     });
-  }).catch((error) => {
-    console.error('[HTTP Bridge] Failed to load skills before startup:', error);
-    // Still start server even if skills fail to load
-    const server = app.listen(port, () => {
-      console.log(`Cyrano MCP HTTP Bridge running on port ${port} (skills not loaded)`);
+    
+    // Start background tasks (non-blocking)
+    loadSkillsBeforeStartup().catch((error) => {
+      console.error('[HTTP Bridge] Failed to load skills (non-blocking):', error);
     });
-  });
+    
+    // Preload tools in background (non-blocking)
+    preloadToolsInBackground().catch((error) => {
+      console.error('[HTTP Bridge] Failed to preload tools (non-blocking):', error);
+    });
+    
+    // Initialize Custodian engine automatically (non-blocking)
+    import('./engines/registry.js').then(({ engineRegistry }) => {
+      const custodian = engineRegistry.get('custodian');
+      if (custodian) {
+        custodian.initialize().catch((error) => {
+          console.error('[HTTP Bridge] Failed to initialize Custodian (non-blocking):', error);
+        });
+      }
+    }).catch((error) => {
+      console.error('[HTTP Bridge] Failed to load engine registry:', error);
+    });
+    
+    console.error('[HTTP Bridge] Startup sequence complete.');
+  } catch (error) {
+    console.error('[HTTP Bridge] Fatal error during startup:', error);
+    process.exit(1);
+  }
+} else {
+  console.error('[HTTP Bridge] Not starting server (test environment detected)');
 }

@@ -7,11 +7,12 @@
 import { BaseTool } from './base-tool.js';
 import { z } from 'zod';
 import { AIService } from '../services/ai-service.js';
-import { ValueBillingEngine, WorkEvent, BillingPolicy, RecommendedEntry } from '../services/value-billing-engine.js';
+import { TimeEstimationEngine, WorkEvent, TimeEstimationPolicy, EstimatedEntry } from '../services/time-estimation-engine.js';
 import { LocalActivityService } from '../services/local-activity.js';
 import { IMAPEmailService, IMAPConfig } from '../services/email-imap.js';
 import { WestlawImportService } from '../services/westlaw-import.js';
 import { ClioClient } from '../services/clio-client.js';
+import { logAgentAction } from '../services/audit-logger.js';
 
 const AnalyzeSchema = z.object({
   action: z.literal('analyze_period'),
@@ -35,7 +36,7 @@ const AnalyzeSchema = z.object({
     }).optional(),
   }).default({}),
   policy: z.object({
-    mode: z.enum(['value','actual','blended']).default('value'),
+    mode: z.enum(['actual','estimated','blended']).default('estimated'),
     blendRatio: z.number().optional(),
     normativeRules: z.array(z.object({
       task: z.string(),
@@ -45,6 +46,10 @@ const AnalyzeSchema = z.object({
     minIncrementMinutes: z.number().optional(),
     roundUp: z.boolean().optional(),
     capMultiplier: z.number().optional(),
+    includeLexFiatTime: z.boolean().optional(),
+    includeToolTime: z.boolean().optional(),
+    includeReviewTime: z.boolean().optional(),
+    reviewTimeMultiplier: z.number().optional(),
   }).optional(),
 }).strict();
 
@@ -71,7 +76,10 @@ export const timeValueBilling = new (class extends BaseTool {
   getToolDefinition() {
     return {
       name: 'time_value_billing',
-      description: 'Aggregate attorney work across sources and compute value-billing recommendations; optionally push to Clio.',
+      description: 'Aggregate attorney work across sources and compute TIME ESTIMATES (LexFiat + tools + attorney review/verification). ' +
+        'MRPC COMPLIANCE: This provides TIME ESTIMATES, not billing recommendations. Attorneys must bill only for time ACTUALLY SPENT. ' +
+        'Value billing (billing based on estimated value rather than actual time) is NOT compliant with MRPC. ' +
+        'Optionally push time entries to Clio.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -102,7 +110,15 @@ export const timeValueBilling = new (class extends BaseTool {
 
   public async handleAnalyze(input: z.infer<typeof AnalyzeSchema>) {
     const aiService = new AIService();
-    const engine = new ValueBillingEngine(aiService);
+    const engine = new TimeEstimationEngine(aiService);
+
+    logAgentAction(
+      'time-estimation-tool',
+      'analyze_period',
+      `Analyzing time period ${input.start} to ${input.end}`,
+      undefined,
+      { start: input.start, end: input.end, sources: Object.keys(input.sources) }
+    );
 
     const events: WorkEvent[] = [];
 
@@ -180,13 +196,32 @@ export const timeValueBilling = new (class extends BaseTool {
       }
     }
 
-    const policy: BillingPolicy = input.policy || { mode: 'value', aiNormative: true, minIncrementMinutes: 6, roundUp: true };
-    const recs: RecommendedEntry[] = await engine.recommend(events, policy);
+    const policy: TimeEstimationPolicy = input.policy || {
+      mode: 'estimated',
+      aiNormative: true,
+      minIncrementMinutes: 6,
+      roundUp: true,
+      includeLexFiatTime: true,
+      includeToolTime: true,
+      includeReviewTime: true,
+      reviewTimeMultiplier: 0.3
+    };
+    const estimates: EstimatedEntry[] = await engine.estimate(events, policy);
+
+    logAgentAction(
+      'time-estimation-tool',
+      'analyze_period_complete',
+      `Time estimation complete: ${estimates.length} estimates generated`,
+      undefined,
+      { eventCount: events.length, estimateCount: estimates.length }
+    );
 
     return this.createSuccessResult(JSON.stringify({
       period: { start: input.start, end: input.end },
-      counts: { events: events.length, recommendations: recs.length },
-      recommendations: recs,
+      counts: { events: events.length, estimates: estimates.length },
+      estimates: estimates,
+      complianceWarning: 'IMPORTANT: MRPC Compliance - These are TIME ESTIMATES, not billing recommendations. ' +
+        'Attorneys must bill only for time ACTUALLY SPENT on tasks. Value billing is NOT compliant with MRPC.',
     }, null, 2));
   }
 

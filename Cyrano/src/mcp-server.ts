@@ -123,6 +123,8 @@ import {
 import { cyranoPathfinder } from './tools/cyrano-pathfinder.js';
 import { skillExecutor } from './tools/skill-executor.js';
 import { mcrValidator } from './tools/mcr-validator.js';
+import { custodianEngineTool } from './tools/custodian-engine.js';
+import { betaTestSupport } from './tools/beta-test-support.js';
 
 class CyranoMCPServer {
   private server: Server;
@@ -258,6 +260,12 @@ class CyranoMCPServer {
           skillExecutor.getToolDefinition(),
           // MCR Compliance Validator
           mcrValidator.getToolDefinition(),
+          // MiCourt Query
+          micourtQuery.getToolDefinition(),
+          // Custodian Engine
+          custodianEngineTool.getToolDefinition(),
+          // Beta Test Support
+          betaTestSupport.getToolDefinition(),
         ],
       };
     });
@@ -530,6 +538,12 @@ class CyranoMCPServer {
             break;
           case 'skill_executor':
             result = await skillExecutor.execute(args);
+            break;
+          case 'custodian_engine':
+            result = await custodianEngineTool.execute(args);
+            break;
+          case 'beta_test_support':
+            result = await betaTestSupport.execute(args);
             break;
           default:
             throw new Error(`Unknown tool: ${name}`);

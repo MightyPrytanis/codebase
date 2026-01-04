@@ -177,10 +177,12 @@ export default function Header({ attorney, onAdminClick, onSettingsClick, onProf
                 <HelpCircle size={18} />
                 <span>Help</span>
               </div>
-              <div className="menu-panel-item admin" onClick={() => { if (onAdminClick) onAdminClick(); else expandPanel('admin'); }}>
-                <Settings size={18} />
-                <span>Admin</span>
-              </div>
+              {isAdminSync() && (
+                <div className="menu-panel-item admin" onClick={() => { if (onAdminClick) onAdminClick(); else expandPanel('admin'); }}>
+                  <Settings size={18} />
+                  <span>Admin</span>
+                </div>
+              )}
               <div className="menu-panel-item" onClick={() => { if (onSettingsClick) onSettingsClick(); else expandPanel('settings'); }}>
                 <Settings size={18} />
                 <span>Settings</span>

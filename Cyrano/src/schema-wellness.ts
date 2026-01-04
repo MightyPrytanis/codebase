@@ -21,7 +21,7 @@ export const wellnessJournalEntries = pgTable('wellness_journal_entries', {
   
   // Emotional/metadata (encrypted)
   mood: text('mood'), // User-provided mood (encrypted)
-  tags: jsonb('tags').$type<string[]>().default([]), // Tags (encrypted array)
+  tags: jsonb('tags').$type<string | string[]>().default([]), // Tags: encrypted JSON string (new) or array of encrypted strings (old format for migration)
   
   // Voice recording (if applicable)
   voiceAudioPath: text('voice_audio_path'), // Path to encrypted audio file (encrypted)

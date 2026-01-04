@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import standardized hover effects */
+@import './styles/hover-effects.css';
+
 :root {
   /* Piquette Color System */
   --piq-ocean-deep: #0A1A2A;

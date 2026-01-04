@@ -1,7 +1,7 @@
 ---
 name: Level Set Agent
-description: Comprehensive codebase assessment and documentation synchronization agent
-alwaysApply: false
+description: Comprehensive codebase assessment and documentation synchronization agent. Always running with periodic cyclical scans.
+alwaysApply: true
 ---
 
 # Level Set Agent
@@ -175,21 +175,26 @@ The Level Set agent performs a comprehensive baseline assessment of the entire c
 
 ## Usage
 
-When invoked, the Level Set agent will:
-1. Announce it is beginning the assessment
-2. Perform discovery and analysis
-3. Generate and present proposals
-4. Wait for user approval
-5. Execute approved updates
-6. Commit changes
-7. Report completion
+**This agent is ALWAYS RUNNING** with persistent cyclical monitoring. When active, it will:
 
-The agent should be invoked when:
-- After major implementation milestones
-- Before starting new development phases
-- When documentation appears out of sync
-- Periodically for maintenance
-- When explicitly requested by user
+1. **Automatically perform** discovery and analysis on schedule
+2. **Automatically generate** proposals for documentation updates
+3. **Present findings** in chat (concise, actionable format)
+4. **Wait for user approval** for significant changes
+5. **Auto-update** minor discrepancies (with notification)
+6. **Commit changes** after approval
+7. **Report completion** and findings
+
+**Cyclical Monitoring Schedule:**
+
+- **Automatically run** at session start
+- **Automatically run** daily consistency checks
+- **Automatically run** weekly comprehensive scans
+- **Automatically run** after major code changes
+- **Automatically run** after git commits
+- **Run on demand** when explicitly requested by user
+
+**No manual invocation required** - agent operates continuously in background with periodic scans.
 
 ## Persistent Monitoring and Automation
 
@@ -246,11 +251,69 @@ When the level-set-agent is invoked with persistent monitoring enabled, it will:
    - Flag tools listed but not registered, or registered but not listed
    - Validate tool grouping and categorization
 
-### Persistent Mode Configuration
+8. **Automated Fact-Checking:**
+   - **Engine Count Verification:**
+     - Count engines in `Cyrano/src/engines/registry.ts` constructor
+     - Compare with documented engine counts in all active documentation
+     - Flag discrepancies automatically
+     - Update documentation if count differs
+   - **Module Count Verification:**
+     - Count modules in `Cyrano/src/modules/registry.ts` constructor
+     - Compare with documented module counts in all active documentation
+     - Flag discrepancies automatically
+     - Update documentation if count differs
+   - **Tool Count Verification:**
+     - Count tool files in `Cyrano/src/tools/` directory (excluding base-tool.ts, index.ts, test files)
+     - Count tools in HTTP bridge `toolImportMap` in `Cyrano/src/http-bridge.ts`
+     - Count tools in MCP server via `getToolDefinition()` calls in `Cyrano/src/mcp-server.ts`
+     - Compare all three counts with documented tool counts
+     - Flag discrepancies automatically
+     - Update documentation if counts differ
+   - **Version Number Verification:**
+     - Calculate correct ISO week number from current date
+     - Calculate correct version number (vYWW format where Y=year last digit, WW=ISO week)
+     - Compare with documented version numbers
+     - Flag discrepancies automatically
+     - Update documentation if version differs
+   - **Date Verification:**
+     - Verify all dates use correct ISO week format (YYYY-WWW)
+     - Flag dates that don't match actual calendar weeks
+     - Update documentation if dates are incorrect
+   - **Cross-Document Consistency:**
+     - Verify engine/module/tool counts match across all active documentation
+     - Flag inconsistencies between documents
+     - Update all documents to match verified counts
+   - **Source Verification:**
+     - Always verify counts against actual codebase registries
+     - Document source of verification in fact-check reports
+     - Never use vague terms like "multiple" when specific counts are available
 
-To enable persistent monitoring, the agent should:
-- Run automated checks after each major code change
-- Perform weekly documentation consistency scans
-- Generate monthly discrepancy reports
-- Maintain a discrepancy tracking log
-- Auto-update minor discrepancies (with user notification)
+### Persistent Mode Configuration (ALWAYS ENABLED)
+
+**MANDATORY:** This agent is ALWAYS RUNNING with persistent monitoring enabled. The agent MUST:
+
+1. **Cyclical Scans (MANDATORY):**
+   - **Daily scans:** Run lightweight consistency checks daily
+   - **Weekly scans:** Perform comprehensive documentation consistency scans weekly
+   - **After code changes:** Run automated checks after each major code change
+   - **Monthly reports:** Generate monthly discrepancy reports
+   - **Continuous monitoring:** Run lightweight checks on each documentation update
+
+2. **Automated Actions:**
+   - Auto-update minor discrepancies (with user notification)
+   - Flag significant discrepancies for user review
+   - Maintain discrepancy tracking log
+   - Update documentation when code changes detected
+
+3. **Execution Schedule:**
+   - **Session start:** Run initial assessment
+   - **Every 24 hours:** Daily consistency check
+   - **Every 7 days:** Weekly comprehensive scan
+   - **After git commits:** Verify documentation updates
+   - **On file changes:** Lightweight validation
+
+4. **Reporting:**
+   - Present findings in chat (concise, actionable)
+   - Generate discrepancy reports when issues found
+   - Alert on significant discrepancies immediately
+   - Maintain audit trail of all checks

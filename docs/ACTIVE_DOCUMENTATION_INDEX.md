@@ -3,11 +3,11 @@ Document ID: ACTIVE-DOCS-INDEX
 Title: Active Documentation Library Index
 Subject(s): Documentation | Index | Reference
 Project: Cyrano
-Version: v551
+Version: v601
 Created: 2025-11-28 (2025-W48)
-Last Substantive Revision: 2025-12-21 (2025-W51)
-Last Format Update: 2025-12-21 (2025-W51)
-Owner: Director Agent / Cognisint LLC
+Last Substantive Revision: 2025-12-31 (2026-W01)
+Last Format Update: 2025-12-31 (2026-W01)
+Owner: Executor Agent / Cognisint LLC
 Copyright: © 2025 Cognisint LLC
 Summary: Complete index of all active documentation in the docs/ library, verified and cleaned for beta readiness.
 Status: Active - Beta Ready
@@ -15,11 +15,13 @@ Status: Active - Beta Ready
 
 # Active Documentation Library Index
 
-**Total Active Documents:** 40 markdown files  
+**Total Active Documents:** 50 or fewer markdown files (target achieved)  
 **Location:** `/Users/davidtowne/Desktop/Coding/codebase/docs/`  
-**Last Updated:** 2025-12-21 (W51, v551)  
+**Last Updated:** 2025-12-31 (2026-W01, v601) - Consolidation Complete  
+**Agent Refactoring:** 2025-12-29 - All agents refactored and renamed  
 **Status:** ✅ **VERIFIED AND CLEANED** - Ready for beta release  
-**Cleanup Date:** 2025-12-21 - All obsolete status reports archived
+**Cleanup Date:** 2025-12-21 - All obsolete status reports archived  
+**Consolidation Date:** 2025-12-31 - Documents consolidated and archived
 
 ---
 
@@ -48,14 +50,13 @@ Status: Active - Beta Ready
 
 ---
 
-## Architecture (3 documents)
+## Architecture (5 documents)
 
 1. **`architecture/ARCHITECTURE_ARCHITECTURE_ENGINE_ARCHITECTURE.md`** - Engine layer architecture (Tools → Modules → Engines → Apps)
 2. **`architecture/ARCHITECTURE_ARCHITECTURE_MODULE_ARCHITECTURE.md`** - Module layer architecture
 3. **`architecture/ARKIVER_ARCHITECTURE_GUIDE.md`** - **Authoritative source for Arkiver architecture**
-
-### Skills Documentation
 4. **`architecture/SKILLS_IMPLEMENTATION.md`** - Skills system implementation documentation
+5. **`architecture/CUSTODIAN_ENGINE_COMPLETE.md`** - Custodian Engine complete documentation (consolidated from enhancements, architectural review, and skills review)
 
 ---
 
@@ -105,18 +106,19 @@ Status: Active - Beta Ready
 
 ---
 
-## Additional Documentation (3 documents)
+## Additional Documentation (5 documents)
 
 1. **`CYRANO_PATHFINDER_README.md`** - Cyrano Pathfinder README
 2. **`GoodCounsel.md`** - GoodCounsel documentation
 3. **`SETUP_CODACY.md`** - Codacy setup guide
+4. **`DOCUMENTATION_CLEANUP_HISTORY.md`** - Historical record of documentation cleanup efforts (consolidated from plan and report)
+5. **`TOOL_REGISTRATION_VERIFICATION_2025-12-31.md`** - Tool registration verification report
 
 ---
 
-## Index Documents (2 documents)
+## Index Documents (1 document)
 
-1. **`ACTIVE_DOCUMENTATION_INDEX.md`** - This document
-2. **`ACTIVE_DOCUMENTATION_SUMMARY.md`** - Documentation summary (pre-consolidation)
+1. **`ACTIVE_DOCUMENTATION_INDEX.md`** - This document (consolidated from INDEX and SUMMARY)
 
 ---
 
@@ -158,19 +160,23 @@ Status: Active - Beta Ready
 
 ### Tools Layer
 - **Status:** ✅ Active
-- **Count:** 69+ tool implementations (verified in codebase)
+- **Tool Files:** 60 files in `Cyrano/src/tools/` directory
+- **HTTP Bridge Registration:** 82 tools registered in `toolImportMap`
+- **MCP Server Registration:** 82 tools registered (after adding missing tools)
+- **Note:** Some files export multiple tools; HTTP bridge has tools not yet migrated to MCP server
 - **Base Class:** `Cyrano/src/tools/base-tool.ts` ✅
 - **Documentation:** `architecture/ARCHITECTURE_ARCHITECTURE_MODULE_ARCHITECTURE.md` (explains tool composition)
+- **Verification:** See `TOOL_REGISTRATION_VERIFICATION_2025-12-31.md` for detailed breakdown
 
 ### Modules Layer
 - **Status:** ✅ Active
-- **Count:** Multiple modules (arkiver, chronometric, rag, forecast, ethical-ai, billing-reconciliation)
+- **Count:** 11 modules (8 original + 3 Arkiver: tax_forecast, child_support_forecast, qdro_forecast, time_reconstruction, cost_estimation, pattern_learning, ethical_ai, billing_reconciliation, ark_extractor, ark_processor, ark_analyst)
 - **Base Class:** `Cyrano/src/modules/base-module.ts` ✅
 - **Documentation:** `architecture/ARCHITECTURE_ARCHITECTURE_MODULE_ARCHITECTURE.md`
 
 ### Engines Layer
 - **Status:** ✅ Active
-- **Count:** 5 engines (goodcounsel, mae, potemkin, forecast, chronometric)
+- **Count:** 6 engines (goodcounsel, mae, potemkin, forecast, chronometric, custodian)
 - **Base Class:** `Cyrano/src/engines/base-engine.ts` ✅
 - **Documentation:** `architecture/ARCHITECTURE_ARCHITECTURE_ENGINE_ARCHITECTURE.md`
 - **MAE = Multi-Agent Engine** (verified in code)
@@ -189,4 +195,5 @@ Status: Active - Beta Ready
 
 **This index is maintained as the master reference for all active documentation.**
 
-**Last Cleanup:** 2025-12-21 (Beta Preparation)
+**Last Cleanup:** 2025-12-21 (Beta Preparation)  
+**Last Consolidation:** 2025-12-31 (2026-W01) - Consolidated INDEX and SUMMARY, archived one-offs, consolidated Custodian docs

@@ -16,6 +16,9 @@ import { taxForecastModule, childSupportForecastModule, qdroForecastModule } fro
 import { timeReconstructionModule, costEstimationModule, patternLearningModule } from '../engines/chronometric/modules/index.js';
 import { ethicalAIModule } from './ethical-ai/ethical-ai-module.js';
 import { billingReconciliationModule } from './billing-reconciliation/index.js';
+import { arkExtractorModule } from './arkiver/ark-extractor-module.js';
+import { arkProcessorModule } from './arkiver/ark-processor-module.js';
+import { arkAnalystModule } from './arkiver/ark-analyst-module.js';
 
 class ModuleRegistry {
   private modules: Map<string, BaseModule>;
@@ -34,6 +37,10 @@ class ModuleRegistry {
     this.register(ethicalAIModule);
     // Register Billing Reconciliation module
     this.register(billingReconciliationModule);
+    // Register Arkiver modules (orchestrated by MAE engine)
+    this.register(arkExtractorModule);
+    this.register(arkProcessorModule);
+    this.register(arkAnalystModule);
     // Note: Chronometric is now an Engine (src/engines/chronometric), not a Module
     // Its sub-modules (time_reconstruction, cost_estimation, pattern_learning, etc.) are registered here
   }
