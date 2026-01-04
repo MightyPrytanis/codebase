@@ -21,11 +21,8 @@ exclude_paths:
   - '**/coverage/**'
   - '**/public/**'
   - 'Legacy/**'
-  - 'Cyrano/**'
-  - 'apps/**'
-  - 'LexFiat/**'
-  - 'docs/**'
   - 'Miscellaneous/**'
+  - '.cursor/**'
 
 # Patterns to skip for analysis
 exclude_patterns:

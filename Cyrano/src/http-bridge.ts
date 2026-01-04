@@ -611,7 +611,7 @@ async function reloadTool(toolName: string): Promise<boolean> {
     console.error(`[Tool Loader] Successfully reloaded ${toolName}`);
     return true;
   } catch (error) {
-    console.error('[Tool Loader] Failed to reload %s:', toolName, error);
+    console.error(`[Tool Loader] Failed to reload ${toolName}:`, error);
     return false;
   }
 }
