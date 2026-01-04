@@ -185,6 +185,7 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
             </div>
           )}
         </div>
+      </div>
       </SheetContent>
     </Sheet>
   );

@@ -253,7 +253,7 @@ Current mode: ${mode === 'execute' ? 'EXECUTE (can call tools)' : 'GUIDE (Q&A on
   /**
    * Find relevant skills for a user query (autonomous skill selection)
    */
-  private async findRelevantSkills(message: string, context: any): Promise<any[]> {
+  async findRelevantSkills(message: string, context: any): Promise<any[]> {
     try {
       const allSkills = skillRegistry.getAll();
       if (allSkills.length === 0) return [];
@@ -306,7 +306,7 @@ Current mode: ${mode === 'execute' ? 'EXECUTE (can call tools)' : 'GUIDE (Q&A on
   /**
    * Heuristic-based skill selection when AI selection fails
    */
-  private heuristicSkillSelection(message: string, skills: any[]): any[] {
+  heuristicSkillSelection(message: string, skills: any[]): any[] {
     const lowerMessage = message.toLowerCase();
     const relevantSkills: any[] = [];
 

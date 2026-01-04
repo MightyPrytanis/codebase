@@ -56,7 +56,7 @@ export const PROMPT_INJECTION_PATTERNS: PromptInjectionPattern[] = [
     description: 'Instruction replacement attempt'
   },
   {
-    pattern: /\[INST\]|\[/INST\]/i,
+    pattern: /\[INST\]|\[\/INST\]/i,
     severity: 'medium',
     description: 'Llama instruction format injection'
   },
