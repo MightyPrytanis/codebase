@@ -30,7 +30,7 @@ const ClioIntegrationSchema = z.object({
   parameters: z.record(z.string(), z.any()).optional().describe('Additional parameters'),
 });
 
-export const clioIntegration = new (class extends BaseTool {
+export const clioIntegration: BaseTool = new (class extends BaseTool {
   public clioApiKey: string;
   public clioBaseUrl: string = 'https://app.clio.com/api/v4';
 

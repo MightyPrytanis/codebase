@@ -13,7 +13,7 @@ const SyncManagerSchema = z.object({
   parameters: z.record(z.string(), z.any()).optional().describe('Sync parameters'),
 });
 
-export const syncManager = new (class extends BaseTool {
+export const syncManager: BaseTool = new (class extends BaseTool {
   public syncStates: Map<string, any> = new Map();
   public syncProgress: Map<string, number> = new Map();
 

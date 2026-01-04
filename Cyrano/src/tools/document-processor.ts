@@ -35,7 +35,7 @@ const DocumentProcessorSchema = z.object({
   }).optional().describe('Redaction rules configuration'),
 });
 
-export const documentProcessor = new (class extends BaseTool {
+export const documentProcessor: BaseTool = new (class extends BaseTool {
   getToolDefinition() {
     return {
       name: 'document_processor',

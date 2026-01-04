@@ -68,7 +68,7 @@ export interface GuardResult {
   };
 }
 
-export const ethicalAIGuard = new (class extends BaseTool {
+export const ethicalAIGuard: BaseTool = new (class extends BaseTool {
   getToolDefinition() {
     return {
       name: 'ethical_ai_guard',
