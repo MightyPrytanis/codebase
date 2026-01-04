@@ -12,8 +12,8 @@ import { eq, and, or, desc, asc, like, sql } from 'drizzle-orm';
 const CaseManagerSchema = z.object({
   action: z.enum(['create', 'update', 'get', 'list', 'delete']).describe('Action to perform on case'),
   case_id: z.string().optional().describe('Case ID for the operation'),
-  case_data: z.record(z.any()).optional().describe('Case data for create/update operations'),
-  filters: z.record(z.any()).optional().describe('Filters for list operations'),
+  case_data: z.record(z.string(), z.any()).optional().describe('Case data for create/update operations'),
+  filters: z.record(z.string(), z.any()).optional().describe('Filters for list operations'),
 });
 
 export const caseManager = new (class extends BaseTool {

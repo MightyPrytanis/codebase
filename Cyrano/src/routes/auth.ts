@@ -75,7 +75,7 @@ router.post('/refresh', async (req: Request, res: Response) => {
     if (!validationResult.success && req.body && Object.keys(req.body).length > 0) {
       return res.status(400).json({
         error: 'Invalid request body',
-        details: validationResult.error.errors,
+        details: validationResult.error.issues,
       });
     }
     
@@ -108,7 +108,7 @@ router.post('/verify', (req: Request, res: Response) => {
     if (!validationResult.success && req.body && Object.keys(req.body).length > 0) {
       return res.status(400).json({
         error: 'Invalid request body',
-        details: validationResult.error.errors,
+        details: validationResult.error.issues,
       });
     }
     

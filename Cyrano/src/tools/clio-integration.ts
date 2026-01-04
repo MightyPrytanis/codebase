@@ -27,7 +27,7 @@ const ClioIntegrationSchema = z.object({
   matter_id: z.string().optional().describe('Matter ID'),
   client_id: z.string().optional().describe('Client ID'),
   document_id: z.string().optional().describe('Document ID'),
-  parameters: z.record(z.any()).optional().describe('Additional parameters'),
+  parameters: z.record(z.string(), z.any()).optional().describe('Additional parameters'),
 });
 
 export const clioIntegration = new (class extends BaseTool {

@@ -38,7 +38,7 @@ const EthicalAIGuardSchema = z.object({
     app: z.string().optional().describe('Which app (LexFiat, Arkiver, etc.)'),
     tool: z.string().optional().describe('Which tool generated this'),
   }).optional().describe('Metadata about where this was called from'),
-  facts: z.record(z.any()).optional().describe('Facts for professional ethics rules evaluation'),
+  facts: z.record(z.string(), z.any()).optional().describe('Facts for professional ethics rules evaluation'),
 });
 
 export interface GuardResult {

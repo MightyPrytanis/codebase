@@ -1,17 +1,16 @@
 {
   "name": "@cyrano/arkiver",
   "version": "1.0.0",
-  "description": "Standalone document processing and insight extraction application",
+  "description": "Thin-client MCP application for document processing and insight extraction (backend hosted in Cyrano)",
   "type": "module",
-  "main": "backend/index.js",
   "scripts": {
-    "build": "tsc",
-    "dev": "tsx watch backend/index.ts",
-    "start": "node backend/index.js"
+    "dev": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build",
+    "preview": "cd frontend && npm run preview"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.25.1",
-    "zod": "3.25.76"
+    "zod": "^4.3.4"
   },
   "devDependencies": {
     "@types/node": "^25.0.3",
