@@ -32,7 +32,7 @@ console.error('[HTTP Bridge] CORS imported');
 import dotenv from 'dotenv';
 import multer from 'multer';
 import cookieParser from 'cookie-parser';
-import csurf from 'csurf';
+// CSRF protection now handled by security.ts custom implementation
 console.error('[HTTP Bridge] Basic middleware imported');
 
 // Load environment variables
@@ -726,17 +726,9 @@ app.disable('x-powered-by');
 app.use(security.secureHeaders);
 app.use(cookieParser());
 
-// CSRF protection
-const csrfProtection = csurf({
-  cookie: {
-    httpOnly: true,
-    sameSite: 'lax',
-    secure: process.env.NODE_ENV === 'production',
-  },
-  ignoreMethods: process.env.NODE_ENV === 'test' ? ['GET', 'HEAD', 'OPTIONS', 'POST', 'PUT', 'DELETE', 'PATCH'] : undefined,
-});
+// CSRF protection (using custom implementation from security.ts instead of deprecated csurf)
 if (process.env.NODE_ENV !== 'test') {
-  app.use(csrfProtection);
+  app.use(security.csrfProtection);
 }
 
 // CORS configuration
