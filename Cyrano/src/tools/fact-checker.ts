@@ -31,7 +31,7 @@ const FactCheckerSchema = z.object({
   save_preference: z.boolean().optional().default(false).describe('Save current settings as user preference'),
 });
 
-export const factChecker = new (class extends BaseTool {
+export const factChecker: BaseTool = new (class extends BaseTool {
   getToolDefinition() {
     return {
       name: 'fact_checker',

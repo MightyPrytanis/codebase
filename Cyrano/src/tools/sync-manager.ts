@@ -10,10 +10,10 @@ import { z } from 'zod';
 const SyncManagerSchema = z.object({
   service: z.enum(['clio', 'gmail', 'calendar', 'westlaw', 'icle', 'all']).describe('Service to sync (MiFile removed - use micourt_query for user-initiated docket queries)'),
   action: z.enum(['status', 'sync', 'force_sync']).default('status').describe('Sync action to perform'),
-  parameters: z.record(z.any()).optional().describe('Sync parameters'),
+  parameters: z.record(z.string(), z.any()).optional().describe('Sync parameters'),
 });
 
-export const syncManager = new (class extends BaseTool {
+export const syncManager: BaseTool = new (class extends BaseTool {
   public syncStates: Map<string, any> = new Map();
   public syncProgress: Map<string, number> = new Map();
 

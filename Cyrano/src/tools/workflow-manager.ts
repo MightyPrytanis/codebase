@@ -12,7 +12,7 @@ const WorkflowManagerSchema = z.object({
   workflow_type: z.enum(['compare', 'critique', 'collaborate', 'custom']).optional().describe('Type of workflow to manage'),
   case_id: z.string().optional().describe('Case ID for the workflow'),
   documents: z.array(z.string()).optional().describe('Document IDs to process'),
-  parameters: z.record(z.any()).optional().describe('Workflow parameters'),
+  parameters: z.record(z.string(), z.any()).optional().describe('Workflow parameters'),
   custom_stages: z.array(z.object({
     id: z.string(),
     name: z.string(),
