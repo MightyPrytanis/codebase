@@ -89,7 +89,7 @@ const LibraryLocationSchema = z.object({
   name: z.string().min(1, 'Location name is required'),
   type: z.enum(['local', 'onedrive', 'gdrive', 's3']),
   path: z.string().min(1, 'Path is required'),
-  credentials: z.record(z.any()).optional(),
+  credentials: z.record(z.string(), z.any()).optional(),
   enabled: z.boolean().optional(),
 });
 
@@ -124,7 +124,7 @@ const BaselineConfigSchema = z.object({
   userId: z.string().optional(),
   minimumHoursPerWeek: z.number().min(0).max(168),
   minimumHoursPerDay: z.number().min(0).max(24).optional(),
-  typicalSchedule: z.record(z.number()).optional(),
+  typicalSchedule: z.record(z.string(), z.number()).optional(),
   offDays: z.array(z.string()).optional(),
   useBaselineUntilDataAvailable: z.boolean().optional(),
 });
@@ -156,7 +156,7 @@ router.post('/onboarding/practice-profile', authenticateJWT, async (req: Request
     if (!validationResult.success) {
       return res.status(400).json({ 
         error: 'Invalid practice profile data',
-        details: validationResult.error.errors
+        details: validationResult.error.issues
       });
     }
 
@@ -192,7 +192,7 @@ router.post('/onboarding/baseline-config', authenticateJWT, async (req: Request,
     if (!validationResult.success) {
       return res.status(400).json({ 
         error: 'Invalid baseline config data',
-        details: validationResult.error.errors
+        details: validationResult.error.issues
       });
     }
 
@@ -272,7 +272,7 @@ router.post('/library/locations', authenticateJWT, async (req: Request, res: Res
     if (!validationResult.success) {
       return res.status(400).json({ 
         error: 'Invalid library location data',
-        details: validationResult.error.errors
+        details: validationResult.error.issues
       });
     }
 
@@ -318,7 +318,7 @@ router.post('/library/locations/:id/sync', authenticateJWT, async (req: Request,
     if (!idValidation.success) {
       return res.status(400).json({
         error: 'Invalid location ID format',
-        details: idValidation.error.errors,
+        details: idValidation.error.issues,
       });
     }
 
@@ -513,7 +513,7 @@ router.get('/library/items', authenticateJWT, async (req: Request, res: Response
     if (!validationResult.success) {
       return res.status(400).json({ 
         error: 'Invalid filter parameters',
-        details: validationResult.error.errors
+        details: validationResult.error.issues
       });
     }
 
@@ -545,7 +545,7 @@ router.get('/library/items/:id', authenticateJWT, async (req: Request, res: Resp
     if (!validationResult.success) {
       return res.status(400).json({
         error: 'Invalid item ID format',
-        details: validationResult.error.errors,
+        details: validationResult.error.issues,
       });
     }
 
@@ -604,7 +604,7 @@ router.post('/library/items', authenticateJWT, async (req: Request, res: Respons
     if (!validationResult.success) {
       return res.status(400).json({ 
         error: 'Invalid library item data',
-        details: validationResult.error.errors
+        details: validationResult.error.issues
       });
     }
 
@@ -653,7 +653,7 @@ router.delete('/library/items/:id', authenticateJWT, async (req: Request, res: R
     if (!validationResult.success) {
       return res.status(400).json({
         error: 'Invalid item ID format',
-        details: validationResult.error.errors,
+        details: validationResult.error.issues,
       });
     }
 
@@ -714,7 +714,7 @@ router.post('/library/items/upload', authenticateJWT, upload.single('file'), asy
     if (!validationResult.success) {
       return res.status(400).json({
         error: 'Invalid upload request data',
-        details: validationResult.error.errors,
+        details: validationResult.error.issues,
       });
     }
 
@@ -790,7 +790,7 @@ router.post('/library/items/:id/ingest', authenticateJWT, async (req: Request, r
     if (!validationResult.success) {
       return res.status(400).json({ 
         error: 'Invalid ingest request data',
-        details: validationResult.error.errors
+        details: validationResult.error.issues
       });
     }
 
@@ -815,7 +815,7 @@ router.post('/library/items/:id/ingest', authenticateJWT, async (req: Request, r
     if (!idValidation.success) {
       return res.status(400).json({
         error: 'Invalid item ID format',
-        details: idValidation.error.errors,
+        details: idValidation.error.issues,
       });
     }
     

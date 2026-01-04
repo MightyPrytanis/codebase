@@ -22,6 +22,10 @@ on:
       - 'docs/**'
       - 'Miscellaneous/**'
       - 'node_modules/**'
+      - '.cursor/**'
+      - '.cursorignore'
+      - '.gitmodules'
+      - 'Labs/**'
   pull_request:
     branches: [ "main" ]
     paths-ignore:
@@ -32,6 +36,10 @@ on:
       - 'docs/**'
       - 'Miscellaneous/**'
       - 'node_modules/**'
+      - '.cursor/**'
+      - '.cursorignore'
+      - '.gitmodules'
+      - 'Labs/**'
   schedule:
     - cron: '25 14 * * 4'
 

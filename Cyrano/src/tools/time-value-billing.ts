@@ -32,7 +32,7 @@ const AnalyzeSchema = z.object({
     clio: z.object({
       api_key: z.string(),
       base_url: z.string().optional(),
-      query: z.record(z.any()).optional(),
+      query: z.record(z.string(), z.any()).optional(),
     }).optional(),
   }).default({}),
   policy: z.object({

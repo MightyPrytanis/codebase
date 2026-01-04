@@ -17,7 +17,7 @@ const EmailArtifactCollectorSchema = z.object({
   keywords: z.array(z.string()).optional().describe('Optional keywords to filter emails'),
 });
 
-export const emailArtifactCollector = new (class extends BaseTool {
+export const emailArtifactCollector: BaseTool = new (class extends BaseTool {
   getToolDefinition() {
     return {
       name: 'email_artifact_collector',

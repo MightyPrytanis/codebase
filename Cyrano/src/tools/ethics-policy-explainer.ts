@@ -48,7 +48,7 @@ export interface PolicyExplanation {
   };
 }
 
-export const ethicsPolicyExplainer = new (class extends BaseTool {
+export const ethicsPolicyExplainer: BaseTool = new (class extends BaseTool {
   getToolDefinition() {
     return {
       name: 'ethics_policy_explainer',

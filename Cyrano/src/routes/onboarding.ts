@@ -54,7 +54,7 @@ const BaselineConfigSchema = z.object({
   minimumHoursPerWeek: z.number().min(0).max(168),
   minimumHoursPerDay: z.number().min(0).max(24).optional(),
   useBaselineUntilEnoughData: z.boolean().default(true),
-  typicalSchedule: z.record(z.number()).optional(), // day-of-week hours
+  typicalSchedule: z.record(z.string(), z.number()).optional(), // day-of-week hours
   offDays: z.array(z.string()).optional(), // ISO date strings
 });
 
@@ -259,7 +259,7 @@ router.get('/onboarding/status', authenticateJWT, async (req: Request, res: Resp
       return res.status(400).json({
         success: false,
         error: 'Invalid query parameters',
-        details: validationResult.error.errors,
+        details: validationResult.error.issues,
       });
     }
     
@@ -497,7 +497,7 @@ router.get('/onboarding/load-progress', authenticateJWT, async (req: Request, re
       return res.status(400).json({
         success: false,
         error: 'Invalid query parameters',
-        details: validationResult.error.errors,
+        details: validationResult.error.issues,
       });
     }
     

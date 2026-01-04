@@ -20,7 +20,7 @@ const ChatGPTConversationSchema = z.object({
   title: z.string().optional(),
   create_time: z.number().optional(),
   update_time: z.number().optional(),
-  mapping: z.record(z.any()).optional(),
+  mapping: z.record(z.string(), z.any()).optional(),
   moderation_results: z.array(z.any()).optional(),
 });
 

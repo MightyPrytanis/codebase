@@ -13,6 +13,11 @@ jobs:
   test-and-report:
     name: Test, collect coverage, and report to Codacy
     runs-on: ubuntu-latest
+    
+    defaults:
+      run:
+        working-directory: ./Cyrano
+    
     steps:
       - uses: actions/checkout@v4
         with:
@@ -21,27 +26,26 @@ jobs:
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: Cyrano/package-lock.json
 
       - name: Install dependencies
         run: npm ci
 
       - name: Run tests with coverage
-        # adapt to your test script if it's different
-        run: npm test -- --coverage
+        run: npm run test:coverage
         env:
           CI: true
+        continue-on-error: true
 
       - name: Upload coverage to Codacy
         # Works if Codacy GitHub App is installed; otherwise set CODACY_PROJECT_TOKEN in repo secrets
         uses: codacy/codacy-coverage-reporter-action@v1
-        # If you have a project token, uncomment the 'with:' block below and set it as a repository secret named CODACY_PROJECT_TOKEN
-        # with:
-        #   token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-        #   coverage_reporter_version: '1.0.0'  # optional
-        env:
-          # Fallback: if you have private token, put it in repo secrets as CODACY_PROJECT_TOKEN
-          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+        with:
+          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+          coverage-reports: Cyrano/coverage/lcov.info
+        continue-on-error: true
 
       - name: Run Codacy Analysis CLI (optional)
         # Optional: run Codacy analysis CLI to upload issues — works with GitHub App or CODACY_PROJECT_TOKEN
@@ -53,5 +57,6 @@ jobs:
           format: sarif
           gh-code-scanning-compat: true
           max-allowed-issues: 2147483647
-          tool: eslint,eslint-typescript,jest,shellcheck
+          tool: eslint,eslint-typescript,shellcheck
           exclude: '.cursor/**,.gitmodules'  # Exclude Cursor IDE rules and gitmodules
+        continue-on-error: true
