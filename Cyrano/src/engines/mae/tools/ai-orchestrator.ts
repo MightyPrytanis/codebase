@@ -316,7 +316,7 @@ export const aiOrchestrator = new (class extends BaseTool {
     results.push(...validAnalysis);
 
     // Phase 2: Verification (if we have enough providers)
-    let verificationResults: any[] = [];
+    const verificationResults: any[] = [];
     if (providers.length >= 2 && validAnalysis.length > 0) {
       const verificationProvider = providers[providers.length - 1];
       const analysisSummary = validAnalysis.map(r => r.response).join('\n\n');
@@ -405,7 +405,7 @@ export const aiOrchestrator = new (class extends BaseTool {
       'deepseek': 'You are DeepSeek, an expert AI assistant specializing in comprehensive legal analysis.',
     };
     
-    let basePrompt = prompts[provider] || 'You are an expert AI assistant.';
+    const basePrompt = prompts[provider] || 'You are an expert AI assistant.';
     // Ten Rules will be injected at call site
     return basePrompt;
   }

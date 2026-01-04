@@ -14,32 +14,24 @@ name: "CodeQL Advanced"
 on:
   push:
     branches: [ "main" ]
-    paths-ignore:
-      - 'Legacy/**'
+    paths:
       - 'Cyrano/**'
-      - 'apps/**'
-      - 'LexFiat/**'
+      - 'Labs/Potemkin/**'
+      - 'apps/lexfiat/**'
+      - 'apps/arkiver/**'
       - 'docs/**'
-      - 'Miscellaneous/**'
-      - 'node_modules/**'
-      - '.cursor/**'
-      - '.cursorignore'
-      - '.gitmodules'
-      - 'Labs/**'
+      - '.github/workflows/codeql.yml'
+      - '.github/codeql-config.yml'
   pull_request:
     branches: [ "main" ]
-    paths-ignore:
-      - 'Legacy/**'
+    paths:
       - 'Cyrano/**'
-      - 'apps/**'
-      - 'LexFiat/**'
+      - 'Labs/Potemkin/**'
+      - 'apps/lexfiat/**'
+      - 'apps/arkiver/**'
       - 'docs/**'
-      - 'Miscellaneous/**'
-      - 'node_modules/**'
-      - '.cursor/**'
-      - '.cursorignore'
-      - '.gitmodules'
-      - 'Labs/**'
+      - '.github/workflows/codeql.yml'
+      - '.github/codeql-config.yml'
   schedule:
     - cron: '25 14 * * 4'
 

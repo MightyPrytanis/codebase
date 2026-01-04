@@ -209,7 +209,7 @@ export class ChronometricEngine extends BaseEngine {
           }
           return await this.executeWorkflow(parsed.workflow_id, parsed.input || {});
         
-        case 'execute_module':
+        case 'execute_module': {
           if (!parsed.module_name) {
             return {
               content: [{ type: 'text', text: 'Error: module_name is required for execute_module action' }],
@@ -224,6 +224,7 @@ export class ChronometricEngine extends BaseEngine {
             };
           }
           return await module.execute(parsed.input || {});
+        }
         
         case 'list_workflows':
           return this.listWorkflows();
@@ -235,7 +236,7 @@ export class ChronometricEngine extends BaseEngine {
         case 'check_duplicates':
         case 'recollection_support':
         case 'pre_fill':
-        case 'track_provenance':
+        case 'track_provenance': {
           // Delegate to time_reconstruction module
           const timeReconModule = this.modules.get('time_reconstruction');
           if (timeReconModule) {
@@ -259,8 +260,9 @@ export class ChronometricEngine extends BaseEngine {
             }],
             isError: true,
           };
+        }
         
-        case 'generate_report':
+        case 'generate_report': {
           // Delegate to billing_reconciliation module
           const { moduleRegistry } = await import('../../modules/registry.js');
           const billingModule = moduleRegistry.get('billing_reconciliation');
@@ -282,6 +284,7 @@ export class ChronometricEngine extends BaseEngine {
             }],
             isError: true,
           };
+        }
         
         default:
           return {

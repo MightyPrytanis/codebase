@@ -71,7 +71,7 @@ export class TextProcessor {
    */
   private normalizeText(text: string): string {
     // Normalize line endings
-    let normalized = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    normalized = normalized.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
     
     // Preserve paragraph breaks (double newlines)
     normalized = normalized.replace(/\n{3,}/g, '\n\n');

@@ -346,7 +346,7 @@ export abstract class BaseEngine {
    */
   protected async executeStep(step: WorkflowStep, context: any): Promise<CallToolResult> {
     switch (step.type) {
-      case 'module':
+      case 'module': {
         const module = this.modules.get(step.target);
         if (!module) {
           return {
@@ -365,6 +365,7 @@ export abstract class BaseEngine {
           ? { ...context, ...step.input }
           : context;
         return await module.execute(moduleInput);
+      }
 
       case 'tool':
         // Execute tool by name
@@ -559,7 +560,7 @@ export abstract class BaseEngine {
                                  context.isLegalDocument ||
                                  this.config.name === 'mae' && step.input?.workflow_id?.includes('legal');
           
-          let mrpcWarnings: string[] = [];
+          const mrpcWarnings: string[] = [];
           if (isLegalContent) {
             try {
               const { legalEthicsFramework } = await import('../modules/ethical-ai/ethical-frameworks.js');

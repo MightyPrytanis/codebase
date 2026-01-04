@@ -345,7 +345,7 @@ switch (command) {
   case 'status':
     showStatus();
     break;
-  case 'update':
+  case 'update': {
     const taskId = process.argv[3];
     const status = process.argv[4];
     if (!taskId || !status) {
@@ -354,6 +354,7 @@ switch (command) {
     }
     updateTask(taskId, status);
     break;
+  }
   default:
     console.log('Multi-Agent Coordination System');
     console.log('\nCommands:');

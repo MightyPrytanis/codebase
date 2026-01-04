@@ -309,7 +309,7 @@ export class PotemkinEngine extends BaseEngine {
           }
           return await this.executeWorkflow(parsed.workflow_id, parsed.input || {});
 
-        case 'list_workflows':
+        case 'list_workflows': {
           const workflows = await this.getWorkflows();
           return {
             content: [
@@ -326,6 +326,7 @@ export class PotemkinEngine extends BaseEngine {
               },
             ],
           };
+        }
 
         case 'verify_document':
           return await this.executeWorkflow('verify_document', {
