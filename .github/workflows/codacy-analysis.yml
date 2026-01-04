@@ -39,12 +39,34 @@ jobs:
           CI: true
         continue-on-error: true
 
+      - name: Debug coverage file
+        run: |
+          echo "Checking for coverage file..."
+          if [ -f coverage/lcov.info ]; then
+            echo "✓ Coverage file found at coverage/lcov.info"
+            ls -lh coverage/lcov.info
+          else
+            echo "✗ Coverage file not found at coverage/lcov.info"
+            echo "Contents of coverage directory:"
+            ls -la coverage/ || echo "Coverage directory does not exist"
+          fi
+
       - name: Upload coverage to Codacy
         # Works if Codacy GitHub App is installed; otherwise set CODACY_PROJECT_TOKEN in repo secrets
         uses: codacy/codacy-coverage-reporter-action@v1
         with:
           project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
           coverage-reports: Cyrano/coverage/lcov.info
+        continue-on-error: true
+
+      - name: Upload coverage artifact on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: codacy-coverage-debug
+          path: |
+            Cyrano/coverage/
+          retention-days: 5
         continue-on-error: true
 
       - name: Run Codacy Analysis CLI (optional)

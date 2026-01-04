@@ -4,7 +4,10 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "lint": "echo \"No linter configured for lexfiat\" && exit 0",
+    "lint:fix": "echo \"No linter configured for lexfiat\" && exit 0",
+    "test": "echo \"No tests configured for lexfiat\" && exit 0"
   },
   "dependencies": {
     "@iconify/react": "^6.0.2",
