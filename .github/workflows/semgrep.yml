@@ -13,9 +13,23 @@ name: Semgrep
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - 'Cyrano/**'
+      - 'Labs/Potemkin/**'
+      - 'apps/lexfiat/**'
+      - 'apps/arkiver/**'
+      - 'docs/**'
+      - '.github/workflows/semgrep.yml'
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [ "main" ]
+    paths:
+      - 'Cyrano/**'
+      - 'Labs/Potemkin/**'
+      - 'apps/lexfiat/**'
+      - 'apps/arkiver/**'
+      - 'docs/**'
+      - '.github/workflows/semgrep.yml'
   schedule:
     - cron: '20 19 * * 6'
 
