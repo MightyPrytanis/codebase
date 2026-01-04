@@ -14,7 +14,7 @@ const AIOrchestratorSchema = z.object({
   task_description: z.string().describe('Description of the task to orchestrate'),
   ai_providers: z.array(z.string()).optional().describe('AI providers to use'),
   orchestration_mode: z.enum(['sequential', 'parallel', 'collaborative']).default('collaborative'),
-  parameters: z.record(z.any()).optional().describe('Orchestration parameters'),
+  parameters: z.record(z.string(), z.any()).optional().describe('Orchestration parameters'),
 });
 
 /**

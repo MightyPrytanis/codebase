@@ -12,13 +12,13 @@ const WorkflowArchaeologySchema = z.object({
   start_time: z.string().describe('Start time (ISO 8601)'),
   end_time: z.string().describe('End time (ISO 8601)'),
   granularity: z.enum(['hour', 'day', 'week']).optional().describe('Time granularity (auto-detected if not provided)'),
-  context: z.record(z.any()).optional().describe('Additional context (matter_id, user_id, etc.)'),
+  context: z.record(z.string(), z.any()).optional().describe('Additional context (matter_id, user_id, etc.)'),
   artifacts: z.array(z.object({
     type: z.enum(['email', 'calendar', 'document', 'call', 'other']),
     id: z.string(),
     timestamp: z.string(),
     content: z.string().optional(),
-    metadata: z.record(z.any()).optional(),
+    metadata: z.record(z.string(), z.any()).optional(),
   })).describe('Array of artifact sources'),
 });
 

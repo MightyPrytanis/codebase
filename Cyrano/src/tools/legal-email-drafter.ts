@@ -310,7 +310,7 @@ export const legalEmailDrafter = new (class extends BaseTool {
       return this.createSuccessResult(JSON.stringify(draft, null, 2), responseMetadata);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return this.createErrorResult(`Validation error: ${error.errors.map(e => e.message).join(', ')}`);
+        return this.createErrorResult(`Validation error: ${error.issues.map(e => e.message).join(', ')}`);
       }
       return this.createErrorResult(`Legal email drafting failed: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -552,7 +552,7 @@ export const refineEmailTone = new (class extends BaseTool {
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return this.createErrorResult(`Validation error: ${error.errors.map(e => e.message).join(', ')}`);
+        return this.createErrorResult(`Validation error: ${error.issues.map(e => e.message).join(', ')}`);
       }
       return this.createErrorResult(`Email tone refinement failed: ${error instanceof Error ? error.message : String(error)}`);
     }
@@ -665,7 +665,7 @@ export const validateLegalLanguage = new (class extends BaseTool {
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return this.createErrorResult(`Validation error: ${error.errors.map(e => e.message).join(', ')}`);
+        return this.createErrorResult(`Validation error: ${error.issues.map(e => e.message).join(', ')}`);
       }
       return this.createErrorResult(`Legal language validation failed: ${error instanceof Error ? error.message : String(error)}`);
     }

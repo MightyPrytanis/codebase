@@ -3,21 +3,19 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: pmd
+name: pmd (disabled)
 
 on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-  schedule:
-    - cron: '36 5 * * 0'
+  # Disabled: This workflow is configured for Java projects
+  # but this repository is primarily JavaScript/TypeScript
+  workflow_dispatch:
 
 permissions:
   contents: read
 
 jobs:
   pmd-code-scan:
+    if: ${{ false }} # Disabled - configured for Java but repo is JS/TS
     permissions:
       contents: read # for actions/checkout to fetch code
       security-events: write # for github/codeql-action/upload-sarif to upload SARIF results

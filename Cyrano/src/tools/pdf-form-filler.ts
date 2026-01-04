@@ -22,7 +22,7 @@ const PDFFormFillerSchema = z.object({
  * PDF Form Filler Tool
  * Fills PDF forms with calculated values and applies LexFiat Forecaster™ branding
  */
-export const pdfFormFiller = new (class extends BaseTool {
+export const pdfFormFiller: BaseTool = new (class extends BaseTool {
   constructor() {
     super();
   }

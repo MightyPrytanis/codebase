@@ -34,7 +34,7 @@ const MiCourtQuerySchema = z.object({
   portal: z.enum(['micourt', 'odyssey', 'court-explorer', 'auto']).optional().default('auto').describe('Court portal to use (auto selects based on court)'),
 });
 
-export const micourtQuery = new (class extends BaseTool {
+export const micourtQuery: BaseTool = new (class extends BaseTool {
   private micourtService: MiCourtService;
 
   constructor() {
