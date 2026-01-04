@@ -183,7 +183,9 @@ router.get('/clio/authorize', authLimiter, (req: Request, res: Response) => {
  */
 router.get('/clio/callback', authLimiter, async (req: Request, res: Response) => {
   try {
-    const { code, state: receivedState, error: oauthError } = req.query;
+    const code = typeof req.query.code === 'string' ? req.query.code : undefined;
+    const receivedState = typeof req.query.state === 'string' ? req.query.state : undefined;
+    const oauthError = typeof req.query.error === 'string' ? req.query.error : undefined;
 
     if (oauthError) {
       logSecurityEvent('error', 'clio_oauth_error', `Clio OAuth error: ${oauthError}`);

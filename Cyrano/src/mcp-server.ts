@@ -421,7 +421,7 @@ class CyranoMCPServer {
           case 'potemkin_engine':
             result = await potemkinEngineTool.execute(args);
             break;
-          case 'forecast_engine':
+          case 'forecast_engine': {
             const forecastResult = await forecastEngineTool.execute(args);
             // Normalize result to match CallToolResult type
             if (forecastResult && typeof forecastResult === 'object' && 'content' in forecastResult && Array.isArray(forecastResult.content)) {
@@ -443,6 +443,7 @@ class CyranoMCPServer {
               result = forecastResult as CallToolResult;
             }
             break;
+          }
           // Shared verification tools
           case 'claim_extractor':
             result = await claimExtractor.execute(args);
