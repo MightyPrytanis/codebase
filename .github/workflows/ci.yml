@@ -36,6 +36,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
+      - name: Debug environment
+        run: |
+          echo "Working directory: $(pwd)"
+          echo "Node version: $(node -v)"
+          echo "NPM version: $(npm -v)"
+          echo "Directory contents:"
+          ls -la
+      
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -63,10 +71,21 @@ jobs:
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
         with:
-          file: ./Cyrano/coverage/coverage-final.json
+          file: ./Cyrano/coverage/lcov.info
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: false
+        continue-on-error: true
+      
+      - name: Upload test artifacts on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-artifacts
+          path: |
+            ./Cyrano/coverage/
+            ./Cyrano/test-output.txt
+          retention-days: 5
         continue-on-error: true
 
   quality-gates:
