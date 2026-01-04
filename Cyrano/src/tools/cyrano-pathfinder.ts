@@ -21,7 +21,7 @@ import {
 
 const CyranoPathfinderSchema = z.object({
   message: z.string().describe('User message to the Cyrano Pathfinder'),
-  context: z.record(z.any()).optional().describe('Optional context (app, page, matter, document, etc.)'),
+  context: z.record(z.string(), z.any()).optional().describe('Optional context (app, page, matter, document, etc.)'),
   model: z.enum(['perplexity', 'anthropic', 'openai', 'google', 'xai', 'deepseek'])
     .default('perplexity')
     .describe('AI model to use (default: perplexity)'),
