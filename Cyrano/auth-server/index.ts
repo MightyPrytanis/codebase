@@ -1,4 +1,4 @@
-const express = require('express');
+import express from 'express';
 const app = express();
 
 // Add health check endpoint
@@ -18,14 +18,15 @@ app.get('/health', (req, res) => {
     
     res.status(200).json(healthcheck);
   } catch (error) {
-    healthcheck.message = error.message;
+    const err = error as Error;
+    healthcheck.message = err.message;
     res.status(503).json(healthcheck);
   }
 });
 
 // Optional: More detailed health check with AI provider status
 app.get('/health/detailed', async (req, res) => {
-  const health = {
+  const health: any = {
     status: 'ok',
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
@@ -55,10 +56,11 @@ app.get('/health/detailed', async (req, res) => {
     
     res.json(health);
   } catch (error) {
+    const err = error as Error;
     health.status = 'error';
-    health.error = error.message;
+    health.error = err.message;
     res.status(503).json(health);
   }
 });
 
-module.exports = app;
+export default app;

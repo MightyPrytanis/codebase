@@ -70,8 +70,7 @@ jobs:
           # This will handover control about PR rejection to the GitHub side
           max-allowed-issues: 2147483647
           tool: eslint,eslint-typescript,shellcheck
-          # Exclude non-standard files that cannot be identified
-          exclude: '.cursor/**,.gitmodules'
+
 
       # Upload the SARIF file generated in the previous step
       - name: Upload SARIF results file
