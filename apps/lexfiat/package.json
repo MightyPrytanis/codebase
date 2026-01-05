@@ -31,7 +31,7 @@
     "react": "^19.1.1",
     "react-dom": "^19.2.3",
     "react-icons": "^5.5.0",
-    "tailwind-merge": "^2.6.0",
+    "tailwind-merge": "^3.4.0",
     "vite": "^7.3.0",
     "wouter": "^3.9.0"
   },
