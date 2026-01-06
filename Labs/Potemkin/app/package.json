@@ -13,7 +13,7 @@
     "test": "echo \"No tests configured for Potemkin app\" && exit 0"
   },
   "dependencies": {
-    "react": "^18.2.0",
+    "react": "^19.2.3",
     "react-dom": "^18.2.0",
     "@modelcontextprotocol/sdk": "^1.0.0"
   },
