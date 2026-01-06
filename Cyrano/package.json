@@ -74,7 +74,7 @@
     "@types/node": "^25.0.3",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
-    "@types/uuid": "^9.0.0",
+    "@types/uuid": "^11.0.0",
     "@vitest/coverage-v8": "^4.0.16",
     "@vitest/ui": "^4.0.13",
     "csv-parse": "^6.1.0",
