@@ -78,7 +78,7 @@
     "@vitest/coverage-v8": "^4.0.16",
     "@vitest/ui": "^4.0.13",
     "csv-parse": "^6.1.0",
-    "drizzle-kit": "^0.31.5",
+    "drizzle-kit": "^0.31.8",
     "eslint": "^9.39.2",
     "globals": "^16.5.0",
     "imapflow": "^1.2.4",
