@@ -22,9 +22,9 @@ codebase/
 │   └── forecaster/     # Forecaster frontend application
 ├── Cyrano/              # MCP Server
 │   ├── src/
-│   │   ├── engines/     # Engines (GoodCounsel, MAE, Potemkin, Forecast, Chronometric)
-│   │   ├── modules/    # Modules (Arkiver, Chronometric, RAG, Forecast, Library)
-│   │   ├── tools/       # MCP Tools (61 tools)
+│   │   ├── engines/     # Engines (GoodCounsel, MAE, Potemkin, Forecast, Chronometric, Custodian - 6 engines)
+│   │   ├── modules/    # Modules (11 modules: tax_forecast, child_support_forecast, qdro_forecast, time_reconstruction, cost_estimation, pattern_learning, ethical_ai, billing_reconciliation, ark_extractor, ark_processor, ark_analyst)
+│   │   ├── tools/       # MCP Tools (60 tool files, 82 tools registered)
 │   │   ├── services/   # Services (RAG, legal research, AI, etc.)
 │   │   └── routes/      # API Routes
 │   └── docs/            # Cyrano-specific docs
@@ -67,9 +67,9 @@ codebase/
 
 **MCP Server:**
 - ✅ `Cyrano/` - MCP server (correct location)
-- ✅ `Cyrano/src/engines/` - Engines (GoodCounsel, MAE, Potemkin, Forecast, Chronometric)
-- ✅ `Cyrano/src/modules/` - Modules (Arkiver, Chronometric, RAG, Forecast, Library)
-- ✅ `Cyrano/src/tools/` - MCP Tools (61 tools)
+- ✅ `Cyrano/src/engines/` - Engines (GoodCounsel, MAE, Potemkin, Forecast, Chronometric, Custodian - 6 engines)
+- ✅ `Cyrano/src/modules/` - Modules (11 modules: tax_forecast, child_support_forecast, qdro_forecast, time_reconstruction, cost_estimation, pattern_learning, ethical_ai, billing_reconciliation, ark_extractor, ark_processor, ark_analyst)
+- ✅ `Cyrano/src/tools/` - MCP Tools (60 tool files, 82 tools registered)
 
 **Archived Code:**
 - ✅ `Legacy/old-codebase-artifacts/arkivermj/` - Original Base44 Arkiver (archived)
@@ -124,9 +124,9 @@ The following are intentionally excluded from git (see `.gitignore`):
 
 ### Cyrano
 MCP-compliant AI orchestration server with modular architecture:
-- **Engines:** GoodCounsel, MAE, Potemkin, Forecast, Chronometric
-- **Modules:** Arkiver, Chronometric, RAG, Forecast (tax, child support, QDRO)
-- **Tools:** 61 MCP tools for legal workflow automation
+- **Engines:** GoodCounsel, MAE, Potemkin, Forecast, Chronometric, Custodian (6 engines)
+- **Modules:** 11 modules (tax_forecast, child_support_forecast, qdro_forecast, time_reconstruction, cost_estimation, pattern_learning, ethical_ai, billing_reconciliation, ark_extractor, ark_processor, ark_analyst)
+- **Tools:** 60 tool files, 82 tools registered in HTTP bridge and MCP server
 
 ### LexFiat
 Legal intelligence platform with adaptive workflow engine:

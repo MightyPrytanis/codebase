@@ -15,13 +15,14 @@ Status: Active - Beta Ready
 
 # Active Documentation Library Index
 
-**Total Active Documents:** 50 or fewer markdown files (target achieved)  
+**Total Active Documents:** ~49 markdown files (target achieved - under 50)  
 **Location:** `/Users/davidtowne/Desktop/Coding/codebase/docs/`  
-**Last Updated:** 2025-12-31 (2026-W01, v601) - Consolidation Complete  
+**Last Updated:** 2026-01-07 (2026-W02, v602) - Documentation Review and Cleanup Complete  
 **Agent Refactoring:** 2025-12-29 - All agents refactored and renamed  
 **Status:** ✅ **VERIFIED AND CLEANED** - Ready for beta release  
 **Cleanup Date:** 2025-12-21 - All obsolete status reports archived  
-**Consolidation Date:** 2025-12-31 - Documents consolidated and archived
+**Consolidation Date:** 2025-12-31 - Documents consolidated and archived  
+**Review Date:** 2026-01-07 - Additional consolidation and cleanup completed
 
 ---
 
@@ -33,7 +34,7 @@ Status: Active - Beta Ready
 
 ---
 
-## Policies & Guides (5 documents)
+## Policies & Guides (11 documents)
 
 ### Core Guides
 1. **`GENERAL_GUIDE_PROJECT_POLICIES.md`** - Project policies (versioning, documentation, work protocol, ethics)
@@ -45,18 +46,21 @@ Status: Active - Beta Ready
 ### Integration Guides
 6. **`guides/RAG_INTEGRATION_GUIDE.md`** - RAG integration guide (architecture + usage)
 7. **`guides/CYRANO_ENGINES_USER_GUIDE.md`** - Cyrano engines user guide
-8. **`guides/LEXFIAT_INTEGRATION_STATUS.md`** - LexFiat integration status
+8. **`guides/LEXFIAT_INTEGRATION_STATUS.md`** - LexFiat integration status (consolidated from LEXFIAT_IMPLEMENTATION_PROGRESS.md and LEXFIAT_IMPLEMENTATION_STATUS.md)
 9. **`guides/PRODUCTION_READINESS_ROADMAP.md`** - Production readiness roadmap
+10. **`guides/LEXFIAT_COMPETITIVE_ANALYSIS.md`** - LexFiat competitive analysis and enhancement recommendations
+11. **`guides/LEXFIAT_ENHANCEMENT_RECOMMENDATIONS.md`** - LexFiat security and feature enhancement recommendations
 
 ---
 
-## Architecture (5 documents)
+## Architecture (6 documents)
 
 1. **`architecture/ARCHITECTURE_ARCHITECTURE_ENGINE_ARCHITECTURE.md`** - Engine layer architecture (Tools → Modules → Engines → Apps)
 2. **`architecture/ARCHITECTURE_ARCHITECTURE_MODULE_ARCHITECTURE.md`** - Module layer architecture
 3. **`architecture/ARKIVER_ARCHITECTURE_GUIDE.md`** - **Authoritative source for Arkiver architecture**
 4. **`architecture/SKILLS_IMPLEMENTATION.md`** - Skills system implementation documentation
-5. **`architecture/CUSTODIAN_ENGINE_COMPLETE.md`** - Custodian Engine complete documentation (consolidated from enhancements, architectural review, and skills review)
+5. **`architecture/CUSTODIAN_ENGINE_COMPLETE.md`** - Custodian Engine complete documentation (consolidated from enhancements, architectural review, skills review, and next steps implementation)
+6. **`architecture/BETA_PORTAL_GUIDE.md`** - Beta Test Portal architecture and integration guide (consolidated from BETA_PORTAL_ARCHITECTURE.md and BETA_PORTAL_INTEGRATION_GUIDE.md)
 
 ---
 
@@ -111,7 +115,7 @@ Status: Active - Beta Ready
 1. **`CYRANO_PATHFINDER_README.md`** - Cyrano Pathfinder README
 2. **`GoodCounsel.md`** - GoodCounsel documentation
 3. **`SETUP_CODACY.md`** - Codacy setup guide
-4. **`DOCUMENTATION_CLEANUP_HISTORY.md`** - Historical record of documentation cleanup efforts (consolidated from plan and report)
+4. **`DOCUMENTATION_CLEANUP_HISTORY.md`** - Historical record of documentation cleanup efforts (consolidated from plan, report, and consolidation summary)
 5. **`TOOL_REGISTRATION_VERIFICATION_2025-12-31.md`** - Tool registration verification report
 
 ---
@@ -196,4 +200,5 @@ Status: Active - Beta Ready
 **This index is maintained as the master reference for all active documentation.**
 
 **Last Cleanup:** 2025-12-21 (Beta Preparation)  
-**Last Consolidation:** 2025-12-31 (2026-W01) - Consolidated INDEX and SUMMARY, archived one-offs, consolidated Custodian docs
+**Last Consolidation:** 2025-12-31 (2026-W01) - Consolidated INDEX and SUMMARY, archived one-offs, consolidated Custodian docs  
+**Last Review:** 2026-01-07 (2026-W02) - Consolidated Beta Portal docs, LexFiat status docs, merged implementation history, relocated guides, archived historical reports
