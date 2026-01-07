@@ -23,3 +23,6 @@ export * from './schema-wellness.js';
 
 // Export library schema
 export * from './schema-library.js';
+
+// Export custodian schema
+export * from './schema-custodian.js';

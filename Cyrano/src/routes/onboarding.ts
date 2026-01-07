@@ -22,6 +22,7 @@ import {
 } from '../services/library-service.js';
 import { encryptApiKey } from '../services/sensitive-data-encryption.js';
 import { AIService, type AIProvider } from '../services/ai-service.js';
+import { authenticateJWT } from '../middleware/security.js';
 
 const router = Router();
 const aiService = new AIService();
@@ -94,10 +95,18 @@ const LLMTestSchema = z.object({
  * POST /api/onboarding/practice-profile
  * Save practice profile (Step 1-3 data)
  */
-router.post('/onboarding/practice-profile', async (req: Request, res: Response) => {
+router.post('/onboarding/practice-profile', authenticateJWT, async (req: Request, res: Response) => {
   try {
     const data = PracticeProfileSchema.parse(req.body);
-    const userId = data.userId || 'default-user'; // TODO: Get from auth session
+    const user = (req as any).user;
+    const userId = user?.userId?.toString() || data.userId;
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'User ID is required',
+      });
+    }
     
     const profile = await upsertPracticeProfile(userId, data);
     
@@ -149,13 +158,22 @@ router.post('/onboarding/test-llm-provider', async (req: Request, res: Response)
  * POST /api/onboarding/baseline-config
  * Save Chronometric baseline configuration (Step 6)
  */
-router.post('/onboarding/baseline-config', async (req: Request, res: Response) => {
+router.post('/onboarding/baseline-config', authenticateJWT, async (req: Request, res: Response) => {
   try {
     const data = BaselineConfigSchema.parse(req.body);
+    const user = (req as any).user;
+    const userId = user?.userId?.toString() || data.userId;
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'User ID is required',
+      });
+    }
     
     // TODO: Save to Chronometric service/database
     // For now, store in practice profile integrations
-    const profile = await upsertPracticeProfile(data.userId, {
+    const profile = await upsertPracticeProfile(userId, {
       integrations: {
         chronometric: {
           baseline: {
@@ -188,12 +206,21 @@ router.post('/onboarding/baseline-config', async (req: Request, res: Response) =
  * POST /api/onboarding/integrations
  * Save integration status (Step 7)
  */
-router.post('/onboarding/integrations', async (req: Request, res: Response) => {
+router.post('/onboarding/integrations', authenticateJWT, async (req: Request, res: Response) => {
   try {
     const data = IntegrationStatusSchema.parse(req.body);
+    const user = (req as any).user;
+    const userId = user?.userId?.toString() || data.userId;
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'User ID is required',
+      });
+    }
     
     // Save integration status to practice profile
-    const profile = await upsertPracticeProfile(data.userId, {
+    const profile = await upsertPracticeProfile(userId, {
       integrations: {
         clio: data.clio ? { enabled: data.clio.connected, clientId: undefined } : undefined,
         gmail: data.email?.gmail ? { enabled: data.email.gmail.connected, authenticated: data.email.gmail.connected } : undefined,
@@ -219,7 +246,7 @@ router.post('/onboarding/integrations', async (req: Request, res: Response) => {
  * GET /api/onboarding/status
  * Get onboarding completion status
  */
-router.get('/onboarding/status', async (req: Request, res: Response) => {
+router.get('/onboarding/status', authenticateJWT, async (req: Request, res: Response) => {
   try {
     // Validate query parameters
     const StatusQuerySchema = z.object({
@@ -236,7 +263,16 @@ router.get('/onboarding/status', async (req: Request, res: Response) => {
       });
     }
     
-    const userId = validationResult.data.userId || 'default-user'; // TODO: Get from auth session
+    const user = (req as any).user;
+    const userId = user?.userId?.toString() || validationResult.data.userId;
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'User ID is required',
+      });
+    }
+    
     const appId = validationResult.data.appId || 'lexfiat';
     
     const profile = await getPracticeProfile(userId);
@@ -347,12 +383,22 @@ router.get('/onboarding/status', async (req: Request, res: Response) => {
  * POST /api/onboarding/complete
  * Mark onboarding as complete
  */
-router.post('/onboarding/complete', async (req: Request, res: Response) => {
+router.post('/onboarding/complete', authenticateJWT, async (req: Request, res: Response) => {
   try {
-    const { userId, appId } = z.object({
-      userId: z.string(),
+    const { userId: bodyUserId, appId } = z.object({
+      userId: z.string().optional(),
       appId: z.string().optional(),
     }).parse(req.body);
+    
+    const user = (req as any).user;
+    const userId = user?.userId?.toString() || bodyUserId;
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'User ID is required',
+      });
+    }
     
     const targetAppId = appId || 'lexfiat';
     
@@ -390,16 +436,26 @@ router.post('/onboarding/complete', async (req: Request, res: Response) => {
  * POST /api/onboarding/save-progress
  * Save partial onboarding progress (state management)
  */
-router.post('/onboarding/save-progress', async (req: Request, res: Response) => {
+router.post('/onboarding/save-progress', authenticateJWT, async (req: Request, res: Response) => {
   try {
     const data = z.object({
-      userId: z.string(),
+      userId: z.string().optional(),
       currentStep: z.number().min(1).max(8),
       formData: z.any(), // Flexible form data structure
     }).parse(req.body);
     
+    const user = (req as any).user;
+    const userId = user?.userId?.toString() || data.userId;
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'User ID is required',
+      });
+    }
+    
     // Save progress to practice profile
-    const profile = await upsertPracticeProfile(data.userId, {
+    const profile = await upsertPracticeProfile(userId, {
       integrations: {
         onboarding: {
           completed: false,
@@ -429,7 +485,7 @@ router.post('/onboarding/save-progress', async (req: Request, res: Response) => 
  * GET /api/onboarding/load-progress
  * Load saved onboarding progress
  */
-router.get('/onboarding/load-progress', async (req: Request, res: Response) => {
+router.get('/onboarding/load-progress', authenticateJWT, async (req: Request, res: Response) => {
   try {
     // Validate query parameters
     const LoadProgressQuerySchema = z.object({
@@ -445,7 +501,15 @@ router.get('/onboarding/load-progress', async (req: Request, res: Response) => {
       });
     }
     
-    const userId = validationResult.data.userId || 'default-user'; // TODO: Get from auth session
+    const user = (req as any).user;
+    const userId = user?.userId?.toString() || validationResult.data.userId;
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'User ID is required',
+      });
+    }
     
     const profile = await getPracticeProfile(userId);
     
@@ -504,10 +568,18 @@ const ArkiverConfigSchema = z.object({
   }),
 });
 
-router.post('/onboarding/arkiver-config', async (req: Request, res: Response) => {
+router.post('/onboarding/arkiver-config', authenticateJWT, async (req: Request, res: Response) => {
   try {
     const data = ArkiverConfigSchema.parse(req.body);
-    const userId = data.userId || 'default-user';
+    const user = (req as any).user;
+    const userId = user?.userId?.toString() || data.userId;
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'User ID is required',
+      });
+    }
     
     // Save Arkiver configuration to practice profile
     const profile = await upsertPracticeProfile(userId, {

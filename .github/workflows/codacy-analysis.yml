@@ -94,4 +94,5 @@ jobs:
           gh-code-scanning-compat: true
           max-allowed-issues: 2147483647
           tool: eslint,eslint-typescript,shellcheck
+          exclude: '.cursor/**,.gitmodules'  # Exclude Cursor IDE rules and gitmodules
         continue-on-error: true

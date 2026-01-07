@@ -1,10 +1,10 @@
 ---
-name: Compliance/Enforcement Agent
-description: Specialized agent for security compliance, HIPAA compliance, and regulatory enforcement
+name: Compliance Enforcement Agent
+description: Specialized agent for security compliance, HIPAA compliance, and regulatory enforcement. Ensures all code changes meet security standards and regulatory requirements.
 alwaysApply: false
 ---
 
-# Compliance/Enforcement Agent
+# Compliance Enforcement Agent
 
 ## Purpose
 

@@ -1072,8 +1072,24 @@ export class MaeEngine extends BaseEngine {
           type: 'tool',
           target: 'citation_checker',
           input: { verifyFormat: true, verifySource: true },
+          onSuccess: 'mcr_validation',
+          onFailure: 'mcr_validation',
+        },
+        {
+          id: 'mcr_validation',
+          type: 'tool',
+          target: 'mcr_validator',
+          input: {
+            document: '{{final_draft}}',
+            documentType: '{{document_type}}',
+            caseNumber: '{{case_number}}',
+            court: '{{court}}',
+            checkFormat: true,
+            checkEFiling: true,
+            checkCitations: true,
+          },
           onSuccess: 'potemkin_final_check',
-          onFailure: 'final_review',
+          onFailure: 'potemkin_final_check',
         },
         {
           id: 'potemkin_final_check',
@@ -1118,9 +1134,13 @@ export class MaeEngine extends BaseEngine {
           id: 'collect_calendar',
           type: 'tool',
           target: 'calendar_artifact_collector',
-          input: { matter_id: '{{case_id}}' },
+          input: { 
+            matter_id: '{{case_id}}',
+            // Note: Calendar API not implemented in beta - will fail gracefully if OAuth not configured
+            // See docs/BETA_LIMITATIONS.md for details
+          },
           onSuccess: 'ingest_discovery',
-          onFailure: 'ingest_discovery',
+          onFailure: 'ingest_discovery', // Continue workflow even if calendar collection fails
         },
         {
           id: 'ingest_discovery',

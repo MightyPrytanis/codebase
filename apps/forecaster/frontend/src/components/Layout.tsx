@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Calculator, FileText, Scale } from 'lucide-react';
+import { Calculator, FileText, Scale, TrendingUp, Home, AlertTriangle } from 'lucide-react';
 
 interface LayoutProps {
   children: ReactNode;
@@ -10,58 +10,60 @@ export default function Layout({ children }: LayoutProps) {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm border-b">
+    <div className="min-h-screen bg-warm-white">
+      <header className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <div className="flex items-center">
-              <Calculator className="h-8 w-8 text-blue-600 mr-2" />
-              <h1 className="text-2xl font-bold text-gray-900">
-                LexFiat Forecaster<sup className="text-xs">™</sup>
+            <div className="flex items-center gap-3">
+              <Calculator className="h-8 w-8 text-accent-gold" />
+              <h1 className="text-2xl font-bold text-charcoal">
+                LexFiat Forecaster<sup className="text-xs text-accent-gold">™</sup>
               </h1>
             </div>
-            <nav className="flex space-x-4">
+            <nav className="flex items-center gap-1">
               <Link
                 to="/"
-                className={`px-3 py-2 rounded-md text-sm font-medium ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
                   location.pathname === '/'
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    ? 'bg-accent-gold text-charcoal'
+                    : 'text-charcoal/70 hover:text-charcoal hover:bg-gray-100'
                 }`}
               >
-                Home
+                <Home className="w-4 h-4" />
+                <span className="hidden sm:inline">Home</span>
               </Link>
               <Link
                 to="/tax"
-                className={`px-3 py-2 rounded-md text-sm font-medium ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
                   location.pathname === '/tax'
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    ? 'bg-accent-gold text-charcoal'
+                    : 'text-charcoal/70 hover:text-charcoal hover:bg-gray-100'
                 }`}
               >
-                <FileText className="inline h-4 w-4 mr-1" />
-                Tax
+                <FileText className="w-4 h-4" />
+                <span className="hidden sm:inline">Tax</span>
               </Link>
               <Link
                 to="/support"
-                className={`px-3 py-2 rounded-md text-sm font-medium ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
                   location.pathname === '/support'
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    ? 'bg-accent-gold text-charcoal'
+                    : 'text-charcoal/70 hover:text-charcoal hover:bg-gray-100'
                 }`}
               >
-                <Scale className="inline h-4 w-4 mr-1" />
-                Support
+                <Scale className="w-4 h-4" />
+                <span className="hidden sm:inline">Support</span>
               </Link>
               <Link
                 to="/qdro"
-                className={`px-3 py-2 rounded-md text-sm font-medium ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
                   location.pathname === '/qdro'
-                    ? 'bg-blue-100 text-blue-700'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    ? 'bg-accent-gold text-charcoal'
+                    : 'text-charcoal/70 hover:text-charcoal hover:bg-gray-100'
                 }`}
               >
-                QDRO
+                <TrendingUp className="w-4 h-4" />
+                <span className="hidden sm:inline">QDRO</span>
               </Link>
             </nav>
           </div>
@@ -70,11 +72,20 @@ export default function Layout({ children }: LayoutProps) {
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {children}
       </main>
-      <footer className="bg-white border-t mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <p className="text-center text-sm text-gray-500">
-            LexFiat Forecaster<sup>™</sup> - Hypothetical Forecasts Only. Not Filing Ready.
-          </p>
+      <footer className="bg-white border-t border-gray-200 mt-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-yellow-800">
+                <p className="font-semibold mb-1">Important Disclaimer</p>
+                <p>
+                  All forecasts generated by LexFiat Forecaster<sup>™</sup> are hypothetical and not filing-ready.
+                  They must be reviewed and finalized by qualified professionals before any filing or use in legal proceedings.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </footer>
     </div>

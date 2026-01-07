@@ -1,7 +1,7 @@
 # Codebase - Cyrano Ecosystem Monorepo
 
 **Repository:** [MightyPrytanis/codebase](https://github.com/MightyPrytanis/codebase)  
-**Last Updated:** 2025-12-17  
+**Last Updated:** 2025-12-29  
 **Status:** Active Development
 
 ## Overview
@@ -24,7 +24,7 @@ codebase/
 │   ├── src/
 │   │   ├── engines/     # Engines (GoodCounsel, MAE, Potemkin, Forecast, Chronometric)
 │   │   ├── modules/    # Modules (Arkiver, Chronometric, RAG, Forecast, Library)
-│   │   ├── tools/       # MCP Tools (69 tools)
+│   │   ├── tools/       # MCP Tools (61 tools)
 │   │   ├── services/   # Services (RAG, legal research, AI, etc.)
 │   │   └── routes/      # API Routes
 │   └── docs/            # Cyrano-specific docs
@@ -69,7 +69,7 @@ codebase/
 - ✅ `Cyrano/` - MCP server (correct location)
 - ✅ `Cyrano/src/engines/` - Engines (GoodCounsel, MAE, Potemkin, Forecast, Chronometric)
 - ✅ `Cyrano/src/modules/` - Modules (Arkiver, Chronometric, RAG, Forecast, Library)
-- ✅ `Cyrano/src/tools/` - MCP Tools (71 tools)
+- ✅ `Cyrano/src/tools/` - MCP Tools (61 tools)
 
 **Archived Code:**
 - ✅ `Legacy/old-codebase-artifacts/arkivermj/` - Original Base44 Arkiver (archived)
@@ -126,7 +126,7 @@ The following are intentionally excluded from git (see `.gitignore`):
 MCP-compliant AI orchestration server with modular architecture:
 - **Engines:** GoodCounsel, MAE, Potemkin, Forecast, Chronometric
 - **Modules:** Arkiver, Chronometric, RAG, Forecast (tax, child support, QDRO)
-- **Tools:** 71 MCP tools for legal workflow automation
+- **Tools:** 61 MCP tools for legal workflow automation
 
 ### LexFiat
 Legal intelligence platform with adaptive workflow engine:

@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { RAGService } from '../services/rag-service.js';
 import { checkGeneratedContent } from '../services/ethics-check-helper.js';
 import { systemicEthicsService } from '../services/systemic-ethics-service.js';
+import { hipaaCompliance } from '../services/hipaa-compliance.js';
 
 const RAGQuerySchema = z.object({
   action: z.enum(['query', 'ingest', 'ingest_batch', 'get_context', 'get_stats']).describe('Action to perform'),
@@ -143,11 +144,33 @@ All retrieved information includes source attribution for transparency and verif
     try {
       const { action, query, document, documents, topK, minScore, filterByType, expandQuery, rerank, includeSourceInfo } = RAGQuerySchema.parse(args);
 
+      // Extract user context for audit logging
+      const userId = (args as any).userId || (args as any).user_id || null;
+      const ipAddress = (args as any).ipAddress || (args as any).ip_address;
+      const userAgent = (args as any).userAgent || (args as any).user_agent;
+
       switch (action) {
         case 'query':
           if (!query) {
             return this.createErrorResult('Query string is required for query action');
           }
+          
+          // Log privileged document access (RAG queries access client documents)
+          if (userId) {
+            try {
+              await hipaaCompliance.logAccess(
+                userId,
+                null, // RAG queries may access multiple documents, so no specific entryId
+                'view',
+                ipAddress,
+                userAgent
+              );
+            } catch (auditError) {
+              // Don't fail the operation if audit logging fails
+              console.warn('Failed to log RAG query access:', auditError);
+            }
+          }
+          
           const result = await this.ragService.query(query, {
             topK,
             minScore,
@@ -198,6 +221,23 @@ All retrieved information includes source attribution for transparency and verif
           if (!document) {
             return this.createErrorResult('Document is required for ingest action');
           }
+          
+          // Log privileged document access (ingesting client documents)
+          if (userId) {
+            try {
+              await hipaaCompliance.logAccess(
+                userId,
+                document.id,
+                'create', // Ingesting is creating a new entry in the RAG system
+                ipAddress,
+                userAgent
+              );
+            } catch (auditError) {
+              // Don't fail the operation if audit logging fails
+              console.warn('Failed to log RAG ingest access:', auditError);
+            }
+          }
+          
           const chunkIds = await this.ragService.ingestDocument({
             id: document.id,
             text: document.text,
@@ -219,6 +259,27 @@ All retrieved information includes source attribution for transparency and verif
         case 'ingest_batch':
           if (!documents || documents.length === 0) {
             return this.createErrorResult('Documents array is required for ingest_batch action and must not be empty');
+          }
+          
+          // Log privileged document access for batch ingest
+          if (userId) {
+            try {
+              // Log access for each document in the batch
+              await Promise.all(
+                documents.map(doc =>
+                  hipaaCompliance.logAccess(
+                    userId,
+                    doc.id,
+                    'create',
+                    ipAddress,
+                    userAgent
+                  )
+                )
+              );
+            } catch (auditError) {
+              // Don't fail the operation if audit logging fails
+              console.warn('Failed to log RAG batch ingest access:', auditError);
+            }
           }
           
           // Process documents in parallel with Promise.allSettled to handle individual failures

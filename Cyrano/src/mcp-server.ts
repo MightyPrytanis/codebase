@@ -122,6 +122,9 @@ import {
 } from './tools/arkiver-tools.js';
 import { cyranoPathfinder } from './tools/cyrano-pathfinder.js';
 import { skillExecutor } from './tools/skill-executor.js';
+import { mcrValidator } from './tools/mcr-validator.js';
+import { custodianEngineTool } from './tools/custodian-engine.js';
+import { betaTestSupport } from './tools/beta-test-support.js';
 
 class CyranoMCPServer {
   private server: Server;
@@ -255,6 +258,14 @@ class CyranoMCPServer {
           cyranoPathfinder.getToolDefinition(),
           // Skills Executor
           skillExecutor.getToolDefinition(),
+          // MCR Compliance Validator
+          mcrValidator.getToolDefinition(),
+          // MiCourt Query
+          micourtQuery.getToolDefinition(),
+          // Custodian Engine
+          custodianEngineTool.getToolDefinition(),
+          // Beta Test Support
+          betaTestSupport.getToolDefinition(),
         ],
       };
     });
@@ -410,7 +421,7 @@ class CyranoMCPServer {
           case 'potemkin_engine':
             result = await potemkinEngineTool.execute(args);
             break;
-          case 'forecast_engine':
+          case 'forecast_engine': {
             const forecastResult = await forecastEngineTool.execute(args);
             // Normalize result to match CallToolResult type
             if (forecastResult && typeof forecastResult === 'object' && 'content' in forecastResult && Array.isArray(forecastResult.content)) {
@@ -432,6 +443,7 @@ class CyranoMCPServer {
               result = forecastResult as CallToolResult;
             }
             break;
+          }
           // Shared verification tools
           case 'claim_extractor':
             result = await claimExtractor.execute(args);
@@ -527,6 +539,12 @@ class CyranoMCPServer {
             break;
           case 'skill_executor':
             result = await skillExecutor.execute(args);
+            break;
+          case 'custodian_engine':
+            result = await custodianEngineTool.execute(args);
+            break;
+          case 'beta_test_support':
+            result = await betaTestSupport.execute(args);
             break;
           default:
             throw new Error(`Unknown tool: ${name}`);

@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { IconSprite } from "@/components/ui/icon-sprite";
 import { DemoModeBanner } from "@/components/demo/demo-mode-banner";
 import { ThemeProvider } from "@/components/theme/theme-provider";
+import { ViewModeProvider } from "@/lib/view-mode-context";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { CyranoChatDrawer } from "@/components/cyrano-chat-drawer";
 import { Loader2 } from "lucide-react";
@@ -85,17 +86,19 @@ function App() {
     <ErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider defaultTheme="control-room">
-          <TooltipProvider>
-            <div className="piquette-theme dark min-h-screen">
-              <IconSprite />
-              <DemoModeBanner />
-              <Toaster />
-              <ErrorBoundary>
-                <Router />
-              </ErrorBoundary>
-              <CyranoChatDrawer app="lexfiat" />
-            </div>
-          </TooltipProvider>
+          <ViewModeProvider>
+            <TooltipProvider>
+              <div className="piquette-theme dark min-h-screen">
+                <IconSprite />
+                <DemoModeBanner />
+                <Toaster />
+                <ErrorBoundary>
+                  <Router />
+                </ErrorBoundary>
+                <CyranoChatDrawer app="lexfiat" />
+              </div>
+            </TooltipProvider>
+          </ViewModeProvider>
         </ThemeProvider>
       </QueryClientProvider>
     </ErrorBoundary>

@@ -14,6 +14,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Heart, Target, TrendingDown, Users, Sparkles, ArrowRight, ArrowLeft, CheckCircle2, Shield } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { PrivacyAssurance } from "./goodcounsel-privacy-assurance";
+import { safeSetJSON, safeSetItem } from "@/lib/secure-storage";
 
 interface GuidedSetupProps {
   onComplete: (data: GoodCounselSetupData) => void;
@@ -131,10 +132,10 @@ export function GuidedSetup({ onComplete, onCancel }: GuidedSetupProps) {
       aiInsights: insights
     };
     
-    // Store in localStorage
-    localStorage.setItem('goodcounsel-setup-data', JSON.stringify(setupData));
-    localStorage.setItem('goodcounsel-setup-complete', 'true');
-    localStorage.setItem('goodcounsel-setup-date', new Date().toISOString());
+    // Store in localStorage using secure wrapper
+    safeSetJSON('goodcounsel-setup-data', setupData);
+    safeSetItem('goodcounsel-setup-complete', 'true');
+    safeSetItem('goodcounsel-setup-date', new Date().toISOString());
     
     onComplete(setupData);
   };

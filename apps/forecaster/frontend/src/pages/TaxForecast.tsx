@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { Calculator } from 'lucide-react';
+import { Calculator, Loader2, AlertCircle, CheckCircle2, Download } from 'lucide-react';
+import { generateTaxForecast, type TaxForecastRequest } from '../lib/forecaster-api';
 
 export default function TaxForecast() {
   const [formData, setFormData] = useState({
     year: new Date().getFullYear(),
-    filingStatus: 'single',
+    filingStatus: 'single' as TaxForecastRequest['filingStatus'],
     wages: '',
     selfEmploymentIncome: '',
     interestIncome: '',
@@ -18,32 +19,74 @@ export default function TaxForecast() {
 
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [brandingMode, setBrandingMode] = useState<'strip' | 'watermark' | 'none'>('strip');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
+    setResult(null);
 
     try {
-      // TODO: Connect to actual forecast engine API
-      // For now, show placeholder
-      setTimeout(() => {
-        setResult({
-          message: 'Tax forecast calculation would be performed here',
-          note: 'Connect to forecast engine API endpoint',
-        });
-        setLoading(false);
-      }, 1000);
-    } catch (error) {
-      console.error('Error calculating tax forecast:', error);
+      const request: TaxForecastRequest = {
+        year: formData.year,
+        filingStatus: formData.filingStatus,
+        wages: parseFloat(formData.wages) || 0,
+        selfEmploymentIncome: formData.selfEmploymentIncome ? parseFloat(formData.selfEmploymentIncome) : undefined,
+        interestIncome: formData.interestIncome ? parseFloat(formData.interestIncome) : undefined,
+        dividendIncome: formData.dividendIncome ? parseFloat(formData.dividendIncome) : undefined,
+        capitalGains: formData.capitalGains ? parseFloat(formData.capitalGains) : undefined,
+        standardDeduction: formData.standardDeduction ? parseFloat(formData.standardDeduction) : undefined,
+        itemizedDeductions: formData.itemizedDeductions ? parseFloat(formData.itemizedDeductions) : undefined,
+        dependents: parseInt(formData.dependents) || 0,
+        estimatedWithholding: formData.estimatedWithholding ? parseFloat(formData.estimatedWithholding) : undefined,
+      };
+
+      const response = await generateTaxForecast(request, {
+        presentationMode: brandingMode,
+        userRole: 'other',
+        licensedInAny: false,
+        riskAcknowledged: false,
+      });
+
+      if (response.success) {
+        setResult(response);
+      } else {
+        setError(response.error || 'Failed to generate forecast');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred while generating the forecast');
+    } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold text-gray-900 mb-6">Tax Return Forecast</h1>
+    <div className="max-w-4xl mx-auto space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-charcoal mb-2">Tax Return Forecast</h1>
+        <p className="text-charcoal/70">Generate hypothetical tax return forecasts using IRS forms and calculations</p>
+      </div>
 
-      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md space-y-6">
+      {/* Branding Mode Selector */}
+      <div className="bg-white p-4 rounded-lg border border-gray-200">
+        <label className="block text-sm font-semibold text-charcoal mb-2">Branding Mode</label>
+        <select
+          value={brandingMode}
+          onChange={(e) => setBrandingMode(e.target.value as 'strip' | 'watermark' | 'none')}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md text-charcoal"
+        >
+          <option value="strip">Warning Strip (Default)</option>
+          <option value="watermark">Watermark</option>
+          <option value="none">No Branding (Licensed Attorneys Only)</option>
+        </select>
+        <p className="text-xs text-charcoal/50 mt-1">
+          All forecasts include mandatory LexFiat Forecaster™ branding unless you are a licensed attorney
+        </p>
+      </div>
+
+      <form onSubmit={handleSubmit} className="bg-white p-6 rounded-lg shadow-md border border-gray-200 space-y-6">
         <div className="grid md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -197,25 +240,57 @@ export default function TaxForecast() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center"
+          className="w-full bg-accent-gold hover:bg-accent-gold/90 disabled:bg-gray-400 disabled:cursor-not-allowed text-charcoal font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
         >
           {loading ? (
-            'Calculating...'
+            <>
+              <Loader2 className="h-5 w-5 animate-spin" />
+              Calculating Forecast...
+            </>
           ) : (
             <>
-              <Calculator className="h-5 w-5 mr-2" />
+              <Calculator className="h-5 w-5" />
               Calculate Forecast
             </>
           )}
         </button>
       </form>
 
-      {result && (
-        <div className="mt-6 bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Forecast Results</h2>
-          <pre className="bg-gray-50 p-4 rounded overflow-auto">
-            {JSON.stringify(result, null, 2)}
-          </pre>
+      {error && (
+        <div className="bg-alert-red/10 border border-alert-red/50 rounded-lg p-4 flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-alert-red flex-shrink-0 mt-0.5" />
+          <div>
+            <h3 className="font-semibold text-alert-red mb-1">Error</h3>
+            <p className="text-sm text-alert-red/80">{error}</p>
+          </div>
+        </div>
+      )}
+
+      {result && result.success && (
+        <div className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <CheckCircle2 className="w-6 h-6 text-light-green" />
+              <h2 className="text-xl font-semibold text-charcoal">Forecast Results</h2>
+            </div>
+            <button className="flex items-center gap-2 px-4 py-2 bg-accent-gold hover:bg-accent-gold/90 text-charcoal font-semibold rounded-lg transition-colors">
+              <Download className="w-4 h-4" />
+              Download
+            </button>
+          </div>
+          
+          {result.brandingApplied && (
+            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-sm text-yellow-800">
+              <strong>Branding Applied:</strong> {result.presentationMode === 'strip' ? 'Warning Strip' : 
+                result.presentationMode === 'watermark' ? 'Watermark' : 'None'}
+            </div>
+          )}
+
+          <div className="bg-gray-50 p-4 rounded-lg">
+            <pre className="text-sm text-charcoal overflow-auto">
+              {JSON.stringify(result.calculatedValues, null, 2)}
+            </pre>
+          </div>
         </div>
       )}
     </div>

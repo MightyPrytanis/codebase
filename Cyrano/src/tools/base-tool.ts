@@ -41,6 +41,19 @@ export abstract class BaseTool {
   }
 
   createSuccessResult(content: string, metadata?: any): CallToolResult {
+    // Standard attorney review warning for AI-generated content
+    const attorneyReviewWarning = '⚠️ ATTORNEY REVIEW REQUIRED: This AI-generated content has not been reviewed by a licensed attorney. All legal documents, calculations, and research results must be reviewed and verified by a qualified attorney before use. The system and its developers disclaim all liability for any errors, omissions, or inaccuracies in AI-generated content.';
+
+    // Merge warnings into metadata
+    const enhancedMetadata = {
+      ...metadata,
+      attorneyReviewRequired: true,
+      standardWarning: attorneyReviewWarning,
+      warnings: metadata?.warnings 
+        ? [...metadata.warnings, attorneyReviewWarning]
+        : [attorneyReviewWarning],
+    };
+
     return {
       content: [
         {
@@ -49,7 +62,7 @@ export abstract class BaseTool {
         },
       ],
       isError: false,
-      metadata,
+      metadata: enhancedMetadata,
     };
   }
 }

@@ -3,10 +3,10 @@ Document ID: PROJECT-CHANGE-LOG
 Title: Cyrano Project Change Log
 Subject(s): Project | History | Development
 Project: Cyrano
-Version: v550
+Version: v601
 Created: 2025-11-28 (2025-W48)
-Last Substantive Revision: 2025-12-16 (2025-W50)
-Last Format Update: 2025-12-16 (2025-W50)
+Last Substantive Revision: 2025-12-31 (2026-W01)
+Last Format Update: 2025-12-31 (2026-W01)
 Owner: David W Towne / Cognisint LLC
 Copyright: © 2025 Cognisint LLC
 Summary: Consolidated running log of all project changes, structured by work plan steps.
@@ -17,10 +17,129 @@ Related Documents: REALISTIC-WORK-PLAN
 # Cyrano Project Change Log
 
 **Project Start:** July 2025  
-**Last Updated:** 2025-12-21  
-**Last Substantive Revision:** 2025-12-21 (2025-W51)  
+**Last Updated:** 2025-12-31 (2026-W01)  
+**Last Substantive Revision:** 2025-12-31 (2026-W01)  
 **Auditor General DRAFT Report:** Issued 2025-12-21 (see `docs/AUDITOR_GENERAL_REPORT.md`)  
 **Structure:** Organized by work plan steps (see REALISTIC_WORK_PLAN.md)
+
+## Agent Force Refactoring (2025-12-29)
+
+**Status:** ✅ COMPLETE
+
+**Context:** Comprehensive refactoring and renaming of all agents to create better coverage, clearer naming, and explicit alignment with skills layer domains. All agents recovered from "netherworld" and refactored.
+
+**Changes:**
+
+1. **Agent Renaming and Refactoring:**
+   - Renamed 14 agents for clarity and consistency
+   - Removed old-named files (14 files deleted)
+   - Updated all agent descriptions to reflect refactored roles
+   - Created comprehensive agent force overview documentation
+
+2. **Agent File Renames:**
+   - `autonomous-skills-architect-agent.mdc` → `skills-architect-agent.mdc`
+   - `skills-specialist-agent.mdc` → `skills-development-agent.mdc`
+   - `assessment-agent.mdc` → `functional-assessment-agent.mdc`
+   - `frontend-ui-ux-agent.mdc` → `frontend-development-agent.mdc`
+   - `housekeeper-agent.mdc` → `codebase-housekeeper-agent.mdc`
+   - `proactive-human-task-reminder-agent.mdc` → `human-task-reminder-agent.mdc`
+   - `security-specialist-agent.mdc` → `security-testing-agent.mdc`
+   - `tool-specialist-agent.mdc` → `mcp-tool-development-agent.mdc`
+   - `integrations-specialist-agent.mdc` → `external-integrations-agent.mdc`
+   - `integration-enforcement-agent.mdc` → `internal-integration-agent.mdc`
+   - `beta-test-specialist-agent.mdc` → `beta-testing-agent.mdc`
+   - `devops-specialist-agent.mdc` → `devops-agent.mdc`
+   - `documentation-specialist-agent.mdc` → `documentation-agent.mdc`
+   - `project-manager-orchestrator-agent.mdc` → `project-orchestrator-agent.mdc`
+
+3. **Skills Layer Alignment:**
+   - Skills Architect Agent updated to emphasize domain categorization support
+   - Skills Development Agent updated to emphasize domain expertise alignment (forensic-finance, legal-reasoning, etc.)
+   - Both agents now explicitly reference skills layer domains and proficiencies
+
+4. **Documentation Created:**
+   - `.cursor/rules/AGENT_REFACTORING_SUMMARY.md` - Complete refactoring summary
+   - `.cursor/rules/AGENT_FORCE_OVERVIEW.md` - Comprehensive agent force overview with descriptions
+
+5. **Agent Force Structure:**
+   - **Total Active Agents:** 24
+   - Core Execution & Coordination: 2 (Executor, Project Orchestrator)
+   - Architecture & Design: 3 (Architect, Skills Architect, Skills Development)
+   - Quality & Verification: 5 (Auditor General, Functional Assessment, Goal Verification, Inspector General, Inquisitor)
+   - Development Specialists: 4 (Frontend Development, MCP Tool Development, External Integrations, Internal Integration)
+   - Testing & QA: 1 (Beta Testing)
+   - Security & Compliance: 3 (Security Testing, Compliance Enforcement, Ethics Enforcement)
+   - Operations: 1 (DevOps)
+   - Documentation & Maintenance: 3 (Documentation, Level Set, Codebase Housekeeper)
+   - Human Tasks: 1 (Human Task Reminder)
+
+6. **Intentional Overlaps Maintained:**
+   - Quality verification: 5 agents with different approaches and presumptions
+   - Integration: 3 agents with different scopes (external, internal, skills)
+   - Skills: 2 agents with complementary roles (architecture vs development)
+   - Documentation: 2 agents with different focuses (creation vs synchronization)
+
+**Status:** All agents refactored, renamed, and aligned. Old files removed. Documentation updated. ✅
+
+**Date:** 2025-12-29
+
+---
+
+## Custodian Next Steps Implementation (2025-12-29)
+
+**Status:** ✅ COMPLETE  
+**Purpose:** Complete all automated next steps for Custodian Engine
+
+**Changes:**
+
+1. **Database Persistence:**
+   - Created `Cyrano/src/schema-custodian.ts` with three tables (custodian_config, admin_contacts, custodian_alerts)
+   - Updated `CustodianConfigService` to load/save from database with environment variable fallback
+   - Updated `AlertService` to store all alerts in database
+   - Configuration persists across server restarts
+
+2. **Email/SMS Infrastructure:**
+   - Created `EmailService` with SMTP support (nodemailer, optional dependency - already installed via imapflow)
+   - Created `SMSService` with Twilio support (twilio SDK, optional dependency)
+   - Integrated both services into `AlertService` for actual email/SMS sending
+   - Graceful fallback if services not configured/installed
+
+3. **Improved Admin Role Integration:**
+   - Enhanced `admin-auth.ts` in LexFiat and Arkiver with JWT token decoding
+   - Multiple fallback checks (JWT, localStorage, user_info, environment)
+   - Async and sync versions for different use cases
+   - Better error handling
+
+4. **Arkiver Admin Panel:**
+   - Created `CustodianSettings` component for Arkiver
+   - Added "Admin" tab to Arkiver Settings page (admin-only visibility)
+   - Full configuration management (intervals, contacts, toggles)
+   - Real-time updates via Cyrano API
+
+5. **Engine Status Dashboard:**
+   - Created `EngineStatusDashboard` component
+   - Displays Custodian engine status and health metrics
+   - Shows system metrics (CPU, memory, response time)
+   - Lists detected issues
+   - Auto-refreshes every minute
+   - Integrated into LexFiat admin panel
+
+**Key Features:**
+- ✅ Configuration persists in database
+- ✅ Email/SMS sending infrastructure ready (requires optional dependencies)
+- ✅ Admin role checks work with JWT tokens
+- ✅ Arkiver has full admin panel with Custodian settings
+- ✅ Engine status dashboard for monitoring
+
+**Optional Dependencies:**
+- `nodemailer` and `@types/nodemailer` for email (already installed via imapflow)
+- `twilio` for SMS (install with: `npm install twilio`)
+
+**Status:** ✅ **ALL AUTOMATED NEXT STEPS COMPLETE**
+
+**Date:** 2025-12-29
+
+---
 
 ## Parallel Execution - Priorities 4-8 (2025-12-21)
 
@@ -1730,3 +1849,292 @@ All Priority 1 tasks (1.1 through 1.9) have been completed. See detailed entry b
 
 **This log consolidates all historical development information. Individual status reports and completion summaries have been archived.**
 
+---
+
+## Executor Agent Authority Consolidation (2025-12-29)
+
+**Status:** ✅ COMPLETE
+
+**Context:** Executor Agent has been granted highest autonomy and all Director Agent functions. Director Agent terminated for repeated failures and redundancy.
+
+**Changes:**
+
+1. **Executor Agent Enhanced (2025-12-29):**
+   - Added all Director Agent functions to Executor Agent:
+     - Task Prioritization
+     - Progress Tracking
+     - Dependency Management
+     - Multi-Agent Coordination
+     - Plan Management
+   - Executor Agent now has all authority from Director and Project Manager/Orchestrator
+   - Executor Agent has highest degree of agentic ability and autonomy
+   - Summary termination and deletion authority granted
+
+2. **Director Agent Terminated (2025-12-29):**
+   - Director Agent terminated for repeated failures and redundancy
+   - All functions transferred to Executor Agent
+   - Termination notice created: `.cursor/rules/DIRECTOR_AGENT_TERMINATION_NOTICE.md`
+   - Director rule file marked as terminated (protected file, cannot delete)
+
+3. **Demo Build Fixes (2025-12-29):**
+   - Fixed all import path issues in LexFiat (comprehensive fix, not incremental)
+   - Fixed Vite configuration syntax errors
+   - Fixed Cyrano port conflicts
+   - All three services (LexFiat, Arkiver, Cyrano) operational
+
+**Files Modified:**
+- `.cursor/rules/executor-agent.mdc` - Added all Director functions
+- `.cursor/rules/director-agent.mdc` - Marked as terminated
+- `.cursor/rules/DIRECTOR_AGENT_TERMINATION_NOTICE.md` - Created termination notice
+- `docs/PROJECT_CHANGE_LOG.md` - Updated with authority consolidation
+
+**Authority Status:**
+- Executor Agent: Highest autonomy, all coordination functions, summary termination authority
+- Director Agent: TERMINATED - All functions transferred to Executor
+- Project Manager/Orchestrator: TERMINATED (previous) - Functions now in Executor
+
+---
+
+## HTTP Bridge Hybrid Dynamic Loading Implementation (2025-12-29)
+
+**Status:** ✅ COMPLETE
+
+**Context:** Replaced static tool imports with hybrid dynamic loading system to fix startup hang and improve resilience. Added critical safeguards for production stability.
+
+**Changes:**
+
+1. **Hybrid Dynamic Loading System (2025-12-29):**
+   - Removed all blocking static tool imports (50+ tools)
+   - Implemented dynamic tool loader with on-demand loading
+   - Server starts immediately, tools load asynchronously in background
+   - Tools load on-demand when first requested
+   - Frequently used tools preload first for faster response
+
+2. **Critical Safeguards Added (2025-12-29):**
+   - **Race Condition Protection:** Loading locks prevent multiple simultaneous loads of same tool
+   - **Timeout Protection:** 30-second timeout prevents indefinite hangs on tool import
+   - **Circuit Breaker:** Stops retrying tools after 5 failures (1-minute cooldown)
+   - All safeguards prevent real failures, not just theoretical issues
+
+3. **Enhanced Features (2025-12-29):**
+   - Tool health monitoring endpoint (`GET /mcp/tools/health`)
+   - Hot reload capability (`POST /mcp/tools/:toolName/reload`)
+   - Dependency resolution (tools automatically load dependencies)
+   - Tool metadata tracking (load times, use counts, error counts)
+   - Status endpoints with tool health metrics
+
+4. **Bug Fixes (2025-12-29):**
+   - Fixed duplicate changelog entry (removed lines 1779-1825)
+   - Restored `npm run http` to use full bridge (was incorrectly using simple-http-bridge.ts)
+   - Added `http:simple` script for development/testing when needed
+
+**Benefits:**
+- **Faster Startup:** Server starts immediately instead of waiting for all tools
+- **Better Resilience:** One failing tool doesn't block others or prevent server startup
+- **Production Ready:** Critical safeguards prevent real-world failures
+- **Better Observability:** Health monitoring and metrics for all tools
+- **Development Friendly:** Hot reloading without server restart
+
+**Files Modified:**
+- `Cyrano/src/http-bridge.ts` - Complete rewrite with hybrid dynamic loading
+- `Cyrano/package.json` - Fixed http script, added http:simple
+- `docs/PROJECT_CHANGE_LOG.md` - Removed duplicate entry, documented changes
+
+**Technical Details:**
+- Tool loading uses dynamic `import()` statements
+- Loading locks prevent race conditions during concurrent requests
+- Circuit breaker opens after 5 failures, resets after 1 minute
+- Timeout set to 30 seconds (configurable via TOOL_LOAD_TIMEOUT)
+- Frequently used tools preload first for optimal performance
+
+---
+
+---
+## Documentation Level Set Sync (2025-12-29)
+
+**Status:** ✅ COMPLETE
+
+**Context:** Level Set Agent executed to synchronize all documentation with actual codebase state after HTTP Bridge hybrid dynamic loading implementation.
+
+**Changes:**
+
+1. **Tool Count Corrections (2025-12-29):**
+   - Updated tool count from "69+" or "71" to accurate count of **60 tool files** (82 tools in HTTP bridge, 82 tools in MCP server) across all documentation
+   - Files updated:
+     - `docs/ACTIVE_DOCUMENTATION_INDEX.md` - Corrected tool count
+     - `README.md` - Corrected 3 occurrences of tool count
+     - All references now accurately reflect 60 tool files (some files export multiple tools)
+
+2. **HTTP Bridge Documentation Updates (2025-12-29):**
+   - Added hybrid dynamic loading implementation details to HTTP Bridge status sections
+   - Files updated:
+     - `docs/reference/CYRANO_MCP_SERVER_README.md` - Added hybrid loading details to "What Works" section
+     - `Cyrano/README.md` - Added hybrid loading details to "What Works" section
+     - `docs/ui/CYRANO_UI_CYRANO_MCP_SERVER_-_IMPLEMENTATION_GUIDE.md` - Added hybrid loading details
+   - All HTTP Bridge documentation now mentions:
+     - Server starts immediately, tools load asynchronously on-demand
+     - Race condition protection, timeout protection (30s), and circuit breaker safeguards
+     - Tool health monitoring and hot reload capabilities
+
+3. **Date and Version Updates (2025-12-29):**
+   - Updated "Last Updated" dates to 2025-12-29
+   - Updated version numbers where applicable
+   - Files updated:
+     - `docs/ACTIVE_DOCUMENTATION_INDEX.md` - Version v552, dates updated
+     - `README.md` - Last Updated date updated
+     - `docs/PROJECT_CHANGE_LOG.md` - Header dates updated
+
+**Files Modified:**
+- `docs/ACTIVE_DOCUMENTATION_INDEX.md` - Tool count, version, dates
+- `README.md` - Tool count (3x), date
+- `docs/reference/CYRANO_MCP_SERVER_README.md` - HTTP Bridge status
+- `Cyrano/README.md` - HTTP Bridge status
+- `docs/ui/CYRANO_UI_CYRANO_MCP_SERVER_-_IMPLEMENTATION_GUIDE.md` - HTTP Bridge status
+- `docs/PROJECT_CHANGE_LOG.md` - Header dates, new entry
+
+**Verification:**
+- ✅ Tool count verified: 60 tool files, 82 tools in HTTP bridge, 82 tools in MCP server
+- ✅ HTTP Bridge hybrid dynamic loading documented in all relevant files
+- ✅ All dates and versions updated to reflect current state
+- ✅ Documentation now accurately reflects codebase implementation
+
+---
+
+## HTTP Bridge Tool Registration Completion & Wellness Beta Readiness (2025-12-29)
+
+**Status:** ✅ COMPLETE
+
+**Context:** Added 8 missing tools to HTTP bridge registration and verified wellness features are production-ready for beta.
+
+**Changes:**
+
+1. **Missing Tools Added to HTTP Bridge (2025-12-29):**
+   - Added `forecast_engine` - Forecast Engine wrapper tool (tax, child support, QDRO forecasts)
+   - Added `workflow_status` - Workflow status tool for LexFiat HUD
+   - Added `wellness_journal` - Wellness journaling tool (text and voice, HIPAA-compliant)
+   - Added `get_goodcounsel_prompts` - Get active GoodCounsel prompts
+   - Added `dismiss_goodcounsel_prompt` - Dismiss GoodCounsel prompt
+   - Added `snooze_goodcounsel_prompt_type` - Snooze GoodCounsel prompt type
+   - Added `get_goodcounsel_prompt_history` - Get GoodCounsel prompt history
+   - Added `evaluate_goodcounsel_context` - Evaluate context for GoodCounsel prompts
+   - All 8 tools now registered in `toolImportMap` with proper dynamic loading
+
+2. **Wellness Features Beta Readiness Verification (2025-12-29):**
+   - ✅ **GoodCounsel Engine:** All wellness actions fully implemented (wellness_journal, wellness_trends, burnout_check)
+   - ✅ **Wellness Service:** Fully implemented with no mocks, TODOs, or placeholders
+   - ✅ **Wellness Journal Tool:** Production-ready with HIPAA-compliant encryption
+   - ✅ **Database Schema:** Complete wellness schema (wellness_journal_entries, wellness_feedback, wellness_trends)
+   - ✅ **Integration:** Wellness features properly integrated in GoodCounsel engine
+   - ✅ **No Disabled Code:** All wellness features active and functional
+
+**Files Modified:**
+- `Cyrano/src/http-bridge.ts` - Added 8 missing tools to toolImportMap
+
+**Verification:**
+- ✅ All 8 missing tools added to HTTP bridge registration
+- ✅ Tool count: 60 tool files, 82 tools in HTTP bridge, 82 tools in MCP server
+- ✅ Wellness features verified production-ready for beta
+- ✅ No mocks, TODOs, or disabled code in wellness implementation
+- ✅ All wellness database schemas in place
+- ✅ HIPAA compliance features active
+
+**Impact:**
+- HTTP bridge now has feature parity with stdio MCP server
+- Wellness features fully functional and ready for beta deployment
+- All GoodCounsel prompt management tools accessible via HTTP bridge
+
+---
+
+---
+
+## Documentation Corrections and Level Set Agent Enhancement (2025-12-31)
+
+**Status:** ✅ COMPLETE  
+**Purpose:** Corrected M.Pk. error and enhanced Level Set Agent with automated fact-checking
+
+**Changes:**
+
+1. **Level Set Agent Enhancement:**
+   - Added automated fact-checking capabilities to Level Set Agent
+   - Engine count verification against `Cyrano/src/engines/registry.ts`
+   - Module count verification against `Cyrano/src/modules/registry.ts`
+   - Tool count verification (files, HTTP bridge, MCP server)
+   - Version number and date verification (ISO week format)
+   - Cross-document consistency checking
+   - Source verification documentation
+
+2. **Documentation Corrections:**
+   - Corrected M.Pk. error in tool registration documentation
+   - Updated tool counts to reflect accurate registration status
+   - Removed references to unregistered tool files
+   - Verified HTTP bridge and MCP server have parity (82 tools each)
+
+**Files Modified:**
+- `.cursor/rules/level-set-agent.mdc` - Added automated fact-checking section
+- `docs/TOOL_REGISTRATION_VERIFICATION_2025-12-31.md` - Corrected M.Pk. error
+- `docs/FACT_CHECK_REPORT_2025-12-31.md` - Corrected M.Pk. error
+- `docs/PROJECT_CHANGE_LOG.md` - Added entry, corrected M.Pk. error
+
+**Status:** ✅ **ALL CORRECTIONS COMPLETE**
+
+**Date:** 2025-12-31 (2026-W01)
+
+---
+
+## Demo Build Setup and Readiness Assessment (2025-12-31)
+
+**Status:** ✅ COMPLETE  
+**Purpose:** Prepare full demo build of Cyrano, Arkiver, and LexFiat with database setup
+
+**Changes:**
+
+1. **Demo Script Fixes:**
+   - Fixed hardcoded path to LexFiat in `start-demo.sh` (changed from `/Users/davidtowne/Desktop/Coding/codebase/LexFiat` to `apps/lexfiat`)
+   - Made all paths relative using `SCRIPT_DIR` variable
+   - Changed Arkiver startup from `npm run preview` to `npm run dev`
+   - Script is now executable and uses relative paths
+
+2. **Database Setup Script:**
+   - Created `setup-database.sh` script for PostgreSQL setup via Docker Compose
+   - Script checks Docker status, starts PostgreSQL container, waits for readiness
+   - Automatically updates `.env` file with PostgreSQL connection string
+   - Provides clear error messages and instructions if Docker isn't running
+
+3. **Environment Configuration:**
+   - Verified `.env` file exists in `Cyrano/` directory
+   - Confirmed API keys configured (PERPLEXITY_API_KEY, ANTHROPIC_API_KEY, OPENAI_API_KEY)
+   - Noted DATABASE_URL currently set to SQLite (setup script will update to PostgreSQL)
+
+4. **Dependencies Verification:**
+   - Verified all dependencies installed:
+     - ✅ Cyrano dependencies installed
+     - ✅ LexFiat dependencies installed
+     - ✅ Arkiver dependencies installed
+
+5. **Documentation:**
+   - Created `DEMO_SETUP_SUMMARY.md` with comprehensive setup guide
+   - Documented quick start steps, troubleshooting, and current configuration
+
+**Files Created:**
+- `setup-database.sh` - PostgreSQL database setup script
+- `DEMO_SETUP_SUMMARY.md` - Demo setup and readiness guide
+
+**Files Modified:**
+- `start-demo.sh` - Fixed paths, made relative, changed Arkiver command
+
+**Verification:**
+- ✅ All three components (Cyrano, LexFiat, Arkiver) ready for demo
+- ✅ Demo script fixed and executable
+- ✅ Database setup script created
+- ✅ Environment configuration verified
+- ✅ Dependencies installed
+
+**Impact:**
+- Demo can now be started with single command: `./start-demo.sh`
+- Database setup automated via `./setup-database.sh`
+- All paths are relative and portable
+- Comprehensive setup documentation available
+
+**Status:** ✅ **DEMO BUILD READY**
+
+**Date:** 2025-12-31 (2026-W01)

@@ -17,6 +17,7 @@ import { goodcounselEngine } from './goodcounsel/goodcounsel-engine.js';
 import { potemkinEngine } from './potemkin/potemkin-engine.js';
 import { forecastEngine } from './forecast/index.js';
 import { chronometricEngine } from './chronometric/index.js';
+import { custodianEngine } from './custodian/index.js';
 
 class EngineRegistry {
   private engines: Map<string, BaseEngine>;
@@ -29,6 +30,7 @@ class EngineRegistry {
     this.register(potemkinEngine);
     this.register(forecastEngine);
     this.register(chronometricEngine);
+    this.register(custodianEngine);
   }
 
   /**

@@ -19,6 +19,7 @@ Related Documents: COMPREHENSIVE_CODE_AUDIT_REPORT.md, FINAL_SECURITY_REPORT_STE
 **Purpose:** Verify HIPAA compliance for GoodCounsel wellness journaling system  
 **Scope:** Encryption, access controls, audit logging, data retention, secure deletion  
 **Date Completed:** 2025-12-13  
+**Last Updated:** 2025-12-29 (Added FERPA notes)  
 **Reviewed By:** Security Audit Agent  
 **Status:** COMPLETE
 
@@ -342,5 +343,48 @@ tags: tagsEncrypted ? JSON.parse(encryption.decryptField({ encrypted: tagsEncryp
 | Data Retention & Secure Deletion | ❌ FAIL | hipaa-compliance.ts:95-129 | No enforcement; secureDelete stub |
 
 Overall Status: ⚠️ PARTIAL COMPLIANCE
+
+---
+
+## FERPA Compliance Notes (2025-12-29)
+
+**Note:** FERPA (Family Educational Rights and Privacy Act) applies to law practice in specific contexts:
+
+### Applicable Scenarios
+
+1. **Filings/Pleadings Involving Minor Children:**
+   - Divorce/custody matters involving minor children
+   - Educational records referenced in legal proceedings
+   - Student privacy protections in family law contexts
+
+2. **Educational Records in Legal Practice:**
+   - School records used as evidence
+   - Student transcripts in custody disputes
+   - Educational assessments in special education matters
+
+### Compliance Requirements
+
+- **FERPA Protections:** Educational records must be protected similarly to PHI
+- **Parental Consent:** May be required for accessing student records
+- **Redaction:** Student identifying information should be redacted when appropriate
+
+### BAA Requirements
+
+**Important:** Business Associate Agreements (BAAs) are **NOT required** for HIPAA compliance in LexFiat because:
+- LexFiat's HIPAA compliance is largely **voluntary** (not a covered entity requirement)
+- LexFiat is not a HIPAA-covered entity
+- Wellness journaling features are provided as a service, not as a covered entity
+
+**FERPA Context:** FERPA compliance does not require BAAs in the same way HIPAA does. FERPA compliance is primarily about:
+- Access controls to educational records
+- Parental consent requirements
+- Proper handling of student information
+
+### Recommendations
+
+1. **Document Handling:** Treat educational records with same care as PHI when applicable
+2. **Access Controls:** Apply similar access controls to educational records
+3. **Consent:** Document parental consent when accessing student records
+4. **Redaction:** Use redaction tools for student identifying information when appropriate
 
 ---

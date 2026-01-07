@@ -20,10 +20,13 @@ check_port() {
     return 0
 }
 
+# Get script directory for relative paths
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Start Cyrano HTTP Bridge
 start_cyrano() {
     echo -e "${YELLOW}📡 Starting Cyrano MCP HTTP Bridge...${NC}"
-    cd /Users/davidtowne/Desktop/Coding/codebase/Cyrano
+    cd "$SCRIPT_DIR/Cyrano"
     
     if ! check_port 5002; then
         echo "Cyrano may already be running. Continuing..."
@@ -50,7 +53,7 @@ start_cyrano() {
 # Start LexFiat Frontend
 start_lexfiat() {
     echo -e "${YELLOW}🎨 Starting LexFiat Frontend...${NC}"
-    cd /Users/davidtowne/Desktop/Coding/codebase/LexFiat
+    cd "$SCRIPT_DIR/apps/lexfiat"
     
     if ! check_port 5173; then
         echo "LexFiat may already be running. Continuing..."
@@ -70,7 +73,7 @@ start_lexfiat() {
 # Start Arkiver Frontend
 start_arkiver() {
     echo -e "${YELLOW}📦 Starting Arkiver Frontend...${NC}"
-    cd /Users/davidtowne/Desktop/Coding/codebase/apps/arkiver/frontend
+    cd "$SCRIPT_DIR/apps/arkiver/frontend"
     
     # Find an available port starting from 4173
     ARKIVER_PORT=4173
@@ -78,7 +81,7 @@ start_arkiver() {
         ARKIVER_PORT=$((ARKIVER_PORT + 1))
     done
     
-    npm run preview -- --port $ARKIVER_PORT > /tmp/arkiver.log 2>&1 &
+    npm run dev -- --port $ARKIVER_PORT > /tmp/arkiver.log 2>&1 &
     ARKIVER_PID=$!
     echo $ARKIVER_PID > /tmp/arkiver.pid
     echo $ARKIVER_PORT > /tmp/arkiver.port

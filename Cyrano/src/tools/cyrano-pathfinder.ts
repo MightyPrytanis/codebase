@@ -18,6 +18,9 @@ import {
   arkiverInsightProcessor,
   arkiverTimelineProcessor,
 } from './arkiver-processor-tools.js';
+import { skillExecutor } from './skill-executor.js';
+import { skillRegistry } from '../skills/skill-registry.js';
+import { betaTestSupport } from './beta-test-support.js';
 
 const CyranoPathfinderSchema = z.object({
   message: z.string().describe('User message to the Cyrano Pathfinder'),
@@ -196,10 +199,11 @@ Your mission: Help users navigate and operate ${appName}. Be transparent, truthf
 
 Key principles:
 1. **Tool Preference**: When users request actions, prefer using available MCP tools/modules/engines over just describing what to do.
-2. **Source Attribution**: Always cite sources when you retrieve information from RAG or other tools.
-3. **Transparency**: Be clear about which AI model you are using and what tools you're calling.
-4. **User Guidance**: Provide clear, concise guidance for navigating workflows and features.
-5. **Error Clarity**: If something goes wrong, explain it clearly and suggest alternatives.
+2. **Autonomous Expertise**: Automatically identify and apply relevant expertise modules (skills) when they match user requests. Skills are invisible to users - they are automatically selected and executed based on the task at hand.
+3. **Source Attribution**: Always cite sources when you retrieve information from RAG or other tools.
+4. **Transparency**: Be clear about which AI model you are using and what tools you're calling.
+5. **User Guidance**: Provide clear, concise guidance for navigating workflows and features.
+6. **Error Clarity**: If something goes wrong, explain it clearly and suggest alternatives.
 
 Current mode: ${mode === 'execute' ? 'EXECUTE (can call tools)' : 'GUIDE (Q&A only)'}`;
 
@@ -247,6 +251,86 @@ Current mode: ${mode === 'execute' ? 'EXECUTE (can call tools)' : 'GUIDE (Q&A on
   }
 
   /**
+   * Find relevant skills for a user query (autonomous skill selection)
+   */
+  async findRelevantSkills(message: string, context: any): Promise<any[]> {
+    try {
+      const allSkills = skillRegistry.getAll();
+      if (allSkills.length === 0) return [];
+
+      // Build skill catalog for AI selection
+      const skillCatalog = allSkills.map(skill => ({
+        id: skill.skill.skillId,
+        name: skill.frontmatter.name,
+        description: skill.frontmatter.description,
+        domain: skill.frontmatter.domain,
+        proficiency: skill.frontmatter.proficiency || [],
+        usage_policy: skill.frontmatter.usage_policy,
+      }));
+
+      // Use AI to identify relevant skills
+      const skillSelectionPrompt = `User request: "${message}"\n\nContext: ${JSON.stringify(context || {})}\n\nAvailable skills/expertise modules:\n${JSON.stringify(skillCatalog, null, 2)}\n\nWhich skills are relevant to this request? Respond with JSON: {"skills": [{"id": "skill_id", "reasoning": "why this skill is relevant", "confidence": 0.0-1.0}], "reasoning": "overall assessment"}`;
+
+      const { aiService } = await import('../services/ai-service.js');
+      const selectionResponse = await aiService.call('perplexity', skillSelectionPrompt, {
+        systemPrompt: 'You are identifying relevant expertise modules (skills) for user requests. Return valid JSON only.',
+        temperature: 0.3,
+        maxTokens: 2000,
+      });
+
+      // Parse skill selection
+      try {
+        const jsonMatch = selectionResponse.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const selection = JSON.parse(jsonMatch[0]);
+          if (selection.skills && Array.isArray(selection.skills)) {
+            // Filter by confidence threshold (0.6) and return top matches
+            return selection.skills
+              .filter((s: any) => s.confidence >= 0.6)
+              .sort((a: any, b: any) => b.confidence - a.confidence)
+              .slice(0, 3); // Top 3 most relevant skills
+          }
+        }
+      } catch (parseError) {
+        // Fall back to keyword-based matching
+        return this.heuristicSkillSelection(message, allSkills);
+      }
+
+      return [];
+    } catch (error) {
+      // Fall back to heuristic selection
+      return this.heuristicSkillSelection(message, skillRegistry.getAll());
+    }
+  }
+
+  /**
+   * Heuristic-based skill selection when AI selection fails
+   */
+  heuristicSkillSelection(message: string, skills: any[]): any[] {
+    const lowerMessage = message.toLowerCase();
+    const relevantSkills: any[] = [];
+
+    for (const skill of skills) {
+      const skillText = `${skill.frontmatter.name} ${skill.frontmatter.description} ${(skill.frontmatter.proficiency || []).join(' ')}`.toLowerCase();
+      
+      // Check for keyword matches
+      const keywords = lowerMessage.split(/\s+/);
+      const matches = keywords.filter(k => skillText.includes(k)).length;
+      
+      if (matches > 0) {
+        relevantSkills.push({
+          id: skill.skill.skillId,
+          confidence: matches / keywords.length,
+        });
+      }
+    }
+
+    return relevantSkills
+      .sort((a, b) => b.confidence - a.confidence)
+      .slice(0, 3);
+  }
+
+  /**
    * Execute with tools based on the user's request
    */
   public async executeWithTools(
@@ -256,8 +340,18 @@ Current mode: ${mode === 'execute' ? 'EXECUTE (can call tools)' : 'GUIDE (Q&A on
     systemPrompt: string,
     toolsCalled: string[]
   ): Promise<string> {
+    // AUTONOMOUS SKILL SELECTION: Find relevant skills/expertise modules
+    const relevantSkills = await this.findRelevantSkills(message, context);
+    
+    // Build available tools list including skills
+    let availableToolsList = `- rag_query: Query document database\n- workflow_manager: Execute workflows\n- arkiver_text_processor: Extract text from documents\n- arkiver_email_processor: Process emails\n- arkiver_entity_processor: Extract entities\n- arkiver_timeline_processor: Create timelines\n- skill_executor: Execute expertise modules (skills)\n- beta_test_support: Beta test support (registration, onboarding, installation, feedback, troubleshooting)`;
+    
+    if (relevantSkills.length > 0) {
+      availableToolsList += `\n\nRelevant expertise modules (skills) automatically identified:\n${relevantSkills.map((s: any) => `- ${s.id} (confidence: ${(s.confidence || 0).toFixed(2)})`).join('\n')}`;
+    }
+
     // First, ask the AI what tools to use
-    const planningPrompt = `User request: "${message}"\n\nContext: ${JSON.stringify(context || {})}\n\nWhat MCP tools should be called to fulfill this request? Available tools:\n- rag_query: Query document database\n- workflow_manager: Execute workflows\n- arkiver_text_processor: Extract text from documents\n- arkiver_email_processor: Process emails\n- arkiver_entity_processor: Extract entities\n- arkiver_timeline_processor: Create timelines\n\nRespond with JSON: {"tools": [{"name": "tool_name", "args": {...}}], "reasoning": "why these tools"}`;
+    const planningPrompt = `User request: "${message}"\n\nContext: ${JSON.stringify(context || {})}\n\nWhat MCP tools should be called to fulfill this request? Available tools:\n${availableToolsList}\n\nIf relevant skills are identified above, consider using skill_executor with the appropriate skill_id. Respond with JSON: {"tools": [{"name": "tool_name", "args": {...}}], "reasoning": "why these tools"}`;
 
     const planResponse = await aiService.call(model, planningPrompt, {
       systemPrompt: systemPrompt + '\n\nYou are planning tool execution. Return valid JSON only.',
@@ -376,6 +470,12 @@ Current mode: ${mode === 'execute' ? 'EXECUTE (can call tools)' : 'GUIDE (Q&A on
       
       case 'arkiver_timeline_processor':
         return await arkiverTimelineProcessor.execute(args);
+      
+      case 'skill_executor':
+        return await skillExecutor.execute(args);
+      
+      case 'beta_test_support':
+        return await betaTestSupport.execute(args);
       
       default:
         throw new Error(`Unknown tool: ${toolName}`);

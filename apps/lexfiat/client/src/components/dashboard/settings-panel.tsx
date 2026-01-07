@@ -10,6 +10,7 @@ import { Settings, Bell, Palette, Globe, Link as LinkIcon, Bot } from "lucide-re
 import { useLocation } from "wouter";
 import { useTheme } from "@/components/theme/theme-provider";
 import { ThemeSelector } from "@/components/theme/theme-selector";
+import { ViewModeSelector } from "@/components/dashboard/view-mode-selector";
 
 interface SettingsPanelProps {
   isOpen: boolean;
@@ -37,7 +38,7 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
         </SheetHeader>
       <div className="space-y-6">
         <div 
-          className="insight-card info p-4 cursor-pointer hover:bg-black/40 transition-colors"
+          className="insight-card info p-4 cursor-pointer hover-glass"
           onClick={() => handleNavigate("/settings")}
         >
           <div className="flex items-center gap-3 mb-2">
@@ -49,7 +50,7 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div 
-            className="insight-card info p-4 cursor-pointer hover:bg-black/40 transition-colors"
+            className="insight-card info p-4 cursor-pointer hover-glass"
             onClick={() => handleNavigate("/settings", "preferences")}
           >
             <div className="flex items-center gap-3 mb-2">
@@ -60,7 +61,7 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
           </div>
 
           <div 
-            className="insight-card info p-4 cursor-pointer hover:bg-black/40 transition-colors"
+            className="insight-card info p-4 cursor-pointer hover-glass"
             onClick={() => {
               setActiveSection(activeSection === "appearance" ? null : "appearance");
             }}
@@ -71,14 +72,15 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
             </div>
             <p className="text-sm text-muted-foreground">Customize theme and display options</p>
             {activeSection === "appearance" && (
-              <div className="mt-3 pt-3 border-t border-slate-700">
+              <div className="mt-3 pt-3 border-t border-slate-700 space-y-4">
                 <ThemeSelector />
+                <ViewModeSelector />
               </div>
             )}
           </div>
 
           <div 
-            className="insight-card info p-4 cursor-pointer hover:bg-black/40 transition-colors"
+            className="insight-card info p-4 cursor-pointer hover-glass"
             onClick={() => handleNavigate("/settings", "preferences")}
           >
             <div className="flex items-center gap-3 mb-2">
@@ -89,7 +91,7 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
           </div>
 
           <div 
-            className="insight-card info p-4 cursor-pointer hover:bg-black/40 transition-colors"
+            className="insight-card info p-4 cursor-pointer hover-glass"
             onClick={() => handleNavigate("/settings", "integrations")}
           >
             <div className="flex items-center gap-3 mb-2">
@@ -100,7 +102,7 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
           </div>
 
           <div 
-            className="insight-card info p-4 cursor-pointer hover:bg-black/40 transition-colors"
+            className="insight-card info p-4 cursor-pointer hover-glass"
             onClick={() => handleNavigate("/settings", "ai-providers")}
           >
             <div className="flex items-center gap-3 mb-2">
@@ -110,6 +112,7 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
             <p className="text-sm text-muted-foreground">Configure AI service providers and API keys</p>
           </div>
         </div>
+      </div>
       </SheetContent>
     </Sheet>
   );

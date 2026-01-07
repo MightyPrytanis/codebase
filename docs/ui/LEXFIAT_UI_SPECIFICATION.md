@@ -5,8 +5,8 @@ Subject(s): LexFiat | UI | Design System | Frontend
 Project: Cyrano
 Version: v549
 Created: 2025-11-27 (2025-W48)
-Last Substantive Revision: 2025-12-06 (2025-W49)
-Last Format Update: 2025-12-06 (2025-W49)
+Last Substantive Revision: 2025-12-29 (2025-W52)
+Last Format Update: 2025-12-29 (2025-W52)
 Owner: David W Towne / Cognisint LLC
 Copyright: © 2025 Cognisint LLC
 Summary: Definitive reference for all LexFiat UI structure, styling, and behavior. Authoritative source for LexFiat UI/UX specifications. For architecture, see LEXFIAT-README.
@@ -278,7 +278,80 @@ LexFiat UI is a dark-themed, glass-morphism legal intelligence dashboard. The de
 
 ---
 
-**Last Updated:** 2025-11-27  
+---
+
+## UI Modes (2025-12-29)
+
+LexFiat supports multiple UI modes to accommodate different user preferences and workflows:
+
+### Full Stack Mode (Default)
+
+**Location:** `apps/lexfiat/client/src/pages/dashboard.tsx`
+
+**Features:**
+- Complete dashboard with all widgets
+- Workflow pipeline visualization
+- Priority alerts row
+- Active WIP row
+- All workflow stages (Intake, Analysis, Draft Prep, Attorney Review)
+- Expanded panels for detailed views
+- Testing sidebar
+- Footer banner
+
+**Status:** ✅ **FULLY FUNCTIONAL** - Default view
+
+### Essentials Mode
+
+**Location:** `apps/lexfiat/client/src/pages/essentials-dashboard.tsx`
+
+**Features:**
+- CompactHUD at top showing key metrics (deadlines, drafts, reviews, GoodCounsel prompts)
+- Minimal navigation focused on essentials
+- Quick access to Today's Focus and GoodCounsel widgets
+- All expanded panels accessible via CompactHUD clicks
+- Switch to Full Stack mode button
+- View mode persistence via localStorage
+
+**Access:** Settings → Appearance → UI Mode → Select "Essentials"
+
+**Status:** ✅ **FULLY FUNCTIONAL** (Implemented 2025-12-29)
+
+### Floating Panel Mode
+
+**Status:** ⏸️ **DESIGNED BUT NOT IMPLEMENTED** (Future enhancement, requires Electron wrapper)
+
+**Design Intent:**
+- Lightweight desktop widget that floats on desktop
+- Menu-bar/tray window implementation
+- Always visible, non-intrusive
+- Click to expand to Essentials or Full Stack
+
+**See:** `docs/UI_MODE_IMPLEMENTATION_STATUS.md` for full details
+
+---
+
+## Standardized Hover Effects (2025-12-29)
+
+**Location:** `apps/lexfiat/client/src/styles/hover-effects.css`
+
+**Standardized Classes:**
+- `.hover-glass` - Glass surface sheen effect for panels/cards
+- `.hover-panel` - Panel/card hover with border highlight
+- `.hover-interactive` - Button/interactive element hover
+- `.hover-muted` - Subtle hover for muted interactions
+- `.hover-sheen` - Enhanced glass sheen with animation for widgets
+
+**Design System Compliance:**
+- Consistent with Piquette design system
+- Glass surface sheens maintained
+- Sharp angles preserved (no rounded corners except specific places)
+- Hover highlighting standardized across all components
+
+**Status:** ✅ **STANDARDIZED** (Implemented 2025-12-29)
+
+---
+
+**Last Updated:** 2025-12-29  
 **Maintained By:** UI Team  
 **Status:** Authoritative - All other UI docs must match this specification
 

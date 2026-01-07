@@ -4,6 +4,8 @@
  * Client functions for interacting with the Library backend API
  */
 
+import { safeParseUrlParams, sanitizeUrlParam } from './dom-xss-security';
+
 const API_URL = import.meta.env.VITE_CYRANO_API_URL || 'http://localhost:5002';
 
 export interface PracticeProfile {
@@ -105,12 +107,18 @@ export async function fetchLibraryItems(
   userId?: string
 ): Promise<LibraryItem[]> {
   const params = new URLSearchParams();
-  if (userId) params.append('userId', userId);
-  if (filters?.sourceType) params.append('sourceType', filters.sourceType.join(','));
-  if (filters?.county) params.append('county', filters.county);
-  if (filters?.court) params.append('court', filters.court);
-  if (filters?.judgeReferee) params.append('judgeReferee', filters.judgeReferee);
-  if (filters?.issueTags) params.append('issueTags', filters.issueTags.join(','));
+  if (userId) params.append('userId', sanitizeUrlParam(userId));
+  if (filters?.sourceType) {
+    const sanitized = filters.sourceType.map(s => sanitizeUrlParam(s)).join(',');
+    params.append('sourceType', sanitized);
+  }
+  if (filters?.county) params.append('county', sanitizeUrlParam(filters.county));
+  if (filters?.court) params.append('court', sanitizeUrlParam(filters.court));
+  if (filters?.judgeReferee) params.append('judgeReferee', sanitizeUrlParam(filters.judgeReferee));
+  if (filters?.issueTags) {
+    const sanitized = filters.issueTags.map(t => sanitizeUrlParam(t)).join(',');
+    params.append('issueTags', sanitized);
+  }
   if (filters?.ingested !== undefined) params.append('ingested', String(filters.ingested));
   if (filters?.pinned !== undefined) params.append('pinned', String(filters.pinned));
   if (filters?.superseded !== undefined) params.append('superseded', String(filters.superseded));
@@ -192,7 +200,7 @@ export async function savePracticeProfile(
  */
 export async function getPracticeProfile(userId?: string): Promise<PracticeProfile | null> {
   const params = new URLSearchParams();
-  if (userId) params.append('userId', userId);
+  if (userId) params.append('userId', sanitizeUrlParam(userId));
   
   const response = await fetch(`${API_URL}/api/onboarding/practice-profile?${params}`);
   if (response.status === 404) {
@@ -209,7 +217,7 @@ export async function getPracticeProfile(userId?: string): Promise<PracticeProfi
  */
 export async function getLibraryHealth(userId?: string): Promise<LibraryStats> {
   const params = new URLSearchParams();
-  if (userId) params.append('userId', userId);
+  if (userId) params.append('userId', sanitizeUrlParam(userId));
   
   const response = await fetch(`${API_URL}/api/health/library?${params}`);
   if (!response.ok) {
@@ -223,7 +231,7 @@ export async function getLibraryHealth(userId?: string): Promise<LibraryStats> {
  */
 export async function getLibraryLocations(userId?: string): Promise<LibraryLocation[]> {
   const params = new URLSearchParams();
-  if (userId) params.append('userId', userId);
+  if (userId) params.append('userId', sanitizeUrlParam(userId));
   
   const response = await fetch(`${API_URL}/api/library/locations?${params}`);
   if (!response.ok) {

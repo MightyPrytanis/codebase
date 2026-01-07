@@ -106,19 +106,19 @@ export function CalendarView({ isOpen, onClose }: CalendarViewProps) {
             <div className="flex items-center gap-2">
               <button
                 onClick={() => navigateDate("prev")}
-                className="p-2 rounded hover:bg-white/10 transition-colors"
+                className="p-2 hover-interactive transition-colors"
               >
                 <ChevronLeft size={20} />
               </button>
               <button
                 onClick={() => setCurrentDate(new Date())}
-                className="px-4 py-2 rounded hover:bg-white/10 transition-colors text-sm"
+                className="px-4 py-2 hover-interactive transition-colors text-sm"
               >
                 Today
               </button>
               <button
                 onClick={() => navigateDate("next")}
-                className="p-2 rounded hover:bg-white/10 transition-colors"
+                className="p-2 hover-interactive transition-colors"
               >
                 <ChevronRight size={20} />
               </button>
@@ -194,6 +194,7 @@ export function CalendarView({ isOpen, onClose }: CalendarViewProps) {
             );
           })}
         </div>
+      </div>
       </SheetContent>
     </Sheet>
   );

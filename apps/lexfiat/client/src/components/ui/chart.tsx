@@ -4,6 +4,7 @@ import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 
 import { cn } from "@/lib/utils"
+import { escapeCSS, validateCSSValue } from "@/lib/dom-xss-security"
 
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: "", dark: ".dark" } as const
@@ -76,25 +77,45 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
     return null
   }
 
+  // Sanitize chart ID to prevent CSS injection
+  const sanitizedId = id.replace(/[^a-zA-Z0-9-_]/g, '')
+
+  // Generate CSS safely with validation
+  const cssContent = Object.entries(THEMES)
+    .map(
+      ([theme, prefix]) => {
+        const colorRules = colorConfig
+          .map(([key, itemConfig]) => {
+            const color =
+              itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
+              itemConfig.color
+            
+            if (!color) return null
+            
+            // Validate CSS value before including
+            if (!validateCSSValue('--color-' + key, color)) {
+              console.warn(`Rejected unsafe CSS color for key ${key}: ${color}`)
+              return null
+            }
+            
+            // Sanitize key and color
+            const sanitizedKey = key.replace(/[^a-zA-Z0-9-_]/g, '')
+            const sanitizedColor = escapeCSS(color)
+            
+            return `  --color-${sanitizedKey}: ${sanitizedColor};`
+          })
+          .filter(Boolean)
+          .join("\n")
+        
+        return `${prefix} [data-chart="${sanitizedId}"] {\n${colorRules}\n}`
+      }
+    )
+    .join("\n")
+
   return (
     <style
       dangerouslySetInnerHTML={{
-        __html: Object.entries(THEMES)
-          .map(
-            ([theme, prefix]) => `
-${prefix} [data-chart=${id}] {
-${colorConfig
-  .map(([key, itemConfig]) => {
-    const color =
-      itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
-      itemConfig.color
-    return color ? `  --color-${key}: ${color};` : null
-  })
-  .join("\n")}
-}
-`
-          )
-          .join("\n"),
+        __html: cssContent,
       }}
     />
   )

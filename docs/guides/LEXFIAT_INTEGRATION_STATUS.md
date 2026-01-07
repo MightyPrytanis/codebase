@@ -423,5 +423,53 @@ This document tracks the status of all LexFiat integrations, identifies what's w
 
 ---
 
-**Last Updated:** 2025-12-12
+---
+
+## 6. UI Mode System ✅ COMPLETE (2025-12-29)
+
+### Status: **FULLY IMPLEMENTED**
+
+**Implementation:**
+- ✅ View mode context provider: `apps/lexfiat/client/src/lib/view-mode-context.tsx`
+- ✅ View mode selector: `apps/lexfiat/client/src/components/dashboard/view-mode-selector.tsx`
+- ✅ Essentials dashboard: `apps/lexfiat/client/src/pages/essentials-dashboard.tsx`
+- ✅ Standardized hover effects: `apps/lexfiat/client/src/styles/hover-effects.css`
+
+**Features:**
+- **Full Stack Mode:** Complete dashboard with all features (default)
+- **Essentials Mode:** Simplified view with CompactHUD and core features
+- **View Mode Selector:** Settings → Appearance → UI Mode
+- **View Mode Persistence:** localStorage-based persistence
+- **Automatic Routing:** Dashboard automatically switches between modes
+
+**Status:** ✅ **UI MODE SYSTEM FULLY FUNCTIONAL**
+
+---
+
+## 7. Standardized Hover Effects ✅ COMPLETE (2025-12-29)
+
+### Status: **STANDARDIZED**
+
+**Implementation:**
+- Created standardized CSS classes in `hover-effects.css`
+- Updated all components to use standardized hover effects
+- Consistent with Piquette design system
+
+**Classes:**
+- `.hover-glass` - Glass surface sheen for panels/cards
+- `.hover-panel` - Panel hover with border highlight
+- `.hover-interactive` - Button/interactive element hover
+- `.hover-muted` - Subtle hover for muted interactions
+- `.hover-sheen` - Enhanced glass sheen with animation
+
+**Updated Components:**
+- `settings-panel.tsx`
+- `calendar-view.tsx`
+- `compact-hud.tsx`
+
+**Status:** ✅ **HOVER EFFECTS STANDARDIZED**
+
+---
+
+**Last Updated:** 2025-12-29
 

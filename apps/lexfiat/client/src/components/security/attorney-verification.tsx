@@ -1,0 +1,229 @@
+/*
+ * Copyright 2025 Cognisint LLC
+ * Licensed under the Apache License, Version 2.0
+ * See LICENSE.md for full license text
+ */
+
+/**
+ * Attorney Verification Component
+ * 
+ * UI component for attorney verification workflows (Track Delta).
+ * Implements MRPC 5.1 and 5.3 supervision requirements.
+ */
+
+import React, { useState, useEffect } from 'react';
+import { CheckCircle, XCircle, AlertTriangle, Clock, FileText, User } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+
+export interface AttorneyVerificationProps {
+  workProductId: string;
+  workProductType: 'non-confidential' | 'confidential' | 'court_filing' | 'client_communication' | 'other';
+  originalContent?: string;
+  onVerified: (verified: boolean, notes?: string) => void;
+  onCancel?: () => void;
+  reviewerName?: string;
+  reviewerId?: string;
+}
+
+export function AttorneyVerification({
+  workProductId,
+  workProductType,
+  originalContent,
+  onVerified,
+  onCancel,
+  reviewerName,
+  reviewerId
+}: AttorneyVerificationProps) {
+  const [verified, setVerified] = useState<boolean | null>(null);
+  const [verificationNotes, setVerificationNotes] = useState('');
+  const [reviewedContent, setReviewedContent] = useState(originalContent || '');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const getReviewIntensity = () => {
+    switch (workProductType) {
+      case 'court_filing':
+        return { level: 'intensive', color: 'bg-alert-red', description: 'Intensive review required - verify all facts, citations, and legal arguments' };
+      case 'confidential':
+      case 'client_communication':
+        return { level: 'standard', color: 'bg-aqua', description: 'Standard review required - ensure accuracy and appropriate tone' };
+      default:
+        return { level: 'minimal', color: 'bg-light-green', description: 'Minimal review required for non-confidential content' };
+    }
+  };
+
+  const intensity = getReviewIntensity();
+
+  const handleVerify = async (isVerified: boolean) => {
+    setIsSubmitting(true);
+    try {
+      // In production, this would call the attorney verification service
+      // For now, we'll call the callback directly
+      await onVerified(isVerified, verificationNotes);
+      setVerified(isVerified);
+    } catch (error) {
+      console.error('Verification failed:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Card className="w-full max-w-4xl mx-auto bg-card-dark border-border-gray">
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle className="text-2xl font-bold text-warm-white flex items-center gap-2">
+              <FileText className="w-6 h-6 text-accent-gold" />
+              Attorney Verification Required
+            </CardTitle>
+            <CardDescription className="text-secondary mt-2">
+              MRPC 5.1 and 5.3 require attorney supervision of AI-generated work product
+            </CardDescription>
+          </div>
+          <Badge className={intensity.color + ' text-primary-dark'}>
+            {intensity.level.toUpperCase()} REVIEW
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {/* Work Product Information */}
+        <div className="bg-navy rounded-lg p-4 border border-border-gray">
+          <div className="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <span className="text-secondary">Work Product ID:</span>
+              <span className="text-warm-white ml-2 font-mono">{workProductId}</span>
+            </div>
+            <div>
+              <span className="text-secondary">Type:</span>
+              <span className="text-warm-white ml-2 capitalize">{workProductType.replace('_', ' ')}</span>
+            </div>
+            <div>
+              <span className="text-secondary">Review Intensity:</span>
+              <span className="text-warm-white ml-2">{intensity.description}</span>
+            </div>
+            <div>
+              <span className="text-secondary">Reviewer:</span>
+              <span className="text-warm-white ml-2">{reviewerName || 'Not assigned'}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* MRPC Compliance Warning */}
+        <div className="bg-charcoal border border-accent-gold rounded-lg p-4">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-accent-gold flex-shrink-0 mt-0.5" />
+            <div>
+              <h4 className="font-semibold text-warm-white mb-1">MRPC Compliance Notice</h4>
+              <p className="text-secondary text-sm">
+                MRPC 5.1 and 5.3 require attorneys to supervise AI outputs. This work product was generated by AI
+                and requires attorney review before use or delivery. Please verify accuracy, completeness, and
+                compliance with applicable rules and standards.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Original Content */}
+        {originalContent && (
+          <div>
+            <label className="block text-sm font-medium text-warm-white mb-2">
+              Original AI-Generated Content
+            </label>
+            <div className="bg-navy rounded-lg p-4 border border-border-gray max-h-64 overflow-y-auto">
+              <pre className="text-sm text-secondary whitespace-pre-wrap font-mono">
+                {originalContent}
+              </pre>
+            </div>
+          </div>
+        )}
+
+        {/* Reviewed Content */}
+        <div>
+          <label className="block text-sm font-medium text-warm-white mb-2">
+            Reviewed/Revised Content (Optional)
+          </label>
+          <Textarea
+            value={reviewedContent}
+            onChange={(e) => setReviewedContent(e.target.value)}
+            className="bg-navy border-border-gray text-warm-white min-h-32"
+            placeholder="Enter reviewed or revised content here..."
+          />
+        </div>
+
+        {/* Verification Notes */}
+        <div>
+          <label className="block text-sm font-medium text-warm-white mb-2">
+            Verification Notes
+          </label>
+          <Textarea
+            value={verificationNotes}
+            onChange={(e) => setVerificationNotes(e.target.value)}
+            className="bg-navy border-border-gray text-warm-white min-h-24"
+            placeholder="Document what verification was performed, any issues found, or changes made..."
+          />
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex items-center justify-end gap-4 pt-4 border-t border-border-gray">
+          {onCancel && (
+            <Button
+              variant="outline"
+              onClick={onCancel}
+              disabled={isSubmitting}
+              className="border-border-gray text-warm-white hover:bg-navy"
+            >
+              Cancel
+            </Button>
+          )}
+          <Button
+            variant="outline"
+            onClick={() => handleVerify(false)}
+            disabled={isSubmitting || verified !== null}
+            className="border-alert-red text-alert-red hover:bg-alert-red hover:text-warm-white"
+          >
+            <XCircle className="w-4 h-4 mr-2" />
+            Reject
+          </Button>
+          <Button
+            onClick={() => handleVerify(true)}
+            disabled={isSubmitting || verified !== null}
+            className="bg-aqua text-primary-dark hover:bg-light-green"
+          >
+            <CheckCircle className="w-4 h-4 mr-2" />
+            Verify & Approve
+          </Button>
+        </div>
+
+        {/* Verification Status */}
+        {verified !== null && (
+          <div className={`rounded-lg p-4 border ${
+            verified 
+              ? 'bg-light-green/20 border-light-green' 
+              : 'bg-alert-red/20 border-alert-red'
+          }`}>
+            <div className="flex items-center gap-3">
+              {verified ? (
+                <CheckCircle className="w-6 h-6 text-light-green" />
+              ) : (
+                <XCircle className="w-6 h-6 text-alert-red" />
+              )}
+              <div>
+                <h4 className="font-semibold text-warm-white">
+                  {verified ? 'Work Product Verified' : 'Work Product Rejected'}
+                </h4>
+                <p className="text-secondary text-sm">
+                  {verified 
+                    ? 'This work product has been verified and approved for use.'
+                    : 'This work product has been rejected and should not be used.'}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}

@@ -46,8 +46,18 @@ import {
 import { SearchCheck, Send, MessageSquare, TrendingUp } from "lucide-react";
 import { executeCyranoTool } from "@/lib/cyrano-api";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { useViewMode } from "@/lib/view-mode-context";
+import EssentialsDashboard from "./essentials-dashboard";
 
 export default function Dashboard() {
+  const { viewMode } = useViewMode();
+
+  // Route to Essentials mode if selected
+  if (viewMode === 'essentials') {
+    return <EssentialsDashboard />;
+  }
+
+  // Full Stack mode (default)
   const [currentTickerIndex, setCurrentTickerIndex] = useState(0);
   const [widgetMenuOpen, setWidgetMenuOpen] = useState(false);
   const [panelOverlayOpen, setPanelOverlayOpen] = useState(false);

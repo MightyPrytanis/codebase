@@ -11,9 +11,14 @@ export default defineConfig({
       "@": path.resolve(import.meta.dirname, "client", "src"),
       "@shared": path.resolve(import.meta.dirname, "shared"),
       "@assets": path.resolve(import.meta.dirname, "attached_assets"),
-      "@cyrano": path.resolve(import.meta.dirname, "..", "Cyrano"),
+      "@cyrano": path.resolve(import.meta.dirname, "..", "..", "Cyrano"),
+      "@cyrano/shared-assets": path.resolve(import.meta.dirname, "..", "..", "Cyrano", "shared-assets"),
     },
     dedupe: ["lucide-react", "react", "react-dom"],
+    extensions: [".ts", ".tsx", ".js", ".jsx", ".json"],
+  },
+  optimizeDeps: {
+    include: ["@cyrano/shared-assets"],
   },
   root: path.resolve(import.meta.dirname, "client"),
   build: {
@@ -36,13 +41,20 @@ export default defineConfig({
   },
   server: {
     fs: {
-      strict: true,
-      deny: ["**/.*"],
+      strict: false,
+      allow: ['..'],
     },
     headers: {
-      'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' ws://localhost:* http://localhost:*;",
+      // Hardened CSP: Remove unsafe-inline and unsafe-eval where possible
+      // Note: 'unsafe-inline' for styles is required for Vite HMR in development
+      // 'unsafe-eval' is required for Vite's module system in development
+      'Content-Security-Policy': process.env.NODE_ENV === 'production'
+        ? "default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self';"
+        : "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' ws://localhost:* http://localhost:* https:; frame-ancestors 'none'; base-uri 'self';",
       'X-Frame-Options': 'DENY',
       'X-Content-Type-Options': 'nosniff',
+      'Referrer-Policy': 'strict-origin-when-cross-origin',
+      'Permissions-Policy': 'geolocation=(), microphone=(), camera=()',
     },
   },
   preview: {

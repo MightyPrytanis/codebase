@@ -82,7 +82,7 @@ export function CompactHUD({
         <Button
           variant="ghost"
           size="sm"
-          className="h-auto p-1.5 gap-1.5 hover:bg-muted/50"
+          className="h-auto p-1.5 gap-1.5 hover-interactive"
           onClick={() => handleClick("incoming")}
         >
           <Inbox className="h-4 w-4 text-primary" />
@@ -98,7 +98,7 @@ export function CompactHUD({
         <Button
           variant="ghost"
           size="sm"
-          className="h-auto p-1.5 gap-1.5 hover:bg-muted/50"
+          className="h-auto p-1.5 gap-1.5 hover-interactive"
           onClick={() => handleClick("deadlines")}
         >
           <Calendar className="h-4 w-4 text-destructive" />
@@ -114,7 +114,7 @@ export function CompactHUD({
         <Button
           variant="ghost"
           size="sm"
-          className="h-auto p-1.5 gap-1.5 hover:bg-muted/50"
+          className="h-auto p-1.5 gap-1.5 hover-interactive"
           onClick={() => handleClick("drafts")}
         >
           <FileText className="h-4 w-4 text-primary" />
@@ -130,7 +130,7 @@ export function CompactHUD({
         <Button
           variant="ghost"
           size="sm"
-          className="h-auto p-1.5 gap-1.5 hover:bg-muted/50"
+          className="h-auto p-1.5 gap-1.5 hover-interactive"
           onClick={() => handleClick("reviews")}
         >
           <AlertCircle className="h-4 w-4 text-warning" />
@@ -146,7 +146,7 @@ export function CompactHUD({
         <Button
           variant="ghost"
           size="sm"
-          className="h-auto p-1.5 gap-1.5 hover:bg-muted/50"
+          className="h-auto p-1.5 gap-1.5 hover-interactive"
           onClick={() => handleClick("goodcounsel")}
         >
           <Heart className="h-4 w-4 text-pink-500" />

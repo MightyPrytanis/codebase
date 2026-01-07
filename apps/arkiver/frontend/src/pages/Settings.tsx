@@ -5,10 +5,13 @@
  */
 
 import { useState } from 'react';
-import { Settings as SettingsIcon, Download, Trash2, Bell, User, Shield } from 'lucide-react';
+import { Settings as SettingsIcon, Download, Trash2, Bell, User, Shield, Activity } from 'lucide-react';
+import { isAdminSync } from '../lib/admin-auth';
+import { CustodianSettings } from '../components/CustodianSettings';
 
 export default function Settings() {
-  const [activeTab, setActiveTab] = useState<'account' | 'alerts' | 'export' | 'data'>('account');
+  const [activeTab, setActiveTab] = useState<'account' | 'alerts' | 'export' | 'data' | 'admin'>('account');
+  const isAdmin = isAdminSync();
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: '#f5f5f5' }}>
@@ -28,6 +31,7 @@ export default function Settings() {
               { id: 'alerts' as const, label: 'Alerts', icon: Bell },
               { id: 'export' as const, label: 'Export', icon: Download },
               { id: 'data' as const, label: 'Data', icon: Trash2 },
+              ...(isAdmin ? [{ id: 'admin' as const, label: 'Admin', icon: Activity }] : []),
             ].map(tab => (
               <button
                 key={tab.id}
@@ -49,6 +53,7 @@ export default function Settings() {
             {activeTab === 'alerts' && <AlertSettings />}
             {activeTab === 'export' && <ExportSettings />}
             {activeTab === 'data' && <DataSettings />}
+            {activeTab === 'admin' && isAdmin && <CustodianSettings />}
           </div>
         </div>
       </div>

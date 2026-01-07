@@ -9,6 +9,8 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Settings, Shield, Database, Users, Activity, RefreshCw, CheckCircle2, AlertTriangle } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { executeCyranoTool } from "@/lib/cyrano-api";
+import { CustodianSettings } from "./custodian-settings";
+import { EngineStatusDashboard } from "./engine-status-dashboard";
 
 interface AdminPanelProps {
   isOpen: boolean;
@@ -149,6 +151,41 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
             </div>
           )}
         </div>
+
+        {/* Engine Status */}
+        <div 
+          className="insight-card info p-4 cursor-pointer hover:bg-black/40 transition-colors"
+          onClick={() => setActiveSection(activeSection === "engine-status" ? null : "engine-status")}
+        >
+          <div className="flex items-center gap-3 mb-2">
+            <Activity className="h-5 w-5" />
+            <h3 className="font-semibold">Engine Status</h3>
+          </div>
+          <p className="text-sm text-muted-foreground">View status and health of all Cyrano engines</p>
+          {activeSection === "engine-status" && (
+            <div className="mt-4 pt-4 border-t border-slate-700">
+              <EngineStatusDashboard />
+            </div>
+          )}
+        </div>
+
+        {/* Custodian Settings */}
+        <div 
+          className="insight-card info p-4 cursor-pointer hover:bg-black/40 transition-colors"
+          onClick={() => setActiveSection(activeSection === "custodian" ? null : "custodian")}
+        >
+          <div className="flex items-center gap-3 mb-2">
+            <Activity className="h-5 w-5" />
+            <h3 className="font-semibold">Custodian Engine</h3>
+          </div>
+          <p className="text-sm text-muted-foreground">Configure system monitoring and maintenance</p>
+          {activeSection === "custodian" && (
+            <div className="mt-4 pt-4 border-t border-slate-700">
+              <CustodianSettings />
+            </div>
+          )}
+        </div>
+      </div>
       </SheetContent>
     </Sheet>
   );

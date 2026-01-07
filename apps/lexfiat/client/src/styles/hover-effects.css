@@ -1,0 +1,95 @@
+/*
+ * Standardized Hover Effects
+ * Consistent hover highlighting and glass surface sheens across LexFiat
+ * 
+ * Copyright 2025 Cognisint LLC
+ */
+
+/* Standard Hover Effect - Glass Surface Sheen */
+.hover-glass {
+  transition: all 0.2s ease;
+}
+
+.hover-glass:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
+  backdrop-filter: blur(10px) saturate(120%);
+  -webkit-backdrop-filter: blur(10px) saturate(120%);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+/* Standard Hover Effect - Panel/Card */
+.hover-panel {
+  transition: all 0.2s ease;
+}
+
+.hover-panel:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* Standard Hover Effect - Button/Interactive */
+.hover-interactive {
+  transition: all 0.2s ease;
+}
+
+.hover-interactive:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Standard Hover Effect - Muted (for subtle interactions) */
+.hover-muted {
+  transition: all 0.2s ease;
+}
+
+.hover-muted:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Glass Surface Sheen - Enhanced for widgets */
+.hover-sheen {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.hover-sheen::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transition: left 0.5s ease;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.hover-sheen:hover::before {
+  left: 100%;
+}
+
+.hover-sheen:hover {
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.5);
+  transform: translateY(-2px);
+}

@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
+import { createSafeTextElement, escapeHtml } from "./lib/dom-xss-security";
 
 const rootElement = document.getElementById("root");
 if (!rootElement) {
@@ -11,22 +12,28 @@ try {
   createRoot(rootElement).render(<App />);
 } catch (error) {
   console.error("Failed to render app:", error);
-  // Sanitize error message to prevent XSS
-  // Note: For entity encoding, single-pass is correct (not iterative)
-  // Encode & first to avoid double-encoding other entities
-  const errorMessage = error instanceof Error ? error.message : "Unknown error";
-  const sanitizedMessage = errorMessage
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#x27;');
   
-  rootElement.innerHTML = `
-    <div style="color: white; padding: 20px; font-family: monospace;">
-      <h1>Error Loading LexFiat</h1>
-      <p>${sanitizedMessage}</p>
-      <p>Check the browser console for more details.</p>
-    </div>
-  `;
+  // Use safe DOM manipulation instead of innerHTML
+  // Clear existing content
+  rootElement.textContent = '';
+  
+  // Create error container
+  const container = document.createElement("div");
+  container.style.cssText = "color: white; padding: 20px; font-family: monospace;";
+  
+  // Create heading safely
+  const heading = createSafeTextElement("h1", "Error Loading LexFiat");
+  
+  // Create error message paragraph safely
+  const errorMessage = error instanceof Error ? error.message : "Unknown error";
+  const messagePara = createSafeTextElement("p", errorMessage);
+  
+  // Create help text paragraph
+  const helpPara = createSafeTextElement("p", "Check the browser console for more details.");
+  
+  // Append elements safely
+  container.appendChild(heading);
+  container.appendChild(messagePara);
+  container.appendChild(helpPara);
+  rootElement.appendChild(container);
 }

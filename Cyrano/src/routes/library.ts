@@ -186,7 +186,7 @@ router.post('/onboarding/practice-profile', authenticateJWT, async (req: Request
  * Save Chronometric baseline configuration
  * Note: Once Chronometric Engine is created, this will call the pattern_learning module
  */
-router.post('/onboarding/baseline-config', async (req: Request, res: Response) => {
+router.post('/onboarding/baseline-config', authenticateJWT, async (req: Request, res: Response) => {
   try {
     const validationResult = BaselineConfigSchema.safeParse(req.body);
     if (!validationResult.success) {
@@ -197,7 +197,12 @@ router.post('/onboarding/baseline-config', async (req: Request, res: Response) =
     }
 
     const configData = validationResult.data;
-    const userId = configData.userId || 'default-user';
+    const user = (req as any).user;
+    const userId = user?.userId?.toString() || configData.userId;
+    
+    if (!userId) {
+      return res.status(401).json({ error: 'User ID is required' });
+    }
     
     // Import baseline config service directly
     // TODO: Once Chronometric Engine is created, use pattern_learning module via MCP

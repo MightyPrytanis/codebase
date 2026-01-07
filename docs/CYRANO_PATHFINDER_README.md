@@ -65,8 +65,18 @@ Located in: `Cyrano/src/tools/cyrano-pathfinder.ts`
 - `buildSystemPrompt()` - Generates branded system prompt
 - `shouldExecuteTools()` - Detects action keywords
 - `executeWithTools()` - Orchestrates tool calls
+- `findRelevantSkills()` - **Autonomously identifies relevant skills using AI** (2025-12-29)
+- `heuristicSkillSelection()` - Fallback keyword-based skill matching
 - `logTelemetry()` - Records usage data
 - `getTelemetryStats()` - Returns usage statistics
+
+**Autonomous Skill Selection (2025-12-29):**
+- Skills are automatically identified and suggested based on user queries
+- AI analyzes queries and identifies relevant skills with confidence scores
+- Top 3 most relevant skills (confidence >= 0.6) are automatically suggested
+- Skills are executed invisibly - users don't need to know skill IDs
+- Falls back to heuristic matching if AI selection fails
+- Integrated into tool execution flow via `skill_executor`
 
 ### Frontend: CyranoChat Component
 
