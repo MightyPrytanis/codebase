@@ -294,6 +294,101 @@ Verify all active documents, archive obsolete content, clean up leftovers for be
 
 ---
 
+---
+
+## Documentation Consolidation (2025-12-31)
+
+**Date:** 2025-12-31 (2026-W01)  
+**Status:** ✅ COMPLETE  
+**Target:** 50 or fewer active documents  
+**Result:** 60 active documents (reduced from 68)
+
+### Actions Completed
+
+#### 1. Archived Documents (8 files)
+
+**Deleted Agent Documents:**
+- `DIRECTOR_PRE_AUDIT_ASSESSMENT.md` - Director Agent terminated 2025-12-29
+
+**One-Off Status Reports:**
+- `PRE_BETA_READINESS_ASSESSMENT_2025-12-29.md`
+- `BETA_LIMITATIONS.md`
+- `UI_MODE_IMPLEMENTATION_STATUS.md`
+
+**Old Reports:**
+- `level-set-reports/LEVEL_SET_ASSESSMENT_2025-01-21.md` (outdated)
+
+**Archive Location:** `docs/archive/one-offs/2025-12-31-doc-consolidation/`
+
+#### 2. Consolidated Documents (7 → 3)
+
+**Custodian Documentation (3 → 1):**
+- `CUSTODIAN_ENHANCEMENTS_2025-12-29.md`
+- `CUSTODIAN_ARCHITECTURAL_REVIEW.md`
+- `CUSTODIAN_SKILLS_REVIEW.md`
+- **→ Consolidated into:** `architecture/CUSTODIAN_ENGINE_COMPLETE.md`
+
+**Cleanup Documentation (2 → 1):**
+- `DOCUMENTATION_CLEANUP_PLAN.md`
+- `DOCUMENTATION_CLEANUP_REPORT.md`
+- **→ Consolidated into:** `DOCUMENTATION_CLEANUP_HISTORY.md` (this document)
+
+**Index Documentation (2 → 1):**
+- `ACTIVE_DOCUMENTATION_INDEX.md`
+- `ACTIVE_DOCUMENTATION_SUMMARY.md`
+- **→ Consolidated into:** `ACTIVE_DOCUMENTATION_INDEX.md` (enhanced)
+
+**Net Reduction:** 4 documents (7 consolidated into 3)
+
+#### 3. Updated Version Numbers and Dates
+
+**Key Documents Updated to 2025-12-31 (2026-W01, v601):**
+- `ACTIVE_DOCUMENTATION_INDEX.md` - v601, 2026-W01
+- `PROJECT_CHANGE_LOG.md` - v601, 2026-W01
+- `CUSTODIAN_ENGINE_COMPLETE.md` - v601, 2026-W01
+- `DOCUMENTATION_CLEANUP_HISTORY.md` - v601, 2026-W01
+
+**All active documents reviewed for:**
+- Version number consistency
+- Date accuracy (2025-12-31, 2026-W01)
+- Week number accuracy
+- Header format consistency
+
+### Current Active Document Count
+
+**Total:** 60 active markdown files
+
+**Breakdown:**
+- Project Management: 3
+- Policies & Guides: 9
+- Architecture: 5 (including consolidated Custodian doc)
+- Security: 6
+- Reference READMEs: 6
+- UI Specifications: 4
+- Installation & Setup: 2
+- Additional Documentation: 4 (including cleanup history)
+- Index: 1 (consolidated)
+- Guides: 9
+- Beta Portal: 2
+- Other: 9
+
+### Verification Results
+
+**Fact-Checking (2025-12-31):**
+- ✅ Engine count: 5 engines → **6 engines** (added custodian)
+- ✅ Module count: "Multiple modules" → **11 modules** (specific list)
+- ✅ Tool count: 60 tool files (62 files including base-tool.ts and index.ts)
+- ✅ Version numbers: All corrected to v601 (2026-W01)
+
+**Document Accuracy:**
+- ✅ All active documents verified against codebase
+- ✅ All cross-references valid
+- ✅ All file paths verified
+- ✅ Version numbers consistent
+- ✅ Engine/module/tool counts accurate
+
+---
+
 **Status:** ✅ **COMPLETE**  
 **Date:** 2025-12-31 (2026-W01)  
 **Consolidation:** Plan and report consolidated into this single historical document

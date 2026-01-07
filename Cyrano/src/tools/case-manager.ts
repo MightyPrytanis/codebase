@@ -76,8 +76,8 @@ export const caseManager = new (class extends BaseTool {
 
   public async createCase(caseData?: any) {
     try {
-      // Import legalCases schema from LexFiat
-      const { legalCases } = await import('../../../apps/lexfiat/shared/schema.js');
+      // Import legalCases schema from LexFiat (server runtime schema)
+      const { legalCases } = await import('../lexfiat-schema.js');
       
       if (!caseData || !caseData.title || !caseData.clientName || !caseData.caseType) {
         throw new Error('Case creation requires: title, clientName, and caseType');
@@ -118,8 +118,8 @@ export const caseManager = new (class extends BaseTool {
 
   public async updateCase(caseId: string, caseData?: any) {
     try {
-      // Import legalCases schema from LexFiat
-      const { legalCases } = await import('../../../apps/lexfiat/shared/schema.js');
+      // Import legalCases schema from LexFiat (server runtime schema)
+      const { legalCases } = await import('../lexfiat-schema.js');
       
       if (!caseData || Object.keys(caseData).length === 0) {
         throw new Error('Update requires at least one field to update');
@@ -175,8 +175,8 @@ export const caseManager = new (class extends BaseTool {
 
   public async getCase(caseId: string) {
     try {
-      // Import legalCases schema from LexFiat
-      const { legalCases } = await import('../../../apps/lexfiat/shared/schema.js');
+      // Import legalCases schema from LexFiat (server runtime schema)
+      const { legalCases } = await import('../lexfiat-schema.js');
       
       const [caseRecord] = await db
         .select()
@@ -189,7 +189,7 @@ export const caseManager = new (class extends BaseTool {
       }
 
       // Retrieve evidence from documents table and artifact collectors
-      const { documents: documentsTable } = await import('../../../apps/lexfiat/shared/schema.js');
+      const { documents: documentsTable } = await import('../lexfiat-schema.js');
       const caseDocuments = await db
         .select()
         .from(documentsTable)
@@ -236,7 +236,7 @@ export const caseManager = new (class extends BaseTool {
             createdAt: doc.createdAt,
             urgencyLevel: doc.urgencyLevel,
           })),
-          court_filing_confirmations: courtConfirmations, // Email confirmations from MiFile/courts (detected, not API integration)
+          court_filing_confirmations: mifileConfirmations, // Email confirmations from MiFile/courts (detected, not API integration)
         },
         message: 'Case retrieved successfully',
       };
@@ -275,8 +275,8 @@ export const caseManager = new (class extends BaseTool {
 
   public async deleteCase(caseId: string) {
     try {
-      // Import legalCases schema from LexFiat
-      const { legalCases } = await import('../../../apps/lexfiat/shared/schema.js');
+      // Import legalCases schema from LexFiat (server runtime schema)
+      const { legalCases } = await import('../lexfiat-schema.js');
       
       const [deleted] = await db
         .delete(legalCases)

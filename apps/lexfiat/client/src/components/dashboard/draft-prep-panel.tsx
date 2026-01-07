@@ -68,6 +68,7 @@ export default function DraftPrepPanel({ isOpen, onClose }: DraftPrepPanelProps)
             <div className="insight-subtext">In progress</div>
           </div>
         </div>
+      </div>
       </SheetContent>
     </Sheet>
   );
