@@ -420,8 +420,8 @@ export class ClaimExtractor extends BaseTool {
     }
     
     try {
-      // Import documents schema from LexFiat
-      const { documents } = await import('../../../../apps/lexfiat/shared/schema.js');
+      // Import documents schema from server
+      const { documents } = await import('../../lexfiat-schema.js');
       const { db } = await import('../../db.js');
       const { eq } = await import('drizzle-orm');
       
