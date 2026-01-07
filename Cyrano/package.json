@@ -22,7 +22,8 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "clean": "rm -rf dist",
-    "rebuild": "npm run clean && npm run build"
+    "rebuild": "npm run clean && npm run build",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.71.2",
@@ -83,6 +84,7 @@
     "eslint": "^9.39.2",
     "globals": "^16.5.0",
     "imapflow": "^1.2.4",
+    "patch-package": "^8.0.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.51.0",
