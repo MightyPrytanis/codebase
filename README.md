@@ -33,10 +33,12 @@ codebase/
 │   ├── reference/      # API reference, architecture
 │   ├── security/       # Security docs
 │   └── install/        # Installation/onboarding docs
-├── Labs/                # Experimental/in-development features
-│   ├── Potemkin/       # Potemkin experimental code
-│   └── [other-experimental]/
 └── Legacy/              # Archived, non-active code
+    ├── archive/         # Recently archived non-essential directories
+    │   ├── labs/       # Experimental projects (Potemkin, infinite-helix)
+    │   ├── cyrano-archive/  # Broken tools archive
+    │   ├── docs-archive/    # Historical documentation
+    │   └── miscellaneous/   # Duplicate UI components
     ├── old-codebase-artifacts/
     │   ├── arkivermj/  # Original Base44 Arkiver
     │   └── [other-archived]/
@@ -78,13 +80,12 @@ codebase/
 - ✅ `Legacy/Cosmos/` - Cosmos project (archived)
 - ✅ `Legacy/sparetools/` - Spare tools (archived)
 
-**Experimental:**
-- ✅ `Labs/Potemkin/` - Potemkin experimental code (correct)
-- ✅ `Labs/infinite-helix/` - Experimental project (correct)
-- ✅ `Labs/muskification-meter/` - Experimental project (correct)
-
-**Other Directories:**
-- ⚠️ `Miscellaneous/` - Contains duplicate UI components (should be archived)
+**Archived (Moved to Legacy/archive/):**
+- ✅ `Legacy/archive/labs/Potemkin/` - Potemkin experimental code (archived)
+- ✅ `Legacy/archive/labs/infinite-helix/` - Experimental project (archived)
+- ✅ `Legacy/archive/cyrano-archive/` - Broken tools archive (archived)
+- ✅ `Legacy/archive/docs-archive/` - Historical documentation (archived)
+- ✅ `Legacy/archive/miscellaneous/` - Duplicate UI components (archived)
 - ⚠️ `Cosmos/` - At root level (should be in Legacy/ if not needed)
 - ⚠️ `NewCodex/` - At root level (should be archived or removed)
 - ✅ `IP/` - Intellectual property (excluded from git, correct)
@@ -100,10 +101,11 @@ codebase/
 ### Recommendations
 
 1. ✅ LexFiat located at `apps/lexfiat/` (COMPLETE - root directory removed)
-2. Archive `Miscellaneous/` to `Legacy/` if not needed
-3. Review and archive `Cosmos/` and `NewCodex/` if not needed
-4. Update `.gitignore` and create `.cursorignore` to exclude `Legacy/` from searches
-5. ✅ All references updated to `apps/lexfiat/` (COMPLETE)
+2. ✅ Archive `Miscellaneous/` to `Legacy/archive/` (COMPLETE - 2025-01-07)
+3. ✅ Archive experimental Labs projects to `Legacy/archive/labs/` (COMPLETE - 2025-01-07)
+4. ✅ Archive `Cyrano/archive` and `docs/archive` to `Legacy/archive/` (COMPLETE - 2025-01-07)
+5. ✅ Update `.gitignore` and `.cursorignore` to exclude `Legacy/archive/` from searches (COMPLETE)
+6. Review and archive `Cosmos/` and `NewCodex/` if not needed (PENDING)
 
 ## Branches
 

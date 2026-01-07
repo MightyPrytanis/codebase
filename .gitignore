@@ -118,6 +118,9 @@ Document Archive/
 # Legacy Directory - Exclude from code searches to prevent confusion
 Legacy/
 
+# Archived experimental and non-essential directories
+Legacy/archive/
+
 # Snyk Security Extension - AI Rules (auto-generated)
 .github/instructions/snyk_rules.instructions.md
 
