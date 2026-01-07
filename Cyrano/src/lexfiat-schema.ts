@@ -1,3 +1,9 @@
+/*
+ * Copyright 2025 Cognisint LLC
+ * Licensed under the Apache License, Version 2.0
+ * See LICENSE.md for full license text
+ */
+
 import { sql } from "drizzle-orm";
 import { pgTable, text, varchar, timestamp, json, boolean, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";

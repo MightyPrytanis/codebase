@@ -236,7 +236,7 @@ export const caseManager = new (class extends BaseTool {
             createdAt: doc.createdAt,
             urgencyLevel: doc.urgencyLevel,
           })),
-          court_filing_confirmations: courtConfirmations, // Email confirmations from MiFile/courts (detected, not API integration)
+          court_filing_confirmations: mifileConfirmations, // Email confirmations from MiFile/courts (detected, not API integration)
         },
         message: 'Case retrieved successfully',
       };
