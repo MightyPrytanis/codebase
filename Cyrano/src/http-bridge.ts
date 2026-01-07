@@ -633,7 +633,7 @@ async function loadAllToolDefinitions(): Promise<Tool[]> {
           const tool = await loadTool(toolName, true);
           return tool.getToolDefinition();
         } catch (error) {
-          errors.push(toolName + ': ' + (error instanceof Error ? error.message : String(error)));
+          errors.push(`${toolName}: ${error instanceof Error ? error.message : String(error)}`);
           return null;
         }
       })
