@@ -75,7 +75,7 @@ export class DriftCalculator extends BaseTool {
       name: 'drift_calculator',
       description: 'Calculates opinion drift by comparing early vs recent insights from a target LLM. Uses AI to analyze position changes, bias indicators, and drift score.',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           targetLLM: {
             type: 'string',
@@ -88,7 +88,7 @@ export class DriftCalculator extends BaseTool {
           earlyInsights: {
             type: 'array',
             items: {
-              type: 'object',
+              type: 'object' as const,
               properties: {
                 id: { type: 'string' },
                 title: { type: 'string' },
@@ -102,7 +102,7 @@ export class DriftCalculator extends BaseTool {
           recentInsights: {
             type: 'array',
             items: {
-              type: 'object',
+              type: 'object' as const,
               properties: {
                 id: { type: 'string' },
                 title: { type: 'string' },

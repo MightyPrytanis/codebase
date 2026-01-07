@@ -20,7 +20,7 @@ export const dupeCheck = new (class extends BaseTool {
       name: 'dupe_check',
       description: 'Check for potential duplicate time entries to prevent overbilling while recognizing legitimate repeated tasks',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           new_entries: {
             type: 'array',

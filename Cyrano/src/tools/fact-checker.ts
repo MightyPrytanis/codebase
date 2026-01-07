@@ -37,7 +37,7 @@ export const factChecker: BaseTool = new (class extends BaseTool {
       name: 'fact_checker',
       description: 'Verify facts and claims in legal documents with confidence scoring',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           claim_text: {
             type: 'string',
@@ -77,7 +77,7 @@ export const factChecker: BaseTool = new (class extends BaseTool {
           custom_models: {
             type: 'array',
             items: {
-              type: 'object',
+              type: 'object' as const,
               properties: {
                 provider: { type: 'string', enum: ['openai', 'anthropic', 'perplexity', 'google', 'xai', 'deepseek'] },
                 model: { type: 'string' },

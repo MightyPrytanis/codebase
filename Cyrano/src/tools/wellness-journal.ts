@@ -34,7 +34,7 @@ export const wellnessJournalTool = new (class extends BaseTool {
       name: 'wellness_journal',
       description: 'Wellness journaling tool for creating entries, getting feedback, tracking trends, and detecting burnout. Supports both text and voice journaling with HIPAA-compliant encryption.',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           action: {
             type: 'string',

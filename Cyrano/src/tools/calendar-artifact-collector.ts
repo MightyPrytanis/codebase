@@ -22,7 +22,7 @@ export const calendarArtifactCollector = new (class extends BaseTool {
       name: 'calendar_artifact_collector',
       description: 'Collect calendar events as circumstantial evidence for time reconstruction',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           start_date: {
             type: 'string',

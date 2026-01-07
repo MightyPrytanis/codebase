@@ -35,7 +35,7 @@ export const goodcounselEngineTool = new (class extends BaseTool {
       name: 'goodcounsel_engine',
       description: 'GoodCounsel Engine - Ethics and Wellness Engine promoting attorney health, wellness, and ethical decision-making',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           action: {
             type: 'string',
@@ -54,7 +54,7 @@ export const goodcounselEngineTool = new (class extends BaseTool {
             description: 'Workflow ID for execution',
           },
           input: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Input data for workflow execution',
           },
           userId: {

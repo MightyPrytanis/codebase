@@ -25,7 +25,7 @@ export const authTool = new (class extends BaseTool {
       name: 'auth',
       description: 'User authentication tool for registration, login, and logout',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           action: {
             type: 'string',

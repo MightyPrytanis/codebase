@@ -75,7 +75,7 @@ export class BiasDetector extends BaseTool {
       name: 'bias_detector',
       description: 'Detects bias in AI-generated content by analyzing historical insights from a target LLM. Identifies bias patterns, neutrality assessment, and provides recommendations.',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           targetLLM: {
             type: 'string',
@@ -88,7 +88,7 @@ export class BiasDetector extends BaseTool {
           insights: {
             type: 'array',
             items: {
-              type: 'object',
+              type: 'object' as const,
               properties: {
                 id: { type: 'string' },
                 content: { type: 'string' },

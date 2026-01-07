@@ -20,7 +20,7 @@ export const preFillLogic = new (class extends BaseTool {
       name: 'pre_fill_logic',
       description: 'Pre-populate time entries based on evidence, work patterns, and professional norms for attorney review',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           gaps: {
             type: 'array',
@@ -28,15 +28,15 @@ export const preFillLogic = new (class extends BaseTool {
             description: 'Identified time gaps',
           },
           artifacts: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Collected artifacts for the gap period',
           },
           user_patterns: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Historical user work patterns and billing data',
           },
           professional_norms: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Professional time allocation norms',
           },
         },

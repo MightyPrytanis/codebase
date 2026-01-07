@@ -91,10 +91,10 @@ export class AlertGenerator extends BaseTool {
       name: 'alert_generator',
       description: 'Creates or updates Alert entities when integrity thresholds are breached. Handles duplicate detection and email notifications.',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           alert: {
-            type: 'object',
+            type: 'object' as const,
             properties: {
               id: { type: 'string' },
               type: { type: 'string' },
@@ -102,7 +102,7 @@ export class AlertGenerator extends BaseTool {
               title: { type: 'string' },
               description: { type: 'string' },
               test: {
-                type: 'object',
+                type: 'object' as const,
                 properties: {
                   id: { type: 'string' },
                   testName: { type: 'string' },
@@ -114,7 +114,7 @@ export class AlertGenerator extends BaseTool {
             description: 'Alert to create or update',
           },
           userConfig: {
-            type: 'object',
+            type: 'object' as const,
             properties: {
               notification_method: { type: 'string', enum: ['none', 'email', 'both'] },
               email: { type: 'string' },
@@ -124,11 +124,11 @@ export class AlertGenerator extends BaseTool {
           existingAlerts: {
             type: 'array',
             items: {
-              type: 'object',
+              type: 'object' as const,
               properties: {
                 id: { type: 'string' },
                 criteria: {
-                  type: 'object',
+                  type: 'object' as const,
                   properties: {
                     test_id: { type: 'string' },
                   },

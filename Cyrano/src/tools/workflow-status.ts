@@ -21,7 +21,7 @@ export const workflowStatusTool = new (class extends BaseTool {
       name: 'workflow_status',
       description: 'Get high-level workflow status for compact HUD, including counts of incoming items by action type (respond, review for response, review and forward, read FYI), drafts in progress, items waiting for review, and active GoodCounsel prompts. Returns errors when data unavailable (demo mode opt-in only via DEMO_MODE=true).',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {},
         required: [],
       },

@@ -23,7 +23,7 @@ export const documentAnalyzer = new (class extends BaseTool {
       name: 'document_analyzer',
       description: 'Analyze legal documents to extract key information, metadata, and insights',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           document_text: {
             type: 'string',

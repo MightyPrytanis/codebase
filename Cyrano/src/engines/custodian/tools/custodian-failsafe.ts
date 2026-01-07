@@ -21,7 +21,7 @@ export const custodianFailsafeTool = new (class extends BaseTool {
       name: 'custodian_failsafe',
       description: 'Activate or deactivate FAILSAFE protocol. FAILSAFE locks down system on security breach. Deactivation requires admin authorization. Admin-only access.',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           action: {
             type: 'string',
@@ -29,7 +29,7 @@ export const custodianFailsafeTool = new (class extends BaseTool {
             description: 'FAILSAFE action',
           },
           options: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Options for FAILSAFE action',
             properties: {
               reason: {
