@@ -205,7 +205,7 @@ router.post('/pathfinder', authenticateJWT, async (req: Request, res: Response) 
   try {
     const { message, context } = z.object({
       message: z.string(),
-      context: z.record(z.any()).optional(),
+      context: z.record(z.string(), z.any()).optional(),
     }).parse(req.body);
     
     const result = await cyranoPathfinder.execute({
@@ -220,8 +220,11 @@ router.post('/pathfinder', authenticateJWT, async (req: Request, res: Response) 
     });
     
     if (result.isError) {
+      const errorText = result.content[0] && result.content[0].type === 'text'
+        ? result.content[0].text
+        : 'Pathfinder request failed';
       return res.status(500).json({ 
-        error: result.content[0]?.text || 'Pathfinder request failed' 
+        error: errorText 
       });
     }
     

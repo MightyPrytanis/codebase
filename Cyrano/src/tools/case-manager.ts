@@ -210,14 +210,15 @@ export const caseManager = new (class extends BaseTool {
           email_provider: 'both',
         });
 
-        if (!artifactResult.isError && artifactResult.content?.[0]?.text) {
-          const artifactData = JSON.parse(artifactResult.content[0].text);
+        const contentItem = artifactResult.content?.[0];
+        if (!artifactResult.isError && contentItem && contentItem.type === 'text') {
+          const artifactData = JSON.parse(contentItem.text);
           if (artifactData.emails && Array.isArray(artifactData.emails)) {
             mifileConfirmations = artifactData.emails.filter((e: any) => e.mifile_confirmation === true);
           }
         }
       } catch (error) {
-        // Email arti ifact collector not available or failed - continue without MiFile confirmations
+        // Email artifact collector not available or failed - continue without MiFile confirmations
         console.warn('Could not retrieve MiFile confirmations:', error instanceof Error ? error.message : String(error));
       }
 

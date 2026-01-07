@@ -12,7 +12,7 @@ import { skillRegistry } from '../skills/skill-registry.js';
 const BetaTestSupportSchema = z.object({
   action: z.enum(['registration', 'onboarding', 'installation', 'evaluation', 'feedback', 'walkthrough', 'troubleshooting']).describe('Type of beta test support needed'),
   user_query: z.string().describe('User\'s question or issue description'),
-  context: z.record(z.any()).optional().describe('Additional context (invitation_token, user_id, step, error_message, feedback_type, etc.)'),
+  context: z.record(z.string(), z.any()).optional().describe('Additional context (invitation_token, user_id, step, error_message, feedback_type, etc.)'),
 });
 
 export const betaTestSupport = new (class extends BaseTool {

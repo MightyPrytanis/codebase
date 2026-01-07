@@ -95,15 +95,19 @@ export async function analyzeClioDocument(
         });
 
         if (verificationResult.isError) {
+          const errorText = verificationResult.content[0] && verificationResult.content[0].type === 'text' 
+            ? verificationResult.content[0].text 
+            : 'Unknown error';
           return {
             result: {} as DocumentAnalysisResult,
-            error: `Potemkin verification failed: ${verificationResult.content[0]?.text || 'Unknown error'}`
+            error: `Potemkin verification failed: ${errorText}`
           };
         }
 
         // Extract verification data
-        const verificationData = verificationResult.content[0]?.text 
-          ? JSON.parse(verificationResult.content[0].text) 
+        const contentItem = verificationResult.content[0];
+        const verificationData = contentItem && contentItem.type === 'text'
+          ? JSON.parse(contentItem.text) 
           : {};
 
         // Create work product ID for attorney verification

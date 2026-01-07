@@ -83,7 +83,8 @@ interface ToolMetadata {
   status: 'loaded' | 'loading' | 'error' | 'unloaded';
 }
 
-type ToolLoader = () => Promise<ToolInstance | { default: ToolInstance }>;
+// Accept any object with the required ToolInstance methods
+type ToolLoader = () => Promise<ToolInstance | { default: ToolInstance } | any>;
 
 // Tool import map with metadata
 const toolImportMap: Record<string, { loader: ToolLoader; metadata: Partial<ToolMetadata> }> = {

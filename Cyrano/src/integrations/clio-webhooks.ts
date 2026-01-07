@@ -174,8 +174,8 @@ export async function processClioWebhook(
         });
 
         if (workflowResult.isError) {
-          logSecurityEvent('error', 'clio_webhook_workflow_failed', `Workflow ${workflowId} failed: ${workflowResult.content[0]?.text || 'Unknown error'}`);
-          return { success: false, error: `Workflow execution failed: ${workflowResult.content[0]?.text || 'Unknown error'}` };
+          logSecurityEvent('error', 'clio_webhook_workflow_failed', `Workflow ${workflowId} failed: ${workflowResult.content[0] && workflowResult.content[0].type === 'text' ? workflowResult.content[0].text : 'Unknown error' || 'Unknown error'}`);
+          return { success: false, error: `Workflow execution failed: ${workflowResult.content[0] && workflowResult.content[0].type === 'text' ? workflowResult.content[0].text : 'Unknown error' || 'Unknown error'}` };
         }
 
         logAgentAction(
