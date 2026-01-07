@@ -633,7 +633,7 @@ async function loadAllToolDefinitions(): Promise<Tool[]> {
           const tool = await loadTool(toolName, true);
           return tool.getToolDefinition();
         } catch (error) {
-          errors.push(`${toolName}: ${error instanceof Error ? error.message : String(error)}`);
+          errors.push(toolName + ': ' + (error instanceof Error ? error.message : String(error)));
           return null;
         }
       })
@@ -664,7 +664,7 @@ async function preloadToolsInBackground() {
   
   try {
     // Preload frequently used tools first
-    console.error(`[Tool Loader] Preloading ${frequentlyUsedTools.length} frequently used tools...`);
+    console.error('[Tool Loader] Preloading %s frequently used tools...', frequentlyUsedTools.length);
     await Promise.allSettled(
       frequentlyUsedTools.map(toolName => loadTool(toolName, true))
     );
@@ -673,7 +673,7 @@ async function preloadToolsInBackground() {
     const remainingTools = Object.keys(toolImportMap).filter(
       name => !frequentlyUsedTools.includes(name)
     );
-    console.error(`[Tool Loader] Preloading ${remainingTools.length} remaining tools...`);
+    console.error('[Tool Loader] Preloading %s remaining tools...', remainingTools.length);
     
     const batchSize = 10;
     for (let i = 0; i < remainingTools.length; i += batchSize) {
@@ -685,7 +685,7 @@ async function preloadToolsInBackground() {
     
     toolsPreloaded = true;
     const loadedCount = Array.from(toolMetadata.values()).filter(m => m.status === 'loaded').length;
-    console.error(`[Tool Loader] Preloaded ${loadedCount}/${Object.keys(toolImportMap).length} tools`);
+    console.error('[Tool Loader] Preloaded %s/%s tools', loadedCount, Object.keys(toolImportMap).length);
   } catch (error) {
     console.error('[Tool Loader] Background preloading failed (non-fatal):', error);
   } finally {
