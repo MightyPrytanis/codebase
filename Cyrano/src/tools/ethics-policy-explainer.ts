@@ -54,7 +54,7 @@ export const ethicsPolicyExplainer: BaseTool = new (class extends BaseTool {
       name: 'ethics_policy_explainer',
       description: 'Explain which Ten Rules and core values apply to a situation and why. Uses values statement and Ten Rules as ground truth. Provides explanations for debugging and user-facing transparency.',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           question: {
             type: 'string',

@@ -30,7 +30,7 @@ export const workflowManager = new (class extends BaseTool {
       name: 'workflow_manager',
       description: 'Manage and execute multi-agent workflows for legal document processing, including workflow customization',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           action: {
             type: 'string',
@@ -53,13 +53,13 @@ export const workflowManager = new (class extends BaseTool {
             description: 'Document IDs to process',
           },
           parameters: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Workflow parameters',
           },
           custom_stages: {
             type: 'array',
             items: {
-              type: 'object',
+              type: 'object' as const,
               properties: {
                 id: { type: 'string' },
                 name: { type: 'string' },

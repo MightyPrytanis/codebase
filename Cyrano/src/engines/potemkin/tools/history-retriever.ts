@@ -71,7 +71,7 @@ export class HistoryRetriever extends BaseTool {
       name: 'history_retriever',
       description: 'Retrieves historical insights for a target LLM, filtered by topic and date range. Splits insights into early and recent groups for opinion drift analysis.',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           targetLLM: {
             type: 'string',
@@ -82,7 +82,7 @@ export class HistoryRetriever extends BaseTool {
             description: 'Optional topic to filter insights',
           },
           dateRange: {
-            type: 'object',
+            type: 'object' as const,
             properties: {
               start: { type: 'string' },
               end: { type: 'string' },

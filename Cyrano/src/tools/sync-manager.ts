@@ -22,7 +22,7 @@ export const syncManager: BaseTool = new (class extends BaseTool {
       name: 'sync_manager',
       description: 'Manage synchronization with external services (Clio, Gmail, Calendar, etc.)',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           service: {
             type: 'string',
@@ -36,7 +36,7 @@ export const syncManager: BaseTool = new (class extends BaseTool {
             description: 'Sync action to perform',
           },
           parameters: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Sync parameters',
           },
         },

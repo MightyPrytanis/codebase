@@ -14,7 +14,7 @@ export const systemStatus = new (class extends BaseTool {
       name: 'system_status',
       description: 'Get system status and API configuration information',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           include_config_details: {
             type: 'boolean',

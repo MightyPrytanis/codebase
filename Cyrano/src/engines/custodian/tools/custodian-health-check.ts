@@ -20,7 +20,7 @@ export const custodianHealthCheckTool = new (class extends BaseTool {
       name: 'custodian_health_check',
       description: 'Run health check on Cyrano instance. Checks system metrics, service health, and identifies issues. Admin-only access.',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           target: {
             type: 'string',

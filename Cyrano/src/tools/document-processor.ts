@@ -42,7 +42,7 @@ export const documentProcessor: BaseTool = new (class extends BaseTool {
       name: 'document_processor',
       description: 'Process legal documents for extraction, transformation, validation, PDF form filling, forecast branding, and redaction',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           document_text: {
             type: 'string',
@@ -59,7 +59,7 @@ export const documentProcessor: BaseTool = new (class extends BaseTool {
             description: 'Action to perform (for PDF and redaction operations)',
           },
           options: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Processing options',
           },
           form_type: {
@@ -68,11 +68,11 @@ export const documentProcessor: BaseTool = new (class extends BaseTool {
             description: 'Type of form to fill (for fill_pdf_forms action)',
           },
           form_data: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Data to fill into form (for fill_pdf_forms action)',
           },
           template_buffer: {
-            type: 'object',
+            type: 'object' as const,
             description: 'PDF template buffer (for fill_pdf_forms and apply_forecast_branding actions)',
           },
           forecast_type: {
@@ -98,7 +98,7 @@ export const documentProcessor: BaseTool = new (class extends BaseTool {
             description: 'Whether user acknowledged risks (for apply_forecast_branding action)',
           },
           redaction_rules: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Redaction rules configuration (for redact action)',
             properties: {
               phi: { type: 'boolean' },

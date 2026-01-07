@@ -29,7 +29,7 @@ export const redFlagFinder = new (class extends BaseTool {
       name: 'red_flag_finder',
       description: 'Scan documents, emails, court notices, and case law for urgent legal matters requiring immediate attention',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           action: {
             type: 'string',

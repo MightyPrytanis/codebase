@@ -32,7 +32,7 @@ export const pdfFormFiller: BaseTool = new (class extends BaseTool {
       name: 'pdf_form_filler',
       description: 'Fills PDF forms with calculated values and applies LexFiat Forecaster™ branding strips, watermarks, or removes branding based on user permissions',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           action: {
             type: 'string',
@@ -45,11 +45,11 @@ export const pdfFormFiller: BaseTool = new (class extends BaseTool {
             description: 'Type of form to fill',
           },
           formData: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Data to fill into form',
           },
           templateBuffer: {
-            type: 'object',
+            type: 'object' as const,
             description: 'PDF template buffer',
           },
           presentationMode: {

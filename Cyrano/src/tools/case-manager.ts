@@ -22,7 +22,7 @@ export const caseManager = new (class extends BaseTool {
       name: 'case_manager',
       description: 'Manage legal cases including creation, updates, and retrieval',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           action: {
             type: 'string',
@@ -34,11 +34,11 @@ export const caseManager = new (class extends BaseTool {
             description: 'Case ID for the operation',
           },
           case_data: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Case data for create/update operations',
           },
           filters: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Filters for list operations',
           },
         },

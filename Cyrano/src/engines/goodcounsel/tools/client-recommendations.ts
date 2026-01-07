@@ -47,7 +47,7 @@ class ClientRecommendationsTool extends BaseTool {
       name: 'client_recommendations',
       description: 'Generate AI-powered recommendations for client relationships, attorney wellness, ethics compliance, and professional development. Analyzes client data to suggest specific actions that improve wellness, reduce risk, and optimize professional relationships.',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           userId: {
             type: 'string',

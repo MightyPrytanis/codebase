@@ -36,7 +36,7 @@ export class DocumentDrafterTool extends BaseTool {
       name: 'document_drafter',
       description: 'Draft legal documents using AI and generate in Microsoft Office (Word) or Adobe Acrobat (PDF) format',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           prompt: {
             type: 'string',

@@ -456,7 +456,7 @@ export class ClaimExtractor extends BaseTool {
       name: 'claim_extractor',
       description: 'Extract claims, assertions, and factual statements from documents',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           documentId: {
             type: 'string',
