@@ -60,14 +60,14 @@ Features:
 
 The Cyrano Pathfinder is the autonomous assistant of the Cyrano MCP server, providing transparent and truthful guidance while preferring tool usage for actions.`,
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           message: {
             type: 'string',
             description: 'User message to the Cyrano Pathfinder',
           },
           context: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Optional context (app, page, matter, document, user role, etc.)',
           },
           model: {

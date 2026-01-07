@@ -74,7 +74,7 @@ export const ethicalAIGuard: BaseTool = new (class extends BaseTool {
       name: 'ethical_ai_guard',
       description: 'Guard AI actions/outputs by evaluating against Ten Rules and professional ethics. Returns allow/allow-with-warnings/block decision with structured reasons and suggested edits.',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           proposedAction: {
             type: 'string',
@@ -90,7 +90,7 @@ export const ethicalAIGuard: BaseTool = new (class extends BaseTool {
             description: 'AI provider that generated the action',
           },
           callSiteMetadata: {
-            type: 'object',
+            type: 'object' as const,
             properties: {
               engine: { type: 'string' },
               app: { type: 'string' },
@@ -99,7 +99,7 @@ export const ethicalAIGuard: BaseTool = new (class extends BaseTool {
             description: 'Metadata about where this was called from',
           },
           facts: {
-            type: 'object',
+            type: 'object' as const,
             additionalProperties: true,
             description: 'Facts for professional ethics rules evaluation',
           },

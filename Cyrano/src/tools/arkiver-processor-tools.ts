@@ -32,7 +32,7 @@ export class ArkiverTextProcessorTool extends BaseTool {
       name: 'arkiver_process_text',
       description: 'Process text content and extract metadata, statistics, and structure. Returns word count, line count, sections, and linguistic analysis.',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           content: {
             type: 'string',
@@ -93,7 +93,7 @@ export class ArkiverEmailProcessorTool extends BaseTool {
       name: 'arkiver_process_email',
       description: 'Process email content and extract structured data including headers, body, participants, and attachments. Supports .eml and .msg formats.',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           content: {
             type: 'string',
@@ -148,7 +148,7 @@ export class ArkiverEntityProcessorTool extends BaseTool {
       name: 'arkiver_extract_entities',
       description: 'Extract named entities from text including persons, organizations, locations, and legal-specific entities (case names, statutes, court names). Returns structured entity data with confidence scores.',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           content: {
             type: 'string',
@@ -163,7 +163,7 @@ export class ArkiverEntityProcessorTool extends BaseTool {
             description: 'Entity types to extract (default: all types)',
           },
           context: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Optional context for entity resolution (e.g., case information)',
           },
           minConfidence: {
@@ -206,7 +206,7 @@ export class ArkiverInsightProcessorTool extends BaseTool {
       name: 'arkiver_generate_insights',
       description: 'Generate insights, summaries, and AI-powered analysis from document content. Identifies key points, themes, and actionable items.',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           content: {
             type: 'string',
@@ -221,7 +221,7 @@ export class ArkiverInsightProcessorTool extends BaseTool {
             description: 'Types of insights to generate',
           },
           context: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Additional context for insight generation (e.g., case type, document purpose)',
           },
           maxLength: {
@@ -296,7 +296,7 @@ export class ArkiverTimelineProcessorTool extends BaseTool {
       name: 'arkiver_extract_timeline',
       description: 'Extract dates and events from content to create a chronological timeline. Identifies deadlines, filing dates, and key events.',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           content: {
             type: 'string',

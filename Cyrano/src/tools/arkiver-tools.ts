@@ -23,7 +23,7 @@ export class ExtractConversationsTool extends BaseTool {
       name: 'extract_conversations',
       description: 'Extract and parse ChatGPT conversation data from JSON files',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           file_path: {
             type: 'string',
@@ -78,7 +78,7 @@ export class ExtractTextContentTool extends BaseTool {
       name: 'extract_text_content',
       description: 'Extract content from plain text files',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           file_path: {
             type: 'string',
@@ -120,7 +120,7 @@ export class CategorizeWithKeywordsTool extends BaseTool {
       name: 'categorize_with_keywords',
       description: 'Categorize text content using keyword matching',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           text_content: {
             type: 'string',
@@ -156,7 +156,7 @@ export class ProcessWithRegexTool extends BaseTool {
       name: 'process_with_regex',
       description: 'Process text content with regular expression patterns',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           text_content: {
             type: 'string',
@@ -195,7 +195,7 @@ export class GenerateCategorizedFilesTool extends BaseTool {
       name: 'generate_categorized_files',
       description: 'Generate categorized text files from processed data',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           processed_items: {
             type: 'array',
@@ -231,14 +231,14 @@ export class RunExtractionPipelineTool extends BaseTool {
       name: 'run_extraction_pipeline',
       description: 'Run a complete data extraction and categorization pipeline',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           config_path: {
             type: 'string',
             description: 'Path to configuration file'
           },
           config_dict: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Configuration dictionary'
           }
         }
@@ -262,7 +262,7 @@ export class CreateArkiverConfigTool extends BaseTool {
       name: 'create_arkiver_config',
       description: 'Create a new Arkiver configuration file',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           output_path: {
             type: 'string',

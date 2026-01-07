@@ -20,10 +20,10 @@ export const recollectionSupport = new (class extends BaseTool {
       name: 'recollection_support',
       description: 'Organize collected artifacts to prompt attorney memory and support time reconstruction',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           artifacts: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Collected artifacts (emails, calendar, documents)',
           },
           date: {

@@ -34,7 +34,7 @@ export const potemkinEngineTool = new (class extends BaseTool {
       name: 'potemkin_engine',
       description: 'Potemkin Engine - Verification and Integrity Engine for truth and logic verification of AI-generated content',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           action: {
             type: 'string',
@@ -54,7 +54,7 @@ export const potemkinEngineTool = new (class extends BaseTool {
             description: 'Workflow ID for execution',
           },
           input: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Input data for workflow execution',
           },
           documentId: {

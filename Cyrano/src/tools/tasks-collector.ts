@@ -29,7 +29,7 @@ export const tasksCollector = new (class extends BaseTool {
       name: 'tasks_collector',
       description: 'Collect tasks and to-do items from Gmail (Google Tasks) and Outlook (Microsoft To-Do) as evidence for time reconstruction',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           provider: {
             type: 'string',

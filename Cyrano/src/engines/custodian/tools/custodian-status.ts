@@ -18,7 +18,7 @@ export const custodianStatusTool = new (class extends BaseTool {
       name: 'custodian_status',
       description: 'Get status of the Custodian engine. Returns monitoring status, service health, and recent activity. Admin-only access.',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {},
         required: [],
       },

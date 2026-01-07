@@ -22,7 +22,7 @@ export const complianceChecker = new (class extends BaseTool {
       name: 'compliance_checker',
       description: 'Check documents for regulatory compliance and identify violations',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           document_text: {
             type: 'string',

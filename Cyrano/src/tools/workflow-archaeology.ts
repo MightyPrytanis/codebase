@@ -35,7 +35,7 @@ export const workflowArchaeology = new (class extends BaseTool {
       name: 'workflow_archaeology',
       description: 'Workflow Archaeology - Reconstruct past hours, days, or weeks using artifact analysis. Provides forensic timeline reconstruction with evidence chains. Usable for both time tracking (LexFiat) and workflow history (Arkiver).',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           start_time: {
             type: 'string',
@@ -51,13 +51,13 @@ export const workflowArchaeology = new (class extends BaseTool {
             description: 'Time granularity (auto-detected if not provided based on duration)',
           },
           context: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Additional context (matter_id, user_id, project_id, etc.)',
           },
           artifacts: {
             type: 'array',
             items: {
-              type: 'object',
+              type: 'object' as const,
               properties: {
                 type: {
                   type: 'string',
@@ -77,7 +77,7 @@ export const workflowArchaeology = new (class extends BaseTool {
                   description: 'Optional artifact content/summary',
                 },
                 metadata: {
-                  type: 'object',
+                  type: 'object' as const,
                   description: 'Optional artifact metadata',
                 },
               },

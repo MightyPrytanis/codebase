@@ -58,7 +58,7 @@ export const clioIntegration: BaseTool = new (class extends BaseTool {
         'Requires CLIO_API_KEY environment variable. Returns errors when not configured. ' +
         'Demo mode available via DEMO_MODE=true (opt-in only, clearly marked in responses).',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           action: {
             type: 'string',
@@ -95,7 +95,7 @@ export const clioIntegration: BaseTool = new (class extends BaseTool {
             description: 'Document ID',
           },
           parameters: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Additional parameters',
           },
         },

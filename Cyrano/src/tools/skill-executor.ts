@@ -23,19 +23,19 @@ export const skillExecutor = new (class extends BaseTool {
       name: 'skill_executor',
       description: 'Execute a skill by ID. Skills are declarative expertise modules defined in .cursor/skills or Cyrano/src/skills. Returns skill execution results with workflow metadata.',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           skill_id: {
             type: 'string',
             description: 'Skill ID (e.g., "forensic-finance:dro-weatherpro-skill")',
           },
           input: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Input data matching the skill\'s input_schema',
             additionalProperties: true,
           },
           context: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Additional context (matter_id, user_id, etc.)',
             additionalProperties: true,
           },

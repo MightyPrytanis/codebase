@@ -19,7 +19,7 @@ export const qualityAssessor = new (class extends BaseTool {
       name: 'quality_assessor',
       description: 'Assess document quality across multiple dimensions',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           document_text: {
             type: 'string',

@@ -52,7 +52,7 @@ export const getGoodCounselPromptsTool = new (class extends BaseTool {
       name: 'get_goodcounsel_prompts',
       description: 'Get active GoodCounsel prompts for a user',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           userId: {
             type: 'string',
@@ -83,7 +83,7 @@ export const dismissGoodCounselPromptTool = new (class extends BaseTool {
       name: 'dismiss_goodcounsel_prompt',
       description: 'Dismiss a GoodCounsel prompt',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           promptId: {
             type: 'string',
@@ -114,7 +114,7 @@ export const snoozeGoodCounselPromptTypeTool = new (class extends BaseTool {
       name: 'snooze_goodcounsel_prompt_type',
       description: 'Snooze a GoodCounsel prompt type for a user',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           userId: {
             type: 'string',
@@ -155,7 +155,7 @@ export const getGoodCounselPromptHistoryTool = new (class extends BaseTool {
       name: 'get_goodcounsel_prompt_history',
       description: 'Get GoodCounsel prompt history for a user',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           userId: {
             type: 'string',
@@ -191,7 +191,7 @@ export const evaluateGoodCounselContextTool = new (class extends BaseTool {
       name: 'evaluate_goodcounsel_context',
       description: 'Evaluate context and generate GoodCounsel prompts',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           userId: {
             type: 'string',
