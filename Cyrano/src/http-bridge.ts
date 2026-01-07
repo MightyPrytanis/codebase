@@ -66,9 +66,9 @@ console.error('[HTTP Bridge] Routes imported');
 // ENHANCED TOOL LOADER WITH CRITICAL SAFEGUARDS
 // ============================================================================
 
-interface ToolInstance {
+interface ToolInstance<T = unknown> {
   getToolDefinition: () => Tool;
-  execute: (args: any) => Promise<CallToolResult>;
+  execute: (args: T) => Promise<CallToolResult>;
 }
 
 interface ToolMetadata {
@@ -83,7 +83,7 @@ interface ToolMetadata {
   status: 'loaded' | 'loading' | 'error' | 'unloaded';
 }
 
-type ToolLoader = () => Promise<ToolInstance | { default: ToolInstance }>;
+type ToolLoader = () => Promise<ToolInstance<unknown> | { default: ToolInstance<unknown> }>;
 
 // Tool import map with metadata
 const toolImportMap: Record<string, { loader: ToolLoader; metadata: Partial<ToolMetadata> }> = {
