@@ -524,7 +524,7 @@ async function loadTool(toolName: string, loadDependencies: boolean = true): Pro
       if (loadDependencies && toolConfig.metadata.dependencies) {
         for (const dep of toolConfig.metadata.dependencies) {
           if (!toolCache.has(dep)) {
-            console.error(`[Tool Loader] Loading dependency ${dep} for ${toolName}...`);
+            console.error('[Tool Loader] Loading dependency %s for %s...', dep, toolName);
             await loadTool(dep, true);
           }
         }
@@ -559,7 +559,7 @@ async function loadTool(toolName: string, loadDependencies: boolean = true): Pro
       // Reset circuit breaker on success
       circuitBreakers.delete(toolName);
       
-      console.error(`[Tool Loader] Loaded ${toolName} in ${loadTime}ms`);
+      console.error('[Tool Loader] Loaded %s in %sms', toolName, loadTime);
       return toolInstance;
     } catch (error) {
       metadata.status = 'error';
@@ -573,12 +573,12 @@ async function loadTool(toolName: string, loadDependencies: boolean = true): Pro
       
       if (breaker.failures >= MAX_FAILURES) {
         breaker.isOpen = true;
-        console.error(`[Tool Loader] Circuit breaker opened for ${toolName} after ${breaker.failures} failures`);
+        console.error('[Tool Loader] Circuit breaker opened for %s after %s failures', toolName, breaker.failures);
       }
       
       circuitBreakers.set(toolName, breaker);
       
-      console.error(`[Tool Loader] Failed to load tool ${toolName}:`, error);
+      console.error('[Tool Loader] Failed to load tool %s:', toolName, error);
       throw error;
     } finally {
       // Remove loading lock
@@ -594,7 +594,7 @@ async function loadTool(toolName: string, loadDependencies: boolean = true): Pro
 
 // Reload a tool (hot reloading)
 async function reloadTool(toolName: string): Promise<boolean> {
-  console.error(`[Tool Loader] Reloading tool ${toolName}...`);
+  console.error('[Tool Loader] Reloading tool %s...', toolName);
   
   // Remove from cache
   toolCache.delete(toolName);
@@ -608,10 +608,10 @@ async function reloadTool(toolName: string): Promise<boolean> {
   
   try {
     await loadTool(toolName, false); // Don't reload dependencies
-    console.error(`[Tool Loader] Successfully reloaded ${toolName}`);
+    console.error('[Tool Loader] Successfully reloaded %s', toolName);
     return true;
   } catch (error) {
-    console.error(`[Tool Loader] Failed to reload ${toolName}:`, error);
+    console.error('[Tool Loader] Failed to reload %s:', toolName, error);
     return false;
   }
 }
@@ -647,7 +647,7 @@ async function loadAllToolDefinitions(): Promise<Tool[]> {
   }
   
   if (errors.length > 0) {
-    console.warn(`[Tool Loader] Some tools failed to load: ${errors.join(', ')}`);
+    console.warn('[Tool Loader] Some tools failed to load: %s', errors.join(', '));
   }
   
   return tools;
