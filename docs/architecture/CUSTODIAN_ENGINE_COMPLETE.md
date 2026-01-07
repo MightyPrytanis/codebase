@@ -694,6 +694,69 @@ POST /mcp/execute
 
 ---
 
+## Implementation History
+
+### Next Steps Implementation (2025-12-29)
+
+**Status:** ✅ COMPLETE (All automated steps)
+
+Completed all next steps that could be implemented without human intervention. This includes database persistence, email/SMS infrastructure, improved admin role integration, Arkiver admin panel, and engine status dashboard.
+
+#### Completed Features
+
+**1. ✅ Database Persistence**
+- Created `Cyrano/src/schema-custodian.ts` with three tables (custodian_config, admin_contacts, custodian_alerts)
+- Updated `CustodianConfigService` to load/save from database with environment variable fallback
+- Updated `AlertService` to store all alerts in database
+- Configuration persists across server restarts
+
+**2. ✅ Email/SMS Infrastructure**
+- Created `Cyrano/src/engines/custodian/services/email-service.ts` - Email service with SMTP support
+- Created `Cyrano/src/engines/custodian/services/sms-service.ts` - SMS service with Twilio support
+- Both services work without dependencies (log instead of send)
+- Optional dependencies: `nodemailer` for email, `twilio` for SMS
+
+**3. ✅ Improved Admin Role Integration**
+- Enhanced `apps/lexfiat/client/src/lib/admin-auth.ts` with JWT support
+- Updated `apps/lexfiat/client/src/components/layout/header.tsx` to use improved admin checks
+- Admin menu only visible to admin users
+
+**4. ✅ Arkiver Admin Panel**
+- Created `apps/arkiver/frontend/src/components/CustodianSettings.tsx` - Arkiver admin settings component
+- Created `apps/arkiver/frontend/src/lib/admin-auth.ts` - Arkiver admin authentication
+- Added admin tab to `apps/arkiver/frontend/src/pages/Settings.tsx`
+
+**5. ✅ Engine Status Dashboard**
+- Created `apps/lexfiat/client/src/components/dashboard/engine-status-dashboard.tsx` - Engine status dashboard
+- Added to admin panel in LexFiat
+- Auto-refreshes every 30 seconds
+- Shows engine status, health metrics, recent alerts
+
+#### Files Created/Modified
+
+**New Files:**
+- `Cyrano/src/schema-custodian.ts` - Database schema
+- `Cyrano/src/engines/custodian/services/email-service.ts` - Email service
+- `Cyrano/src/engines/custodian/services/sms-service.ts` - SMS service
+- `apps/arkiver/frontend/src/components/CustodianSettings.tsx` - Arkiver settings
+- `apps/arkiver/frontend/src/lib/admin-auth.ts` - Arkiver admin auth
+- `apps/lexfiat/client/src/components/dashboard/engine-status-dashboard.tsx` - Engine dashboard
+
+**Modified Files:**
+- `Cyrano/src/schema.ts` - Exports custodian schema
+- `Cyrano/src/engines/custodian/services/custodian-config.ts` - Database integration
+- `Cyrano/src/engines/custodian/services/alert.ts` - Email/SMS integration, database storage
+- `apps/lexfiat/client/src/lib/admin-auth.ts` - Enhanced with JWT support
+- `apps/lexfiat/client/src/components/layout/header.tsx` - Uses improved admin checks
+- `apps/lexfiat/client/src/components/dashboard/admin-panel.tsx` - Added engine status dashboard
+- `apps/arkiver/frontend/src/pages/Settings.tsx` - Added admin tab
+
+**Status:** ✅ **ALL AUTOMATED NEXT STEPS COMPLETE**
+
+All features that could be implemented without human intervention have been completed. Remaining tasks require human action (obtaining API credentials, configuring SMTP/Twilio, etc.).
+
+---
+
 ## Conclusion
 
 The Custodian Engine is **production-ready** and **architecturally sound**. All features have been implemented, tested, and verified. The engine follows Cyrano's modular architecture, is MCP-compliant, properly integrated with the system, and adapted for Render platform deployment.

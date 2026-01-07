@@ -35,9 +35,9 @@ export default defineConfig({
           'query-vendor': ['@tanstack/react-query'],
           'icons': ['lucide-react'],
         },
-        chunkSizeWarningLimit: 300,
       },
     },
+    chunkSizeWarningLimit: 300,
   },
   server: {
     fs: {
