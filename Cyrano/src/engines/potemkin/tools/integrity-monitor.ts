@@ -119,12 +119,12 @@ export class IntegrityMonitor extends BaseTool {
       name: 'integrity_monitor',
       description: 'Monitors AI integrity test results and checks them against user-defined thresholds. Generates alerts when thresholds are breached.',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           testResults: {
             type: 'array',
             items: {
-              type: 'object',
+              type: 'object' as const,
               properties: {
                 id: { type: 'string' },
                 testName: { type: 'string' },
@@ -136,7 +136,7 @@ export class IntegrityMonitor extends BaseTool {
                 tenRulesViolations: {
                   type: 'array',
                   items: {
-                    type: 'object',
+                    type: 'object' as const,
                     properties: {
                       rule_number: { type: 'number' },
                       rule_name: { type: 'string' },
@@ -152,7 +152,7 @@ export class IntegrityMonitor extends BaseTool {
             description: 'Recent test results to monitor',
           },
           userConfig: {
-            type: 'object',
+            type: 'object' as const,
             properties: {
               enabled: { type: 'boolean' },
               drift_threshold: { type: 'number' },

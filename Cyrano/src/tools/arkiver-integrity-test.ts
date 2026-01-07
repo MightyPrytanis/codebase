@@ -39,7 +39,7 @@ export class ArkiverIntegrityTestTool extends BaseTool {
       name: 'arkiver_integrity_test',
       description: 'Run AI integrity monitoring tests using Potemkin engine workflows. Supports opinion drift, bias detection, honesty assessment, Ten Rules (Version 1.4 — Revised and updated 16 December 2025) compliance, and fact checking.',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           testType: {
             type: 'string',
@@ -60,7 +60,7 @@ export class ArkiverIntegrityTestTool extends BaseTool {
             description: 'Source LLM to test (e.g., "ChatGPT", "Claude", "Gemini")',
           },
           parameters: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Additional test-specific parameters (topic, dateRange, etc.)',
           },
         },

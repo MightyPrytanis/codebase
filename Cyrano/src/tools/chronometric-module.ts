@@ -48,7 +48,7 @@ export const chronometricModuleTool = new (class extends BaseTool {
       name: 'chronometric_module',
       description: 'Chronometric Engine - Forensic Time Capture and Workflow Archaeology. Assists attorneys in retrospectively reconstructing lost or unentered billable time.',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           action: {
             type: 'string',
@@ -76,7 +76,7 @@ export const chronometricModuleTool = new (class extends BaseTool {
             description: 'Workflow ID for execute_workflow action',
           },
           input: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Input data for workflow/module execution',
           },
           start_date: {

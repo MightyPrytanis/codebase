@@ -28,7 +28,7 @@ export const contactsCollector = new (class extends BaseTool {
       name: 'contacts_collector',
       description: 'Collect contacts from Gmail (Google Contacts) and Outlook (Microsoft Contacts) for client/matter relationship tracking',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           provider: {
             type: 'string',

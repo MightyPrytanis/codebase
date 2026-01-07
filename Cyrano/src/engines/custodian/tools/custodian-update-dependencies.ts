@@ -21,14 +21,14 @@ export const custodianUpdateDependenciesTool = new (class extends BaseTool {
       name: 'custodian_update_dependencies',
       description: 'Update dependencies automatically. Can update specific package or all dependencies. Includes rollback capability. Admin-only access.',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           target: {
             type: 'string',
             description: 'Specific package to update (optional)',
           },
           options: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Additional options for update',
             additionalProperties: true,
           },

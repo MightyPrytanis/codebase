@@ -35,7 +35,7 @@ export const maeEngineTool = new (class extends BaseTool {
       name: 'mae_engine',
       description: 'Multi-Agent Engine - Orchestrates multiple AI assistants/agents and modules for complex workflows',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           action: {
             type: 'string',
@@ -52,11 +52,11 @@ export const maeEngineTool = new (class extends BaseTool {
             description: 'Workflow ID for execution',
           },
           workflow: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Workflow definition for creation',
           },
           input: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Input data for workflow execution',
           },
         },

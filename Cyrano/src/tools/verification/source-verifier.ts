@@ -535,7 +535,7 @@ export class SourceVerifier extends BaseTool {
       name: 'source_verifier',
       description: 'Verify sources and references for accessibility and reliability',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           sources: {
             type: 'array',

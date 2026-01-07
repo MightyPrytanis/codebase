@@ -81,7 +81,7 @@ export const tenRulesChecker: BaseTool = new (class extends BaseTool {
       name: 'ten_rules_checker',
       description: 'Check text content against The Ten Rules. Enforces classification, identifies missing citations, flags ungrounded factual assertions. Returns machine-readable report with violations, warnings, and suggestions.',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           textContent: {
             type: 'string',

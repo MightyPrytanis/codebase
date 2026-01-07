@@ -32,7 +32,7 @@ export const aiOrchestrator = new (class extends BaseTool {
       name: 'ai_orchestrator',
       description: 'Orchestrate multiple AI providers for complex legal tasks',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           task_description: {
             type: 'string',
@@ -50,7 +50,7 @@ export const aiOrchestrator = new (class extends BaseTool {
             description: 'Mode of AI orchestration',
           },
           parameters: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Orchestration parameters',
           },
         },

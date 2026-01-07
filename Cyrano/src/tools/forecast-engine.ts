@@ -35,7 +35,7 @@ class ForecastEngineTool extends BaseTool {
       name: 'forecast_engine',
       description: 'Forecast Engine - Generates hypothetical forecasts (tax returns, child support, QDROs) with mandatory LexFiat branding and multi-model verification',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           action: {
             type: 'string',
@@ -43,11 +43,11 @@ class ForecastEngineTool extends BaseTool {
             description: 'Action to perform',
           },
           forecast_input: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Forecast-specific input data (varies by forecast type)',
           },
           branding: {
-            type: 'object',
+            type: 'object' as const,
             properties: {
               presentationMode: {
                 type: 'string',

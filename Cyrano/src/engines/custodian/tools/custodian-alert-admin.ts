@@ -21,14 +21,14 @@ export const custodianAlertAdminTool = new (class extends BaseTool {
       name: 'custodian_alert_admin',
       description: 'Send alert to administrators. Used for critical issues requiring human intervention. Admin-only access.',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           target: {
             type: 'string',
             description: 'Alert title or subject',
           },
           options: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Alert options',
             properties: {
               level: {

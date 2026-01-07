@@ -32,7 +32,7 @@ export const goodCounsel = new (class extends BaseTool {
       name: 'good_counsel',
       description: 'AI-powered ethical guidance and workflow optimization for legal practice - focuses on "things that matter" while automating routine tasks',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           context: {
             type: 'string',

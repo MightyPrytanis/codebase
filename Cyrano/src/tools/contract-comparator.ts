@@ -20,7 +20,7 @@ export const contractComparator = new (class extends BaseTool {
       name: 'contract_comparator',
       description: 'Compare two contracts/agreements to identify differences, similarities, and key variations. Note: This tool is designed for contracts and agreements, not all legal documents. For settlement agreements requiring court/referee approval, additional review may be needed.',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           document1_text: {
             type: 'string',

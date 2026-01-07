@@ -21,7 +21,7 @@ export const documentArtifactCollector = new (class extends BaseTool {
       name: 'document_artifact_collector',
       description: 'Collect document artifacts (sent documents, filed motions, drafts) as direct evidence for time reconstruction',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           start_date: {
             type: 'string',

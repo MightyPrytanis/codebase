@@ -23,7 +23,7 @@ export const emailArtifactCollector: BaseTool = new (class extends BaseTool {
       name: 'email_artifact_collector',
       description: 'Collect email artifacts (sent/received emails) as evidence for time reconstruction',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           start_date: {
             type: 'string',

@@ -600,7 +600,7 @@ export class CitationFormatter extends BaseTool {
       name: 'citation_formatter',
       description: 'Check and correct citations according to jurisdiction-specific rules. Michigan: no periods in abbreviations is MANDATORY (Michigan Appellate Opinions Manual controls).',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           text: {
             type: 'string',
