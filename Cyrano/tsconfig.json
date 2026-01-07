@@ -19,6 +19,6 @@
     "resolveJsonModule": true,
     "types": ["node"]
   },
-  "include": ["src/**/*", "../apps/lexfiat/shared/schema.ts"],
+  "include": ["src/**/*", "../packages/cyrano/src/lexfiat-schema.ts"],
   "exclude": ["node_modules", "dist", "**/__tests__/**", "**/*.test.ts", "**/*.spec.ts"]
 }
