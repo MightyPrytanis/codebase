@@ -16,7 +16,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Settings, Save, RefreshCw, AlertCircle, CheckCircle2 } from "lucide-react";
-import { toast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 interface AdminContactPreference {
   method: 'email' | 'sms' | 'instant_message' | 'webhook' | 'console';
@@ -43,6 +43,7 @@ interface CustodianConfig {
 
 export function CustodianSettings() {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
   const [newContact, setNewContact] = useState<Partial<AdminContactPreference>>({
     method: 'email',
     enabled: true,
