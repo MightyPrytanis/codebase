@@ -44,7 +44,7 @@ export const getEthicsAuditTool = new (class extends BaseTool {
       name: 'get_ethics_audit',
       description: 'Get ethics audit trail entries with optional filtering',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           userId: { type: 'string', description: 'User ID to filter by' },
           toolName: { type: 'string', description: 'Tool name to filter by' },
@@ -99,7 +99,7 @@ export const getEthicsStatsTool = new (class extends BaseTool {
       name: 'get_ethics_stats',
       description: 'Get ethics compliance statistics',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           userId: { type: 'string', description: 'User ID to filter by' },
           toolName: { type: 'string', description: 'Tool name to filter by' },

@@ -18,14 +18,14 @@ export const provenanceTracker = new (class extends BaseTool {
       name: 'provenance_tracker',
       description: 'Track and display provenance (supporting evidence) for time entries, distinguishing direct from circumstantial evidence',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           time_entry: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Time entry to track provenance for',
           },
           artifacts: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Related artifacts',
           },
         },

@@ -704,7 +704,7 @@ export class ConsistencyChecker extends BaseTool {
       name: 'consistency_checker',
       description: 'Check consistency across claims and statements in documents',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           claims: {
             type: 'array',

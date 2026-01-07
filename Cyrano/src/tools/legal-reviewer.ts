@@ -25,7 +25,7 @@ export const legalReviewer = new (class extends BaseTool {
       name: 'legal_reviewer',
       description: 'Review legal documents for compliance, accuracy, and completeness',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           document_text: {
             type: 'string',

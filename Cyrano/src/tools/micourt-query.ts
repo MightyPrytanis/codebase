@@ -47,7 +47,7 @@ export const micourtQuery: BaseTool = new (class extends BaseTool {
       name: 'micourt_query',
       description: 'Query Michigan court docket information. User-initiated queries only - no automated scraping. Light footprint integration for on-demand case lookups from LexFiat.',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           action: {
             type: 'string',

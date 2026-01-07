@@ -58,14 +58,14 @@ export class ArkiverProcessFileTool extends BaseTool {
       name: 'arkiver_process_file',
       description: 'Initiates processing of an uploaded file. Returns immediately with a job ID. Use arkiver_job_status to check progress.',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           fileId: {
             type: 'string',
             description: 'File ID from upload endpoint',
           },
           processingSettings: {
-            type: 'object',
+            type: 'object' as const,
             properties: {
               extractionMode: {
                 type: 'string',
@@ -403,7 +403,7 @@ export class ArkiverJobStatusTool extends BaseTool {
       name: 'arkiver_job_status',
       description: 'Check the status of a processing job. Returns current status, progress, and results if completed.',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           jobId: {
             type: 'string',

@@ -207,7 +207,7 @@ export const legalEmailDrafter = new (class extends BaseTool {
       name: 'draft_legal_email',
       description: 'Draft a professional legal email for attorneys and law offices to various recipients including clients, opposing counsel, courts, mediators, and other legal professionals',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           recipientType: {
             type: 'string',
@@ -484,7 +484,7 @@ export const refineEmailTone = new (class extends BaseTool {
       name: 'refine_email_tone',
       description: 'Refine the tone of a draft email to ensure appropriate professionalism and clarity for legal correspondence',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           emailContent: {
             type: 'string',
@@ -639,7 +639,7 @@ export const validateLegalLanguage = new (class extends BaseTool {
       name: 'validate_legal_language',
       description: 'Validate that legal language in the email is accurate, uses proper legal terminology, and avoids unnecessary jargon',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           emailContent: {
             type: 'string',

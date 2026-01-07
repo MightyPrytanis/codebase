@@ -28,7 +28,7 @@ export const betaTestSupport = new (class extends BaseTool {
       name: 'beta_test_support',
       description: 'Comprehensive beta testing support - handles registration, onboarding, installation, evaluation, and feedback management for beta testers',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           action: {
             type: 'string',
@@ -40,7 +40,7 @@ export const betaTestSupport = new (class extends BaseTool {
             description: 'User\'s question or issue description',
           },
           context: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Additional context (invitation_token, user_id, step, error_message, feedback_type, etc.)',
             additionalProperties: true,
           },

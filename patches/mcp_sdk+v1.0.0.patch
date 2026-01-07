@@ -1,0 +1,14 @@
+diff --git a/src/UriTemplate.js b/src/UriTemplate.js
+index abcdef1..1234567 100644
+--- a/src/UriTemplate.js
++++ b/src/UriTemplate.js
+@@ -10,7 +10,7 @@ export class UriTemplate {
+
+     // Original regex
+     const pattern = 
+-    "([^/]+(?:,[^/]+)*)";
++    "([^/,]+(?:,[^/,]+)*)";
+
+     // Usage of the pattern
+     this.regexPattern = new RegExp(pattern);
+ }

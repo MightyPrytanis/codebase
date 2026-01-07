@@ -22,7 +22,7 @@ export const gapIdentifier = new (class extends BaseTool {
       name: 'gap_identifier',
       description: 'Identify days or periods with missing or under-recorded billable time by comparing recorded time entries with expected patterns',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           start_date: {
             type: 'string',

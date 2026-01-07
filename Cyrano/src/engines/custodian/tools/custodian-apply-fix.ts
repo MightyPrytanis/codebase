@@ -21,14 +21,14 @@ export const custodianApplyFixTool = new (class extends BaseTool {
       name: 'custodian_apply_fix',
       description: 'Apply automatic fix for identified issue. Fixes are verified for Ten Rules compliance before application. Admin-only access.',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           target: {
             type: 'string',
             description: 'Fix type or issue to fix (e.g., high_memory, http_bridge_unhealthy, clear_cache)',
           },
           options: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Additional options for fix',
             additionalProperties: true,
           },

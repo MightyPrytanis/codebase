@@ -60,7 +60,7 @@ Sources may include:
 
 All retrieved information includes source attribution for transparency and verification.`,
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           action: {
             type: 'string',
@@ -72,7 +72,7 @@ All retrieved information includes source attribution for transparency and verif
             description: 'Query string for RAG search',
           },
           document: {
-            type: 'object',
+            type: 'object' as const,
             properties: {
               id: { type: 'string' },
               text: { type: 'string' },
@@ -89,7 +89,7 @@ All retrieved information includes source attribution for transparency and verif
           documents: {
             type: 'array',
             items: {
-              type: 'object',
+              type: 'object' as const,
               properties: {
                 id: { type: 'string' },
                 text: { type: 'string' },

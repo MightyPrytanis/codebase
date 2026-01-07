@@ -47,7 +47,7 @@ Available actions:
 
 The Custodian operates continuously in the background and is only visible to administrators.`,
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           action: {
             type: 'string',
@@ -71,7 +71,7 @@ The Custodian operates continuously in the background and is only visible to adm
             description: 'Target for action (service, dependency, fix type, etc.)',
           },
           options: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Additional options for action',
             additionalProperties: true,
           },

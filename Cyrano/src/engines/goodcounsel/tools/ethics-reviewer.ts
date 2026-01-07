@@ -40,14 +40,14 @@ export const ethicsReviewer = new (class extends BaseTool {
       name: 'ethics_reviewer',
       description: 'Review ethical compliance using rule-based evaluation. Evaluates facts against ethics rules and returns violations, warnings, and compliance status.',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           userId: {
             type: 'string',
             description: 'User ID for ethics review',
           },
           facts: {
-            type: 'object',
+            type: 'object' as const,
             description: 'Facts to evaluate against ethics rules (e.g., hasExistingClient, newClientInterests, clientInfoDisclosed, etc.)',
             additionalProperties: true,
           },

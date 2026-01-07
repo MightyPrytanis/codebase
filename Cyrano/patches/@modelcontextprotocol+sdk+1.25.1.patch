@@ -1,0 +1,44 @@
+diff --git a/node_modules/@modelcontextprotocol/sdk/dist/cjs/shared/uriTemplate.js b/node_modules/@modelcontextprotocol/sdk/dist/cjs/shared/uriTemplate.js
+index baad5d9..8f8c74a 100644
+--- a/node_modules/@modelcontextprotocol/sdk/dist/cjs/shared/uriTemplate.js
++++ b/node_modules/@modelcontextprotocol/sdk/dist/cjs/shared/uriTemplate.js
+@@ -184,7 +184,7 @@ class UriTemplate {
+         const name = part.name;
+         switch (part.operator) {
+             case '':
+-                pattern = part.exploded ? '([^/]+(?:,[^/]+)*)' : '([^/,]+)';
++                pattern = part.exploded ? '([^/,]+(?:,[^/,]+)*)' : '([^/,]+)';
+                 break;
+             case '+':
+             case '#':
+@@ -194,7 +194,7 @@ class UriTemplate {
+                 pattern = '\\.([^/,]+)';
+                 break;
+             case '/':
+-                pattern = '/' + (part.exploded ? '([^/]+(?:,[^/]+)*)' : '([^/,]+)');
++                pattern = '/' + (part.exploded ? '([^/,]+(?:,[^/,]+)*)' : '([^/,]+)');
+                 break;
+             default:
+                 pattern = '([^/]+)';
+diff --git a/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/uriTemplate.js b/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/uriTemplate.js
+index 2837ba8..8247f63 100644
+--- a/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/uriTemplate.js
++++ b/node_modules/@modelcontextprotocol/sdk/dist/esm/shared/uriTemplate.js
+@@ -181,7 +181,7 @@ export class UriTemplate {
+         const name = part.name;
+         switch (part.operator) {
+             case '':
+-                pattern = part.exploded ? '([^/]+(?:,[^/]+)*)' : '([^/,]+)';
++                pattern = part.exploded ? '([^/,]+(?:,[^/,]+)*)' : '([^/,]+)';
+                 break;
+             case '+':
+             case '#':
+@@ -191,7 +191,7 @@ export class UriTemplate {
+                 pattern = '\\.([^/,]+)';
+                 break;
+             case '/':
+-                pattern = '/' + (part.exploded ? '([^/]+(?:,[^/]+)*)' : '([^/,]+)');
++                pattern = '/' + (part.exploded ? '([^/,]+(?:,[^/,]+)*)' : '([^/,]+)');
+                 break;
+             default:
+                 pattern = '([^/]+)';

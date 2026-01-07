@@ -552,7 +552,7 @@ export class CitationChecker extends BaseTool {
       name: 'citation_checker',
       description: 'Verify and validate citations in documents. Used by Potemkin (verify_document) and Arkiver (citation validation).',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           citations: {
             type: 'array',

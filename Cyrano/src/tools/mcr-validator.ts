@@ -32,7 +32,7 @@ export const mcrValidator = new (class extends BaseTool {
       name: 'mcr_validator',
       description: 'Validate legal documents for Michigan Court Rules (MCR) compliance. Checks document formatting (MCR 2.113), e-filing specifications (MCR 1.109), service of process (MCR 2.105), and citation formatting per Michigan Appellate Opinions Manual.',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           document: {
             type: 'string',

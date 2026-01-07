@@ -81,7 +81,7 @@ export const timeValueBilling = new (class extends BaseTool {
         'Value billing (billing based on estimated value rather than actual time) is NOT compliant with MRPC. ' +
         'Optionally push time entries to Clio.',
       inputSchema: {
-        type: 'object',
+        type: 'object' as const,
         properties: {
           action: { type: 'string', enum: ['analyze_period','push_entries','get_config'] },
         },
