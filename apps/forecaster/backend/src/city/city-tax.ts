@@ -31,9 +31,9 @@ export function calculateCityTax(input: CityTaxInput): CityTaxResult {
   const cfg = CITY_TAX_CONFIG[input.city];
   const warnings: string[] = [];
 
-  if (cfg.source === 'UNVERIFIED_PLACEHOLDER') {
+  if (cfg.source === 'USER_PROVIDED_STATUTORY_REFERENCE_MCL_141_601_ET_SEQ') {
     warnings.push(
-      `City tax rates for ${cfg.displayName} are scaffold placeholders (unverified). Confirm rates from an authoritative city source before relying on results.`
+      `City tax rates for ${cfg.displayName} are configured from a user-provided statutory reference (MCL 141.601 et seq) and were not independently verified in this environment.`
     );
   }
 
