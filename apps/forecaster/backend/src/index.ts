@@ -4,10 +4,11 @@ import { z } from 'zod';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, StandardFonts } from 'pdf-lib';
 import { calculateFederal, type FederalTaxInput } from './tax/federal.js';
 import { FORM_1040_MAPPINGS, type PresentationMode } from './pdf/form-mappings.js';
 import { applyBranding, fillPdfForm } from './pdf/pdf-filler.js';
+import { calculateCityTax } from './city/city-tax.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -32,6 +33,11 @@ const ForecastRequestSchema = z.object({
     otherIncome: z.number().optional(),
     standardDeduction: z.number().optional(),
     itemizedDeductions: z.number().optional(),
+    qualifyingChildrenUnder17: z.number().optional(),
+    otherDependents: z.number().optional(),
+    filerAge: z.number().optional(),
+    spouseAge: z.number().optional(),
+    canBeClaimedAsDependent: z.boolean().optional(),
     estimatedWithholding: z.number().optional()
   }),
   branding: z
@@ -129,7 +135,9 @@ app.post('/api/forecast/tax/pdf', async (req, res) => {
       taxableIncome: calc.taxableIncome,
       taxOwed: calc.totalTax,
       federalTaxWithheld: withholding,
-      totalPayments: withholding,
+      earnedIncomeCredit: calc.creditsBreakdown.earnedIncomeCreditRefundable,
+      additionalChildTaxCredit: calc.creditsBreakdown.additionalChildTaxCreditRefundable,
+      totalPayments: calc.totalPayments,
       overpayment: refundOrBalance > 0 ? refundOrBalance : 0,
       amountOwed: refundOrBalance < 0 ? Math.abs(refundOrBalance) : 0
     };
@@ -140,6 +148,95 @@ app.post('/api/forecast/tax/pdf', async (req, res) => {
 
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="LexFiat-Forecaster-1040-${year}.pdf"`);
+    res.send(pdfBytes);
+  } catch (err) {
+    const status = (err as any)?.statusCode ?? 500;
+    res.status(status).json({ success: false, error: err instanceof Error ? err.message : 'Unknown error' });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// City tax forecaster (testing feature): Lansing + Albion only
+// ---------------------------------------------------------------------------
+
+const CityTaxRequestSchema = z.object({
+  forecast_input: z.object({
+    city: z.enum(['lansing', 'albion']),
+    year: z.union([z.literal(2023), z.literal(2024), z.literal(2025)]),
+    isResident: z.boolean(),
+    wages: z.number().nonnegative(),
+    otherIncome: z.number().optional(),
+    withholding: z.number().optional()
+  }),
+  branding: z
+    .object({
+      presentationMode: z.enum(['strip', 'watermark', 'none']).optional(),
+      riskAcknowledged: z.boolean().optional()
+    })
+    .optional()
+});
+
+app.post('/api/forecast/city-tax', async (req, res) => {
+  try {
+    const parsed = CityTaxRequestSchema.parse(req.body);
+    const mode: PresentationMode = parsed.branding?.presentationMode ?? 'strip';
+    requireRiskAck(mode, parsed.branding?.riskAcknowledged);
+
+    const calc = calculateCityTax(parsed.forecast_input);
+    res.json({
+      success: true,
+      forecastType: 'city_tax',
+      calculatedValues: calc,
+      brandingApplied: mode !== 'none',
+      presentationMode: mode
+    });
+  } catch (err) {
+    const status = (err as any)?.statusCode ?? 500;
+    res.status(status).json({ success: false, error: err instanceof Error ? err.message : 'Unknown error' });
+  }
+});
+
+// Generates a simple forecast PDF (not an official city form)
+app.post('/api/forecast/city-tax/pdf', async (req, res) => {
+  try {
+    const parsed = CityTaxRequestSchema.parse(req.body);
+    const mode: PresentationMode = parsed.branding?.presentationMode ?? 'strip';
+    requireRiskAck(mode, parsed.branding?.riskAcknowledged);
+
+    const calc = calculateCityTax(parsed.forecast_input);
+
+    const pdfDoc = await PDFDocument.create();
+    const page = pdfDoc.addPage([612, 792]); // letter
+    const { width, height } = page.getSize();
+    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const bold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+    const title = `City Income Tax Forecast Form (${calc.city.toUpperCase()})`;
+    page.drawText(title, { x: 50, y: height - 80, size: 16, font: bold });
+    page.drawText(`Tax Year: ${calc.year}`, { x: 50, y: height - 110, size: 11, font });
+    page.drawText(`Resident: ${calc.isResident ? 'Yes' : 'No'}`, { x: 50, y: height - 130, size: 11, font });
+
+    page.drawText(`Tax base (scaffold): $${calc.taxBase.toFixed(2)}`, { x: 50, y: height - 170, size: 11, font });
+    page.drawText(`Rate: ${(calc.rate * 100).toFixed(3)}%`, { x: 50, y: height - 190, size: 11, font });
+    page.drawText(`Tax: $${calc.tax.toFixed(2)}`, { x: 50, y: height - 210, size: 11, font: bold });
+    page.drawText(`Withholding: $${calc.withholding.toFixed(2)}`, { x: 50, y: height - 230, size: 11, font });
+    page.drawText(`Refund/(Balance): $${calc.refundOrBalance.toFixed(2)}`, { x: 50, y: height - 250, size: 11, font: bold });
+
+    if (calc.warnings.length > 0) {
+      page.drawText('Items requiring review:', { x: 50, y: height - 290, size: 11, font: bold });
+      let y = height - 310;
+      for (const w of calc.warnings.slice(0, 6)) {
+        page.drawText(`- ${w}`, { x: 60, y, size: 9, font });
+        y -= 14;
+      }
+    }
+
+    const bytes = await pdfDoc.save();
+    const branded = await applyBranding({ pdf: Buffer.from(bytes), presentationMode: mode });
+    const pdfBytes = Buffer.from(branded.pdfBase64, 'base64');
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename=\"LexFiat-Forecaster-CityTax-${calc.city}-${calc.year}.pdf\"`);
     res.send(pdfBytes);
   } catch (err) {
     const status = (err as any)?.statusCode ?? 500;

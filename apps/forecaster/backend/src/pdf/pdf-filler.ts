@@ -42,24 +42,43 @@ export async function fillPdfForm(params: {
   const skippedFields: string[] = [];
 
   for (const [fieldName, rawValue] of values.entries()) {
-    const field = fieldMap.get(fieldName);
-    if (!field) {
+    const direct = fieldMap.get(fieldName);
+
+    // Special case: checkbox arrays like c1_3[0..4]
+    if (!direct) {
+      const baseName = String(fieldName).replace(/\[\d+\]$/, '');
+      const candidates = Array.from(fieldMap.keys()).filter((n) => n.startsWith(`${baseName}[`));
+      if (candidates.length > 0 && typeof rawValue === 'number' && Number.isInteger(rawValue)) {
+        const targetName = candidates[rawValue];
+        const targetField = targetName ? fieldMap.get(targetName) : undefined;
+        if (targetField && targetField instanceof PDFCheckBox) {
+          targetField.check();
+          fieldsFilled++;
+          continue;
+        }
+      }
+
       fieldsSkipped++;
       skippedFields.push(fieldName);
       continue;
     }
-    if (field instanceof PDFTextField) {
-      field.setText(String(rawValue));
+
+    if (direct instanceof PDFTextField) {
+      direct.setText(String(rawValue));
       fieldsFilled++;
-    } else if (field instanceof PDFCheckBox) {
-      const v = rawValue === true || rawValue === 'true' || rawValue === 1 || rawValue === '1' || rawValue === 'checked';
-      if (v) field.check();
-      else field.uncheck();
-      fieldsFilled++;
-    } else {
-      fieldsSkipped++;
-      skippedFields.push(fieldName);
+      continue;
     }
+
+    if (direct instanceof PDFCheckBox) {
+      const v = rawValue === true || rawValue === 'true' || rawValue === 1 || rawValue === '1' || rawValue === 'checked';
+      if (v) direct.check();
+      else direct.uncheck();
+      fieldsFilled++;
+      continue;
+    }
+
+    fieldsSkipped++;
+    skippedFields.push(fieldName);
   }
 
   const bytes = await pdfDoc.save();

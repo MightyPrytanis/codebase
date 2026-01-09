@@ -26,6 +26,9 @@ export const FORM_1040_MAPPINGS: Record<string, string> = {
 
   // Page 2 payments + balance
   federalTaxWithheld: 'topmostSubform[0].Page2[0].f2_01[0]', // Line 25d (approx)
+  earnedIncomeCredit: 'topmostSubform[0].Page2[0].f2_03[0]', // EIC
+  additionalChildTaxCredit: 'topmostSubform[0].Page2[0].f2_04[0]', // ACTC (Sch 8812)
+  otherCredits: 'topmostSubform[0].Page2[0].f2_07[0]', // other refundable credits (approx bucket)
   totalPayments: 'topmostSubform[0].Page2[0].f2_08[0]',
   taxOwed: 'topmostSubform[0].Page2[0].f2_09[0]',
   overpayment: 'topmostSubform[0].Page2[0].f2_10[0]',
