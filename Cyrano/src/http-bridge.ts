@@ -397,11 +397,11 @@ const toolImportMap: Record<string, { loader: ToolLoader; metadata: Partial<Tool
   
   // Ethics Tools (special handling for getEthicsAuditTool/getEthicsStatsTool)
   get_ethics_audit: {
-    loader: () => import('./tools/ethics-audit-tools.js').then(m => m.getEthicsAuditTool()),
+    loader: () => import('./tools/ethics-audit-tools.js').then(m => m.getEthicsAuditTool),
     metadata: { name: 'get_ethics_audit', dependencies: [] }
   },
   get_ethics_stats: {
-    loader: () => import('./tools/ethics-audit-tools.js').then(m => m.getEthicsStatsTool()),
+    loader: () => import('./tools/ethics-audit-tools.js').then(m => m.getEthicsStatsTool),
     metadata: { name: 'get_ethics_stats', dependencies: [] }
   },
   
@@ -1007,6 +1007,149 @@ app.get('/api/good-counsel/overview', async (req, res) => {
     res.status(500).json({ 
       error: 'Failed to get GoodCounsel overview',
       details: error instanceof Error ? error.message : 'Unknown error' 
+    });
+  }
+});
+
+// ============================================================================
+// FORECASTER API (LexFiat Forecaster™ standalone frontend compatibility)
+// ============================================================================
+
+const ForecastHttpRequestSchema = z.object({
+  forecast_input: z.any(),
+  branding: z.object({
+    presentationMode: z.enum(['strip', 'watermark', 'none']).optional(),
+    userRole: z.enum(['attorney', 'staff', 'client', 'other']).optional(),
+    licensedInAny: z.boolean().optional(),
+    riskAcknowledged: z.boolean().optional(),
+  }).optional(),
+});
+
+function extractTextPayload(result: any): string {
+  const item = result?.content?.find?.((c: any) => c?.type === 'text' && 'text' in c);
+  return item?.text || '';
+}
+
+app.post('/api/forecast/tax', async (req, res) => {
+  try {
+    const parsed = ForecastHttpRequestSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ success: false, error: 'Invalid request body', details: parsed.error.issues });
+    }
+
+    const { forecast_input, branding } = parsed.data;
+    const presentationMode = branding?.presentationMode ?? 'strip';
+    const riskAcknowledged = branding?.riskAcknowledged ?? false;
+
+    if (presentationMode === 'none' && !riskAcknowledged) {
+      return res.status(400).json({
+        success: false,
+        error: 'Risk acknowledgement required to disable LexFiat Forecaster™ advisories/branding.',
+        presentationMode: 'strip',
+      });
+    }
+
+    const { taxForecastModule } = await import('./modules/forecast/tax-forecast-module.js');
+    const calcResult = await taxForecastModule.execute({ action: 'calculate', input: forecast_input });
+    const calcText = extractTextPayload(calcResult);
+    const calculatedValues = calcText ? JSON.parse(calcText) : {};
+
+    res.json({
+      success: true,
+      forecastType: 'tax_return',
+      calculatedValues,
+      brandingApplied: presentationMode !== 'none',
+      presentationMode,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+  }
+});
+
+// Returns a branded, filled PDF as application/pdf
+app.post('/api/forecast/tax/pdf', async (req, res) => {
+  try {
+    const parsed = ForecastHttpRequestSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ success: false, error: 'Invalid request body', details: parsed.error.issues });
+    }
+
+    const { forecast_input, branding } = parsed.data;
+    const year = forecast_input?.year || new Date().getFullYear();
+    const { taxForecastModule } = await import('./modules/forecast/tax-forecast-module.js');
+
+    // 1) Calculate values
+    const calcResult = await taxForecastModule.execute({ action: 'calculate', input: forecast_input });
+    const calcText = extractTextPayload(calcResult);
+    const calculated = calcText ? JSON.parse(calcText) : {};
+
+    // 2) Map to 1040 fill keys (minimal set; expands as module evolves)
+    const filingStatusIndex: Record<string, number> = {
+      single: 0,
+      married_joint: 1,
+      married_separate: 2,
+      head_of_household: 3,
+      qualifying_widow: 4,
+    };
+
+    const withholding = Number(forecast_input?.estimatedWithholding || 0);
+    const refundOrBalance = Number(calculated?.refundOrBalance || 0);
+
+    const formData = {
+      year,
+      // checkbox array index on IRS PDFs (c1_3[0..4])
+      filingStatus: filingStatusIndex[String(forecast_input?.filingStatus || 'single')] ?? 0,
+      wages: Number(forecast_input?.wages || 0),
+      taxableInterest: Number(forecast_input?.interestIncome || 0),
+      ordinaryDividends: Number(forecast_input?.dividendIncome || 0),
+      capitalGain: Number(forecast_input?.capitalGains || 0),
+      otherIncome: Number(forecast_input?.otherIncome || 0),
+      totalIncome: Number(calculated?.grossIncome || 0),
+      adjustedGrossIncome: Number(calculated?.adjustedGrossIncome || 0),
+      standardDeductionAmount: Number(calculated?.deductionUsed || forecast_input?.standardDeduction || 0),
+      taxableIncome: Number(calculated?.taxableIncome || 0),
+      taxOwed: Number(calculated?.totalTax || 0),
+      federalTaxWithheld: withholding,
+      totalPayments: withholding,
+      // Basic refund/balance presentation
+      overpayment: refundOrBalance > 0 ? refundOrBalance : 0,
+      amountOwed: refundOrBalance < 0 ? Math.abs(refundOrBalance) : 0,
+    };
+
+    // 3) Fill Form 1040
+    const filledResult = await taxForecastModule.execute({ action: 'generate_pdf', input: formData });
+    const filledText = extractTextPayload(filledResult);
+    const filledParsed = filledText ? JSON.parse(filledText) : {};
+    const pdfBase64 = filledParsed?.pdfBase64;
+    if (!pdfBase64) {
+      return res.status(500).json({ success: false, error: 'PDF generation failed', details: filledParsed });
+    }
+
+    // 4) Apply branding/warnings
+    const presentationMode = branding?.presentationMode ?? 'strip';
+    const { pdfFormFiller } = await import('./tools/pdf-form-filler.js');
+    const branded = await pdfFormFiller.execute({
+      action: 'apply_branding',
+      formType: 'tax_return',
+      presentationMode,
+      templateBuffer: Buffer.from(pdfBase64, 'base64'),
+      returnPdfBase64: true,
+    });
+    const brandedText = extractTextPayload(branded);
+    const brandedParsed = brandedText ? JSON.parse(brandedText) : {};
+    const brandedPdfBase64 = brandedParsed?.pdfBase64 || pdfBase64;
+
+    const pdfBytes = Buffer.from(brandedPdfBase64, 'base64');
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="LexFiat-Forecaster-1040-${year}.pdf"`);
+    res.send(pdfBytes);
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 });
