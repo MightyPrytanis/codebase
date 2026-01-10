@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { FileText, Scale, TrendingUp, AlertTriangle } from 'lucide-react';
+import { FileText, Scale, TrendingUp, AlertTriangle, Building2 } from 'lucide-react';
 
 export default function HomePage() {
   return (
@@ -25,7 +25,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid md:grid-cols-4 gap-6">
         <Link
           to="/tax"
           className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow"
@@ -35,6 +35,15 @@ export default function HomePage() {
           <p className="text-gray-600">
             Generate hypothetical tax return forecasts using IRS forms and calculations
           </p>
+        </Link>
+
+        <Link
+          to="/city-tax"
+          className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow"
+        >
+          <Building2 className="h-12 w-12 text-orange-600 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">City Tax (Testing)</h2>
+          <p className="text-gray-600">Forecast city income taxes for Lansing and Albion (scaffold)</p>
         </Link>
 
         <Link

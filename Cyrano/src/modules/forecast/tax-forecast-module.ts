@@ -10,6 +10,9 @@ import { z } from 'zod';
 import { ResourceLoader } from '../../services/resource-loader.js';
 import { calculateTax, TaxInput, TaxCalculation } from './formulas/tax-formulas.js';
 import { pdfFormFiller } from '../../tools/pdf-form-filler.js';
+import { promises as fs } from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 const TaxForecastInputSchema = z.object({
   action: z.enum(['calculate', 'generate_pdf', 'get_status']).describe('Action to perform'),
@@ -32,6 +35,7 @@ const TaxForecastInputSchema = z.object({
 export class TaxForecastModule extends BaseModule {
   private resourceLoader: ResourceLoader;
   private loadedResources: Map<string, Buffer> = new Map();
+  private templatesDir: string;
 
   constructor() {
     super({
@@ -90,6 +94,21 @@ export class TaxForecastModule extends BaseModule {
       ],
     });
     this.resourceLoader = new ResourceLoader();
+    const __filename = fileURLToPath(import.meta.url);
+    const __dirname = path.dirname(__filename);
+    this.templatesDir = path.resolve(__dirname, '../../templates/forms');
+  }
+
+  private async tryLoadBundledTemplate(formCode: string, year: number): Promise<Buffer | undefined> {
+    const candidates = [`${formCode}--${year}.pdf`, `${formCode}.pdf`];
+    for (const filename of candidates) {
+      try {
+        return await fs.readFile(path.join(this.templatesDir, filename));
+      } catch {
+        // ignore missing
+      }
+    }
+    return undefined;
   }
 
   /**
@@ -279,11 +298,35 @@ export class TaxForecastModule extends BaseModule {
       } as CallToolResult;
     }
 
-    // Execute PDF form filling
+    const year = input?.year || new Date().getFullYear();
+
+    const templateBuffer =
+      (await this.tryLoadBundledTemplate('f1040', year)) ||
+      this.getResourceBuffer(`irs_1040_${year}`);
+
+    if (!templateBuffer) {
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: JSON.stringify({
+              success: false,
+              error: `No Form 1040 template available for year ${year}`,
+              year,
+            }, null, 2),
+          },
+        ],
+        isError: true,
+      } as CallToolResult;
+    }
+
+    // Execute PDF form filling (include base64 PDF so clients can download)
     return await pdfFiller.execute({
       action: 'fill_form',
       formType: 'tax_return',
       formData: input,
+      templateBuffer,
+      returnPdfBase64: true,
     });
   }
 

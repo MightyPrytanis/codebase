@@ -16,6 +16,7 @@ const PDFFormFillerSchema = z.object({
   formData: z.any().optional().describe('Data to fill into form'),
   templateBuffer: z.any().optional().describe('PDF template buffer'),
   presentationMode: z.enum(['strip', 'watermark', 'none']).optional().describe('Branding presentation mode'),
+  returnPdfBase64: z.boolean().optional().describe('When true, include base64-encoded PDF bytes in response'),
 });
 
 /**
@@ -57,10 +58,34 @@ export const pdfFormFiller: BaseTool = new (class extends BaseTool {
             enum: ['strip', 'watermark', 'none'],
             description: 'Branding presentation mode',
           },
+          returnPdfBase64: {
+            type: 'boolean',
+            description: 'When true, include base64-encoded PDF bytes in response (large)',
+          },
         },
         required: ['action'],
       },
     };
+  }
+
+  private encodePdfBase64(pdfBytes: Uint8Array): string {
+    // Node Buffer is safe here (server-side tool)
+    return Buffer.from(pdfBytes).toString('base64');
+  }
+
+  private drawMultilineText(
+    page: any,
+    text: string,
+    opts: { x: number; y: number; size: number; font: any; color: any; lineHeight?: number }
+  ) {
+    // pdf-lib drawText does not handle '\n' reliably across viewers
+    const lines = String(text).split(/\r?\n/);
+    const lineHeight = opts.lineHeight ?? Math.ceil(opts.size * 1.15);
+    let cursorY = opts.y;
+    for (const line of lines) {
+      page.drawText(line, { x: opts.x, y: cursorY, size: opts.size, font: opts.font, color: opts.color });
+      cursorY -= lineHeight;
+    }
   }
 
   async execute(args: any): Promise<CallToolResult> {
@@ -69,10 +94,10 @@ export const pdfFormFiller: BaseTool = new (class extends BaseTool {
 
       switch (parsed.action) {
         case 'fill_form':
-          return await this.fillForm(parsed.formType, parsed.formData, parsed.templateBuffer);
+          return await this.fillForm(parsed.formType, parsed.formData, parsed.templateBuffer, parsed.returnPdfBase64);
 
         case 'apply_branding':
-          return await this.applyBranding(parsed.templateBuffer, parsed.presentationMode, parsed.formType);
+          return await this.applyBranding(parsed.templateBuffer, parsed.presentationMode, parsed.formType, parsed.returnPdfBase64);
 
         case 'get_status':
           return {
@@ -119,7 +144,8 @@ export const pdfFormFiller: BaseTool = new (class extends BaseTool {
   private async fillForm(
     formType: string | undefined,
     formData: any,
-    templateBuffer: Buffer | undefined
+    templateBuffer: Buffer | undefined,
+    returnPdfBase64?: boolean
   ): Promise<CallToolResult> {
     if (!templateBuffer) {
       return {
@@ -229,6 +255,7 @@ export const pdfFormFiller: BaseTool = new (class extends BaseTool {
               fieldsSkipped,
               skippedFields: skippedFields.length > 0 ? skippedFields.slice(0, 10) : [], // Limit to first 10
               pdfSize: pdfBytes.length,
+              ...(returnPdfBase64 ? { pdfBase64: this.encodePdfBase64(pdfBytes) } : {}),
             }, null, 2),
           },
         ],
@@ -253,7 +280,8 @@ export const pdfFormFiller: BaseTool = new (class extends BaseTool {
   private async applyBranding(
     templateBuffer: Buffer | undefined,
     presentationMode: string | undefined,
-    formType: string | undefined
+    formType: string | undefined,
+    returnPdfBase64?: boolean
   ): Promise<CallToolResult> {
     if (!templateBuffer) {
       return {
@@ -276,6 +304,8 @@ export const pdfFormFiller: BaseTool = new (class extends BaseTool {
             text: JSON.stringify({
               success: true,
               message: 'No branding applied (user override)',
+              pdfSize: templateBuffer.length,
+              ...(returnPdfBase64 ? { pdfBase64: templateBuffer.toString('base64') } : {}),
             }, null, 2),
           },
         ],
@@ -312,12 +342,13 @@ export const pdfFormFiller: BaseTool = new (class extends BaseTool {
             color: rgb(0, 0, 0),
           });
 
-          page.drawText(disclaimerText, {
+          this.drawMultilineText(page, disclaimerText, {
             x: 10,
-            y: height - 15,
-            size: 8,
+            y: height - 34,
+            size: 7,
             font: helveticaFont,
             color: rgb(0, 0, 0),
+            lineHeight: 8,
           });
         } else if (presentationMode === 'watermark') {
           // Add watermark across page
@@ -343,6 +374,7 @@ export const pdfFormFiller: BaseTool = new (class extends BaseTool {
               success: true,
               message: `Branding applied: ${presentationMode}`,
               pdfSize: pdfBytes.length,
+              ...(returnPdfBase64 ? { pdfBase64: this.encodePdfBase64(pdfBytes) } : {}),
             }, null, 2),
           },
         ],

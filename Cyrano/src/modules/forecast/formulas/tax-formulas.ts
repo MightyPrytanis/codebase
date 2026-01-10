@@ -43,6 +43,8 @@ export interface TaxInput {
 export interface TaxCalculation {
   grossIncome: number;
   adjustedGrossIncome: number;
+  adjustments: number;
+  deductionUsed: number;
   taxableIncome: number;
   taxBeforeCredits: number;
   credits: number;
@@ -57,75 +59,74 @@ export interface TaxCalculation {
  * Get tax brackets for a given year and filing status
  */
 export function getTaxBrackets(year: number, filingStatus: FilingStatus): TaxBracket[] {
-  // 2024 tax brackets (most recent)
-  const brackets2024: Record<FilingStatus, TaxBracket[]> = {
-    single: [
-      { min: 0, max: 11600, rate: 0.10 },
-      { min: 11600, max: 47150, rate: 0.12 },
-      { min: 47150, max: 100525, rate: 0.22 },
-      { min: 100525, max: 191950, rate: 0.24 },
-      { min: 191950, max: 243725, rate: 0.32 },
-      { min: 243725, max: 609350, rate: 0.35 },
-      { min: 609350, max: Infinity, rate: 0.37 },
-    ],
-    married_joint: [
-      { min: 0, max: 23200, rate: 0.10 },
-      { min: 23200, max: 94300, rate: 0.12 },
-      { min: 94300, max: 201050, rate: 0.22 },
-      { min: 201050, max: 383900, rate: 0.24 },
-      { min: 383900, max: 487450, rate: 0.32 },
-      { min: 487450, max: 731200, rate: 0.35 },
-      { min: 731200, max: Infinity, rate: 0.37 },
-    ],
-    married_separate: [
-      { min: 0, max: 11600, rate: 0.10 },
-      { min: 11600, max: 47150, rate: 0.12 },
-      { min: 47150, max: 100525, rate: 0.22 },
-      { min: 100525, max: 191950, rate: 0.24 },
-      { min: 191950, max: 243725, rate: 0.32 },
-      { min: 243725, max: 365600, rate: 0.35 },
-      { min: 365600, max: Infinity, rate: 0.37 },
-    ],
-    head_of_household: [
-      { min: 0, max: 16550, rate: 0.10 },
-      { min: 16550, max: 63100, rate: 0.12 },
-      { min: 63100, max: 100500, rate: 0.22 },
-      { min: 100500, max: 191950, rate: 0.24 },
-      { min: 191950, max: 243700, rate: 0.32 },
-      { min: 243700, max: 609350, rate: 0.35 },
-      { min: 609350, max: Infinity, rate: 0.37 },
-    ],
-    qualifying_widow: [
-      { min: 0, max: 23200, rate: 0.10 },
-      { min: 23200, max: 94300, rate: 0.12 },
-      { min: 94300, max: 201050, rate: 0.22 },
-      { min: 201050, max: 383900, rate: 0.24 },
-      { min: 383900, max: 487450, rate: 0.32 },
-      { min: 487450, max: 731200, rate: 0.35 },
-      { min: 731200, max: Infinity, rate: 0.37 },
-    ],
+  // Data source: Tax-Calculator (taxcalc) 6.3.0 policy parameters
+  // Extracted in this workspace via `python3 -m pip install taxcalc==6.3.0` and Policy.select_eq().
+  // Note: This is intended to cover 2023–2025 for the Forecaster prototype.
+  const thresholds: Record<number, Record<FilingStatus, number[]>> = {
+    2023: {
+      single: [11000, 44725, 95375, 182100, 231250, 578125, Infinity],
+      married_joint: [22000, 89450, 190750, 364200, 462500, 693750, Infinity],
+      married_separate: [11000, 44725, 95375, 182100, 231250, 578125, Infinity],
+      head_of_household: [15700, 59850, 95350, 182100, 231250, 578100, Infinity],
+      qualifying_widow: [22000, 89450, 190750, 364200, 462500, 693750, Infinity],
+    },
+    2024: {
+      single: [11600, 47150, 100525, 191950, 243725, 609350, Infinity],
+      married_joint: [23200, 94300, 201050, 383900, 487450, 731200, Infinity],
+      married_separate: [11600, 47150, 100525, 191950, 243725, 365600, Infinity],
+      head_of_household: [16550, 63100, 100500, 191950, 243700, 609350, Infinity],
+      qualifying_widow: [23200, 94300, 201050, 383900, 487450, 731200, Infinity],
+    },
+    2025: {
+      single: [11925, 48475, 103350, 197300, 250525, 626350, Infinity],
+      married_joint: [23850, 96950, 206700, 394600, 501050, 751600, Infinity],
+      married_separate: [11925, 48475, 103350, 197300, 250525, 375800, Infinity],
+      head_of_household: [17000, 64850, 103350, 197300, 250500, 626350, Infinity],
+      qualifying_widow: [23850, 96950, 206700, 394600, 501050, 751600, Infinity],
+    },
   };
 
-  // For now, use 2024 brackets for all years (in production, would have year-specific data)
-  // TODO: Add historical brackets for 2018-2023
-  return brackets2024[filingStatus] || brackets2024.single;
+  const rates = [0.10, 0.12, 0.22, 0.24, 0.32, 0.35, 0.37];
+  const t = thresholds[year]?.[filingStatus] || thresholds[2024][filingStatus];
+  const brackets: TaxBracket[] = [];
+  let prevMin = 0;
+  for (let i = 0; i < rates.length; i++) {
+    const max = t[i] ?? Infinity;
+    brackets.push({ min: prevMin, max, rate: rates[i] });
+    prevMin = max;
+  }
+  return brackets;
 }
 
 /**
  * Get standard deduction for a given year and filing status
  */
 export function getStandardDeduction(year: number, filingStatus: FilingStatus): number {
-  // 2024 standard deductions
-  const deductions2024: Record<FilingStatus, number> = {
-    single: 14600,
-    married_joint: 29200,
-    married_separate: 14600,
-    head_of_household: 21900,
-    qualifying_widow: 29200,
+  // Data source: Tax-Calculator (taxcalc) 6.3.0 policy parameters (STD)
+  const std: Record<number, Record<FilingStatus, number>> = {
+    2023: {
+      single: 13850,
+      married_joint: 27700,
+      married_separate: 13850,
+      head_of_household: 20800,
+      qualifying_widow: 27700,
+    },
+    2024: {
+      single: 14600,
+      married_joint: 29200,
+      married_separate: 14600,
+      head_of_household: 21900,
+      qualifying_widow: 29200,
+    },
+    2025: {
+      single: 15750,
+      married_joint: 31500,
+      married_separate: 15750,
+      head_of_household: 23625,
+      qualifying_widow: 31500,
+    },
   };
-
-  // TODO: Add historical standard deductions for 2018-2023
-  return deductions2024[filingStatus] || deductions2024.single;
+  return std[year]?.[filingStatus] ?? std[2024][filingStatus];
 }
 
 /**
@@ -149,19 +150,25 @@ export function calculateTaxFromBrackets(taxableIncome: number, brackets: TaxBra
 /**
  * Calculate self-employment tax (Social Security + Medicare)
  */
-export function calculateSelfEmploymentTax(selfEmploymentIncome: number, year: number): number {
-  // 2024 rates
+export function calculateSelfEmploymentTax(selfEmploymentIncome: number, wages: number, year: number): number {
   const socialSecurityRate = 0.124; // 12.4% (employee + employer)
   const medicareRate = 0.029; // 2.9% (employee + employer)
-  const socialSecurityWageBase = 168600; // 2024
+  // Data source: Tax-Calculator (taxcalc) 6.3.0 policy parameter SS_Earnings_c
+  const socialSecurityWageBaseByYear: Record<number, number> = {
+    2023: 160200,
+    2024: 168600,
+    2025: 176100,
+  };
+  const socialSecurityWageBase = socialSecurityWageBaseByYear[year] ?? socialSecurityWageBaseByYear[2024];
 
-  const taxableSS = Math.min(selfEmploymentIncome, socialSecurityWageBase);
+  // IRS: SE tax is calculated on 92.35% of net SE earnings (simplified here).
+  const netEarnings = selfEmploymentIncome * 0.9235;
+  // Approximate coordination with W-2 wages subject to SS wage base
+  const remainingSSBase = Math.max(0, socialSecurityWageBase - Math.max(0, wages || 0));
+  const taxableSS = Math.min(netEarnings, remainingSSBase);
   const socialSecurityTax = taxableSS * socialSecurityRate;
-  const medicareTax = selfEmploymentIncome * medicareRate;
-
-  // Self-employment tax is reduced by employer-equivalent portion (50%)
-  const selfEmploymentTax = (socialSecurityTax + medicareTax) * 0.9235; // SE tax adjustment
-
+  const medicareTax = netEarnings * medicareRate;
+  const selfEmploymentTax = socialSecurityTax + medicareTax;
   return Math.round(selfEmploymentTax * 100) / 100;
 }
 
@@ -179,14 +186,20 @@ export function calculateTax(input: TaxInput): TaxCalculation {
     input.rentalIncome +
     input.otherIncome;
 
-  // Calculate AGI (simplified - would include adjustments in full implementation)
-  const adjustedGrossIncome = grossIncome;
+  // Self-employment tax (simplified) and related adjustment (½ SE tax)
+  const selfEmploymentTax = calculateSelfEmploymentTax(input.selfEmploymentIncome, input.wages, input.year);
+  const adjustments = selfEmploymentTax * 0.5;
+
+  // Calculate AGI (still simplified; only includes the SE-tax adjustment for now)
+  const adjustedGrossIncome = grossIncome - adjustments;
 
   // Determine deduction (standard vs itemized)
-  const deduction = Math.max(input.standardDeduction, input.itemizedDeductions || 0);
+  const defaultStandardDeduction = getStandardDeduction(input.year, input.filingStatus);
+  const standard = input.standardDeduction && input.standardDeduction > 0 ? input.standardDeduction : defaultStandardDeduction;
+  const deductionUsed = Math.max(standard, input.itemizedDeductions || 0);
 
   // Calculate taxable income
-  const taxableIncome = Math.max(0, adjustedGrossIncome - deduction);
+  const taxableIncome = Math.max(0, adjustedGrossIncome - deductionUsed);
 
   // Get tax brackets
   const brackets = getTaxBrackets(input.year, input.filingStatus);
@@ -204,9 +217,6 @@ export function calculateTax(input: TaxInput): TaxCalculation {
   // Calculate tax liability
   const taxLiability = Math.max(0, taxBeforeCredits - credits);
 
-  // Calculate self-employment tax
-  const selfEmploymentTax = calculateSelfEmploymentTax(input.selfEmploymentIncome, input.year);
-
   // Total tax
   const totalTax = taxLiability + selfEmploymentTax;
 
@@ -216,6 +226,8 @@ export function calculateTax(input: TaxInput): TaxCalculation {
   return {
     grossIncome,
     adjustedGrossIncome,
+    adjustments,
+    deductionUsed,
     taxableIncome,
     taxBeforeCredits,
     credits,
