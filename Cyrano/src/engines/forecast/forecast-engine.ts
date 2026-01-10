@@ -465,7 +465,7 @@ export class ForecastEngine extends BaseEngine {
 
   /**
    * Validate branding override permissions
-   * Licensed attorneys can override, others cannot
+   * Branding/advisory removal is allowed only with explicit risk acknowledgement.
    */
   private validateBrandingOverride(
     branding?: ForecastBrandingConfig
@@ -475,30 +475,16 @@ export class ForecastEngine extends BaseEngine {
       return { allowed: true, presentationMode: 'strip' };
     }
 
-    // Override requires: licensed attorney + risk acknowledgement
-    if (branding.userRole === 'attorney' && branding.licensedInAny && branding.riskAcknowledged) {
+    // Override requires explicit risk acknowledgement
+    if (branding.riskAcknowledged) {
       return { allowed: true, presentationMode: branding.presentationMode };
     }
 
-    // Non-attorneys or unlicensed users cannot override
-    if (branding.userRole !== 'attorney' || !branding.licensedInAny) {
-      return {
-        allowed: false,
-        error: 'Only licensed attorneys can disable LexFiat Forecaster™ branding. Branding is required for non-attorney users.',
-        presentationMode: 'strip',
-      };
-    }
-
-    // Licensed attorney but risk not acknowledged
-    if (!branding.riskAcknowledged) {
-      return {
-        allowed: false,
-        error: 'Risk acknowledgement required to disable LexFiat Forecaster™ branding. You must acknowledge that forecast outputs may resemble official forms and are not filing-ready.',
-        presentationMode: 'strip',
-      };
-    }
-
-    return { allowed: true, presentationMode: branding.presentationMode };
+    return {
+      allowed: false,
+      error: 'Risk acknowledgement required to disable LexFiat Forecaster™ advisories/branding. You must explicitly acknowledge that forecast outputs may resemble official forms and are not filing-ready.',
+      presentationMode: 'strip',
+    };
   }
 
   /**
