@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Calculator, FileText, Scale, TrendingUp, Home, AlertTriangle } from 'lucide-react';
+import { Calculator, FileText, Scale, TrendingUp, Home, AlertTriangle, Building2 } from 'lucide-react';
 
 interface LayoutProps {
   children: ReactNode;
@@ -42,6 +42,17 @@ export default function Layout({ children }: LayoutProps) {
               >
                 <FileText className="w-4 h-4" />
                 <span className="hidden sm:inline">Tax</span>
+              </Link>
+              <Link
+                to="/city-tax"
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+                  location.pathname === '/city-tax'
+                    ? 'bg-accent-gold text-charcoal'
+                    : 'text-charcoal/70 hover:text-charcoal hover:bg-gray-100'
+                }`}
+              >
+                <Building2 className="w-4 h-4" />
+                <span className="hidden sm:inline">City Tax</span>
               </Link>
               <Link
                 to="/support"
