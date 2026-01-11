@@ -139,3 +139,6 @@ export default function HelpMenu({ onClose }: HelpMenuProps) {
     </div>
   );
 }
+
+}
+)

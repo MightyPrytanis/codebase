@@ -285,5 +285,4 @@ export default function TimeTracking() {
       </div>
     </div>
   );
-}
 

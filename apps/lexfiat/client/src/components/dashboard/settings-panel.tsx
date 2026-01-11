@@ -118,3 +118,7 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
   );
 }
 
+
+}
+}
+)

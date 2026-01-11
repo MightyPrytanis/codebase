@@ -258,3 +258,6 @@ export default function WorkflowPipeline({
     </div>
   );
 }
+
+}
+)

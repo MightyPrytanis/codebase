@@ -424,3 +424,22 @@ export function GoodCounselJournaling({ userId }: JournalingProps) {
   );
 }
 
+
+}
+)
+}
+)
+}
+)
+}
+)
+}
+)
+}
+)
+}
+)
+}
+)
+}
+)

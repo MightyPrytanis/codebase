@@ -86,7 +86,7 @@ These tools were registered in HTTP bridge but missing from MCP server (now adde
 
 1. `custodian_engine` - Custodian Engine tool wrapper
 2. `beta_test_support` - Beta testing support tool
-3. `micourt_query` - MiCourt query tool (had handler but wasn't in tool list)
+3. `micourt_query` - MiCourt query tool (had handler but wasn't in tool list
 
 **Status:** ✅ **FIXED** - All 3 tools now registered in MCP server (2025-12-31)
 

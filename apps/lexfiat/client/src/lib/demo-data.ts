@@ -219,3 +219,6 @@ export const mockRedFlags = [
  */
 export const mockCases = DEMO_CASES;
 
+
+}
+}

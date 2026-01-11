@@ -46,8 +46,7 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-    );
-  }
+    ;
 
   return (
     <div className="min-h-screen bg-primary-dark">
@@ -178,3 +177,14 @@ export default function Dashboard() {
     </div>
   );
 }
+
+}
+}
+}
+}
+}
+}
+}
+}
+}
+)

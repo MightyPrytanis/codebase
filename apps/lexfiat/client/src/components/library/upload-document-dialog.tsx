@@ -244,5 +244,4 @@ export function UploadDocumentDialog({
       </div>
     </>
   );
-}
 
