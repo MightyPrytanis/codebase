@@ -55,11 +55,15 @@ class SMSService {
         return { success: false, error: 'twilio not installed' };
       }
 
+      if (!this.twilioConfig.accountSid || !this.twilioConfig.authToken) {
+        return { success: false, error: 'Twilio credentials incomplete' };
+      }
+
       const client = twilio.default(this.twilioConfig.accountSid, this.twilioConfig.authToken);
 
       await client.messages.create({
         body: options.message,
-        from: this.twilioConfig.fromNumber,
+        from: this.twilioConfig.fromNumber || undefined,
         to: options.to,
       });
 

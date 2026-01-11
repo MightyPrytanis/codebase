@@ -87,7 +87,7 @@ export class SkillLoader {
     const lines = yaml.split('\n');
     const result: Record<string, any> = {};
     let currentKey: string | null = null;
-    let indentStack: { key: string; indent: number }[] = [];
+    const indentStack: { key: string; indent: number }[] = [];
     
     for (const rawLine of lines) {
       const line = rawLine;

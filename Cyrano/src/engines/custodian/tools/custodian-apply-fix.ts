@@ -12,7 +12,7 @@ import { custodianEngine } from '../custodian-engine.js';
 
 const CustodianApplyFixSchema = z.object({
   target: z.string().describe('Fix type or issue to fix'),
-  options: z.record(z.any()).optional().describe('Additional options for fix'),
+  options: z.record(z.string(), z.any()).optional().describe('Additional options for fix'),
 });
 
 export const custodianApplyFixTool = new (class extends BaseTool {

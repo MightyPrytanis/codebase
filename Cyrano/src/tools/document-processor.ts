@@ -486,6 +486,7 @@ export const documentProcessor: BaseTool = new (class extends BaseTool {
   }
 
   public hasInvalidCharacters(text: string): boolean {
+    // eslint-disable-next-line no-control-regex
     return /[^\x00-\x7F]/.test(text);
   }
 
@@ -562,7 +563,7 @@ export const documentProcessor: BaseTool = new (class extends BaseTool {
       }
 
       // Dates of birth: MM/DD/YYYY, MM-DD-YYYY, YYYY-MM-DD
-      const dobPattern = /\b(0?[1-9]|1[0-2])[\/\-](0?[1-9]|[12][0-9]|3[01])[\/\-]\d{4}\b/g;
+      const dobPattern = /\b(0?[1-9]|1[0-2])[/-](0?[1-9]|[12][0-9]|3[01])[/-]\d{4}\b/g;
       const dobMatches = document.match(dobPattern) || [];
       if (dobMatches.length > 0) {
         redacted = redacted.replace(dobPattern, '[REDACTED-DOB]');

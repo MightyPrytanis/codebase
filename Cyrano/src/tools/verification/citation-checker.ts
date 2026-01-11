@@ -6,6 +6,7 @@
  * 
  * Created: 2025-11-22
  */
+/* eslint-disable no-case-declarations */
 /*
  * Copyright 2025 Cognisint LLC
  * Licensed under the Apache License, Version 2.0

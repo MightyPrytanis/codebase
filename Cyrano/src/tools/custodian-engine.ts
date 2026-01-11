@@ -23,7 +23,7 @@ const CustodianEngineSchema = z.object({
     'stop_monitoring',
   ]).describe('Action to perform'),
   target: z.string().optional().describe('Target for action'),
-  options: z.record(z.any()).optional().describe('Additional options'),
+  options: z.record(z.string(), z.any()).optional().describe('Additional options'),
 });
 
 export const custodianEngineTool = new (class extends BaseTool {

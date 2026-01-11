@@ -86,8 +86,16 @@ export const mcrValidator = new (class extends BaseTool {
     try {
       const validated = MCRValidatorSchema.parse(args);
 
+      // Map documentType to filingType
+      const filingTypeMap: Record<string, DocumentMetadata['filingType']> = {
+        motion: 'motion',
+        brief: 'brief',
+        pleading: 'pleading',
+        order: 'order',
+      };
+
       const metadata: DocumentMetadata = {
-        documentType: validated.documentType,
+        filingType: validated.documentType ? (filingTypeMap[validated.documentType] || 'other') : undefined,
         caseNumber: validated.caseNumber,
         court: validated.court,
         format: validated.format,

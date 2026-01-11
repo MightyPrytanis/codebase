@@ -458,7 +458,7 @@ export const factChecker: BaseTool = new (class extends BaseTool {
    */
   public extractSourcesFromResponse(response: string): string[] {
     const sourcePatterns = [
-      /(?:source|reference|citation|according to|from)\s*:?\s*([^\n\.]+)/gi,
+      /(?:source|reference|citation|according to|from)\s*:?\s*([^\n.]+)/gi,
       /https?:\/\/[^\s]+/g,
       /\[([^\]]+)\]/g,
     ];

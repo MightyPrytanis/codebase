@@ -238,7 +238,7 @@ export class TimelineProcessor {
     
     for (const match of simpleMatches) {
       const term = match[1].toLowerCase();
-      let date = new Date(now);
+      const date = new Date(now);
       
       if (term === 'yesterday') {
         date.setDate(date.getDate() - 1);
@@ -270,7 +270,7 @@ export class TimelineProcessor {
     for (const match of agoMatches) {
       const amount = parseInt(match[1]);
       const unit = match[2].toLowerCase();
-      let date = new Date(now);
+      const date = new Date(now);
       
       if (unit.startsWith('day')) {
         date.setDate(date.getDate() - amount);
@@ -306,7 +306,7 @@ export class TimelineProcessor {
     for (const match of lastNextMatches) {
       const direction = match[1].toLowerCase();
       const unit = match[2].toLowerCase();
-      let date = new Date(now);
+      const date = new Date(now);
       const multiplier = direction === 'last' ? -1 : 1;
       
       if (unit === 'week') {

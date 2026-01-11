@@ -108,8 +108,17 @@ export function detectPromptInjection(
   }
 
   if (detectedPatterns.length > 0) {
+    // Map severity levels to AuditLogLevel
+    const severityMap: Record<string, 'info' | 'warning' | 'error' | 'critical'> = {
+      low: 'info',
+      medium: 'warning',
+      high: 'error',
+      critical: 'critical',
+    };
+    const auditLevel = severityMap[maxSeverity || 'medium'] || 'warning';
+
     logSecurityEvent(
-      maxSeverity || 'medium',
+      auditLevel,
       'prompt_injection_detected',
       `Prompt injection detected: ${detectedPatterns.map(p => p.description).join(', ')}`,
       undefined,
@@ -144,6 +153,7 @@ export function sanitizePromptInput(input: string): { sanitized: string; warning
   }
 
   // Remove control characters that could be used for injection
+  // eslint-disable-next-line no-control-regex
   sanitized = sanitized.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
 
   // Limit length to prevent resource exhaustion

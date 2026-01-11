@@ -9,7 +9,7 @@ import { spawn, ChildProcess } from 'child_process';
 import { join } from 'path';
 
 describe('MCP Stdio Bridge Compliance', () => {
-  let serverProcess: ChildProcess | null = null;
+  const serverProcess: ChildProcess | null = null;
   const testTimeout = 10000;
 
   beforeAll(() => {

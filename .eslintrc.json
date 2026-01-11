@@ -33,6 +33,5 @@
         "no-undef": "off"
       }
     }
-  ],
-  "_comment": "This is the legacy ESLint 8.x config for projects not yet upgraded. Cyrano uses ESLint 9.x with flat config (eslint.config.js)."
+  ]
 }

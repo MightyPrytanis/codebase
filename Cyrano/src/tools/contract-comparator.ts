@@ -294,7 +294,7 @@ export const contractComparator = new (class extends BaseTool {
   }
 
   public extractSections(text: string): string[] {
-    const sectionPattern = /(?:section|clause|article|paragraph)\s+\d+[:\-\.]?\s*([^.!?]+)/gi;
+    const sectionPattern = /(?:section|clause|article|paragraph)\s+\d+[:.-]?\s*([^.!?]+)/gi;
     const matches = text.match(sectionPattern) || [];
     return matches.map(match => match.trim());
   }

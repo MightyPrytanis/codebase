@@ -289,7 +289,7 @@ export class RAGService {
     );
 
     // Search with each query and combine results
-    let allResults: SearchResult[] = [];
+    const allResults: SearchResult[] = [];
     for (const queryEmbedding of queryEmbeddings) {
       const results = this.vectorStore.search(queryEmbedding.embedding, topK * 2, minScore);
       allResults.push(...results);

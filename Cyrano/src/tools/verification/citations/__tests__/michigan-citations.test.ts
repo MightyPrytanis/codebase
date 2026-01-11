@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Michigan Citation Tests
  * Tests validator against Michigan Appellate Opinion Manual rules

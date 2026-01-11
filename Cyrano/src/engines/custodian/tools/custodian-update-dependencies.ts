@@ -12,7 +12,7 @@ import { custodianEngine } from '../custodian-engine.js';
 
 const CustodianUpdateDependenciesSchema = z.object({
   target: z.string().optional().describe('Specific package to update (optional, updates all if not specified)'),
-  options: z.record(z.any()).optional().describe('Additional options for update'),
+  options: z.record(z.string(), z.any()).optional().describe('Additional options for update'),
 });
 
 export const custodianUpdateDependenciesTool = new (class extends BaseTool {

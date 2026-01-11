@@ -396,10 +396,13 @@ export function sanitizeString(input: string): string {
   sanitized = sanitized.replace(/on\w+\s*=/gi, '');
   
   // Use DOMPurify for additional sanitization
-  sanitized = getDOMPurify().sanitize(sanitized, {
-    ALLOWED_TAGS: [],
-    ALLOWED_ATTR: [],
-  });
+  const domPurify = getDOMPurify();
+  if (domPurify) {
+    sanitized = domPurify.sanitize(sanitized, {
+      ALLOWED_TAGS: [],
+      ALLOWED_ATTR: [],
+    });
+  }
   return sanitized.trim();
 }
 

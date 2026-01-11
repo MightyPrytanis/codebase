@@ -134,7 +134,6 @@ export async function calculateDeadlines(
             requireAttorneyVerification(
               workProductId,
               'other',
-              false, // Not AI-generated, but requires verification
               JSON.stringify({ event, deadline: endDate.toISOString(), daysRemaining })
             );
 

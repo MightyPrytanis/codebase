@@ -142,7 +142,7 @@ export const documentAnalyzer = new (class extends BaseTool {
     const paragraphCount = documentText.split('\n\n').length;
 
     // Create analysis prompt based on type
-    let prompt = this.buildAnalysisPrompt(documentText, analysisType, focusAreas);
+    const prompt = this.buildAnalysisPrompt(documentText, analysisType, focusAreas);
     
     // Inject Ten Rules into system prompt (will be used by AI service)
     // Note: Actual injection happens in AI service call, but we prepare it here
@@ -316,9 +316,9 @@ Provide a detailed analysis of ${focusArea} aspects, including key findings, pot
   }
 
   public extractKeyProvisions(text: string): string[] {
-    const provisionPattern = /(?:section|clause|provision|term)\s+\d+[:\-\.]?\s*([^.!?]+)/gi;
+    const provisionPattern = /(?:section|clause|provision|term)\s+\d+[:.-]?\s*([^.!?]+)/gi;
     const matches = text.match(provisionPattern) || [];
-    return matches.map(match => match.replace(/(?:section|clause|provision|term)\s+\d+[:\-\.]?\s*/i, '').trim());
+    return matches.map(match => match.replace(/(?:section|clause|provision|term)\s+\d+[:.-]?\s*/i, '').trim());
   }
 
   public identifyRiskFactors(text: string): string[] {
