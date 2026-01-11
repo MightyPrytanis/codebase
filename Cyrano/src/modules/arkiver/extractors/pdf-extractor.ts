@@ -14,11 +14,11 @@
 
 // Import pdf-parse - handle both CommonJS and ESM
 // Use dynamic require to avoid issues in test environments
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
 let pdfParse: (buffer: Buffer) => Promise<any>;
 try {
   // Try CommonJS require first
-  import { createRequire } from 'module';
-  const require = createRequire(import.meta.url);
   const pdfParseModule = require('pdf-parse');
   if (typeof pdfParseModule === 'function') {
     pdfParse = pdfParseModule;

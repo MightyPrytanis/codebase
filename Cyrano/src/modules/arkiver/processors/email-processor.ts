@@ -113,7 +113,7 @@ export class EmailProcessor {
     const headers: Record<string, string> = {};
     let headerSection = true;
     let currentHeader = '';
-    const bodyLines: string[] = [];
+    let bodyLines: string[] = [];
 
     for (const line of lines) {
       if (headerSection) {
