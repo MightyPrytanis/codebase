@@ -74,6 +74,8 @@ export function escapeCSS(value: string): string {
   return value
     .replace(/[<>]/g, '')
     .replace(/javascript:/gi, '')
+    .replace(/data:/gi, '')
+    .replace(/vbscript:/gi, '')
     .replace(/expression\(/gi, '')
     .replace(/@import/gi, '')
     .replace(/url\(/gi, '');

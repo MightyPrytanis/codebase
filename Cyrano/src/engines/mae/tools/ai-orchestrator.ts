@@ -316,7 +316,6 @@ export const aiOrchestrator = new (class extends BaseTool {
     results.push(...validAnalysis);
 
     // Phase 2: Verification (if we have enough providers)
-    const verificationResults: any[] = [];
     if (providers.length >= 2 && validAnalysis.length > 0) {
       const verificationProvider = providers[providers.length - 1];
       const analysisSummary = validAnalysis.map(r => r.response).join('\n\n');
@@ -331,12 +330,11 @@ export const aiOrchestrator = new (class extends BaseTool {
           maxTokens: parameters?.maxTokens || 4000,
         });
         
-        verificationResults.push({
+        results.push({
           phase: 'verification',
           provider: verificationProvider,
           response: verification,
         });
-        results.push(...verificationResults);
       } catch (error) {
         errors.push({
           phase: 'verification',
@@ -348,6 +346,7 @@ export const aiOrchestrator = new (class extends BaseTool {
 
     // Phase 3: Synthesis
     const synthesisProvider = providers[0];
+    const verificationResults = results.filter(r => r.phase === 'verification');
     const allInputs = [
       ...validAnalysis.map(r => r.response),
       ...verificationResults.map(r => r.response),
@@ -405,9 +404,8 @@ export const aiOrchestrator = new (class extends BaseTool {
       'deepseek': 'You are DeepSeek, an expert AI assistant specializing in comprehensive legal analysis.',
     };
     
-    const basePrompt = prompts[provider] || 'You are an expert AI assistant.';
     // Ten Rules will be injected at call site
-    return basePrompt;
+    return prompts[provider] || 'You are an expert AI assistant.';
   }
 
   /**
