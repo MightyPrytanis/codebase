@@ -207,7 +207,6 @@ try {
   return this.createErrorResult(
     `Operation failed: ${error instanceof Error ? error.message : String(error)}`
   );
-}
 ```
 
 ### Response Format (Success)

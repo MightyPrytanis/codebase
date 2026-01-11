@@ -494,3 +494,6 @@ export class RAGService {
     this.vectorStore.clear();
   }
 }
+
+}
+}

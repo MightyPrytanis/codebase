@@ -48,7 +48,7 @@ const Menubar = React.forwardRef<
     )}
     {...props}
   />
-))
+)
 Menubar.displayName = MenubarPrimitive.Root.displayName
 
 const MenubarTrigger = React.forwardRef<
@@ -254,3 +254,8 @@ export {
   MenubarSub,
   MenubarShortcut,
 }
+
+}
+)
+}
+)

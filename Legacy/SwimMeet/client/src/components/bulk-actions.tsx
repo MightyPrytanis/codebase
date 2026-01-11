@@ -37,3 +37,5 @@ export function BulkActions({ selectedResponses, onBulkAction }: BulkActionsProp
     </div>
   );
 }
+}
+)

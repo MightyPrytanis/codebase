@@ -256,6 +256,7 @@ All retrieved information includes source attribution for transparency and verif
             notice: `Document ingested from source: ${document.source || document.sourceType || 'unknown'}. ` +
                    `This document will be available for retrieval in RAG queries.`,
           }, null, 2));
+        }
 
         case 'ingest_batch': {
           if (!documents || documents.length === 0) {
@@ -356,3 +357,12 @@ All retrieved information includes source attribution for transparency and verif
     }
   }
 })();
+
+)
+}
+}
+}
+}
+}
+}
+)

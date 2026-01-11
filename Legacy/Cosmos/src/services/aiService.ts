@@ -66,7 +66,7 @@ Contact: ${partner.contact.primaryContact} (${partner.contact.preferredContactMe
         response_format: { type: "json_object" },
         temperature: 0.7,
         max_tokens: 1000
-      });
+      };
 
       const aiResponse = completion.choices[0]?.message?.content;
       if (!aiResponse) {
@@ -75,11 +75,10 @@ Contact: ${partner.contact.primaryContact} (${partner.contact.preferredContactMe
 
       const parsedResponse = JSON.parse(aiResponse);
       return this.structureRecommendations(parsedResponse, partner);
-    } catch (error) {
+     catch (error) {
       console.error('AI service error:', error);
       return this.generateFallbackRecommendations(partner);
     }
-  }
 
   private structureRecommendations(aiResponse: any, partner: Partner): NextActionRecommendation[] {
     const recommendations: NextActionRecommendation[] = [];
@@ -199,4 +198,13 @@ Contact: ${partner.contact.primaryContact} (${partner.contact.preferredContactMe
 
     return recommendations;
   }
+}
+
+}
+}
+)
+}
+}
+}
+)
 }

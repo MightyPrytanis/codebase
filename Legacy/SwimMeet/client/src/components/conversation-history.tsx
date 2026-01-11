@@ -138,3 +138,15 @@ export default function ConversationHistory({ onOpenConversation }: Conversation
     </Card>
   );
 }
+
+}
+}
+)
+}
+)
+}
+)
+)
+}
+}
+}

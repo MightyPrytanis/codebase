@@ -67,7 +67,7 @@ export function Logo({ size = 'md', variant = 'full', className = '' }: LogoProp
         rx="1"
       />
       
-      {/* Base/screw threads - simplified bold lines */}
+      {/* Base/screw threads - simplified bold lines */
       <rect 
         x="42" 
         y="67" 
@@ -93,7 +93,7 @@ export function Logo({ size = 'md', variant = 'full', className = '' }: LogoProp
         rx="2"
       />
     </svg>
-  );
+  ;
 
   if (variant === 'icon') {
     return (
@@ -129,3 +129,6 @@ export function Logo({ size = 'md', variant = 'full', className = '' }: LogoProp
 export const LexFiatIcon = () => <Logo variant="icon" />;
 export const LexFiatWordmark = () => <Logo variant="wordmark" />;
 export const LexFiatFull = () => <Logo variant="full" />;
+}
+}
+)

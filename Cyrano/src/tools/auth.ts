@@ -132,3 +132,11 @@ export const authTool = new (class extends BaseTool {
     return this.createSuccessResult('Logged out successfully');
   }
 })();
+)
+}
+}
+}
+}
+}
+}
+}

@@ -141,7 +141,7 @@ export async function analyzeClioDocument(
         return { result };
       }
     );
-  } catch (error) {
+   catch (error) {
     return {
       result: {} as DocumentAnalysisResult,
       error: `Document analysis error: ${error instanceof Error ? error.message : String(error)}`
@@ -230,4 +230,10 @@ export async function batchAnalyzeClioDocuments(
   }
 
   return { results, errors };
+}
+
+}
+}
+)
+}
 }

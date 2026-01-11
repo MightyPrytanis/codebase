@@ -15,7 +15,6 @@ export class MAEExpertiseSelector {
     let best: { engine: BaseEngine; score: number } | null = null;
     for (const engine of engines) {
       const info = engine.getEngineInfo();
-      // @ts-expect-error expertiseContext optional on config
       const ctx = (engine as any).config?.expertiseContext || {};
       const score = this.score(ctx, task);
       if (!best || score > best.score) {

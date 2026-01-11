@@ -306,3 +306,7 @@ When reporting issues, include:
 ---
 
 **Installation Complete!** Your Cosmos MCP server should now be running and ready to provide AI-powered mortgage partner management recommendations.
+)
+)
+)
+)

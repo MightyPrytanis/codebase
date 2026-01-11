@@ -492,3 +492,8 @@ Be specific, practical, and focused on improving legal practice effectiveness wh
     return tasks;
   }
 });
+
+)
+}
+}
+}

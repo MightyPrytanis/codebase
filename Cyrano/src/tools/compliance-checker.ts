@@ -283,5 +283,14 @@ export const complianceChecker = new (class extends BaseTool {
     return !document.toLowerCase().includes('accessibility') && 
            !document.toLowerCase().includes('ada');
   }
-})();
+}();
 
+
+)
+}
+}
+}
+}
+}
+}
+}

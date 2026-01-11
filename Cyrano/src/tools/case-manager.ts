@@ -305,3 +305,22 @@ export const caseManager = new (class extends BaseTool {
   }
 })();
 
+
+)
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}

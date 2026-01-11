@@ -65,8 +65,8 @@ function planWorkflowStepsImproved(query: string, aiProviders: string[], attache
       assignedAI: aiProviders[0],
       objective: `Complete analysis and solution development for: ${query.substring(0, 100)}`,
       hasAttachments: attachedFiles.length > 0
-    });
-  } else if (totalProviders === 2) {
+    };
+   else if (totalProviders === 2) {
     // Two AI workflow
     steps.push(
       { assignedAI: aiProviders[0], objective: "Initial analysis and framework development", hasAttachments: attachedFiles.length > 0 },
@@ -105,7 +105,6 @@ function planWorkflowStepsImproved(query: string, aiProviders: string[], attache
   });
   
   return steps;
-}
 
 async function initiateWorkflowStep(conversationId: string, workflowState: any, aiService: AIService) {
   const currentStepData = workflowState.stepHistory[workflowState.currentStep - 1];
@@ -159,7 +158,6 @@ Please provide your contribution that builds upon any previous work and can be h
 
   // Process AI request asynchronously
   processWorkflowStep(currentStepData.assignedAI, workPrompt, response.id, conversationId, workflowState);
-}
 
 function buildContextSummary(workflowState: any): string {
   const completedSteps = workflowState.stepHistory.filter((step: any) => step.output);
@@ -3121,4 +3119,76 @@ async function processWorkflowStepEnhanced(conversationId: string, workflowState
     await storageInstance.updateResponseContent(response.id, `Error: ${error}`, "error");
     return null;
   }
+}
+
+}
+}
+)
+}
+}
+}
+}
+}
+)
+}
+)
+)
+}
+}
+)
+)
+}
+}
+}
+)
+)
+}
+)
+}
+}
+)
+}
+}
+}
+)
+}
+)
+}
+)
+}
+}
+}
+)
+}
+}
+}
+}
+}
+)
+}
+)
+)
+}
+}
+)
+)
+}
+}
+}
+)
+)
+}
+)
+}
+}
+)
+}
+}
+}
+)
+}
+)
+}
+)
+}
 }

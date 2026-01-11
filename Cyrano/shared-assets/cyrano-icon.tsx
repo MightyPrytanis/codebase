@@ -142,3 +142,14 @@ export function CyranoIcon({
     </svg>
   );
 }
+
+}
+}
+}
+)
+)
+}
+}
+}
+)
+)

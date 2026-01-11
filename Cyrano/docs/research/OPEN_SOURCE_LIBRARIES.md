@@ -113,8 +113,7 @@ for (let i = 1; i <= pdf.numPages; i++) {
   const page = await pdf.getPage(i);
   const textContent = await page.getTextContent();
   const text = textContent.items.map(item => item.str).join(' ');
-  console.log(`Page ${i}:`, text);
-}
+  console.log(`Page ${i}:`, text;
 ```
 
 **Integration Notes:**

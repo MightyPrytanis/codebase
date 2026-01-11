@@ -365,3 +365,11 @@ switch (command) {
     console.log('\nExample: tsx scripts/agent-coordinator.ts init');
 }
 
+
+}
+}
+)
+}
+}
+)
+)

@@ -428,3 +428,30 @@ export class CloudStorageService implements ICloudStorageService {
 }
 
 export const cloudStorageService = new CloudStorageService();
+}
+}
+)
+}
+}
+}
+)
+}
+}
+}
+}
+)
+}
+}
+}
+}
+}
+)
+}
+}
+}
+}
+}
+}
+}
+}
+}

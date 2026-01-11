@@ -189,3 +189,4 @@ export class APIValidator {
 }
 
 export const apiValidator = APIValidator.getInstance();
+}

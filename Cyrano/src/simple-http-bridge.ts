@@ -119,3 +119,7 @@ app.listen(port, () => {
   console.log(`  POST /mcp/execute - Execute a tool`);
   console.log(`  GET  /mcp/status - Server status`);
 });
+
+)
+)
+}

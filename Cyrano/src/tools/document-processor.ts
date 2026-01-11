@@ -751,3 +751,18 @@ export const documentProcessor: BaseTool = new (class extends BaseTool {
   }
 })();
 
+
+)
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}

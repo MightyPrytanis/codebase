@@ -325,8 +325,26 @@ export class ArkiverIntegrityTestTool extends BaseTool {
         `Integrity test failed: ${error instanceof Error ? error.message : String(error)}`
       );
     }
-  }
-}
-
 export const arkiverIntegrityTestTool = new ArkiverIntegrityTestTool();
 
+
+}
+}
+}
+}
+)
+}
+}
+)
+}
+)
+}
+)
+}
+)
+)
+}
+)
+}
+}
+)

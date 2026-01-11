@@ -255,3 +255,10 @@ Return your analysis as a JSON object with the following structure:
 // Export singleton instance
 export const driftCalculator = new DriftCalculator();
 
+
+}
+}
+}
+}
+}
+}

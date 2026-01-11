@@ -624,3 +624,11 @@ Return JSON:
  * Export singleton instance
  */
 export const moralReasoningService = new MoralReasoningService();
+
+}
+}
+}
+}
+}
+}
+}
