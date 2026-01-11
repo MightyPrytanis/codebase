@@ -346,6 +346,7 @@ export const aiOrchestrator = new (class extends BaseTool {
 
     // Phase 3: Synthesis
     const synthesisProvider = providers[0];
+    const verificationResults = results.filter(r => r.phase === 'verification');
     const allInputs = [
       ...validAnalysis.map(r => r.response),
       ...verificationResults.map(r => r.response),
