@@ -186,7 +186,6 @@ export function ProcessingHistory({ result, fileId, jobId }: ProcessingHistoryPr
       </div>
     </div>
   );
-}
 
 const confidenceColors = {
   low: 'bg-yellow-100 text-yellow-800 border-yellow-300',

@@ -123,8 +123,9 @@ export async function calculateDeadlines(
         const deadlines: DeadlineCalculation[] = [];
 
         for (const event of events) {
-          if (event.end?.dateTime || event.end?.date) {
-            const endDate = new Date(event.end.dateTime || event.end.date);
+          const endDateTime = event.end?.dateTime || event.end?.date;
+          if (endDateTime) {
+            const endDate = new Date(endDateTime);
             const now = new Date();
             const daysRemaining = Math.ceil((endDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
@@ -134,7 +135,6 @@ export async function calculateDeadlines(
             requireAttorneyVerification(
               workProductId,
               'other',
-              false, // Not AI-generated, but requires verification
               JSON.stringify({ event, deadline: endDate.toISOString(), daysRemaining })
             );
 
@@ -210,3 +210,15 @@ export async function syncEventsWithClio(
     };
   }
 }
+
+}
+}
+}
+)
+)
+}
+)
+}
+}
+}
+)

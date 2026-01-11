@@ -12,6 +12,9 @@
  * See LICENSE.md for full license text
  */
 
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+
 // Import pdf-parse - handle both CommonJS and ESM
 // Use dynamic require to avoid issues in test environments
 import { createRequire } from 'module';
@@ -259,3 +262,6 @@ export class PDFExtractor {
  * Default instance
  */
 export const pdfExtractor = new PDFExtractor();
+
+}
+}

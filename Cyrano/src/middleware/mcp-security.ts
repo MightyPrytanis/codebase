@@ -23,7 +23,7 @@ import { logSecurityEvent } from '../services/audit-logger.js';
 export interface MCPTokenPayload {
   aud: string; // Audience (must match server identifier)
   sub: string; // Subject (user ID)
-  scope: string[]; // Scopes granted
+  scope: string[] | string; // Scopes granted
   exp: number; // Expiration
   iat: number; // Issued at
   [key: string]: any;
@@ -253,3 +253,16 @@ export function logScopeElevation(
     { fromScopes, toScopes, reason }
   );
 }
+
+}
+}
+}
+}
+}
+)
+}
+}
+}
+}
+}
+)

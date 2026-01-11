@@ -1,4 +1,4 @@
-const express = require('express');
+import express from 'express';
 const app = express();
 
 // Add health check endpoint
@@ -61,4 +61,4 @@ app.get('/health/detailed', async (req, res) => {
   }
 });
 
-module.exports = app;
+export default app;

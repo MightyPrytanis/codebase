@@ -138,7 +138,6 @@ async execute(args: any) {
   } catch (error) {
     return this.createErrorResult(`Analysis failed: ${error.message}`);
   }
-}
 ```
 
 ### 3. Environment Configuration
@@ -331,3 +330,5 @@ This project is licensed under the Apache License 2.0 – see the LICENSE file f
 ---
 
 **Remember**: This is currently a mock system. Implement real AI integrations before using in production!
+)
+)

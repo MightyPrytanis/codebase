@@ -452,9 +452,9 @@ Format the response as JSON with a "red_flags" array containing objects with: de
 
   public extractCaseId(content: string): string | null {
     const caseIdPatterns = [
-      /case\s+(?:no\.?|number)[:\s]+([a-zA-Z0-9\-]+)/i,
-      /docket\s+(?:no\.?|number)[:\s]+([a-zA-Z0-9\-]+)/i,
-      /file\s+(?:no\.?|number)[:\s]+([a-zA-Z0-9\-]+)/i,
+      /case\s+(?:no\.?|number)[:\s]+([a-zA-Z0-9-]+)/i,
+      /docket\s+(?:no\.?|number)[:\s]+([a-zA-Z0-9-]+)/i,
+      /file\s+(?:no\.?|number)[:\s]+([a-zA-Z0-9-]+)/i,
     ];
 
     for (const pattern of caseIdPatterns) {
@@ -487,3 +487,13 @@ Format the response as JSON with a "red_flags" array containing objects with: de
 
 
 
+
+)
+}
+}
+}
+}
+}
+}
+}
+}

@@ -133,3 +133,6 @@ if ('totalCitations' in docResult) {
 
 console.log('\n' + '='.repeat(80));
 
+
+}
+)

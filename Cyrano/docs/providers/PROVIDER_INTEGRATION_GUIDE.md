@@ -191,7 +191,6 @@ export class XaiProvider extends BaseProvider {
   constructor() {
     super('xai');
     this.baseUrl = process.env.XAI_BASE_URL || 'https://api.x.ai/v1';
-  }
   
   async chat(messages: Message[], options?: ChatOptions): Promise<ChatResponse> {
     try {
@@ -240,7 +239,6 @@ export class XaiProvider extends BaseProvider {
     }
     throw new ProviderError(`xAI error: ${error.message}`);
   }
-}
 ```
 
 ### Rate Limits

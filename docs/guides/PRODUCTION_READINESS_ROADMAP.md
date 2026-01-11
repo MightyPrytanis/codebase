@@ -336,7 +336,7 @@ Based on the current test infrastructure implementation and codebase analysis, h
 ### DNS & SSL
 - [ ] Domain name registered
 - [ ] DNS configured (Route53, CloudFlare)
-- [ ] SSL certificates (Let's Encrypt or purchased)
+- [ ] SSL certificates (Let's Encrypt or purchased
 - [ ] CDN setup (CloudFront, CloudFlare)
 
 **Deliverable:** Production environment live, deployment pipeline operational

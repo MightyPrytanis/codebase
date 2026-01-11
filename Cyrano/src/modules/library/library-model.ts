@@ -75,6 +75,13 @@ export interface PracticeProfile {
       completed?: boolean;
       currentStep?: number;
       completedSteps?: number[];
+      appId?: string;
+      formData?: Record<string, any>;
+      lastSaved?: string;
+    };
+    arkiver?: {
+      config?: Record<string, any>;
+      configuredAt?: string;
     };
     email?: {
       enabled?: boolean;

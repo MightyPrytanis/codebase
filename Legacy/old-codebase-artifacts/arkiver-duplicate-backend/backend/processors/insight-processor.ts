@@ -612,3 +612,13 @@ export class InsightProcessor {
 }
 
 export const insightProcessor = new InsightProcessor();
+
+}
+}
+}
+}
+}
+}
+}
+}
+}

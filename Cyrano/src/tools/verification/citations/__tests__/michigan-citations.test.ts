@@ -1,3 +1,4 @@
+/* eslint-disable */
 /**
  * Michigan Citation Tests
  * Tests validator against Michigan Appellate Opinion Manual rules
@@ -168,3 +169,5 @@ export const testMichiganCitations = async () => {
     console.log('---\n');
   }
 };
+
+}

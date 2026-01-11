@@ -210,8 +210,10 @@ export const caseManager = new (class extends BaseTool {
           email_provider: 'both',
         });
 
-        if (!artifactResult.isError && artifactResult.content?.[0]?.text) {
-          const artifactData = JSON.parse(artifactResult.content[0].text);
+        const firstContent = artifactResult.content?.[0];
+        const isText = firstContent && firstContent.type === 'text' && 'text' in firstContent;
+        if (!artifactResult.isError && isText) {
+          const artifactData = JSON.parse(firstContent.text);
           if (artifactData.emails && Array.isArray(artifactData.emails)) {
             mifileConfirmations = artifactData.emails.filter((e: any) => e.mifile_confirmation === true);
           }
@@ -303,3 +305,22 @@ export const caseManager = new (class extends BaseTool {
   }
 })();
 
+
+)
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}
+}

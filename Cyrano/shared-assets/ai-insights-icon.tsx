@@ -49,5 +49,6 @@ export function AIInsightsIcon({
       </div>
     </div>
   );
-}
 
+
+}

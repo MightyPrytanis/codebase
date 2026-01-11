@@ -71,7 +71,7 @@ export class MCRComplianceService {
     const recommendations: string[] = [];
 
     // Check for required caption (case name and number)
-    const hasCaseNumber = metadata?.caseNumber || /Case No\.?\s*[:\-]?\s*[\d\-]+/i.test(document);
+    const hasCaseNumber = metadata?.caseNumber || /Case No\.?\s*[:-]?\s*[\d-]+/i.test(document);
     const hasCaseName = /IN RE|v\.|vs\.|versus/i.test(document) || metadata?.caseNumber;
 
     if (!hasCaseNumber && !hasCaseName) {
@@ -140,7 +140,7 @@ export class MCRComplianceService {
         rule: 'MCR 1.109',
         description: 'E-filing requires PDF format',
         severity: 'critical',
-        field: 'format',
+        location: { field: 'format' },
         fix: 'Convert document to PDF format before e-filing',
       });
     }
@@ -151,7 +151,7 @@ export class MCRComplianceService {
         rule: 'MCR 1.109',
         description: 'Case number required for e-filing',
         severity: 'critical',
-        field: 'caseNumber',
+        location: { field: 'caseNumber' },
         fix: 'Provide case number in document metadata',
       });
     }
@@ -380,3 +380,5 @@ export class MCRComplianceService {
 
 // Export singleton instance
 export const mcrComplianceService = new MCRComplianceService();
+
+}

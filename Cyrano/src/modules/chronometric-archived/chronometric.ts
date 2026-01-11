@@ -525,7 +525,11 @@ export class ChronometricModule extends BaseModule {
   async cleanup(): Promise<void> {
     // Cleanup any resources, connections, etc.
   }
-}
 
 // Export singleton instance
 export const chronometricModule = new ChronometricModule();
+
+}
+}
+}
+}

@@ -109,3 +109,4 @@ export class LocalFileStorage {
 }
 
 export const localStorage = new LocalFileStorage();
+}

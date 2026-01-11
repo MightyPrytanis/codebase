@@ -12,7 +12,7 @@ import { skillRegistry } from '../skills/skill-registry.js';
 const BetaTestSupportSchema = z.object({
   action: z.enum(['registration', 'onboarding', 'installation', 'evaluation', 'feedback', 'walkthrough', 'troubleshooting']).describe('Type of beta test support needed'),
   user_query: z.string().describe('User\'s question or issue description'),
-  context: z.record(z.any()).optional().describe('Additional context (invitation_token, user_id, step, error_message, feedback_type, etc.)'),
+  context: z.record(z.string(), z.any()).optional().describe('Additional context (invitation_token, user_id, step, error_message, feedback_type, etc.)'),
 });
 
 export const betaTestSupport = new (class extends BaseTool {
@@ -58,9 +58,16 @@ export const betaTestSupport = new (class extends BaseTool {
       const skill = skillRegistry.get('beta-test-support');
       if (skill) {
         try {
-          const skillResult = await skill.skill.execute({
-            action,
-            user_query,
+          // Skills are executed through SkillDispatcher, not directly
+          const { SkillDispatcher } = await import('../skills/skill-dispatcher.js');
+          const dispatcher = new SkillDispatcher();
+          const skillResult = await dispatcher.execute(skill, {
+            skillId: 'beta-test-support',
+            input: {
+              action,
+              user_query,
+              ...context,
+            },
             context,
           });
           
@@ -156,3 +163,11 @@ export const betaTestSupport = new (class extends BaseTool {
     return prompt;
   }
 })();
+
+)
+}
+}
+}
+}
+}
+}

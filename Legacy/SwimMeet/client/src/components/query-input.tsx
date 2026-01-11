@@ -218,3 +218,9 @@ export default function QueryInput({ onSubmit, selectedAIs, onSelectionChange, i
     </div>
   );
 }
+
+}
+)
+}
+)
+}

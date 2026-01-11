@@ -281,3 +281,6 @@ export function PerformanceOverlay({ isVisible, onClose }: PerformanceOverlayPro
     </div>
   );
 }
+}
+}
+}

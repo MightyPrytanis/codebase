@@ -267,7 +267,7 @@ Task: [Task Name]
 Priority: [HIGH/MEDIUM/LOW]
 Estimated Time: [Time estimate]
 Prerequisite: [What is needed]
-Why: [Why it's needed]
+Why: [Why it's needed
 Instructions: [Step-by-step instructions]
 
 While waiting for this action, I will continue with [independent work].

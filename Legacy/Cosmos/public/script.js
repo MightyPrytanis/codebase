@@ -352,3 +352,7 @@ window.CosmosApp = {
     showTutorial,
     callMCPTool
 };
+}
+)
+}
+)

@@ -67,12 +67,9 @@ function handleResponse(data) {
         console.log('\n✨ Test completed successfully!');
         console.log('The contract-comparator tool is working correctly.');
       }
-    } catch (e) {
+     catch (e) {
       console.log('Raw response:', response);
     }
-  }
-}
-
 mcpProcess.stdout.on('data', handleResponse);
 mcpProcess.stderr.on('data', (data) => {
   console.error('❌ MCP Error:', data.toString());

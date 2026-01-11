@@ -81,18 +81,21 @@ export const workflowManager = new (class extends BaseTool {
       const { action, workflow_type, case_id, documents, parameters, custom_stages } = WorkflowManagerSchema.parse(args);
       
       switch (action) {
-        case 'customize':
+        case 'customize': {
           const customized = this.customizeWorkflow(workflow_type || 'custom', custom_stages);
           return this.createSuccessResult(JSON.stringify(customized, null, 2));
+        }
         
-        case 'get_config':
+        case 'get_config': {
           const config = this.getWorkflowConfig(workflow_type || 'custom');
           return this.createSuccessResult(JSON.stringify(config, null, 2));
+        }
         
         case 'execute':
-        default:
+        default: {
           const workflow = this.executeWorkflow(workflow_type || 'custom', case_id, documents, parameters);
           return this.createSuccessResult(JSON.stringify(workflow, null, 2));
+        }
       }
     } catch (error) {
       return this.createErrorResult(`Workflow management failed: ${error instanceof Error ? error.message : String(error)}`);
@@ -298,3 +301,7 @@ export const workflowManager = new (class extends BaseTool {
   }
 })();
 
+
+)
+}
+}

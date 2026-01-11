@@ -337,3 +337,10 @@ export default function DocumentAnalyzer({ isOpen, onClose, documentText = "" }:
   );
 }
 
+
+}
+)
+)
+}
+)
+)

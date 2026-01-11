@@ -150,7 +150,7 @@ All retrieved information includes source attribution for transparency and verif
       const userAgent = (args as any).userAgent || (args as any).user_agent;
 
       switch (action) {
-        case 'query':
+        case 'query': {
           if (!query) {
             return this.createErrorResult('Query string is required for query action');
           }
@@ -216,8 +216,9 @@ All retrieved information includes source attribution for transparency and verif
           };
           
           return this.createSuccessResult(JSON.stringify(finalResult, null, 2));
+        }
 
-        case 'ingest':
+        case 'ingest': {
           if (!document) {
             return this.createErrorResult('Document is required for ingest action');
           }
@@ -255,8 +256,9 @@ All retrieved information includes source attribution for transparency and verif
             notice: `Document ingested from source: ${document.source || document.sourceType || 'unknown'}. ` +
                    `This document will be available for retrieval in RAG queries.`,
           }, null, 2));
+        }
 
-        case 'ingest_batch':
+        case 'ingest_batch': {
           if (!documents || documents.length === 0) {
             return this.createErrorResult('Documents array is required for ingest_batch action and must not be empty');
           }
@@ -318,8 +320,9 @@ All retrieved information includes source attribution for transparency and verif
                    `${failed > 0 ? `${failed} documents failed. ` : ''}` +
                    `All successful documents are now available for retrieval in RAG queries.`,
           }, null, 2));
+        }
 
-        case 'get_context':
+        case 'get_context': {
           if (!query) {
             return this.createErrorResult('Query string is required for get_context action');
           }
@@ -336,13 +339,15 @@ All retrieved information includes source attribution for transparency and verif
             dataSources: contextResult.dataSources,
             sourceNotice: contextResult.sourceNotice,
           }, null, 2));
+        }
 
-        case 'get_stats':
+        case 'get_stats': {
           const stats = this.ragService.getStats();
           return this.createSuccessResult(JSON.stringify({
             ...stats,
             notice: `RAG system contains ${stats.documentCount} documents from ${stats.dataSources.length} data sources: ${stats.dataSources.join(', ')}.`,
           }, null, 2));
+        }
 
         default:
           return this.createErrorResult(`Unknown action: ${action}`);
@@ -352,3 +357,12 @@ All retrieved information includes source attribution for transparency and verif
     }
   }
 })();
+
+)
+}
+}
+}
+}
+}
+}
+)

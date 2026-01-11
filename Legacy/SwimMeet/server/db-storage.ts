@@ -232,3 +232,6 @@ export class DatabaseStorage implements IStorage {
     // Implementation would delete file attachment from database
   }
 }
+}
+}
+)

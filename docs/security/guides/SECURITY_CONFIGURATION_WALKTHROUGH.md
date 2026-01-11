@@ -461,7 +461,7 @@ After completing this walkthrough:
 ## Additional Resources
 
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/) - Common security vulnerabilities
-- [Let's Encrypt Documentation](https://letsencrypt.org/docs/) - Free SSL certificates
+- [Let's Encrypt Documentation(https://letsencrypt.org/docs/) - Free SSL certificates
 - [Express Security Best Practices](https://expressjs.com/en/advanced/best-practice-security.html)
 - [Node.js Security Checklist](https://blog.risingstack.com/node-js-security-checklist/)
 
@@ -472,3 +472,7 @@ After completing this walkthrough:
 **Status:** Active
 
 
+
+)
+)
+)

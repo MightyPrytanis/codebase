@@ -216,3 +216,6 @@ export default function Header({ attorney, onAdminClick, onSettingsClick, onProf
     </div>
   );
 }
+
+}
+)

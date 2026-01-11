@@ -12,7 +12,7 @@ import { custodianEngine } from '../custodian-engine.js';
 
 const CustodianAlertAdminSchema = z.object({
   target: z.string().describe('Alert title or subject'),
-  options: z.record(z.any()).optional().describe('Alert options (level, message, requires_intervention)'),
+  options: z.record(z.string(), z.any()).optional().describe('Alert options (level, message, requires_intervention)'),
 });
 
 export const custodianAlertAdminTool = new (class extends BaseTool {
@@ -69,3 +69,6 @@ export const custodianAlertAdminTool = new (class extends BaseTool {
     }
   }
 })();
+
+)
+}

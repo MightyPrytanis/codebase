@@ -161,11 +161,10 @@ const conversations = await extractor.extract('path/to/conversations.json', {
 
 // Access extracted data
 for (const conv of conversations) {
-  console.log(`Title: ${conv.title}`);
+  console.log(`Title: ${conv.title}`;
   console.log(`Messages: ${conv.messages.length}`);
   console.log(`Source LLM: ${conv.sourceLLM}`);
   console.log(`Full Text: ${conv.fullText}`);
-}
 ```
 
 ### Text/Markdown Extraction

@@ -58,7 +58,6 @@ export async function executeTool(
         isError: true,
         _serviceUnavailable: true,
       };
-    }
 
     const result = await response.json();
     return result;
@@ -91,7 +90,6 @@ export async function executeTool(
     };
   }
 }
-
 /**
  * Get workflow data from workflow_manager
  */
@@ -254,3 +252,7 @@ export async function checkApiHealth(): Promise<boolean> {
   }
 }
 
+
+}
+}
+)

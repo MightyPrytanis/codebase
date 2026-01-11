@@ -548,7 +548,7 @@ router.post('/feedback', authenticateJWT, async (req: Request, res: Response) =>
   } catch (error) {
     res.status(400).json({ error: 'Feedback submission failed' });
   }
-});
+;
 
 // Get installation guide
 router.get('/install-guide', async (req: Request, res: Response) => {

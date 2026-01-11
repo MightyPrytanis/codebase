@@ -72,7 +72,7 @@ export class TextProcessor {
   private normalizeText(text: string): string {
     let normalized = text;
     // Normalize line endings
-    normalized = normalized.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    let normalized = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
     
     // Preserve paragraph breaks (double newlines)
     normalized = normalized.replace(/\n{3,}/g, '\n\n');
@@ -159,7 +159,7 @@ export class TextProcessor {
       // Underlined headings
       if (i < lines.length - 1) {
         const nextLine = lines[i + 1].trim();
-        if (nextLine.match(/^[=\-]{3,}$/)) {
+        if (nextLine.match(/^(=|-){3,}$/)) {
           headings.push(line);
           continue;
         }
@@ -198,9 +198,9 @@ export class TextProcessor {
       // Detect section type
       if (trimmed.match(/^#{1,6}\s+/)) {
         type = 'heading';
-      } else if (trimmed.match(/^[\*\-\+]\s+/) || trimmed.match(/^\d+\.\s+/)) {
+      } else if (trimmed.match(/^[*+-]\s+/) || trimmed.match(/^\d+\.\s+/)) {
         type = 'list';
-      } else if (trimmed.match(/^```/) || trimmed.match(/^    /)) {
+      } else if (trimmed.match(/^```/) || trimmed.match(/^ {4}/)) {
         type = 'code';
       } else if (trimmed.match(/^>/)) {
         type = 'quote';
@@ -224,7 +224,7 @@ export class TextProcessor {
       /\*[^*]+\*/,             // Italic
       /`[^`]+`/,               // Code
       /\[[^\]]+\]\([^)]+\)/,   // Links
-      /^[\*\-\+]\s+/m,         // Lists
+      /^[*+-]\s+/m,            // Lists
       /^\d+\.\s+/m,            // Numbered lists
     ];
     
@@ -265,3 +265,53 @@ export class TextProcessor {
 }
 
 export const textProcessor = new TextProcessor();
+
+}
+}
+}
+)
+}
+}
+]
+}
+}
+}
+)
+}
+}
+]
+}
+}
+}
+)
+}
+}
+]
+}
+}
+}
+)
+}
+}
+]
+}
+}
+}
+)
+}
+}
+]
+}
+}
+}
+)
+}
+}
+]
+}
+}
+}
+)
+}
+}
+]

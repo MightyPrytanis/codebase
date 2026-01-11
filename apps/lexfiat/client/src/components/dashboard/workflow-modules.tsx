@@ -208,3 +208,16 @@ export default function WorkflowModules({ dashboardStats, isLoading }: WorkflowM
     </div>
   );
 }
+
+}
+]
+}
+}
+)
+}
+)
+}
+)
+}
+)
+}

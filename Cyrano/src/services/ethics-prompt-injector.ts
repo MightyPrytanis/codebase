@@ -135,4 +135,3 @@ export function getContextualRules(context: 'legal' | 'wellness' | 'verification
   };
 
   return baseRules + contextualAdditions[context];
-}

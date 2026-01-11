@@ -121,3 +121,6 @@ export const chronometricModuleTool = new (class extends BaseTool {
     }
   }
 })();
+
+)
+}

@@ -56,7 +56,7 @@ The "realistic" plan (likely the first one actually used) underestimated complex
 
 1. **It consolidates everything**—All valuable ideas from previous plans are integrated here. Security fixes (done) are preserved. Modularization (pending) is included. EthicalAI (pending) is included. Chronometric enhancements (pending) are included. Nothing is lost.
 2. **It's execution-ready**—Every task has explicit GitHub Copilot instructions. No ambiguity. The plan can be handed to Copilot and executed without further interpretation.
-3. **It acknowledges reality**—No time estimates (they've been consistently wrong). No false assumptions about "realistic" scope. Just clear tasks with clear dependencies.
+3. **It acknowledges reality**—No time estimates (they've been consistently wrong. No false assumptions about "realistic" scope. Just clear tasks with clear dependencies.
 4. **It enforces discipline**—The "0 net increase in documentation" rule prevents sprawl. The "Sleep When You're Dead" rule prevents process overhead.
 5. **It's comprehensive but modular**—Eight priorities that can work in parallel where possible, with clear critical paths where they can't.
 6. **It includes Workflow Archaeology**—Acknowledging that sometimes we need to reconstruct what happened, not just plan what will happen. (Indeed, this very section is an exercise in workflow archaeology: reconstructing the history of previous plans when the details have been forgotten.)
@@ -203,7 +203,7 @@ This section defines mandatory ongoing maintenance tasks and agent coordination 
 Task: [Task Name]
 Priority: [HIGH/MEDIUM/LOW]
 Estimated Time: [Time estimate]
-Why: [Why it's needed]
+Why: [Why it's needed
 Instructions: [Step-by-step instructions]
 Documentation: [Link to relevant doc]
 

@@ -128,7 +128,6 @@ export class DocumentDrafterTool extends BaseTool {
           };
         }
         provider = validated.aiProvider as AIProvider;
-      }
       
       // Use AI to generate document content
       const aiService = new AIService();
@@ -172,11 +171,21 @@ export class DocumentDrafterTool extends BaseTool {
       const documentContent = aiResponse;
       
       // MCR Compliance Validation before finalization
+      // Map documentType to filingType (letter/contract map to other)
+      const filingTypeMap: Record<string, DocumentMetadata['filingType']> = {
+        motion: 'motion',
+        brief: 'brief',
+        pleading: 'pleading',
+        order: 'order',
+        letter: 'other',
+        contract: 'other',
+      };
+
       const metadata: DocumentMetadata = {
         title: validated.prompt.substring(0, 100),
         caseNumber: validated.caseContext,
         court: validated.jurisdiction ? `${validated.jurisdiction} Court` : undefined,
-        filingType: validated.documentType,
+        filingType: filingTypeMap[validated.documentType] || 'other',
         format: validated.format,
       };
 
@@ -240,8 +249,12 @@ export class DocumentDrafterTool extends BaseTool {
       );
     }
   }
-}
 
 // Export pre-instantiated tool instance (standard pattern)
 export const documentDrafterTool = new DocumentDrafterTool();
 
+
+}
+}
+}
+)

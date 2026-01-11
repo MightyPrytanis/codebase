@@ -384,3 +384,5 @@ For issues or questions:
 - Open an issue in the repository
 - Contact the development team
 - Review the documentation in `docs/`
+
+)
