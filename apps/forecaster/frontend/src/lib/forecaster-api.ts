@@ -17,13 +17,12 @@ export interface TaxForecastRequest {
   otherIncome?: number;
   standardDeduction?: number;
   itemizedDeductions?: number;
-  dependents?: number;
-  credits?: {
-    earnedIncomeCredit?: number;
-    childTaxCredit?: number;
-    educationCredit?: number;
-    otherCredits?: number;
-  };
+  // Credits-related inputs (computed server-side)
+  qualifyingChildrenUnder17?: number;
+  otherDependents?: number;
+  filerAge?: number;
+  spouseAge?: number;
+  canBeClaimedAsDependent?: boolean;
   estimatedWithholding?: number;
 }
 
@@ -49,6 +48,15 @@ export interface QDROForecastRequest {
   divisionPercentage: number;
   participantDOB?: string;
   alternatePayeeDOB?: string;
+}
+
+export interface CityTaxForecastRequest {
+  city: 'lansing' | 'albion';
+  year: 2023 | 2024 | 2025;
+  isResident: boolean;
+  wages: number;
+  otherIncome?: number;
+  withholding?: number;
 }
 
 export interface ForecastResponse {
@@ -134,6 +142,38 @@ export async function generateQDROForecast(
   }
 ): Promise<ForecastResponse> {
   const response = await fetch(`${API_BASE_URL}/api/forecast/qdro`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      forecast_input: input,
+      branding: branding || {
+        presentationMode: 'strip',
+        userRole: 'other',
+        licensedInAny: false,
+        riskAcknowledged: false,
+      },
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return await response.json();
+}
+
+export async function generateCityTaxForecast(
+  input: CityTaxForecastRequest,
+  branding?: {
+    presentationMode?: 'strip' | 'watermark' | 'none';
+    userRole?: 'attorney' | 'staff' | 'client' | 'other';
+    licensedInAny?: boolean;
+    riskAcknowledged?: boolean;
+  }
+): Promise<ForecastResponse> {
+  const response = await fetch(`${API_BASE_URL}/api/forecast/city-tax`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
