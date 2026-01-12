@@ -301,7 +301,6 @@ describe('MCP HTTP Bridge Compliance', () => {
  * For now, these tests can be run manually with: npm run http
  */
 
-
 )
 }
 )

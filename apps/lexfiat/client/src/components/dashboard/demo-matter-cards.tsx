@@ -102,8 +102,6 @@ export function DemoMatterCards({ onMatterClick }: DemoMatterCardsProps) {
 
     </>
   );
-}
-
 
 }
 }
@@ -112,7 +110,3 @@ export function DemoMatterCards({ onMatterClick }: DemoMatterCardsProps) {
 }
 )
 )
-}
-)
-)
-}

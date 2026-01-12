@@ -466,6 +466,10 @@ function main() {
   process.exit(results.length > 0 ? 1 : 0);
 }
 
-if (require.main === module) {
-  main();
+// Execute main function
+main();
+
 }
+)
+}
+)

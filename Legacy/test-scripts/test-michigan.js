@@ -33,8 +33,8 @@ for (const citation of testCases) {
         console.log(`Warnings: ${result.warnings.join('; ')}`);
     }
     console.log('-'.repeat(60));
-}
 
 }
 )
 }
+)

@@ -56,7 +56,5 @@ if (import.meta.url === `file://${process.argv[1]}`) {
       console.error('[Retention Enforcement] Job failed:', error);
       process.exit(1);
     });
-}
 
-)
 )

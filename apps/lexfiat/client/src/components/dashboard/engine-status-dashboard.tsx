@@ -200,7 +200,5 @@ export function EngineStatusDashboard() {
       </Card>
     </div>
   );
-}
 
 }
-)

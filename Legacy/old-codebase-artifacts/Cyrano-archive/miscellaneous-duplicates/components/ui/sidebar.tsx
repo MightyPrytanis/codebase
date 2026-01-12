@@ -768,9 +768,6 @@ export {
   SidebarSeparator,
   SidebarTrigger,
   useSidebar,
-}
 
-)
-)
 )
 )

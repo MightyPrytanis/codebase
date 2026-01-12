@@ -78,10 +78,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     console.error('[Resource Refresh] Fatal error:', err);
     process.exit(1);
   });
-}
-
 
 }
 }
 )
-}

@@ -427,13 +427,10 @@ export default function ResponseGrid({ responses, originalQuery, onFactCheck, on
       </Dialog>
     </div>
   );
-}
 
 }
 )
 }
 )
 )
-}
-}
 }

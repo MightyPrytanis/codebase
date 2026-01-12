@@ -381,7 +381,7 @@ export function generateAuditReport(
     },
     logs
   };
-}
 
+}
 }
 }

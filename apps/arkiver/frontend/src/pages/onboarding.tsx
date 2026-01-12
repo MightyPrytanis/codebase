@@ -719,7 +719,6 @@ export default function Onboarding() {
       </main>
     </div>
   );
-}
 
 }
 }
@@ -735,3 +734,4 @@ export default function Onboarding() {
 }
 }
 )
+}

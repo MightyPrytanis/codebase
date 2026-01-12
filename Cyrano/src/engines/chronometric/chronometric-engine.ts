@@ -351,12 +351,3 @@ export const chronometricEngine = new ChronometricEngine();
 }
 ]
 }
-}
-}
-}
-}
-}
-}
-}
-]
-}

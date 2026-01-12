@@ -513,10 +513,3 @@ export const michiganCitationValidator = new MichiganCitationValidator();
 }
 )
 )
-}
-}
-}
-}
-}
-)
-)

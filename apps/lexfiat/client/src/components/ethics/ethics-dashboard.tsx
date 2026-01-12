@@ -369,10 +369,7 @@ export function EthicsDashboard({ userId = 'default-user' }: EthicsDashboardProp
       </Card>
     </div>
   );
-}
 
 }
 )
-}
-}
 }

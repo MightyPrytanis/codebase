@@ -213,7 +213,6 @@ export async function listChanges(
   lastSyncAt?: Date
 ): Promise<FileChange[]> {
   return localConnector.listChanges({ path, lastSyncAt });
-}
 
 }
 }
@@ -226,3 +225,4 @@ export async function listChanges(
 }
 }
 )
+}

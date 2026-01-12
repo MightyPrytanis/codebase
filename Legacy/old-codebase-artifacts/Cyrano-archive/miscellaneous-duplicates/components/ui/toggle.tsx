@@ -44,5 +44,3 @@ export { Toggle, toggleVariants }
 
 )
 )
-)
-)

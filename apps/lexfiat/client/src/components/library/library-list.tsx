@@ -138,8 +138,5 @@ export function LibraryList({
       ))}
     </div>
   );
-}
 
 }
-}
-)

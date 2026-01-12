@@ -543,10 +543,10 @@ export class MiCourtService {
     if (this.browser) {
       await this.browser.close();
       this.browser = null;
-    }
-  }
-}
 
+}
+}
+}
 }
 }
 }

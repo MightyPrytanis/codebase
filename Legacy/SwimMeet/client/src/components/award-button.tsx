@@ -39,7 +39,8 @@ export function AwardButton({ responseId, awardType, onAward }: AwardButtonProps
       {isAwarded && ' ✓'}
     </button>
   );
-}
+
 }
 )
 }
+)

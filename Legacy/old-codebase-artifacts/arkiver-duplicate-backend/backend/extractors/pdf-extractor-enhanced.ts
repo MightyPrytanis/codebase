@@ -265,10 +265,9 @@ export class EnhancedPDFExtractor extends PDFExtractor {
       const opName = opList.argsArray[op]?.name || '';
       return imageOps.some(imgOp => opName.includes(imgOp));
     });
-  }
+
 }
-
-
+}
 }
 }
 }

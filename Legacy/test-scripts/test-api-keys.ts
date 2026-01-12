@@ -171,7 +171,6 @@ testAllProviders()
     process.exit(1);
   });
 
-
 }
 )
 )

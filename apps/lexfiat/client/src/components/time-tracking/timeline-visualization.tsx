@@ -229,8 +229,7 @@ export function TimelineVisualization({ result, onTimeEntrySuggestion }: Timelin
       </div>
     </div>
   );
-}
-
 
 }
 }
+)

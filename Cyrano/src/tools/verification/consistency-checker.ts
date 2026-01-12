@@ -765,7 +765,6 @@ export const consistencyChecker = new ConsistencyChecker();
  */
 export async function handleConsistencyChecker(params: any): Promise<ConsistencyCheckResult> {
   return await consistencyChecker.checkConsistency(params);
-}
 
 }
 }
@@ -782,4 +781,5 @@ export async function handleConsistencyChecker(params: any): Promise<Consistency
 }
 )
 )
+}
 }

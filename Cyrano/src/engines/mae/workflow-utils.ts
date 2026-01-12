@@ -280,16 +280,7 @@ export function groupStepsByLevel(plan: ExecutionPlan[]): Map<number, string[]> 
   });
   
   return levelMap;
-}
 
-
-}
-)
-}
-)
-}
-}
-)
 }
 )
 }

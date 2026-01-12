@@ -704,5 +704,3 @@ export const wellness = {
 
 }
 }
-}
-}

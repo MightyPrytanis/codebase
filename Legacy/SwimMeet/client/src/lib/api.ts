@@ -74,7 +74,6 @@ export async function testProviderConnection(providerId: string, userId?: string
     userId: userId || 'default-user'
   });
   return response.json();
-}
 
 }
 )
@@ -82,3 +81,4 @@ export async function testProviderConnection(providerId: string, userId?: string
 )
 }
 )
+}

@@ -137,7 +137,6 @@ export function decryptSensitiveFields<T extends Record<string, any>>(data: T): 
   }
   
   return decrypted as T;
-}
 
 }
 )
@@ -147,3 +146,4 @@ export function decryptSensitiveFields<T extends Record<string, any>>(data: T): 
 )
 }
 )
+}

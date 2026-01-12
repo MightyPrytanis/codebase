@@ -63,11 +63,11 @@ export class ClioClient {
     // Clio v4: POST /activities with type=time_entry
     const body = { data: { type: 'TimeEntry', ...entry } };
     return this.request('POST', '/activities', { body });
-  }
-}
 
 }
 }
 )
 }
 )
+}
+}

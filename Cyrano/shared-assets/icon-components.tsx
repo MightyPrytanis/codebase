@@ -245,10 +245,9 @@ export function BillingTimeIcon({ className = '', size = 24, style, color }: Ico
       </div>
     </div>
   );
-}
-
 
 }
 )
 }
+)
 }

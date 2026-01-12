@@ -507,7 +507,6 @@ export default function Settings() {
       </div>
     </div>
   );
-}
 
 }
 )
@@ -515,7 +514,5 @@ export default function Settings() {
 }
 )
 )
-}
-}
 }
 }

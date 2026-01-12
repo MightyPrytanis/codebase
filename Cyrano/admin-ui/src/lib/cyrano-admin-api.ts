@@ -125,8 +125,8 @@ export async function getSecurityStatus(): Promise<SecurityStatus> {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
   return await response.json();
-}
 
+}
 }
 }
 }

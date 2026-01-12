@@ -355,46 +355,7 @@ Provide only the humanized version, no explanations.`;
       .replace(/ChatGPT|Claude|Gemini|GPT-4|AI assistant/gi, randomName);
 
     return humanized;
-  }
-}
 
-}
-}
-)
-}
-}
-)
-}
-}
-)
-}
-}
-)
-}
-}
-)
-}
-}
-)
-}
-}
-)
-}
-}
-}
-}
-}
-}
-}
-}
-}
-}
-}
-}
-}
-}
-}
-}
 }
 }
 }

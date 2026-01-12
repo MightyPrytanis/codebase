@@ -352,7 +352,6 @@ window.CosmosApp = {
     showTutorial,
     callMCPTool
 };
-}
-)
+
 }
 )

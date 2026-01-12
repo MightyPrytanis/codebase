@@ -191,10 +191,9 @@ export class SkillLoader {
       }
     }
     return results;
-  }
+
 }
-
-
+}
 }
 }
 }

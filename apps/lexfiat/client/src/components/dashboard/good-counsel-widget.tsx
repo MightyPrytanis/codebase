@@ -179,7 +179,6 @@ export function GoodCounselWidget({ onClick }: GoodCounselWidgetProps) {
       </CardContent>
     </Card>
   );
-}
 
 }
 ]
@@ -189,3 +188,4 @@ export function GoodCounselWidget({ onClick }: GoodCounselWidgetProps) {
 )
 )
 )
+}

@@ -85,7 +85,6 @@ export function getProviderDisplayName(provider: string): string {
     llama: 'Llama™'
   };
   return names[provider] || provider;
+
 }
-}
-)
 }

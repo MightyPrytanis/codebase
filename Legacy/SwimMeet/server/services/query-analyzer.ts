@@ -344,13 +344,7 @@ export class QueryAnalyzer {
     
     const teamRoles = roles[queryType] || ['Primary', 'Secondary'];
     return teamRoles[teamIndex % teamRoles.length];
-  }
-}
-}
-}
-)
-)
-}
+
 }
 }
 )

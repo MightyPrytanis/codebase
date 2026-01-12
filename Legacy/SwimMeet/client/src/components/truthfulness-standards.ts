@@ -73,6 +73,5 @@ Provide:
 - CONFIDENCE: Your certainty in this assessment (1-10)
 
 Be thorough and objective in applying these standards.`;
-}
-}
+
 }

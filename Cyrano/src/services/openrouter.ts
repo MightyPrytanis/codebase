@@ -163,13 +163,13 @@ export class OpenRouterService {
 
     const response = await this.makeRequest(request);
     return response.choices[0]?.message?.content || 'AI response failed';
-  }
-}
 
 }
 }
 }
 }
+}
+)
 }
 )
 }

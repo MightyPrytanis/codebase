@@ -181,6 +181,4 @@ console.log(`  3. Configure resources and prompts`);
 console.log(`  4. Write tests`);
 console.log(`  5. Update documentation`);
 
-
-)
 )

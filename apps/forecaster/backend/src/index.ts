@@ -250,8 +250,5 @@ app.listen(port, () => {
   console.log(`✅ Forecaster backend listening on http://localhost:${port}`);
 });
 
-
-)
-)
 )
 )

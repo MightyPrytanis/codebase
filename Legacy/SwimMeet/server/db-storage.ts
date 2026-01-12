@@ -230,8 +230,9 @@ export class DatabaseStorage implements IStorage {
 
   async deleteFileAttachment(fileId: string): Promise<void> {
     // Implementation would delete file attachment from database
-  }
-}
+
 }
 }
 )
+)
+}

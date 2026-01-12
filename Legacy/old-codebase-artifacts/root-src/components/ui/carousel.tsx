@@ -257,11 +257,7 @@ export {
   CarouselItem,
   CarouselPrevious,
   CarouselNext,
-}
 
-)
-}
-)
 )
 }
 )

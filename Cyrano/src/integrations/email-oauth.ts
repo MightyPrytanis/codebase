@@ -259,8 +259,8 @@ export function filterEmailsByMatter(
            email.matter_id === matterId ||
            (email.metadata && email.metadata.matterId === matterId);
   });
-}
 
+}
 }
 }
 }

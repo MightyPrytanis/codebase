@@ -137,11 +137,7 @@ export function useWorkflowStatus(refreshInterval = 30000) {
  */
 export async function getWorkflowStatus(): Promise<WorkflowStatus> {
   return fetchWorkflowStatus();
-}
-
-
-
-
 
 }
 )
+}

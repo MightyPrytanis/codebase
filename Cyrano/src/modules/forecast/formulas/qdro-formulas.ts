@@ -145,11 +145,9 @@ export function calculateQDRO(input: QDROInput): QDROCalculation {
       return calculateDefinedBenefitQDRO(input);
     default:
       throw new Error(`Unknown plan type: ${input.planType}`);
-  }
-}
-
 
 }
 }
 }
 }
+)

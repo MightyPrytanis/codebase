@@ -137,7 +137,6 @@ export default function ConversationHistory({ onOpenConversation }: Conversation
       )}
     </Card>
   );
-}
 
 }
 }
@@ -147,6 +146,4 @@ export default function ConversationHistory({ onOpenConversation }: Conversation
 }
 )
 )
-}
-}
 }

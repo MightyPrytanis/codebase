@@ -327,7 +327,6 @@ runAllTests()
     process.exit(1);
   });
 
-
 }
 }
 )
@@ -342,6 +341,6 @@ runAllTests()
 }
 )
 )
-)
 }
+)
 }

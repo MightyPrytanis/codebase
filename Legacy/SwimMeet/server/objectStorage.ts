@@ -199,11 +199,7 @@ async function signObjectURL({
 
   const { signed_url: signedURL } = await response.json();
   return signedURL;
-}
-}
-}
-}
-}
+
 }
 }
 }

@@ -207,9 +207,3 @@ export const ethicalAIModule = new EthicalAIModule();
 }
 ]
 }
-}
-}
-}
-}
-]
-}

@@ -85,8 +85,5 @@ export function ThemeSelector() {
       </DropdownMenuContent>
     </DropdownMenu>
   );
-}
 
-
-}
 }

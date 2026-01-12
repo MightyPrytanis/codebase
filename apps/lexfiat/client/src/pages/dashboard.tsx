@@ -463,7 +463,7 @@ export default function Dashboard() {
       </div>
 
       {/* Testing Sidebar */}
-      <TestingSidebar isOpen={testingSidebarOpen onClose={() => setTestingSidebarOpen(false)} />
+      <TestingSidebar isOpen={testingSidebarOpen onClose={() => setTestingSidebarOpen(false) />
       
       {/* Footer Banner */
       <FooterBanner />

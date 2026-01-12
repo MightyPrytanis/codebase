@@ -252,14 +252,7 @@ export function logScopeElevation(
     undefined,
     { fromScopes, toScopes, reason }
   );
-}
 
-}
-}
-}
-}
-}
-)
 }
 }
 }

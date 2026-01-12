@@ -209,8 +209,8 @@ function NetworkView({ insights }: { insights: any[] }) {
       </div>
     </div>
   );
-}
 
+}
 }
 }
 }

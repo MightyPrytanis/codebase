@@ -383,9 +383,6 @@ export function IntegrationSettings() {
       </div>
     </div>
   );
-}
+
 }
 )
-}
-]
-}

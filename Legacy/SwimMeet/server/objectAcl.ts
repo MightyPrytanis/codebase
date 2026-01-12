@@ -75,6 +75,7 @@ export async function canAccessObject({
   }
 
   return false;
+
 }
 }
 }

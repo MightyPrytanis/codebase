@@ -251,9 +251,3 @@ export const timeValueBilling = new (class extends BaseTool {
 )
 }
 }
-)
-}
-}
-)
-}
-}

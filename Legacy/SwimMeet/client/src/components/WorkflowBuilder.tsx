@@ -590,13 +590,14 @@ export function WorkflowBuilder({ onExecute }: WorkflowBuilderProps = {}) {
       )}
     </div>
   );
-}
-}
+
 }
 }
 )
 }
 )
+)
 }
 )
 }
+)

@@ -99,7 +99,6 @@ function generatePlaceholderText(item: LibraryItem): string {
   ];
   
   return parts.filter(Boolean).join('\n');
-}
 
 }
 }

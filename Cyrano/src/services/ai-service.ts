@@ -529,7 +529,6 @@ export class AIService {
 // Export singleton instance
 export const aiService = new AIService();
 
-
 }
 }
 }

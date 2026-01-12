@@ -109,11 +109,11 @@ describe('HTTP Bridge Startup Performance', () => {
 )
 }
 )
-)
 }
 )
 }
 )
+}
 )
 }
 )

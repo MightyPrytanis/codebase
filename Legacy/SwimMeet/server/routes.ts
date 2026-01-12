@@ -3118,45 +3118,7 @@ async function processWorkflowStepEnhanced(conversationId: string, workflowState
     console.error("Workflow step error:", error);
     await storageInstance.updateResponseContent(response.id, `Error: ${error}`, "error");
     return null;
-  }
-}
 
-}
-}
-)
-}
-}
-}
-}
-}
-)
-}
-)
-)
-}
-}
-)
-)
-}
-}
-}
-)
-)
-}
-)
-}
-}
-)
-}
-}
-}
-)
-}
-)
-}
-)
-}
-}
 }
 )
 }

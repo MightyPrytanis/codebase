@@ -43,7 +43,8 @@ export function ModeSelector({ currentMode, onModeChange }: ModeSelectorProps) {
       ))}
     </div>
   );
-}
+
 }
 )
 }
+)

@@ -57,8 +57,5 @@ export function calculateCityTax(input: CityTaxInput): CityTaxResult {
     refundOrBalance,
     warnings
   };
-}
 
-
-}
 }

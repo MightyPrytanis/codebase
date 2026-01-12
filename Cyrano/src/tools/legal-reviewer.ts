@@ -925,7 +925,6 @@ export const legalReviewer = new (class extends BaseTool {
   }
 }();
 
-
 )
 }
 }

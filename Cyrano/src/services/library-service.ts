@@ -608,8 +608,8 @@ export async function getLibraryStats(userId: string): Promise<LibraryStats> {
     lastError,
     queueDepth: queue.length,
   };
-}
 
+}
 }
 }
 }

@@ -77,15 +77,7 @@ export function StandardFileUpload({
       </button>
     </>
   );
-}
-}
-}
-}
-}
-)
-}
-}
-)
+
 }
 }
 }

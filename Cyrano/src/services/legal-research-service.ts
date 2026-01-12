@@ -240,7 +240,6 @@ export class LegalResearchService {
       console.error('Michigan Legal Help search error:', error);
       return [];
     }
-  }
   /**
    * Get case by citation (uses CourtListener)
    */

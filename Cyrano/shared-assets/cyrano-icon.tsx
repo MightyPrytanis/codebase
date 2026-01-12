@@ -141,13 +141,7 @@ export function CyranoIcon({
       />
     </svg>
   );
-}
 
-}
-}
-}
-)
-)
 }
 }
 }

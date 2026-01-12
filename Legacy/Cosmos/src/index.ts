@@ -99,7 +99,7 @@ if (require.main === module) {
     console.error('Unhandled error:', error);
     process.exit(1);
   });
-}
 
+}
 }
 }

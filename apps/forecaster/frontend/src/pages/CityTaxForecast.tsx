@@ -309,8 +309,7 @@ export default function CityTaxForecast() {
       )}
     </div>
   );
-}
-
 
 }
 )
+}

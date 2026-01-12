@@ -24,6 +24,3 @@ export { Textarea }
 )
 }
 )
-)
-}
-)

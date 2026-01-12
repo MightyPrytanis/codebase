@@ -433,8 +433,6 @@ export class ClioAPIService {
     params.append('fields', fields);
 
     return this.makeRequest<ClioPaginationResponse<ClioBill>>(`/bills?${params.toString()}`);
-  }
-}
 
 }
 }
@@ -452,3 +450,4 @@ export class ClioAPIService {
 }
 )
 }
+)

@@ -492,8 +492,8 @@ export class RAGService {
    */
   clear(): void {
     this.vectorStore.clear();
-  }
-}
 
+}
+}
 }
 }

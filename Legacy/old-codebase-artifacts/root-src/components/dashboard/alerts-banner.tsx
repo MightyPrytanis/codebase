@@ -43,7 +43,7 @@ export default function AlertsBanner({ redFlags }: AlertsBannerProps) {
       </div>
     </div>
   );
-}
 
 }
 )
+}

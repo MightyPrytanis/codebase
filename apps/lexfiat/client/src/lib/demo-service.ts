@@ -128,12 +128,7 @@ export function getDemoCases(): any[] {
 export function getDemoDocuments(): any[] {
   const demoData = getDemoData();
   return demoData?.documents || getAllDemoDocuments();
-}
 
-
-}
-}
-}
 }
 }
 }

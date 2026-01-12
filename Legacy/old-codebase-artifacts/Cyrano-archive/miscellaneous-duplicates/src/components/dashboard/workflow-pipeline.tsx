@@ -267,10 +267,7 @@ export default function WorkflowPipeline({ cases, redFlags, dashboardStats, isLo
       )}
     </div>
   );
-}
-}
-)
+
 }
 )
 }
-)

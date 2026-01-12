@@ -148,10 +148,10 @@ export default function AISelector({ selectedAIs, onSelectionChange, onManageCre
       </CardContent>
     </Card>
   );
-}
 
 }
 )
 }
 )
 )
+}

@@ -133,11 +133,10 @@ export function calculateChildSupport(input: ChildSupportInput): ChildSupportCal
     default:
       // Default to Michigan formula for now
       return calculateMichiganChildSupport(input);
-  }
-}
-
 
 }
 }
 )
+}
+}
 }

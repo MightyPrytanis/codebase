@@ -140,7 +140,5 @@ export default function Tools() {
       )}
     </div>
   );
-}
 
 }
-)

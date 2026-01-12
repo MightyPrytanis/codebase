@@ -70,6 +70,7 @@ export class IMAPEmailService {
       return events;
     } finally {
       await client.logout();
-    }
-  }
+
+}
+}
 }

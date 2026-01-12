@@ -215,8 +215,6 @@ Events (indexed):\n${events.map((e, i) => `${i}. [${e.source}] ${e.description |
     }
 
     return results;
-  }
-}
 
 }
 )
@@ -225,4 +223,6 @@ Events (indexed):\n${events.map((e, i) => `${i}. [${e.source}] ${e.description |
 }
 }
 )
+}
+}
 }

@@ -151,9 +151,9 @@ export class PartnerAnalyzer {
       // Secondary sort by partner name for consistency
       return a.partnerName.localeCompare(b.partnerName);
     });
-  }
-}
 
+}
+}
 }
 }
 }

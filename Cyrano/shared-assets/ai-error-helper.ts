@@ -48,10 +48,6 @@ export function getAIOfflineErrorMessage(firstName?: string): string {
   return firstName 
     ? `I'm sorry ${firstName}, I can't do that.`
     : "I'm sorry, I can't do that.";
-}
 
-
-}
-}
 }
 }

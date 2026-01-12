@@ -311,9 +311,7 @@ export function GoodCounselMeditation({ onClose, onComplete }: MeditationProps) 
       </Card>
     </div>
   );
-}
 
-
-
-}
 )
+}
+}

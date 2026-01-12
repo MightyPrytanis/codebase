@@ -317,7 +317,6 @@ export class IntegrityMonitor extends BaseTool {
 // Export singleton instance
 export const integrityMonitor = new IntegrityMonitor();
 
-
 }
 }
 }

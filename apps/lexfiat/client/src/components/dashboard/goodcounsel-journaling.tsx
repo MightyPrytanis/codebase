@@ -422,24 +422,6 @@ export function GoodCounselJournaling({ userId }: JournalingProps) {
       )}
     </div>
   );
-}
 
-
-}
-)
-}
-)
-}
-)
-}
-)
-}
-)
-}
-)
-}
-)
-}
-)
 }
 )

@@ -111,7 +111,7 @@ export class TextProcessor {
     
     const totalSentenceLength = sentences.reduce((sum, sent) => {
       return sum + sent.split(/\s+/).filter(w => w.length > 0).length;
-    }, 0);
+    }, 0;
     const averageSentenceLength = sentences.length > 0 ? totalSentenceLength / sentences.length : 0;
     
     return {
@@ -256,56 +256,5 @@ export class TextProcessor {
     }
     return dates;
   }
-}
 
 export const textProcessor = new TextProcessor();
-
-}
-}
-}
-)
-}
-}
-]
-}
-}
-}
-)
-}
-}
-]
-}
-}
-}
-)
-}
-}
-]
-}
-}
-}
-)
-}
-}
-]
-}
-}
-}
-)
-}
-}
-]
-}
-}
-}
-)
-}
-}
-]
-}
-}
-}
-)
-}
-}
-]

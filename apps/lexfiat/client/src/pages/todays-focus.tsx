@@ -105,22 +105,6 @@ export default function TodaysFocusPage() {
       </main>
     </div>
   );
-}
 
-
-}
-)
-}
-)
-}
-)
-}
-)
-}
-)
-}
-)
-}
-)
 }
 )

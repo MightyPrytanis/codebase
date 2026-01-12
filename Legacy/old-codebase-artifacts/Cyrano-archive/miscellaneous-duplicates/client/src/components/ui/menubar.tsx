@@ -253,9 +253,6 @@ export {
   MenubarGroup,
   MenubarSub,
   MenubarShortcut,
-}
 
-}
-)
 }
 )

@@ -403,10 +403,11 @@ export function CloudStorageSettings({ authToken }: CloudStorageSettingsProps) {
       )}
     </div>
   );
-}
+
 }
 }
 )
+}
 }
 }
 }

@@ -86,7 +86,7 @@ export class OutlookCalendarService extends OutlookService {
         'Content-Type': 'application/json',
         'Prefer': 'outlook.timezone="UTC"',
       },
-    });
+    };
 
     if (!response.ok) {
       if (response.status === 401) {
@@ -123,7 +123,7 @@ export class OutlookCalendarService extends OutlookService {
         'Authorization': `Bearer ${this.config.accessToken}`,
         'Content-Type': 'application/json',
       },
-    });
+    };
 
     if (!response.ok) {
       if (response.status === 401) {
@@ -153,7 +153,7 @@ export class OutlookCalendarService extends OutlookService {
         'Authorization': `Bearer ${this.config.accessToken}`,
         'Content-Type': 'application/json',
       },
-    });
+    };
 
     if (!response.ok) {
       if (response.status === 401) {
@@ -186,7 +186,7 @@ export class OutlookCalendarService extends OutlookService {
         'Authorization': `Bearer ${this.config.accessToken}`,
         'Content-Type': 'application/json',
       },
-    });
+    };
 
     if (!response.ok) {
       if (response.status === 401) {
@@ -263,9 +263,6 @@ export class OutlookCalendarService extends OutlookService {
       jobTitle: contact.jobTitle,
       officeLocation: contact.officeLocation,
     };
-  }
-}
-
 
 }
 }

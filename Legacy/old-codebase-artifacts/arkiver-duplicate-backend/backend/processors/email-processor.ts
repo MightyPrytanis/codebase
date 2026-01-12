@@ -380,9 +380,3 @@ export class EmailProcessor {
 }
 
 export const emailProcessor = new EmailProcessor();
-
-}
-}
-)
-)
-)

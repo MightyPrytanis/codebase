@@ -362,7 +362,7 @@ export {
   ChartLegend,
   ChartLegendContent,
   ChartStyle,
-}
 
-}
 )
+)
+}

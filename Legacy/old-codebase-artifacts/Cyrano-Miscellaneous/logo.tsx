@@ -123,12 +123,8 @@ export function Logo({ size = 'md', variant = 'full', className = '' }: LogoProp
       </span>
     </div>
   );
-}
 
 // Export individual components for flexibility
 export const LexFiatIcon = () => <Logo variant="icon" />;
 export const LexFiatWordmark = () => <Logo variant="wordmark" />;
 export const LexFiatFull = () => <Logo variant="full" />;
-}
-}
-)

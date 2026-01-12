@@ -58,8 +58,9 @@ export class LocalActivityService {
           await onFile(full, stat);
         } catch (_) {
           // ignore
-        }
-      }
-    }
-  }
+
+}
+}
+}
+}
 }

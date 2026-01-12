@@ -53,6 +53,7 @@ export function ResponseRating({ responseId, currentRating, onRatingChange }: Re
       })}
     </div>
   );
-}
+
 }
 )
+}
