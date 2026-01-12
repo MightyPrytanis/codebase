@@ -259,6 +259,3 @@ export class LegalResearchService {
       };
     }
     return null;
-  }
-}
-

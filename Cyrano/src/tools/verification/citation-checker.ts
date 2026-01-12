@@ -609,12 +609,3 @@ export const citationChecker = new CitationChecker();
 export async function handleCitationChecker(params: any): Promise<CitationCheckResult> {
   return await citationChecker.checkCitations(params);
 }
-
-}
-}
-}
-}
-}
-}
-}
-}
