@@ -105,17 +105,3 @@ describe('HTTP Bridge Startup Performance', () => {
     expect(response.status).toBeLessThan(600);
   });
 });
-
-)
-}
-)
-)
-}
-)
-}
-)
-)
-}
-)
-}
-)

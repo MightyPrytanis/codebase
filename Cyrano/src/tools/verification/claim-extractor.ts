@@ -521,7 +521,6 @@ export async function handleClaimExtractor(params: any): Promise<ClaimExtraction
 }
 
 }
-}
 )
 )
 }

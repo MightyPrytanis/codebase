@@ -768,9 +768,6 @@ export async function handleConsistencyChecker(params: any): Promise<Consistency
 }
 
 }
-}
-}
-}
 )
 )
 }

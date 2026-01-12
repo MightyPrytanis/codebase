@@ -332,6 +332,7 @@ export class CitationChecker extends BaseTool {
     }
 
     return null;
+  }
 
   /**
    * Validate citation format
