@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { Switch, Route } from "wouter";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -55,29 +55,31 @@ const PageLoader = () => (
 
 function Router() {
   return (
-    <Suspense fallback={<PageLoader />}>
-      <Switch>
-        <Route path="/" component={Dashboard} />
-        <Route path="/dashboard" component={Dashboard} />
-        <Route path="/settings" component={Settings} />
-        <Route path="/performance" component={PerformancePage} />
-        <Route path="/todays-focus" component={TodaysFocusPage} />
-        <Route path="/research" component={ResearchPage} />
-        <Route path="/clio" component={ClioIntegrationPage} />
-        <Route path="/time-tracking" component={TimeTrackingPage} />
-        <Route path="/compliance" component={ComplianceCheckerPage} />
-        <Route path="/citations" component={CitationToolsPage} />
-        <Route path="/compare" component={DocumentComparisonPage} />
-        <Route path="/icon-preview" component={IconPreviewPage} />
-        <Route path="/mae-workflows" component={MaeWorkflowsPage} />
-        <Route path="/workflows" component={WorkflowLibraryPage} />
-        <Route path="/workflow-library" component={WorkflowLibraryPage} />
-        <Route path="/library" component={LibraryPage} />
-        <Route path="/onboarding" component={OnboardingPage} />
-        <Route path="/ethics" component={EthicsPage} />
-        <Route component={NotFound} />
-      </Switch>
-    </Suspense>
+    <BrowserRouter>
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/performance" element={<PerformancePage />} />
+          <Route path="/todays-focus" element={<TodaysFocusPage />} />
+          <Route path="/research" element={<ResearchPage />} />
+          <Route path="/clio" element={<ClioIntegrationPage />} />
+          <Route path="/time-tracking" element={<TimeTrackingPage />} />
+          <Route path="/compliance" element={<ComplianceCheckerPage />} />
+          <Route path="/citations" element={<CitationToolsPage />} />
+          <Route path="/compare" element={<DocumentComparisonPage />} />
+          <Route path="/icon-preview" element={<IconPreviewPage />} />
+          <Route path="/mae-workflows" element={<MaeWorkflowsPage />} />
+          <Route path="/workflows" element={<WorkflowLibraryPage />} />
+          <Route path="/workflow-library" element={<WorkflowLibraryPage />} />
+          <Route path="/library" element={<LibraryPage />} />
+          <Route path="/onboarding" element={<OnboardingPage />} />
+          <Route path="/ethics" element={<EthicsPage />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Suspense>
+    </BrowserRouter>
   );
 }
 

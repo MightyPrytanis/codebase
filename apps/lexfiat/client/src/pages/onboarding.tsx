@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { useLocation } from 'wouter';
+import { useNavigate } from 'react-router-dom';
 import { 
   ChevronRight, 
   ChevronLeft, 
@@ -71,7 +71,7 @@ interface OnboardingFormData {
 }
 
 export default function Onboarding() {
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<OnboardingFormData>({
     primaryJurisdiction: '',
@@ -310,7 +310,7 @@ export default function Onboarding() {
       
       // Small delay to let fanfare start, then redirect
       setTimeout(() => {
-        setLocation('/dashboard');
+        navigate('/dashboard');
       }, 500);
     } catch (error) {
       console.error('Failed to save onboarding data:', error);

@@ -14,7 +14,7 @@ import { EthicsDashboard } from "@/components/ethics/ethics-dashboard";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
-import { Link as RouterLink } from "wouter";
+import { Link } from "react-router-dom";
 import { useTheme } from "@/components/theme/theme-provider";
 import { ThemeName } from "@/lib/theme";
 
@@ -90,13 +90,13 @@ export default function SettingsPage() {
       <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6 lg:py-8">
         <div className="mb-6 sm:mb-8">
           <div className="flex items-center mb-4">
-            <RouterLink href="/">
+            <Link to="/">
               <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white mr-3 px-2">
                 <ArrowLeft className="w-4 h-4 mr-1" />
                 <span className="hidden sm:inline">Back to Dashboard</span>
                 <span className="sm:hidden">Back</span>
               </Button>
-            </RouterLink>
+            </Link>
           </div>
           
           <h1 className="text-2xl sm:text-3xl font-bold text-gold mb-2 flex flex-col sm:flex-row sm:items-center">

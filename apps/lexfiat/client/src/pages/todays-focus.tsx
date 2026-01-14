@@ -6,7 +6,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { Calendar, Clock, AlertTriangle, FileText } from "lucide-react";
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 import Header from "@/components/layout/header";
 import { getCases } from "@/lib/cyrano-api";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -45,7 +45,7 @@ export default function TodaysFocusPage() {
             <h1 className="text-3xl font-bold text-primary mb-2">Today's Focus</h1>
             <p className="text-secondary">Priority tasks and deadlines for today</p>
           </div>
-          <Link href="/">
+          <Link to="/">
             <Button variant="outline">Back to Dashboard</Button>
           </Link>
         </div>

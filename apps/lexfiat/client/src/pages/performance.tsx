@@ -6,11 +6,12 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { TrendingUp, Clock, CheckCircle, FileText, Zap } from "lucide-react";
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 import Header from "@/components/layout/header";
 import { getWorkflowData } from "@/lib/cyrano-api";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 
 export default function PerformancePage() {
   const { data: workflowData, isLoading } = useQuery({
@@ -39,7 +40,7 @@ export default function PerformancePage() {
             <h1 className="text-3xl font-bold text-primary mb-2">Performance Analytics</h1>
             <p className="text-secondary">Track your productivity and automation metrics</p>
           </div>
-          <Link href="/">
+          <Link to="/">
             <Button variant="outline">Back to Dashboard</Button>
           </Link>
         </div>
