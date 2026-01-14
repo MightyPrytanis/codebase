@@ -60,21 +60,20 @@ export default function TaxForecast() {
     }
 
     // 2-layer acknowledgement before allowing advisory removal
-    // Enhanced warning emphasizing user sovereignty and risk assumption
     const step1 = window.confirm(
       [
-        '⚠️ DANGER ZONE: Remove advisory/branding from generated forms?',
+        'Remove advisory/branding from generated forms?',
         '',
-        'LexFiat Forecaster is designed to simulate tax preparation software.',
-        'Its outputs are fully consistent with applicable law and tax formulas,',
-        'but it is NOT intended for actual tax preparation.',
+        'LexFiat Forecaster simulates tax preparation software. Outputs are',
+        'consistent with applicable law and tax formulas, but are not intended',
+        'for actual tax preparation.',
         '',
-        'These are SIMULATIONS for litigation and planning purposes only.',
-        'If you remove the advisory, the PDFs may be easily mistaken for',
+        'These forecasts are for litigation and planning purposes only.',
+        'Removing the advisory may cause outputs to be mistaken for',
         'filing-ready documents by courts, opposing counsel, or clients.',
         '',
-        '⚠️ EXERCISING FULL SOVEREIGNTY MEANS ASSUMING FULL RISK.',
-        'You are responsible for any consequences of using unlabeled outputs.',
+        'The user assumes responsibility for any consequences of using',
+        'unlabeled outputs.',
         '',
         'Click OK to acknowledge these risks, or Cancel to keep the advisory.',
       ].join('\n')
@@ -84,7 +83,7 @@ export default function TaxForecast() {
       return;
     }
 
-    const step2 = window.prompt('Type REMOVE to confirm you want to remove the advisory (expires after 24 hours):', '');
+    const step2 = window.prompt('Type REMOVE to confirm removal of the advisory (expires after 24 hours):', '');
     if (step2 !== 'REMOVE') {
       setBrandingMode('strip');
       return;
@@ -502,7 +501,3 @@ export default function TaxForecast() {
     </div>
   );
 }
-
-
-}
-)
