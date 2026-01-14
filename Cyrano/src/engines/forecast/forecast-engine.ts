@@ -482,7 +482,7 @@ export class ForecastEngine extends BaseEngine {
 
     return {
       allowed: false,
-      error: 'Risk acknowledgement required to disable LexFiat Forecaster™ advisories/branding. You must explicitly acknowledge that forecast outputs may resemble official forms and are not filing-ready.',
+      error: 'Risk acknowledgement required to disable LexFiat Forecaster™ advisories/branding. LexFiat Forecaster simulates tax preparation software - outputs are consistent with applicable law but NOT intended for actual tax preparation. These are SIMULATIONS for litigation and planning purposes only. Exercising full sovereignty means assuming full risk. You must explicitly acknowledge that forecast outputs may resemble official forms and are not filing-ready.',
       presentationMode: 'strip',
     };
   }

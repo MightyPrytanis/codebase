@@ -23,7 +23,10 @@ app.use(express.json({ limit: '5mb' }));
 
 const ForecastRequestSchema = z.object({
   forecast_input: z.object({
-    year: z.union([z.literal(2023), z.literal(2024), z.literal(2025)]),
+    year: z.union([
+      z.literal(2018), z.literal(2019), z.literal(2020), z.literal(2021), z.literal(2022),
+      z.literal(2023), z.literal(2024), z.literal(2025)
+    ]),
     filingStatus: z.enum(['single', 'married_joint', 'married_separate', 'head_of_household', 'qualifying_widow']),
     wages: z.number().nonnegative(),
     selfEmploymentIncome: z.number().optional(),

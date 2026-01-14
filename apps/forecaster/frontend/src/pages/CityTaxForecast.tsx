@@ -49,15 +49,23 @@ export default function CityTaxForecast() {
       return;
     }
 
+    // Enhanced warning emphasizing user sovereignty and risk assumption
     const step1 = window.confirm(
       [
-        'DANGER ZONE: Remove advisory/branding from generated forms?',
+        '⚠️ DANGER ZONE: Remove advisory/branding from generated forms?',
         '',
-        'These outputs are projections and are NOT real filings.',
-        'If you remove the advisory, the PDFs may be easily mistaken for filing-ready documents.',
-        'Consult a qualified professional before relying on these outputs.',
+        'LexFiat Forecaster is designed to simulate tax preparation software.',
+        'Its outputs are fully consistent with applicable law and tax formulas,',
+        'but it is NOT intended for actual tax preparation.',
         '',
-        'Click OK to continue, or Cancel to keep the advisory.',
+        'These are SIMULATIONS for litigation and planning purposes only.',
+        'If you remove the advisory, the PDFs may be easily mistaken for',
+        'filing-ready documents by courts, opposing counsel, or clients.',
+        '',
+        '⚠️ EXERCISING FULL SOVEREIGNTY MEANS ASSUMING FULL RISK.',
+        'You are responsible for any consequences of using unlabeled outputs.',
+        '',
+        'Click OK to acknowledge these risks, or Cancel to keep the advisory.',
       ].join('\n')
     );
     if (!step1) {

@@ -61,8 +61,43 @@ export interface TaxCalculation {
 export function getTaxBrackets(year: number, filingStatus: FilingStatus): TaxBracket[] {
   // Data source: Tax-Calculator (taxcalc) 6.3.0 policy parameters
   // Extracted in this workspace via `python3 -m pip install taxcalc==6.3.0` and Policy.select_eq().
-  // Note: This is intended to cover 2023–2025 for the Forecaster prototype.
+  // Covers 2018-2025 (2018 was first year of TCJA)
   const thresholds: Record<number, Record<FilingStatus, number[]>> = {
+    2018: {
+      single: [9525, 38700, 82500, 157500, 200000, 500000, Infinity],
+      married_joint: [19050, 77400, 165000, 315000, 400000, 600000, Infinity],
+      married_separate: [9525, 38700, 82500, 157500, 200000, 300000, Infinity],
+      head_of_household: [13650, 51800, 82500, 157500, 200000, 500000, Infinity],
+      qualifying_widow: [19050, 77400, 165000, 315000, 400000, 600000, Infinity],
+    },
+    2019: {
+      single: [9700, 39475, 84200, 160725, 204100, 510300, Infinity],
+      married_joint: [19400, 78950, 168400, 321450, 408200, 612350, Infinity],
+      married_separate: [9700, 39475, 84200, 160725, 204100, 306175, Infinity],
+      head_of_household: [13850, 52850, 84200, 160700, 204100, 510300, Infinity],
+      qualifying_widow: [19400, 78950, 168400, 321450, 408200, 612350, Infinity],
+    },
+    2020: {
+      single: [9875, 40125, 85525, 163300, 207350, 518400, Infinity],
+      married_joint: [19750, 80250, 171050, 326600, 414700, 622050, Infinity],
+      married_separate: [9875, 40125, 85525, 163300, 207350, 311025, Infinity],
+      head_of_household: [14100, 53700, 85500, 163300, 207350, 518400, Infinity],
+      qualifying_widow: [19750, 80250, 171050, 326600, 414700, 622050, Infinity],
+    },
+    2021: {
+      single: [9950, 40525, 86375, 164925, 209425, 523600, Infinity],
+      married_joint: [19900, 81050, 172750, 329850, 418850, 628300, Infinity],
+      married_separate: [9950, 40525, 86375, 164925, 209425, 314150, Infinity],
+      head_of_household: [14200, 54200, 86350, 164900, 209400, 523600, Infinity],
+      qualifying_widow: [19900, 81050, 172750, 329850, 418850, 628300, Infinity],
+    },
+    2022: {
+      single: [10275, 41775, 89450, 190750, 364200, 462500, Infinity],
+      married_joint: [20550, 83550, 178950, 364200, 462500, 693750, Infinity],
+      married_separate: [10275, 41775, 89450, 190750, 231250, 346875, Infinity],
+      head_of_household: [14650, 55900, 89450, 190750, 364200, 462500, Infinity],
+      qualifying_widow: [20550, 83550, 178950, 364200, 462500, 693750, Infinity],
+    },
     2023: {
       single: [11000, 44725, 95375, 182100, 231250, 578125, Infinity],
       married_joint: [22000, 89450, 190750, 364200, 462500, 693750, Infinity],
@@ -104,6 +139,41 @@ export function getTaxBrackets(year: number, filingStatus: FilingStatus): TaxBra
 export function getStandardDeduction(year: number, filingStatus: FilingStatus): number {
   // Data source: Tax-Calculator (taxcalc) 6.3.0 policy parameters (STD)
   const std: Record<number, Record<FilingStatus, number>> = {
+    2018: {
+      single: 12000,
+      married_joint: 24000,
+      married_separate: 12000,
+      head_of_household: 18000,
+      qualifying_widow: 24000,
+    },
+    2019: {
+      single: 12200,
+      married_joint: 24400,
+      married_separate: 12200,
+      head_of_household: 18350,
+      qualifying_widow: 24400,
+    },
+    2020: {
+      single: 12400,
+      married_joint: 24800,
+      married_separate: 12400,
+      head_of_household: 18650,
+      qualifying_widow: 24800,
+    },
+    2021: {
+      single: 12550,
+      married_joint: 25100,
+      married_separate: 12550,
+      head_of_household: 18800,
+      qualifying_widow: 25100,
+    },
+    2022: {
+      single: 12950,
+      married_joint: 25900,
+      married_separate: 12950,
+      head_of_household: 19400,
+      qualifying_widow: 25900,
+    },
     2023: {
       single: 13850,
       married_joint: 27700,
@@ -155,6 +225,11 @@ export function calculateSelfEmploymentTax(selfEmploymentIncome: number, wages: 
   const medicareRate = 0.029; // 2.9% (employee + employer)
   // Data source: Tax-Calculator (taxcalc) 6.3.0 policy parameter SS_Earnings_c
   const socialSecurityWageBaseByYear: Record<number, number> = {
+    2018: 128400,
+    2019: 132900,
+    2020: 137700,
+    2021: 142800,
+    2022: 147000,
     2023: 160200,
     2024: 168600,
     2025: 176100,
@@ -177,42 +252,78 @@ export function calculateSelfEmploymentTax(selfEmploymentIncome: number, wages: 
 // ============================================================================
 
 // CTC / ODC / ACTC
-const CTC_AMOUNT: Record<2023 | 2024 | 2025, number> = { 2023: 2000, 2024: 2000, 2025: 2200 };
-const ODC_AMOUNT: Record<2023 | 2024 | 2025, number> = { 2023: 500, 2024: 500, 2025: 500 };
-const CTC_PHASEOUT_THRESHOLD: Record<2023 | 2024 | 2025, Record<FilingStatus, number>> = {
+// Note: CTC was $2000 per child starting in 2018 (TCJA). ACTC refundable portion varies by year.
+const CTC_AMOUNT: Record<2018 | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025, number> = {
+  2018: 2000, 2019: 2000, 2020: 2000, 2021: 2000, 2022: 2000, 2023: 2000, 2024: 2000, 2025: 2200
+};
+const ODC_AMOUNT: Record<2018 | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025, number> = {
+  2018: 500, 2019: 500, 2020: 500, 2021: 500, 2022: 500, 2023: 500, 2024: 500, 2025: 500
+};
+const CTC_PHASEOUT_THRESHOLD: Record<2018 | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025, Record<FilingStatus, number>> = {
+  2018: { single: 200000, married_joint: 400000, married_separate: 200000, head_of_household: 200000, qualifying_widow: 400000 },
+  2019: { single: 200000, married_joint: 400000, married_separate: 200000, head_of_household: 200000, qualifying_widow: 400000 },
+  2020: { single: 200000, married_joint: 400000, married_separate: 200000, head_of_household: 200000, qualifying_widow: 400000 },
+  2021: { single: 200000, married_joint: 400000, married_separate: 200000, head_of_household: 200000, qualifying_widow: 400000 },
+  2022: { single: 200000, married_joint: 400000, married_separate: 200000, head_of_household: 200000, qualifying_widow: 400000 },
   2023: { single: 200000, married_joint: 400000, married_separate: 200000, head_of_household: 200000, qualifying_widow: 400000 },
   2024: { single: 200000, married_joint: 400000, married_separate: 200000, head_of_household: 200000, qualifying_widow: 400000 },
   2025: { single: 200000, married_joint: 400000, married_separate: 200000, head_of_household: 200000, qualifying_widow: 400000 }
 };
-const ACTC_REFUNDABLE_PER_CHILD: Record<2023 | 2024 | 2025, number> = { 2023: 1600, 2024: 1700, 2025: 1700 };
+const ACTC_REFUNDABLE_PER_CHILD: Record<2018 | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025, number> = {
+  2018: 1400, 2019: 1400, 2020: 1400, 2021: 1400, 2022: 1500, 2023: 1600, 2024: 1700, 2025: 1700
+};
 const ACTC_EARNED_INCOME_THRESHOLD: number = 2500;
 const ACTC_EARNED_INCOME_RATE: number = 0.15;
 const ACTC_REFUNDABLE_CHILD_LIMIT: number = 3;
 
 // EITC
 type EitcKids = 0 | 1 | 2 | 3;
-const EITC_MAX_CREDIT: Record<2023 | 2024 | 2025, Record<EitcKids, number>> = {
+const EITC_MAX_CREDIT: Record<2018 | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025, Record<EitcKids, number>> = {
+  2018: { 0: 519, 1: 3461, 2: 5719, 3: 6431 },
+  2019: { 0: 529, 1: 3526, 2: 5828, 3: 6557 },
+  2020: { 0: 538, 1: 3584, 2: 5920, 3: 6660 },
+  2021: { 0: 1502, 1: 3618, 2: 5980, 3: 6728 },
+  2022: { 0: 560, 1: 3733, 2: 6164, 3: 6935 },
   2023: { 0: 600, 1: 3995, 2: 6604, 3: 7430 },
   2024: { 0: 632, 1: 4213, 2: 6960, 3: 7830 },
   2025: { 0: 649, 1: 4405, 2: 7280, 3: 8180 }
 };
-const EITC_PHASE_IN_RATE: Record<2023 | 2024 | 2025, Record<EitcKids, number>> = {
+const EITC_PHASE_IN_RATE: Record<2018 | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025, Record<EitcKids, number>> = {
+  2018: { 0: 0.0765, 1: 0.34, 2: 0.4, 3: 0.45 },
+  2019: { 0: 0.0765, 1: 0.34, 2: 0.4, 3: 0.45 },
+  2020: { 0: 0.0765, 1: 0.34, 2: 0.4, 3: 0.45 },
+  2021: { 0: 0.15, 1: 0.34, 2: 0.4, 3: 0.45 },
+  2022: { 0: 0.0765, 1: 0.34, 2: 0.4, 3: 0.45 },
   2023: { 0: 0.0765, 1: 0.34, 2: 0.4, 3: 0.45 },
   2024: { 0: 0.0765, 1: 0.34, 2: 0.4, 3: 0.45 },
   2025: { 0: 0.0765, 1: 0.34, 2: 0.4, 3: 0.45 }
 };
-const EITC_PHASE_OUT_RATE: Record<2023 | 2024 | 2025, Record<EitcKids, number>> = {
+const EITC_PHASE_OUT_RATE: Record<2018 | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025, Record<EitcKids, number>> = {
+  2018: { 0: 0.0765, 1: 0.1598, 2: 0.2106, 3: 0.2106 },
+  2019: { 0: 0.0765, 1: 0.1598, 2: 0.2106, 3: 0.2106 },
+  2020: { 0: 0.0765, 1: 0.1598, 2: 0.2106, 3: 0.2106 },
+  2021: { 0: 0.0765, 1: 0.1598, 2: 0.2106, 3: 0.2106 },
+  2022: { 0: 0.0765, 1: 0.1598, 2: 0.2106, 3: 0.2106 },
   2023: { 0: 0.0765, 1: 0.1598, 2: 0.2106, 3: 0.2106 },
   2024: { 0: 0.0765, 1: 0.1598, 2: 0.2106, 3: 0.2106 },
   2025: { 0: 0.0765, 1: 0.1598, 2: 0.2106, 3: 0.2106 }
 };
-const EITC_PHASE_OUT_START: Record<2023 | 2024 | 2025, Record<EitcKids, number>> = {
+const EITC_PHASE_OUT_START: Record<2018 | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025, Record<EitcKids, number>> = {
+  2018: { 0: 8490, 1: 18660, 2: 18660, 3: 18660 },
+  2019: { 0: 8650, 1: 19030, 2: 19030, 3: 19030 },
+  2020: { 0: 8790, 1: 19330, 2: 19330, 3: 19330 },
+  2021: { 0: 9210, 1: 20260, 2: 20260, 3: 20260 },
+  2022: { 0: 9530, 1: 20950, 2: 20950, 3: 20950 },
   2023: { 0: 9800, 1: 21560, 2: 21560, 3: 21560 },
   2024: { 0: 10330, 1: 22720, 2: 22720, 3: 22720 },
   2025: { 0: 10620, 1: 23370, 2: 23370, 3: 23370 }
 };
-const EITC_PHASE_OUT_MARRIED_ADDON: Record<2023 | 2024 | 2025, number> = { 2023: 6570, 2024: 6920, 2025: 7110 };
-const EITC_INVESTMENT_INCOME_LIMIT: Record<2023 | 2024 | 2025, number> = { 2023: 11000, 2024: 11600, 2025: 11950 };
+const EITC_PHASE_OUT_MARRIED_ADDON: Record<2018 | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025, number> = {
+  2018: 5700, 2019: 5840, 2020: 5960, 2021: 6250, 2022: 6400, 2023: 6570, 2024: 6920, 2025: 7110
+};
+const EITC_INVESTMENT_INCOME_LIMIT: Record<2018 | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025, number> = {
+  2018: 3500, 2019: 3600, 2020: 3650, 2021: 10000, 2022: 10150, 2023: 11000, 2024: 11600, 2025: 11950
+};
 const EITC_MIN_AGE = 25;
 const EITC_MAX_AGE = 64;
 
@@ -231,7 +342,7 @@ function clampKids(n: number): EitcKids {
  * Calculate EITC (Earned Income Tax Credit)
  */
 function computeEitc(params: {
-  year: 2023 | 2024 | 2025;
+  year: 2018 | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025;
   filingStatus: FilingStatus;
   agi: number;
   earnedIncome: number;
@@ -380,7 +491,7 @@ export function calculateTax(input: TaxInput): TaxCalculation {
  * Standalone backend input interface (for compatibility)
  */
 export interface FederalTaxInput {
-  year: 2023 | 2024 | 2025;
+  year: 2018 | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025;
   filingStatus: FilingStatus;
   wages: number;
   selfEmploymentIncome?: number;
@@ -404,7 +515,7 @@ export interface FederalTaxInput {
  * Standalone backend result interface (for compatibility)
  */
 export interface FederalTaxResult {
-  year: 2023 | 2024 | 2025;
+  year: 2018 | 2019 | 2020 | 2021 | 2022 | 2023 | 2024 | 2025;
   filingStatus: FilingStatus;
   grossIncome: number;
   adjustments: number;
