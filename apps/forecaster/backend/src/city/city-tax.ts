@@ -58,7 +58,3 @@ export function calculateCityTax(input: CityTaxInput): CityTaxResult {
     warnings
   };
 }
-
-
-}
-}
