@@ -73,3 +73,7 @@ app.get('/mcp/status', (req, res) => {
 app.listen(port, () => {
   console.log(`Cyrano MCP Bridge running on port ${port}`);
 });
+
+)
+)
+}

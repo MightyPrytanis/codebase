@@ -458,7 +458,7 @@ export const factChecker: BaseTool = new (class extends BaseTool {
    */
   public extractSourcesFromResponse(response: string): string[] {
     const sourcePatterns = [
-      /(?:source|reference|citation|according to|from)\s*:?\s*([^\n\.]+)/gi,
+      /(?:source|reference|citation|according to|from)\s*:?\s*([^\n.]+)/gi,
       /https?:\/\/[^\s]+/g,
       /\[([^\]]+)\]/g,
     ];
@@ -917,4 +917,23 @@ export const factChecker: BaseTool = new (class extends BaseTool {
     const supportScores = sources.map(source => this.calculateSourceConfidence(claim, source));
     return supportScores.reduce((sum, score) => sum + score, 0) / supportScores.length;
   }
-})();
+();
+
+)
+}
+}
+}
+}
+)
+}
+}
+}
+)
+}
+}
+}
+}
+)
+}
+}
+}

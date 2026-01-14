@@ -252,3 +252,6 @@ export class PDFExtractor {
  * Default instance
  */
 export const pdfExtractor = new PDFExtractor();
+
+}
+}

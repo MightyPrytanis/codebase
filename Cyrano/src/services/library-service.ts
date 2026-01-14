@@ -203,7 +203,7 @@ export async function listLibraryItems(
     return [];
   }
 
-  let conditions = [eq(libraryItemsTable.userId, userIdInt)];
+  const conditions = [eq(libraryItemsTable.userId, userIdInt)];
 
   if (filters) {
     if (filters.sourceType && filters.sourceType.length > 0) {
@@ -414,7 +414,7 @@ export async function getIngestQueue(
   userId?: string,
   status?: 'pending' | 'processing' | 'completed' | 'failed'
 ): Promise<IngestQueueItem[]> {
-  let conditions: SQL<unknown>[] = [];
+  const conditions: SQL<unknown>[] = [];
 
   if (userId) {
     const userIdInt = parseInt(userId, 10);
@@ -608,4 +608,13 @@ export async function getLibraryStats(userId: string): Promise<LibraryStats> {
     lastError,
     queueDepth: queue.length,
   };
+}
+
+}
+}
+}
+}
+}
+}
+}
 }

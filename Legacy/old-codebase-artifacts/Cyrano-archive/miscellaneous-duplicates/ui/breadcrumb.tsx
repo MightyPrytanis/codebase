@@ -24,7 +24,7 @@ const BreadcrumbList = React.forwardRef<
     )}
     {...props}
   />
-))
+)
 BreadcrumbList.displayName = "BreadcrumbList"
 
 const BreadcrumbItem = React.forwardRef<
@@ -54,7 +54,7 @@ const BreadcrumbLink = React.forwardRef<
       {...props}
     />
   )
-})
+}
 BreadcrumbLink.displayName = "BreadcrumbLink"
 
 const BreadcrumbPage = React.forwardRef<
@@ -113,3 +113,5 @@ export {
   BreadcrumbSeparator,
   BreadcrumbEllipsis,
 }
+
+)

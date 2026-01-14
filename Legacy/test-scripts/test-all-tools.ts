@@ -562,7 +562,6 @@ async function runAllTests() {
       }
     }
     console.log('');
-  }
 
   // Test with Anthropic (secondary) - only for tools that use AI
   const aiTools = toolTests.filter(t => 
@@ -626,3 +625,12 @@ runAllTests()
     process.exit(1);
   });
 
+
+}
+}
+}
+}
+}
+}
+)
+)

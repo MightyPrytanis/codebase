@@ -50,7 +50,7 @@ const Toast = React.forwardRef<
       {...props}
     />
   )
-})
+}
 Toast.displayName = ToastPrimitives.Root.displayName
 
 const ToastAction = React.forwardRef<
@@ -125,3 +125,8 @@ export {
   ToastClose,
   ToastAction,
 }
+
+)
+)
+)
+)

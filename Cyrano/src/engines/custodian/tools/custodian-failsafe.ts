@@ -12,7 +12,7 @@ import { custodianEngine } from '../custodian-engine.js';
 
 const CustodianFailsafeSchema = z.object({
   action: z.enum(['activate', 'deactivate']).describe('FAILSAFE action'),
-  options: z.record(z.any()).optional().describe('Options (reason, admin_authorized for deactivate)'),
+  options: z.record(z.string(), z.any()).optional().describe('Options (reason, admin_authorized for deactivate)'),
 });
 
 export const custodianFailsafeTool = new (class extends BaseTool {
@@ -65,3 +65,6 @@ export const custodianFailsafeTool = new (class extends BaseTool {
     }
   }
 })();
+
+)
+}

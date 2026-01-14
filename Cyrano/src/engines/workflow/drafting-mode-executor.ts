@@ -167,7 +167,7 @@ export async function executeModeA(context: DraftingContext): Promise<DraftingRe
       currentState,
       error: 'Unexpected state in Mode A workflow',
     };
-  } catch (error) {
+   catch (error) {
     return {
       success: false,
       documentId: context.documentId,
@@ -175,7 +175,6 @@ export async function executeModeA(context: DraftingContext): Promise<DraftingRe
       error: error instanceof Error ? error.message : String(error),
     };
   }
-}
 
 /**
  * Execute Mode B: Summarize → Discuss → Draft
@@ -358,3 +357,7 @@ export async function executeModeBDraft(context: DraftingContext, summary: strin
 }
 
 
+
+}
+}
+}

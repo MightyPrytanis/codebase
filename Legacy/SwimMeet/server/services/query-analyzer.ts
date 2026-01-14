@@ -346,3 +346,13 @@ export class QueryAnalyzer {
     return teamRoles[teamIndex % teamRoles.length];
   }
 }
+}
+}
+)
+)
+}
+}
+}
+)
+)
+}

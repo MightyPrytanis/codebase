@@ -287,13 +287,12 @@ export default function Dashboard() {
           </Card>
 
           {/* GoodCounsel Widget */}
-          <GoodCounselWidget onClick={() => setActivePanel("goodcounsel")} />
+          <GoodCounselWidget onClick={() => setActivePanel("goodcounsel") />
 
-          {/* Ethics Guidance Widget */}
-          <EthicsGuidanceWidget onClick={() => setActivePanel("ethics")} />
+          {/* Ethics Guidance Widget */
+          <EthicsGuidanceWidget onClick={() => setActivePanel("ethics") />
 
         </div>
       </main>
     </div>
-  );
-}
+  ;

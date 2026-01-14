@@ -173,9 +173,13 @@ export async function processClioWebhook(
           }
         });
 
+        const firstContent = workflowResult.content?.[0];
+        const isText = firstContent && firstContent.type === 'text' && 'text' in firstContent;
+        const errorText = isText ? firstContent.text : 'Unknown error';
+
         if (workflowResult.isError) {
-          logSecurityEvent('error', 'clio_webhook_workflow_failed', `Workflow ${workflowId} failed: ${workflowResult.content[0]?.text || 'Unknown error'}`);
-          return { success: false, error: `Workflow execution failed: ${workflowResult.content[0]?.text || 'Unknown error'}` };
+          logSecurityEvent('error', 'clio_webhook_workflow_failed', `Workflow ${workflowId} failed: ${errorText}`);
+          return { success: false, error: `Workflow execution failed: ${errorText}` };
         }
 
         logAgentAction(
@@ -360,4 +364,15 @@ export async function registerClioWebhook(
   );
 
   return { success: true, webhookId };
+}
+
+}
+}
+}
+}
+}
+)
+)
+}
+)
 }

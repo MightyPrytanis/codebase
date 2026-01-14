@@ -227,3 +227,5 @@ export function AttorneyVerification({
     </Card>
   );
 }
+
+}

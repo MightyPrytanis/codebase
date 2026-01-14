@@ -154,3 +154,12 @@ if __name__ == "__main__":
     
     print("\n=== Integration Complete ===")
     print("Arkiver tools are now available in your Cyrano MCP server!")
+)
+)
+)
+)
+)
+)
+)
+)
+)

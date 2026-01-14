@@ -33,10 +33,15 @@ router.post('/validate-invitation', async (req: Request, res: Response) => {
       },
     });
     
+    const firstContent = result.content?.[0];
+    const errorText = firstContent && firstContent.type === 'text' && 'text' in firstContent
+      ? firstContent.text
+      : 'Invalid invitation token';
+
     if (result.isError) {
       return res.status(400).json({ 
         valid: false, 
-        error: result.content[0]?.text || 'Invalid invitation token' 
+        error: errorText 
       });
     }
     
@@ -76,10 +81,15 @@ router.post('/register', async (req: Request, res: Response) => {
       },
     });
     
+    const firstContent = result.content?.[0];
+    const errorText = firstContent && firstContent.type === 'text' && 'text' in firstContent
+      ? firstContent.text
+      : 'Registration failed';
+
     if (result.isError) {
       return res.status(400).json({ 
         success: false, 
-        error: result.content[0]?.text || 'Registration failed' 
+        error: errorText 
       });
     }
     
@@ -151,10 +161,15 @@ router.post('/feedback', authenticateJWT, async (req: Request, res: Response) =>
       },
     });
     
+    const firstContent = result.content?.[0];
+    const errorText = firstContent && firstContent.type === 'text' && 'text' in firstContent
+      ? firstContent.text
+      : 'Feedback submission failed';
+
     if (result.isError) {
       return res.status(400).json({ 
         success: false, 
-        error: result.content[0]?.text || 'Feedback submission failed' 
+        error: errorText 
       });
     }
     
@@ -182,9 +197,14 @@ router.get('/install-guide', async (req: Request, res: Response) => {
       context: { platform },
     });
     
+    const firstContent = result.content?.[0];
+    const errorText = firstContent && firstContent.type === 'text' && 'text' in firstContent
+      ? firstContent.text
+      : 'Failed to get installation guide';
+
     if (result.isError) {
       return res.status(500).json({ 
-        error: result.content[0]?.text || 'Failed to get installation guide' 
+        error: errorText 
       });
     }
     
@@ -205,7 +225,7 @@ router.post('/pathfinder', authenticateJWT, async (req: Request, res: Response) 
   try {
     const { message, context } = z.object({
       message: z.string(),
-      context: z.record(z.any()).optional(),
+      context: z.record(z.string(), z.any()).optional(),
     }).parse(req.body);
     
     const result = await cyranoPathfinder.execute({
@@ -219,9 +239,14 @@ router.post('/pathfinder', authenticateJWT, async (req: Request, res: Response) 
       model: 'perplexity',
     });
     
+    const firstContent = result.content?.[0];
+    const errorText = firstContent && firstContent.type === 'text' && 'text' in firstContent
+      ? firstContent.text
+      : 'Pathfinder request failed';
+
     if (result.isError) {
       return res.status(500).json({ 
-        error: result.content[0]?.text || 'Pathfinder request failed' 
+        error: errorText 
       });
     }
     

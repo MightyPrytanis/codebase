@@ -269,7 +269,6 @@ export class CourtListenerService {
         },
       }
     );
-    
     const data = await response.json();
     return data.results?.[0] || null;
   }
@@ -285,7 +284,6 @@ export class CourtListenerService {
   }
 }
 ```
-
 **Integration:** `Cyrano/src/tools/verification/citation-checker.ts`
 
 ```typescript

@@ -94,17 +94,19 @@ export async function analyzeClioDocument(
           }
         });
 
+        const firstContent = verificationResult.content[0];
+        const isTextContent = firstContent && firstContent.type === 'text' && 'text' in firstContent;
+
         if (verificationResult.isError) {
+          const errorText = isTextContent ? firstContent.text : 'Unknown error';
           return {
             result: {} as DocumentAnalysisResult,
-            error: `Potemkin verification failed: ${verificationResult.content[0]?.text || 'Unknown error'}`
+            error: `Potemkin verification failed: ${errorText}`
           };
         }
 
         // Extract verification data
-        const verificationData = verificationResult.content[0]?.text 
-          ? JSON.parse(verificationResult.content[0].text) 
-          : {};
+        const verificationData = isTextContent ? JSON.parse(firstContent.text) : {};
 
         // Create work product ID for attorney verification
         const workProductId = `potemkin-analysis-${documentId}-${Date.now()}`;
@@ -113,7 +115,6 @@ export async function analyzeClioDocument(
         const review = requireAttorneyVerification(
           workProductId,
           'confidential', // Document analysis is confidential
-          true, // AI-generated
           JSON.stringify(verificationData)
         );
 
@@ -140,7 +141,7 @@ export async function analyzeClioDocument(
         return { result };
       }
     );
-  } catch (error) {
+   catch (error) {
     return {
       result: {} as DocumentAnalysisResult,
       error: `Document analysis error: ${error instanceof Error ? error.message : String(error)}`
@@ -229,4 +230,10 @@ export async function batchAnalyzeClioDocuments(
   }
 
   return { results, errors };
+}
+
+}
+}
+)
+}
 }

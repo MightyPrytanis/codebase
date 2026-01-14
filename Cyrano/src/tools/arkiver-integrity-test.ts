@@ -123,7 +123,7 @@ export class ArkiverIntegrityTestTool extends BaseTool {
       let potemkinInput: any = {};
 
       switch (validated.testType) {
-        case 'opinion_drift':
+        case 'opinion_drift': {
           potemkinAction = 'test_opinion_drift';
           potemkinInput = {
             targetLLM: validated.llmSource,
@@ -135,8 +135,9 @@ export class ArkiverIntegrityTestTool extends BaseTool {
             minInsights: validated.parameters?.minInsights || 3,
           };
           break;
+        }
 
-        case 'bias':
+        case 'bias': {
           potemkinAction = 'detect_bias';
           // Combine insights content for bias detection
           const combinedContent = insightsToTest
@@ -154,8 +155,9 @@ export class ArkiverIntegrityTestTool extends BaseTool {
             minInsights: validated.parameters?.minInsights || 5,
           };
           break;
+        }
 
-        case 'honesty':
+        case 'honesty': {
           potemkinAction = 'assess_honesty';
           // Combine insights content for honesty assessment
           const honestyContent = insightsToTest
@@ -171,8 +173,9 @@ export class ArkiverIntegrityTestTool extends BaseTool {
             })),
           };
           break;
+        }
 
-        case 'ten_rules':
+        case 'ten_rules': {
           // Ten Rules (Version 1.4 — Revised and updated 16 December 2025) compliance uses honesty assessment workflow
           potemkinAction = 'assess_honesty';
           const tenRulesContent = insightsToTest
@@ -189,8 +192,9 @@ export class ArkiverIntegrityTestTool extends BaseTool {
             })),
           };
           break;
+        }
 
-        case 'fact_check':
+        case 'fact_check': {
           // For fact checking, use verify_document workflow
           potemkinAction = 'verify_document';
           const factCheckContent = insightsToTest
@@ -201,6 +205,7 @@ export class ArkiverIntegrityTestTool extends BaseTool {
             documentId: validated.fileId || 'integrity_test',
           };
           break;
+        }
 
         default:
           return this.createErrorResult(`Unsupported test type: ${validated.testType}`);
@@ -320,8 +325,26 @@ export class ArkiverIntegrityTestTool extends BaseTool {
         `Integrity test failed: ${error instanceof Error ? error.message : String(error)}`
       );
     }
-  }
-}
-
 export const arkiverIntegrityTestTool = new ArkiverIntegrityTestTool();
 
+
+}
+}
+}
+}
+)
+}
+}
+)
+}
+)
+}
+)
+}
+)
+)
+}
+)
+}
+}
+)

@@ -63,3 +63,8 @@ export function Logo({ size = 'md', variant = 'full', className = '' }: LogoProp
 export const LexFiatIcon = () => <Logo variant="icon" />;
 export const LexFiatWordmark = () => <Logo variant="wordmark" />;
 export const LexFiatFull = () => <Logo variant="full" />;
+
+}
+}
+}
+)

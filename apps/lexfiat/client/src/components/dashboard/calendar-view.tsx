@@ -198,5 +198,4 @@ export function CalendarView({ isOpen, onClose }: CalendarViewProps) {
       </SheetContent>
     </Sheet>
   );
-}
 

@@ -302,3 +302,18 @@ export const processWithRegex = new ProcessWithRegexTool();
 export const generateCategorizedFiles = new GenerateCategorizedFilesTool();
 export const runExtractionPipeline = new RunExtractionPipelineTool();
 export const createArkiverConfig = new CreateArkiverConfigTool();
+
+}
+}
+}
+}
+}
+}
+}
+)
+}
+}
+}
+)
+}
+}

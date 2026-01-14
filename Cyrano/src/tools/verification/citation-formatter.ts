@@ -322,7 +322,7 @@ export class CitationFormatter extends BaseTool {
   private correctFederalCitation(citation: string, strictMode: boolean): CitationCorrection {
     const changes: CitationCorrection['changes'] = [];
     let corrected = citation;
-    let confidence = 1.0;
+    const confidence = 1.0;
     
     // Federal citations generally use periods in abbreviations (Bluebook style)
     // But some local rules may vary
@@ -646,7 +646,6 @@ export class CitationFormatter extends BaseTool {
       );
     }
   }
-}
 
 /**
  * Default instance
@@ -660,3 +659,5 @@ export async function handleCitationFormatter(params: any): Promise<DocumentCita
   return await citationFormatter.formatCitations(params);
 }
 
+
+}

@@ -49,4 +49,5 @@ export function AIAnalysisIcon({
       </div>
     </div>
   );
+
 }

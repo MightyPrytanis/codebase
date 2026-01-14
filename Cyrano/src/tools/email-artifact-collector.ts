@@ -216,7 +216,7 @@ export const emailArtifactCollector: BaseTool = new (class extends BaseTool {
         snippet.includes('served');
 
       // Extract dates (filing date, service date)
-      const dateMatch = combined.match(/(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})/);
+      const dateMatch = combined.match(/(\d{1,2}[/-]\d{1,2}[/-]\d{2,4})/);
       const extractedDate = dateMatch ? dateMatch[1] : null;
 
       return {
@@ -278,3 +278,13 @@ export const emailArtifactCollector: BaseTool = new (class extends BaseTool {
     });
   }
 })();
+
+)
+}
+}
+}
+}
+}
+}
+}
+}

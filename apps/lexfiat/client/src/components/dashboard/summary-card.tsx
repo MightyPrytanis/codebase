@@ -193,5 +193,4 @@ export function SummaryCard({
       </div>
     </div>
   );
-}
 

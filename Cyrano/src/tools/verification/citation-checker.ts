@@ -6,6 +6,7 @@
  * 
  * Created: 2025-11-22
  */
+/* eslint-disable no-case-declarations */
 /*
  * Copyright 2025 Cognisint LLC
  * Licensed under the Apache License, Version 2.0
@@ -331,7 +332,6 @@ export class CitationChecker extends BaseTool {
     }
 
     return null;
-  }
 
   /**
    * Validate citation format
@@ -597,8 +597,6 @@ export class CitationChecker extends BaseTool {
       );
     }
   }
-}
-
 /**
  * Default instance
  */
@@ -609,4 +607,13 @@ export const citationChecker = new CitationChecker();
  */
 export async function handleCitationChecker(params: any): Promise<CitationCheckResult> {
   return await citationChecker.checkCitations(params);
+}
+
+}
+}
+}
+}
+}
+}
+}
 }

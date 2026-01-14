@@ -453,7 +453,15 @@ export class MultiModelService {
     const providerCosts = costs[provider] || costs.perplexity;
     return (inputTokens / 1_000_000) * providerCosts.input + (outputTokens / 1_000_000) * providerCosts.output;
   }
-}
 
 export const multiModelService = new MultiModelService();
 
+
+}
+}
+}
+}
+}
+}
+}
+}

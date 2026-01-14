@@ -181,7 +181,6 @@ export class LegalResearchService {
       console.error('Google Scholar search error:', error);
       return [];
     }
-  }
 
   /**
    * Search Justia (free legal research)
@@ -215,8 +214,6 @@ export class LegalResearchService {
       console.error('Justia search error:', error);
       return [];
     }
-  }
-
   /**
    * Search Michigan Legal Help (free Michigan-specific resources)
    */
@@ -244,7 +241,6 @@ export class LegalResearchService {
       return [];
     }
   }
-
   /**
    * Get case by citation (uses CourtListener)
    */

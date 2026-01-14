@@ -40,7 +40,7 @@ const CustodianInputSchema = z.object({
     'update_config',
   ]).describe('Action to perform'),
   target: z.string().optional().describe('Target for action (service, dependency, etc.)'),
-  options: z.record(z.any()).optional().describe('Additional options for action'),
+  options: z.record(z.string(), z.any()).optional().describe('Additional options for action'),
 });
 
 /**
@@ -558,3 +558,12 @@ export class CustodianEngine extends BaseEngine {
 
 // Export singleton instance
 export const custodianEngine = new CustodianEngine();
+
+}
+}
+}
+}
+}
+}
+}
+}

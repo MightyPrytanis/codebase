@@ -302,7 +302,6 @@ curl -X POST http://localhost:5002/auth/register \
    // Include in API requests
    headers: {
      'Authorization': `Bearer ${accessToken}`
-   }
    ```
 
 2. **CSRF Token Handling**

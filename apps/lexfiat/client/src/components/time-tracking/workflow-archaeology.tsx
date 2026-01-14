@@ -260,5 +260,4 @@ export function WorkflowArchaeology({ userId, onReconstruct }: WorkflowArchaeolo
       </div>
     </div>
   );
-}
 
