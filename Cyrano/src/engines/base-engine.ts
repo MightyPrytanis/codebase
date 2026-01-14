@@ -9,7 +9,7 @@
  * individual primitives) for the performance of core/mission-critical
  * functions of an app.
  */
-/*
+ /*
  * Copyright 2025 Cognisint LLC
  * Licensed under the Apache License, Version 2.0
  * See LICENSE.md for full license text
@@ -620,7 +620,7 @@ export abstract class BaseEngine {
           }, null, 2);
 
           // Standard attorney review warning for all AI-generated content
-          const attorneyReviewWarning = '⚠️ ATTORNEY REVIEW REQUIRED: This AI-generated content has not been reviewed by a licensed attorney. All legal documents, calculations, and research results must be reviewed and verified by a qualified attorney before use. The system and its developers disclaim all liability for any errors, omissions, or inaccuracies in AI-generated content.';
+          const attorneyReviewWarning = '⚠️ ATTORNEY REVIEW REQUIRED: This AI-generated content has not been reviewed by a licensed attorney. All legal documents, calculations, and research r[...]';
 
           // Collect all warnings
           const allWarnings: string[] = [];
