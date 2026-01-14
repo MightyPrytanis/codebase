@@ -9,7 +9,7 @@
  * Track Beta: Tests matter-based data isolation
  */
 
-import { describe, it, expect, beforeEach } from '@jest/globals';
+import { describe, it, expect, beforeEach } from 'vitest';
 import {
   matterIsolationStore,
   enforceMatterIsolation,
@@ -21,8 +21,8 @@ import {
 describe('Matter Isolation Integration (Track Beta)', () => {
   beforeEach(() => {
     // Clear stores before each test
-    matterIsolationStore.clearMatterData = jest.fn();
-    matterIsolationStore.clearAgentContext = jest.fn();
+    matterIsolationStore.clearMatterData = vi.fn();
+    matterIsolationStore.clearAgentContext = vi.fn();
   });
 
   describe('Matter Data Storage', () => {

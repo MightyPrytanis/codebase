@@ -9,7 +9,7 @@
  * Track Alpha: Tests OAuth infrastructure ready for credential drop-in
  */
 
-import { describe, it, expect, beforeEach, afterEach } from '@jest/globals';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import {
   validateClioCredentials,
   generateOAuthState,
@@ -165,6 +165,3 @@ describe('Clio OAuth Integration (Track Alpha)', () => {
     });
   });
 });
-
-)
-}
