@@ -1015,8 +1015,14 @@ app.get('/api/good-counsel/overview', async (req, res) => {
 // FORECASTER API (LexFiat Forecaster™ standalone frontend compatibility)
 // ============================================================================
 
+// Import FederalTaxInputSchema dynamically for validation
+// Note: We use z.lazy() to avoid circular dependency issues with dynamic imports
 const ForecastHttpRequestSchema = z.object({
-  forecast_input: z.any(),
+  forecast_input: z.lazy(() => {
+    // This will be validated in the handler after importing the schema
+    // Using z.record allows flexibility for additional properties
+    return z.record(z.any());
+  }),
   branding: z.object({
     presentationMode: z.enum(['strip', 'watermark', 'none']).optional(),
     userRole: z.enum(['attorney', 'staff', 'client', 'other']).optional(),
@@ -1050,8 +1056,19 @@ app.post('/api/forecast/tax', async (req, res) => {
     }
 
     // Use calculateFederal() for complete credit calculations (CTC/ODC/ACTC/EITC)
-    const { calculateFederal } = await import('./modules/forecast/formulas/tax-formulas.js');
-    const calculatedValues = calculateFederal(forecast_input);
+    const { calculateFederal, FederalTaxInputSchema } = await import('./modules/forecast/formulas/tax-formulas.js');
+    
+    // Validate forecast_input with FederalTaxInputSchema for type safety
+    const validationResult = FederalTaxInputSchema.safeParse(forecast_input);
+    if (!validationResult.success) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid forecast_input data',
+        details: validationResult.error.issues
+      });
+    }
+    
+    const calculatedValues = calculateFederal(validationResult.data);
 
     res.json({
       success: true,
@@ -1080,8 +1097,19 @@ app.post('/api/forecast/tax/pdf', async (req, res) => {
     const year = forecast_input?.year || new Date().getFullYear();
     
     // 1) Calculate values using calculateFederal() for complete credit calculations
-    const { calculateFederal } = await import('./modules/forecast/formulas/tax-formulas.js');
-    const calculated = calculateFederal(forecast_input);
+    const { calculateFederal, FederalTaxInputSchema } = await import('./modules/forecast/formulas/tax-formulas.js');
+    
+    // Validate forecast_input with Zod schema
+    const validationResult = FederalTaxInputSchema.safeParse(forecast_input);
+    if (!validationResult.success) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid forecast_input data',
+        details: validationResult.error.issues
+      });
+    }
+    
+    const calculated = calculateFederal(validationResult.data);
 
     // 2) Map to 1040 fill keys (minimal set; expands as module evolves)
     const filingStatusIndex: Record<string, number> = {

@@ -9,6 +9,8 @@
  * Implements IRS tax brackets and calculation logic for 2018-2025
  */
 
+import { z } from 'zod';
+
 export type FilingStatus = 'single' | 'married_joint' | 'married_separate' | 'head_of_household' | 'qualifying_widow';
 
 export interface TaxBracket {
@@ -510,6 +512,30 @@ export interface FederalTaxInput {
   canBeClaimedAsDependent?: boolean;
   estimatedWithholding?: number;
 }
+
+/**
+ * Zod validation schema for FederalTaxInput
+ * Ensures type safety and runtime validation at API boundaries
+ */
+export const FederalTaxInputSchema = z.object({
+  year: z.number().int().min(2018).max(2025),
+  filingStatus: z.enum(['single', 'married_joint', 'married_separate', 'head_of_household', 'qualifying_widow']),
+  wages: z.number().nonnegative(),
+  selfEmploymentIncome: z.number().nonnegative().optional(),
+  interestIncome: z.number().nonnegative().optional(),
+  dividendIncome: z.number().nonnegative().optional(),
+  capitalGains: z.number().optional(),
+  otherIncome: z.number().optional(),
+  itemizedDeductions: z.number().nonnegative().optional(),
+  standardDeduction: z.number().nonnegative().optional(),
+  qualifyingChildrenUnder17: z.number().int().nonnegative().optional(),
+  otherDependents: z.number().int().nonnegative().optional(),
+  filerAge: z.number().int().positive().optional(),
+  spouseAge: z.number().int().positive().optional(),
+  canBeClaimedAsDependent: z.boolean().optional(),
+  estimatedWithholding: z.number().nonnegative().optional()
+});
+
 
 /**
  * Standalone backend result interface (for compatibility)

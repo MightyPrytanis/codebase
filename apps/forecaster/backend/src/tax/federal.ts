@@ -12,7 +12,7 @@ import {
   type FederalTaxInput,
   type FederalTaxResult,
   type FilingStatus,
-} from '../../../../Cyrano/src/modules/forecast/formulas/tax-formulas.js';
+} from '../../../../../Cyrano/src/modules/forecast/formulas/tax-formulas.js';
 
 // Re-export for backward compatibility
 export type { FederalTaxInput, FederalTaxResult, FilingStatus };
