@@ -41,9 +41,9 @@ export default function PerformancePage() {
             <h1 className="text-3xl font-bold text-primary mb-2">Performance Analytics</h1>
             <p className="text-secondary">Track your productivity and automation metrics</p>
           </div>
-          <Link to="/">
-            <Button variant="outline">Back to Dashboard</Button>
-          </Link>
+          <Button variant="outline" asChild>
+            <Link to="/">Back to Dashboard</Link>
+          </Button>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
