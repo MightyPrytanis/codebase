@@ -332,6 +332,7 @@ export class CitationChecker extends BaseTool {
     }
 
     return null;
+  }
 
   /**
    * Validate citation format
@@ -607,13 +608,4 @@ export const citationChecker = new CitationChecker();
  */
 export async function handleCitationChecker(params: any): Promise<CitationCheckResult> {
   return await citationChecker.checkCitations(params);
-}
-
-}
-}
-}
-}
-}
-}
-}
 }

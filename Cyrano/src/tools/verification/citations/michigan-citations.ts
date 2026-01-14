@@ -505,18 +505,3 @@ export class MichiganCitationValidator {
     return result;
   }
 export const michiganCitationValidator = new MichiganCitationValidator();
-
-}
-}
-}
-}
-}
-)
-)
-}
-}
-}
-}
-}
-)
-)
