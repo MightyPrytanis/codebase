@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AvatarUpload } from "@/components/dashboard/avatar-upload";
 import { IntegrationSettings } from "@/components/dashboard/integration-settings";
@@ -13,7 +14,6 @@ import { Settings, User, Link, Bot, MessageSquare, Shield, Bell, ArrowLeft, Scal
 import { EthicsDashboard } from "@/components/ethics/ethics-dashboard";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useTheme } from "@/components/theme/theme-provider";
 import { ThemeName } from "@/lib/theme";

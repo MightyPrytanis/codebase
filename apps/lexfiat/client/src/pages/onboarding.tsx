@@ -4,7 +4,7 @@
  * See LICENSE.md for full license text
  */
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   ChevronRight, 
