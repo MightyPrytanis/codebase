@@ -4,6 +4,7 @@
  * See LICENSE.md for full license text
  */
 
+import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Calendar, Clock, AlertTriangle, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
