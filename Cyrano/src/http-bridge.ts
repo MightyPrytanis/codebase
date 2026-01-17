@@ -1015,8 +1015,14 @@ app.get('/api/good-counsel/overview', async (req, res) => {
 // FORECASTER API (LexFiat Forecaster™ standalone frontend compatibility)
 // ============================================================================
 
+// Import FederalTaxInputSchema dynamically for validation
+// Note: We use z.lazy() to avoid circular dependency issues with dynamic imports
 const ForecastHttpRequestSchema = z.object({
-  forecast_input: z.any(),
+  forecast_input: z.lazy(() => {
+    // This will be validated in the handler after importing the schema
+    // Using z.record allows flexibility for additional properties
+    return z.record(z.any());
+  }),
   branding: z.object({
     presentationMode: z.enum(['strip', 'watermark', 'none']).optional(),
     userRole: z.enum(['attorney', 'staff', 'client', 'other']).optional(),
@@ -1049,10 +1055,20 @@ app.post('/api/forecast/tax', async (req, res) => {
       });
     }
 
-    const { taxForecastModule } = await import('./modules/forecast/tax-forecast-module.js');
-    const calcResult = await taxForecastModule.execute({ action: 'calculate', input: forecast_input });
-    const calcText = extractTextPayload(calcResult);
-    const calculatedValues = calcText ? JSON.parse(calcText) : {};
+    // Use calculateFederal() for complete credit calculations (CTC/ODC/ACTC/EITC)
+    const { calculateFederal, FederalTaxInputSchema } = await import('./modules/forecast/formulas/tax-formulas.js');
+    
+    // Validate forecast_input with FederalTaxInputSchema for type safety
+    const validationResult = FederalTaxInputSchema.safeParse(forecast_input);
+    if (!validationResult.success) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid forecast_input data',
+        details: validationResult.error.issues
+      });
+    }
+    
+    const calculatedValues = calculateFederal(validationResult.data);
 
     res.json({
       success: true,
@@ -1079,12 +1095,21 @@ app.post('/api/forecast/tax/pdf', async (req, res) => {
 
     const { forecast_input, branding } = parsed.data;
     const year = forecast_input?.year || new Date().getFullYear();
-    const { taxForecastModule } = await import('./modules/forecast/tax-forecast-module.js');
-
-    // 1) Calculate values
-    const calcResult = await taxForecastModule.execute({ action: 'calculate', input: forecast_input });
-    const calcText = extractTextPayload(calcResult);
-    const calculated = calcText ? JSON.parse(calcText) : {};
+    
+    // 1) Calculate values using calculateFederal() for complete credit calculations
+    const { calculateFederal, FederalTaxInputSchema } = await import('./modules/forecast/formulas/tax-formulas.js');
+    
+    // Validate forecast_input with Zod schema
+    const validationResult = FederalTaxInputSchema.safeParse(forecast_input);
+    if (!validationResult.success) {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid forecast_input data',
+        details: validationResult.error.issues
+      });
+    }
+    
+    const calculated = calculateFederal(validationResult.data);
 
     // 2) Map to 1040 fill keys (minimal set; expands as module evolves)
     const filingStatusIndex: Record<string, number> = {
@@ -1113,13 +1138,16 @@ app.post('/api/forecast/tax/pdf', async (req, res) => {
       taxableIncome: Number(calculated?.taxableIncome || 0),
       taxOwed: Number(calculated?.totalTax || 0),
       federalTaxWithheld: withholding,
-      totalPayments: withholding,
+      earnedIncomeCredit: Number(calculated?.creditsBreakdown?.earnedIncomeCreditRefundable || 0),
+      additionalChildTaxCredit: Number(calculated?.creditsBreakdown?.additionalChildTaxCreditRefundable || 0),
+      totalPayments: Number(calculated?.totalPayments || withholding),
       // Basic refund/balance presentation
       overpayment: refundOrBalance > 0 ? refundOrBalance : 0,
       amountOwed: refundOrBalance < 0 ? Math.abs(refundOrBalance) : 0,
     };
 
     // 3) Fill Form 1040
+    const { taxForecastModule } = await import('./modules/forecast/tax-forecast-module.js');
     const filledResult = await taxForecastModule.execute({ action: 'generate_pdf', input: formData });
     const filledText = extractTextPayload(filledResult);
     const filledParsed = filledText ? JSON.parse(filledText) : {};
@@ -1510,58 +1538,3 @@ if (shouldStartServer) {
 } else {
   console.error('[HTTP Bridge] Not starting server (test environment detected)');
 }
-
-}
-}
-}
-)
-}
-)
-)
-}
-}
-}
-}
-}
-}
-}
-)
-}
-}
-)
-)
-)
-)
-}
-}
-)
-}
-}
-)
-}
-}
-}
-)
-}
-)
-)
-}
-}
-}
-}
-}
-}
-}
-)
-}
-}
-)
-)
-)
-)
-}
-}
-)
-}
-}
-)

@@ -51,13 +51,20 @@ export default function CityTaxForecast() {
 
     const step1 = window.confirm(
       [
-        'DANGER ZONE: Remove advisory/branding from generated forms?',
+        'Remove advisory/branding from generated forms?',
         '',
-        'These outputs are projections and are NOT real filings.',
-        'If you remove the advisory, the PDFs may be easily mistaken for filing-ready documents.',
-        'Consult a qualified professional before relying on these outputs.',
+        'LexFiat Forecaster simulates tax preparation software. Outputs are',
+        'consistent with applicable law and tax formulas, but are not intended',
+        'for actual tax preparation.',
         '',
-        'Click OK to continue, or Cancel to keep the advisory.',
+        'These forecasts are for litigation and planning purposes only.',
+        'Removing the advisory may cause outputs to be mistaken for',
+        'filing-ready documents by courts, opposing counsel, or clients.',
+        '',
+        'The user assumes responsibility for any consequences of using',
+        'unlabeled outputs.',
+        '',
+        'Click OK to acknowledge these risks, or Cancel to keep the advisory.',
       ].join('\n')
     );
     if (!step1) {
@@ -65,7 +72,7 @@ export default function CityTaxForecast() {
       return;
     }
 
-    const step2 = window.prompt('Type REMOVE to confirm you want to remove the advisory (expires after 24 hours):', '');
+    const step2 = window.prompt('Type REMOVE to confirm removal of the advisory (expires after 24 hours):', '');
     if (step2 !== 'REMOVE') {
       setBrandingMode('strip');
       return;
@@ -310,7 +317,3 @@ export default function CityTaxForecast() {
     </div>
   );
 }
-
-
-}
-)

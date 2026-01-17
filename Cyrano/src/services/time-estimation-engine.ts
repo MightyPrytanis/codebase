@@ -137,6 +137,7 @@ Events (indexed):\n${events.map((e, i) => `${i}. [${e.source}] ${e.description |
     }
 
     return events;
+  }
 
   private findNormative(ruleSet: NormativeRule[] | undefined, task: string): number | undefined {
     if (!ruleSet) return undefined;
@@ -310,7 +311,6 @@ Events (indexed):\n${events.map((e, i) => `${i}. [${e.source}] ${e.description |
   }
 }
 
-}
 }
 )
 }
