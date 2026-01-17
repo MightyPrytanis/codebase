@@ -68,7 +68,7 @@ describe('MCP HTTP Bridge Compliance', () => {
       console.warn('Could not get CSRF token:', error);
       // Continue without CSRF token - tests may fail but we'll see the actual error
     }
-  };
+  });
 
   afterAll(async () => {
     // Clean up: close server
@@ -300,9 +300,3 @@ describe('MCP HTTP Bridge Compliance', () => {
  * 
  * For now, these tests can be run manually with: npm run http
  */
-
-
-)
-}
-)
-}
