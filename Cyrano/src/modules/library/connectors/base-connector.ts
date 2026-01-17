@@ -118,5 +118,3 @@ export async function withRetry<T>(
   }
 
   throw lastError || new Error('Retry failed');
-}
-

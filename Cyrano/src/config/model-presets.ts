@@ -115,6 +115,3 @@ export function getAllPresets(): Record<string, VerificationPreset> {
  */
 export function isValidPreset(mode: string): boolean {
   return mode in VERIFICATION_PRESETS;
-}
-
-

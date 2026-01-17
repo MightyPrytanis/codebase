@@ -99,6 +99,3 @@ export class TextExtractor {
     const paragraphs = content.split(/\n\s*\n/).filter(p => p.trim().length > 0).length;
 
     return { headings, paragraphs };
-  }
-}
-

@@ -364,15 +364,3 @@ export async function registerClioWebhook(
   );
 
   return { success: true, webhookId };
-}
-
-}
-}
-}
-}
-}
-)
-)
-}
-)
-}

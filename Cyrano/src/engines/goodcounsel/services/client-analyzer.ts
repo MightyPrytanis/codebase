@@ -422,24 +422,3 @@ export class ClientAnalyzer {
     if (status.includes('inactive') || status.includes('closed')) return 'inactive';
     if (status.includes('risk') || status.includes('warning')) return 'at_risk';
     return 'active';
-  }
-}
-
-
-}
-}
-}
-}
-}
-}
-}
-}
-}
-)
-}
-}
-)
-}
-}
-}
-}

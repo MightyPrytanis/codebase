@@ -252,9 +252,3 @@ export class DocumentDrafterTool extends BaseTool {
 
 // Export pre-instantiated tool instance (standard pattern)
 export const documentDrafterTool = new DocumentDrafterTool();
-
-
-}
-}
-}
-)

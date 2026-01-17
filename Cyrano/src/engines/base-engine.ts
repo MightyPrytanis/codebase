@@ -707,4 +707,3 @@ export abstract class BaseEngine {
    * Cleanup resources
    */
   abstract cleanup(): Promise<void>;
-}

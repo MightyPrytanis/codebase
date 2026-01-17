@@ -93,5 +93,3 @@ export interface Skill extends ModuleConfig {
 export interface LoadedSkill {
   skill: Skill;
   frontmatter: SkillFrontmatter;
-}
-

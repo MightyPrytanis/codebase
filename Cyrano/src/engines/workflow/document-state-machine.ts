@@ -104,11 +104,3 @@ export function getStateCategory(state: DocumentState): string | null {
   };
 
   return categoryMap[state] || null;
-}
-
-
-
-
-
-}
-}

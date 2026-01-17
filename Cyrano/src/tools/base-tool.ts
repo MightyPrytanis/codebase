@@ -64,7 +64,3 @@ export abstract class BaseTool {
       isError: false,
       metadata: enhancedMetadata,
     };
-  }
-}
-
-}

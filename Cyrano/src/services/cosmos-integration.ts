@@ -179,5 +179,3 @@ export class CosmosIntegration {
     }
 
     return opportunities;
-  }
-}

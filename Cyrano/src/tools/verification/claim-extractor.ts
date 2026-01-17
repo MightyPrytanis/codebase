@@ -518,4 +518,3 @@ export const claimExtractor = new ClaimExtractor();
  */
 export async function handleClaimExtractor(params: any): Promise<ClaimExtractionResult> {
   return await claimExtractor.extractClaims(params);
-}

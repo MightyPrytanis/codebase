@@ -75,7 +75,3 @@ export class ResourceProvisioner {
       return JSON.parse(raw);
     } catch {
       return {};
-    }
-  }
-}
-

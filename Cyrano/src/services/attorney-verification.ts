@@ -248,4 +248,3 @@ export function getVerificationRequirement(workProductType: WorkProductType): Ve
  */
 export function getReviewIntensity(workProductType: WorkProductType): ReviewIntensity {
   return VERIFICATION_REQUIREMENTS[workProductType].intensity;
-}

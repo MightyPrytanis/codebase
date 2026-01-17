@@ -528,8 +528,3 @@ export class ChronometricModule extends BaseModule {
 
 // Export singleton instance
 export const chronometricModule = new ChronometricModule();
-
-}
-}
-}
-}

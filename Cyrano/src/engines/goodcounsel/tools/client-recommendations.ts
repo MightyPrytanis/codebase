@@ -174,7 +174,3 @@ class ClientRecommendationsTool extends BaseTool {
 }
 
 export const clientRecommendationsTool = new ClientRecommendationsTool();
-
-
-}
-}

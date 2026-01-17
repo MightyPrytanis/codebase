@@ -19,6 +19,3 @@ export function getTextFromResult(result: CallToolResult, index: number = 0): st
     return item.text;
   }
   return '';
-}
-
-

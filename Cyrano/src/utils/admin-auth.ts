@@ -44,4 +44,3 @@ export function requireAdmin(req: Request, res: any, next: any): void {
     return;
   }
   next();
-}

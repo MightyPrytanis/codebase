@@ -467,10 +467,3 @@ export class GmailService {
     this.config.accessToken = token;
     if (refreshToken) {
       this.config.refreshToken = refreshToken;
-    }
-  }
-}
-
-
-}
-}

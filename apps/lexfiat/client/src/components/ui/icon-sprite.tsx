@@ -180,4 +180,3 @@ export function IconSprite() {
       </symbol>
     </svg>
   );
-}

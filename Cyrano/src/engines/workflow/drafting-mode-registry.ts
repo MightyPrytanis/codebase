@@ -69,8 +69,3 @@ export function getDraftingMode(id: DraftingModeId): DraftingMode | undefined {
 export function isModeAvailable(id: DraftingModeId): boolean {
   const mode = DRAFTING_MODES[id];
   return mode?.enabled ?? false;
-}
-
-
-
-

@@ -71,4 +71,3 @@ declare module '@aws-sdk/client-s3' {
  */
 declare module 'drizzle-zod' {
   export function createInsertSchema<T>(schema: any): any;
-}

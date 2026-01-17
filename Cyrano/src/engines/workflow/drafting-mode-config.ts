@@ -90,8 +90,3 @@ export function setDocumentTypeDraftingMode(
       [documentType]: mode,
     },
   };
-}
-
-
-
-

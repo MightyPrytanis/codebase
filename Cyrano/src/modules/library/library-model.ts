@@ -185,4 +185,3 @@ export interface LibraryStats {
   lastSyncAt?: Date;
   lastError?: string;
   queueDepth: number;
-}

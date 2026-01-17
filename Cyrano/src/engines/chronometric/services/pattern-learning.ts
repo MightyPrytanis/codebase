@@ -227,5 +227,3 @@ export async function schedulePatternUpdate(userId: string): Promise<void> {
 export async function clearPatternData(userId: string): Promise<void> {
   learnedPatterns.delete(userId);
   timeEntryHistory.delete(userId);
-}
-
