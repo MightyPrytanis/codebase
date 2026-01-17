@@ -310,7 +310,3 @@ Events (indexed):\n${events.map((e, i) => `${i}. [${e.source}] ${e.description |
     return results;
   }
 }
-
-}
-)
-}
