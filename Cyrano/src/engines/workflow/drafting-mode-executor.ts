@@ -353,3 +353,6 @@ export async function executeModeBDraft(context: DraftingContext, summary: strin
       currentState: 'analysis_complete',
       error: error instanceof Error ? error.message : String(error),
     };
+}
+}
+}

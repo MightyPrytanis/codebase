@@ -310,3 +310,4 @@ export function isToolAllowed(
   }
 
   return { allowed: true };
+}

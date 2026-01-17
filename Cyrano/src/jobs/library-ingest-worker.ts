@@ -377,3 +377,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     console.error('[Library Ingest Worker] Fatal error:', err);
     process.exit(1);
   });
+}

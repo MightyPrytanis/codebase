@@ -146,3 +146,5 @@ export class VectorStore {
    */
   getAll(): VectorDocument[] {
     return Array.from(this.documents.values());
+}
+}

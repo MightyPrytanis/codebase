@@ -226,3 +226,4 @@ export function registerGatekeeper(config: GatekeeperConfig): void {
     undefined,
     { agent_id: config.agentId, role: config.role }
   );
+}

@@ -141,3 +141,5 @@ export class ResourceLoader {
    */
   getCacheDir(): string {
     return path.join(this.resourcesDir, 'forecast');
+}
+}

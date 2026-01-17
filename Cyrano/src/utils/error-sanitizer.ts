@@ -102,3 +102,5 @@ export function createUserFriendlyError(
   
   // Return sanitized message for user
   return sanitizeErrorMessage(error, userContext);
+}
+}

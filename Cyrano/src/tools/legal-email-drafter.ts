@@ -723,3 +723,5 @@ export const validateLegalLanguage = new (class extends BaseTool {
     };
   }
 })();
+}
+}

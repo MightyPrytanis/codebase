@@ -249,3 +249,4 @@ export async function listChanges(
   lastSyncAt?: Date
 ): Promise<FileChange[]> {
   return s3Connector.listChanges({ path, credentials, lastSyncAt });
+}

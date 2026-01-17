@@ -332,3 +332,4 @@ export async function checkGeneratedContent(
     ethicsCheck,
     modified: false,
   };
+}

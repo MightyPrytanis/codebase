@@ -295,3 +295,4 @@ ${new Date().toISOString().split('T')[0]}
 
 // Export singleton instance
 export const costEstimationService = new CostEstimationService();
+}

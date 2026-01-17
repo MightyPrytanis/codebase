@@ -598,3 +598,4 @@ export const sourceVerifier = new SourceVerifier();
  */
 export async function handleSourceVerifier(params: any): Promise<SourceVerificationResult> {
   return await sourceVerifier.verifySources(params);
+}

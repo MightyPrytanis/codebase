@@ -263,3 +263,5 @@ export class OutlookCalendarService extends OutlookService {
       jobTitle: contact.jobTitle,
       officeLocation: contact.officeLocation,
     };
+}
+}

@@ -210,3 +210,4 @@ export function extractMatterId(data: any): string | null {
     return data.matterId || data.matter_id || data.matter?.id || null;
   }
   return null;
+}

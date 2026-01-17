@@ -208,3 +208,5 @@ export async function syncEventsWithClio(
       synced: 0,
       error: `Failed to sync events with Clio: ${error instanceof Error ? error.message : String(error)}`
     };
+}
+}

@@ -245,3 +245,4 @@ export async function listChanges(
   lastSyncAt?: Date
 ): Promise<FileChange[]> {
   return oneDriveConnector.listChanges({ path, credentials, lastSyncAt });
+}
