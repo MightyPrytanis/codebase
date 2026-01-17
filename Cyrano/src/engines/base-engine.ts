@@ -708,6 +708,3 @@ export abstract class BaseEngine {
    */
   abstract cleanup(): Promise<void>;
 }
-
-
-}

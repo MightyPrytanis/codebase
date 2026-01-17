@@ -7,7 +7,7 @@
 import React, { useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Settings, Bell, Palette, Globe, Link as LinkIcon, Bot } from "lucide-react";
-import { useLocation } from "wouter";
+import { useNavigate } from "react-router-dom";
 import { useTheme } from "@/components/theme/theme-provider";
 import { ThemeSelector } from "@/components/theme/theme-selector";
 import { ViewModeSelector } from "@/components/dashboard/view-mode-selector";
@@ -18,12 +18,12 @@ interface SettingsPanelProps {
 }
 
 export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   const { theme } = useTheme();
   const [activeSection, setActiveSection] = useState<string | null>(null);
 
   const handleNavigate = (path: string, tab?: string) => {
-    setLocation(path + (tab ? `?tab=${tab}` : ""));
+    navigate(path + (tab ? `?tab=${tab}` : ""));
     onClose();
   };
 
