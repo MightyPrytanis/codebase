@@ -472,7 +472,7 @@ Ensure the email is clear, concise, and professionally appropriate for a ${reque
 
     return recommendations[recipientType] || [];
   }
-();
+})();
 
 /**
  * Refine Email Tone Tool
@@ -593,6 +593,7 @@ Provide only the refined email without additional commentary.`;
     } catch (error) {
       throw new Error(`AI call failed: ${error instanceof Error ? error.message : String(error)}`);
     }
+  }
 
   /**
    * Get tone guidelines (shared with main tool)
@@ -626,7 +627,8 @@ Provide only the refined email without additional commentary.`;
 
     return guidelines[tone] || guidelines.professional;
   }
-();
+})();
+
 /**
  * Validate Legal Language Tool
  * Validates that legal language in the email is accurate and avoids unnecessary jargon
@@ -723,5 +725,3 @@ export const validateLegalLanguage = new (class extends BaseTool {
     };
   }
 })();
-}
-}

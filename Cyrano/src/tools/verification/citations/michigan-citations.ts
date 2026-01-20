@@ -313,6 +313,7 @@ export class MichiganCitationValidator {
       errors,
       warnings,
     };
+  }
   
   /**
    * Parse public domain citation

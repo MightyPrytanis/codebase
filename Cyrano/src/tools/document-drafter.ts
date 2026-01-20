@@ -128,6 +128,7 @@ export class DocumentDrafterTool extends BaseTool {
           };
         }
         provider = validated.aiProvider as AIProvider;
+      }
       
       // Use AI to generate document content
       const aiService = new AIService();
@@ -249,8 +250,7 @@ export class DocumentDrafterTool extends BaseTool {
       );
     }
   }
+}
 
 // Export pre-instantiated tool instance (standard pattern)
 export const documentDrafterTool = new DocumentDrafterTool();
-}
-}
