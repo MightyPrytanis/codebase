@@ -918,22 +918,3 @@ export const factChecker: BaseTool = new (class extends BaseTool {
     return supportScores.reduce((sum, score) => sum + score, 0) / supportScores.length;
   }
 ();
-
-)
-}
-}
-}
-}
-)
-}
-}
-}
-)
-}
-}
-}
-}
-)
-}
-}
-}

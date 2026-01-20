@@ -357,12 +357,3 @@ All retrieved information includes source attribution for transparency and verif
     }
   }
 })();
-
-)
-}
-}
-}
-}
-}
-}
-)

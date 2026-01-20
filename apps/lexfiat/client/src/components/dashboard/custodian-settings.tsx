@@ -370,4 +370,3 @@ export function CustodianSettings() {
       </CardContent>
     </Card>
   );
-}

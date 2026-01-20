@@ -72,5 +72,3 @@ export default function DraftPrepPanel({ isOpen, onClose }: DraftPrepPanelProps)
       </SheetContent>
     </Sheet>
   );
-}
-

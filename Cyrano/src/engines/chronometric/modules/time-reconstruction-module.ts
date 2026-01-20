@@ -489,3 +489,4 @@ export class TimeReconstructionModule extends BaseModule {
   }
 
 // Export singleton instance
+}

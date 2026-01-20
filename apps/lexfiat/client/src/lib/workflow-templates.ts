@@ -828,4 +828,3 @@ export function searchWorkflows(query: string): WorkflowTemplate[] {
     w.tags.some(tag => tag.toLowerCase().includes(lowerQuery)) ||
     w.useCases.some(uc => uc.toLowerCase().includes(lowerQuery))
   );
-}

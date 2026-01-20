@@ -231,9 +231,4 @@ export async function batchAnalyzeClioDocuments(
 
   return { results, errors };
 }
-
-}
-}
-)
-}
 }

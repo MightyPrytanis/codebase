@@ -260,11 +260,6 @@ export class OutlookService {
     this.config.accessToken = token;
     if (refreshToken) {
       this.config.refreshToken = refreshToken;
-    }
-  }
-}
-
-
 }
 }
 }

@@ -257,11 +257,3 @@ export {
   CarouselItem,
   CarouselPrevious,
   CarouselNext,
-}
-
-)
-}
-)
-)
-}
-)

@@ -22,10 +22,3 @@ export function DemoBadge({ className = "", variant = "destructive" }: DemoBadge
       DEMO
     </Badge>
   );
-}
-
-
-
-
-
-}

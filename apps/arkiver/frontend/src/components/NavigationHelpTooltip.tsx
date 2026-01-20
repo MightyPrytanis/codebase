@@ -11,5 +11,3 @@ export function NavigationHelpTooltip({ label, description }: NavigationHelpTool
       {label}
     </span>
   );
-}
-

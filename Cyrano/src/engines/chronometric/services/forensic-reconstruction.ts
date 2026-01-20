@@ -181,3 +181,4 @@ export class ForensicReconstructionService {
 
 // Export singleton instance
 export const forensicReconstructionService = new ForensicReconstructionService();
+}
