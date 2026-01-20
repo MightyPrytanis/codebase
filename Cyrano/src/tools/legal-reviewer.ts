@@ -923,4 +923,4 @@ export const legalReviewer = new (class extends BaseTool {
            document.toLowerCase().includes('osha') ||
            document.toLowerCase().includes('workplace');
   }
-}();
+})();
