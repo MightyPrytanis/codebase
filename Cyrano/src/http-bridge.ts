@@ -1021,7 +1021,7 @@ const ForecastHttpRequestSchema = z.object({
   forecast_input: z.lazy(() => {
     // This will be validated in the handler after importing the schema
     // Using z.record allows flexibility for additional properties
-    return z.record(z.any());
+    return z.record(z.string(), z.any());
   }),
   branding: z.object({
     presentationMode: z.enum(['strip', 'watermark', 'none']).optional(),
@@ -1068,7 +1068,7 @@ app.post('/api/forecast/tax', async (req, res) => {
       });
     }
     
-    const calculatedValues = calculateFederal(validationResult.data);
+    const calculatedValues = calculateFederal(validationResult.data as any);
 
     res.json({
       success: true,
@@ -1109,7 +1109,7 @@ app.post('/api/forecast/tax/pdf', async (req, res) => {
       });
     }
     
-    const calculated = calculateFederal(validationResult.data);
+    const calculated = calculateFederal(validationResult.data as any);
 
     // 2) Map to 1040 fill keys (minimal set; expands as module evolves)
     const filingStatusIndex: Record<string, number> = {

@@ -487,6 +487,7 @@ export class TimeReconstructionModule extends BaseModule {
   async cleanup(): Promise<void> {
     // Cleanup any resources
   }
+}
 
 // Export singleton instance
-}
+export const timeReconstructionModule = new TimeReconstructionModule();
