@@ -5,6 +5,9 @@ services:
   postgres:
     image: postgres:15-alpine
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    read_only: false  # Postgres needs write access
     environment:
       POSTGRES_DB: cyrano
       POSTGRES_USER: postgres
@@ -23,6 +26,9 @@ services:
   redis:
     image: redis:7-alpine
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    read_only: false  # Redis needs write access
     ports:
       - "6379:6379"
     command: redis-server --appendonly yes
@@ -35,6 +41,9 @@ services:
       context: .
       dockerfile: Dockerfile
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    read_only: false  # App needs write access for uploads
     ports:
       - "5000:5000"
     depends_on:
@@ -63,6 +72,9 @@ services:
   pgadmin:
     image: dpage/pgadmin4:latest
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    read_only: false  # pgAdmin needs write access
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@cyrano.local
       PGADMIN_DEFAULT_PASSWORD: admin123

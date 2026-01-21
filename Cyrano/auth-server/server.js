@@ -63,6 +63,8 @@ app.use(session({
     httpOnly: true, // Always prevent XSS access to cookies
     sameSite: 'strict', // CSRF protection via SameSite attribute
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // Explicit expiry
+    domain: isProduction ? process.env.COOKIE_DOMAIN || undefined : undefined, // Set domain in production
     path: '/'
   }
 }));
