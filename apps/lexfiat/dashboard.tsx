@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Settings, Clock, FileText, Users, Zap, Shield, TrendingUp, AlertCircle } from "lucide-react";
-import { Link } from "wouter";
+import { Link } from "react-router-dom";
 import { useState } from "react";
 import Header from "@/components/layout/header";
 import { GoodCounselWidget } from "@/components/dashboard/good-counsel-widget";
@@ -77,7 +77,7 @@ export default function Dashboard() {
               <p className="text-sm text-secondary panel-text-secondary">Automated workflow • Human oversight</p>
             </div>
           </div>
-          <Link href="/settings">
+          <Link to="/settings">
             <Button className="swim-button good-counsel-button">
               <Settings className="w-4 h-4 mr-2" />
               Settings

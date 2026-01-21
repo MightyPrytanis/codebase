@@ -349,15 +349,3 @@ function WorkflowCard({ workflow, onExecute, onEdit, isExecuting }: WorkflowCard
       </CardContent>
     </Card>
   );
-}
-
-}
-}
-}
-)
-}
-}
-}
-}
-)
-}

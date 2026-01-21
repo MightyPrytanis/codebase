@@ -358,11 +358,3 @@ export function CyranoChat({
       </div>
     </div>
   );
-}
-
-}
-}
-)
-}
-)
-}

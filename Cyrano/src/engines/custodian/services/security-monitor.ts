@@ -119,6 +119,3 @@ class SecurityMonitorService {
 }
 
 export const securityMonitorService = new SecurityMonitorService();
-
-}
-}
