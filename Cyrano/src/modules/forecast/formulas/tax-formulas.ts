@@ -518,7 +518,7 @@ export interface FederalTaxInput {
  * Ensures type safety and runtime validation at API boundaries
  */
 export const FederalTaxInputSchema = z.object({
-  year: z.number().int().min(2018).max(2025),
+  year: z.union([z.literal(2018), z.literal(2019), z.literal(2020), z.literal(2021), z.literal(2022), z.literal(2023), z.literal(2024), z.literal(2025)]),
   filingStatus: z.enum(['single', 'married_joint', 'married_separate', 'head_of_household', 'qualifying_widow']),
   wages: z.number().nonnegative(),
   selfEmploymentIncome: z.number().nonnegative().optional(),
