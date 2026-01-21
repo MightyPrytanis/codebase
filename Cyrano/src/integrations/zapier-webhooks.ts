@@ -233,16 +233,3 @@ export async function registerZapierWebhook(
 
   return { success: true, webhookId };
 }
-
-}
-}
-)
-}
-}
-)
-}
-)
-)
-}
-)
-}

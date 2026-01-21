@@ -46,9 +46,3 @@ export function DemoDataWrapper({
       </div>
     </div>
   );
-}
-
-
-
-
-

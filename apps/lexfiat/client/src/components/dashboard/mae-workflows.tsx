@@ -375,15 +375,3 @@ function CustomWorkflowBuilder({
       </div>
     </div>
   );
-}
-}
-}
-)
-}
-)
-}
-)
-}
-)
-}
-}

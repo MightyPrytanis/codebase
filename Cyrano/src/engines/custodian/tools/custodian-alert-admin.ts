@@ -69,6 +69,3 @@ export const custodianAlertAdminTool = new (class extends BaseTool {
     }
   }
 })();
-
-)
-}

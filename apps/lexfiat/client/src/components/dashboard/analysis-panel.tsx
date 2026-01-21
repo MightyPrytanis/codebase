@@ -80,5 +80,3 @@ export default function AnalysisPanel({ isOpen, onClose }: AnalysisPanelProps) {
       </DemoDataWrapper>
     </ExpandedPanel>
   );
-}
-

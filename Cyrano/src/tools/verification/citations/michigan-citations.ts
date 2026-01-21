@@ -313,6 +313,7 @@ export class MichiganCitationValidator {
       errors,
       warnings,
     };
+  }
   
   /**
    * Parse public domain citation
@@ -504,4 +505,6 @@ export class MichiganCitationValidator {
     }
     return result;
   }
+}
+
 export const michiganCitationValidator = new MichiganCitationValidator();

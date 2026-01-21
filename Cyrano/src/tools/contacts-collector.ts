@@ -153,13 +153,3 @@ export const contactsCollector = new (class extends BaseTool {
     }
   }
 })();
-
-
-)
-}
-}
-}
-}
-}
-}
-}
