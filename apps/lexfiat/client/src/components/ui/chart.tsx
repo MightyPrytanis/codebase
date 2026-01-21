@@ -383,8 +383,3 @@ export {
   ChartLegend,
   ChartLegendContent,
   ChartStyle,
-}
-
-)
-}
-)

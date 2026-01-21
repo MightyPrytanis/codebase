@@ -127,8 +127,3 @@ export function StandardPanelLayout({
       </div>
     </div>
   );
-}
-
-
-
-

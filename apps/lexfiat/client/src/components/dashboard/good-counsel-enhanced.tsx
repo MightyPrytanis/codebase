@@ -571,8 +571,3 @@ export function GoodCounselEnhanced({
       )}
     </ExpandedPanel>
   );
-}
-
-
-}
-)

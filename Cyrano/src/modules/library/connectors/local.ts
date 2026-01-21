@@ -14,6 +14,7 @@
 import { promises as fs } from 'fs';
 import { join, dirname, basename } from 'path';
 import { FileChange, ConnectorConfig, StorageConnector, withRetry } from './base-connector.js';
+import { safeJoin } from '../../utils/secure-path.js';
 
 // Supported file extensions for library items
 const SUPPORTED_EXTENSIONS = [
@@ -38,7 +39,8 @@ async function scanDirectory(
     const entries = await fs.readdir(dirPath, { withFileTypes: true });
 
     for (const entry of entries) {
-      const fullPath = join(dirPath, entry.name);
+      // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
+      const fullPath = join(dirPath, entry.name); // Safe - controlled directory scan from trusted base
       const relativePath = fullPath.replace(basePath + '/', '').replace(basePath + '\\', '');
 
       if (entry.isDirectory()) {
@@ -140,7 +142,7 @@ class LocalConnector implements StorageConnector {
 
   async downloadFile(filePath: string, config: ConnectorConfig): Promise<Buffer> {
     return withRetry(async () => {
-      const fullPath = join(config.path, filePath);
+      const fullPath = safeJoin(config.path, filePath);
       
       try {
         return await fs.readFile(fullPath);
@@ -155,7 +157,7 @@ class LocalConnector implements StorageConnector {
 
   async uploadFile(filePath: string, fileData: Buffer, config: ConnectorConfig): Promise<void> {
     return withRetry(async () => {
-      const fullPath = join(config.path, filePath);
+      const fullPath = safeJoin(config.path, filePath);
       
       // Ensure directory exists
       await fs.mkdir(dirname(fullPath), { recursive: true });
@@ -172,7 +174,7 @@ class LocalConnector implements StorageConnector {
     etag?: string;
   } | null> {
     try {
-      const fullPath = join(config.path, filePath);
+      const fullPath = safeJoin(config.path, filePath);
       const stats = await fs.stat(fullPath);
       const ext = filePath.toLowerCase().substring(filePath.lastIndexOf('.'));
 
@@ -214,15 +216,3 @@ export async function listChanges(
 ): Promise<FileChange[]> {
   return localConnector.listChanges({ path, lastSyncAt });
 }
-
-}
-}
-}
-}
-}
-}
-)
-}
-}
-}
-)

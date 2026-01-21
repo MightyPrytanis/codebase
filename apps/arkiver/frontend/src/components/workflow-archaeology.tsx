@@ -238,5 +238,3 @@ export function WorkflowArchaeology({ fileId, jobId, onReconstruct }: WorkflowAr
       </div>
     </div>
   );
-}
-

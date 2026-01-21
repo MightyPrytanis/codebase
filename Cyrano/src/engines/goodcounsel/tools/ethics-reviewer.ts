@@ -85,7 +85,3 @@ export const ethicsReviewer = new (class extends BaseTool {
     }
   }
 })();
-
-
-)
-}

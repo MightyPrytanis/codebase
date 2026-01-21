@@ -420,6 +420,3 @@ export const JURISPRUDENTIAL_MAXIMS = [
     whenToApply: 'When multiple rules address the same subject matter',
   },
 ];
-
-}
-}
