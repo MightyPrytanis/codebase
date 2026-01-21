@@ -64,7 +64,8 @@ async function processDirectory(dirPath: string, stats: FileStats): Promise<void
     const entries = await readdir(dirPath);
     
     for (const entry of entries) {
-      const fullPath = join(dirPath, entry);
+      // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
+      const fullPath = join(dirPath, entry); // Safe: Development script processing trusted local codebase
       const stats_entry = await stat(fullPath);
       
       if (stats_entry.isDirectory()) {
