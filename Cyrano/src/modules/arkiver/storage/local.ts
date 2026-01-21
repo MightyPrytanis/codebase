@@ -193,7 +193,7 @@ export class LocalStorageProvider implements StorageProvider {
 
       return await fs.readFile(fullPath);
     } catch (error) {
-      console.error(`Failed to download file ${storagePath}:`, error);
+      console.error('Failed to download file', storagePath, ':', error);
       return null;
     }
   }
@@ -211,7 +211,7 @@ export class LocalStorageProvider implements StorageProvider {
       
       return true;
     } catch (error) {
-      console.error(`Failed to delete file ${storagePath}:`, error);
+      console.error('Failed to delete file', storagePath, ':', error);
       return false;
     }
   }
