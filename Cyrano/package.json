@@ -65,7 +65,7 @@
     "pdfjs-dist": "^5.4.530",
     "playwright": "^1.57.0",
     "postgres": "^3.4.7",
-    "puppeteer": "^24.34.0",
+    "puppeteer": "^24.35.0",
     "react-icons": "^5.5.0",
     "tesseract.js": "^7.0.0",
     "uuid": "^13.0.0",
