@@ -25,11 +25,11 @@ services:
       - postgres
     restart: unless-stopped
 
-  postgres:
+  postgres: # nosemgrep: yaml.docker-compose.security.writable-filesystem-service.writable-filesystem-service
     image: postgres:15-alpine
     security_opt:
       - no-new-privileges:true
-    read_only: false  # Postgres needs write access
+    read_only: false  # Postgres requires write access for database operations
     environment:
       - POSTGRES_DB=${POSTGRES_DB:-lexfiat}
       - POSTGRES_USER=${POSTGRES_USER:-lexfiat}

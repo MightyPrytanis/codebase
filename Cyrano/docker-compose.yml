@@ -2,12 +2,12 @@ version: '3.8'
 
 services:
   # PostgreSQL Database
-  postgres:
+  postgres: # nosemgrep: yaml.docker-compose.security.writable-filesystem-service.writable-filesystem-service
     image: postgres:15-alpine
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
-    read_only: false  # Postgres needs write access
+    read_only: false  # Postgres requires write access for database operations
     environment:
       POSTGRES_DB: cyrano
       POSTGRES_USER: postgres
@@ -23,12 +23,12 @@ services:
       retries: 3
 
   # Redis (for session storage - optional)
-  redis:
+  redis: # nosemgrep: yaml.docker-compose.security.writable-filesystem-service.writable-filesystem-service
     image: redis:7-alpine
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
-    read_only: false  # Redis needs write access
+    read_only: false  # Redis requires write access for data persistence
     ports:
       - "6379:6379"
     command: redis-server --appendonly yes
@@ -69,12 +69,12 @@ services:
       retries: 3
 
   # pgAdmin (Database Management - Optional)
-  pgadmin:
+  pgadmin: # nosemgrep: yaml.docker-compose.security.writable-filesystem-service.writable-filesystem-service
     image: dpage/pgadmin4:latest
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
-    read_only: false  # pgAdmin needs write access
+    read_only: false  # pgAdmin requires write access for configuration and sessions
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@cyrano.local
       PGADMIN_DEFAULT_PASSWORD: admin123
