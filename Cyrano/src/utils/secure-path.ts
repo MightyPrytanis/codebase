@@ -26,11 +26,14 @@ export function safeJoin(basePath: string, ...segments: string[]): string {
   );
   
   // Join paths
-  const fullPath = path.join(basePath, ...normalizedSegments);
+  // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
+  const fullPath = path.join(basePath, ...normalizedSegments); // Safe - validation utility
   
   // Resolve to absolute paths for comparison
-  const resolvedBase = path.resolve(basePath);
-  const resolvedFile = path.resolve(fullPath);
+  // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
+  const resolvedBase = path.resolve(basePath); // Safe - validation utility
+  // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
+  const resolvedFile = path.resolve(fullPath); // Safe - validation utility
   
   // Verify the resolved path is within the base directory
   if (!resolvedFile.startsWith(resolvedBase + path.sep) && resolvedFile !== resolvedBase) {
@@ -49,8 +52,10 @@ export function safeJoin(basePath: string, ...segments: string[]): string {
  */
 export function isPathSafe(basePath: string, targetPath: string): boolean {
   try {
-    const resolvedBase = path.resolve(basePath);
-    const resolvedTarget = path.resolve(targetPath);
+    // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
+    const resolvedBase = path.resolve(basePath); // Safe - validation utility
+    // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
+    const resolvedTarget = path.resolve(targetPath); // Safe - validation utility
     return resolvedTarget.startsWith(resolvedBase + path.sep) || resolvedTarget === resolvedBase;
   } catch {
     return false;
