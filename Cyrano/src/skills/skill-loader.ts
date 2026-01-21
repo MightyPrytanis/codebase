@@ -119,14 +119,23 @@ export class SkillLoader {
         const value = rest.join(':').trim();
         const fullKey = key.trim();
         
-        // Build nested path
+        // Build nested path (with prototype pollution protection)
         let target = result;
         for (const { key: parentKey } of indentStack) {
+          // Skip dangerous property names
+          if (parentKey === '__proto__' || parentKey === 'constructor' || parentKey === 'prototype') {
+            continue;
+          }
           if (!target[parentKey]) target[parentKey] = {};
           target = target[parentKey];
         }
         
         currentKey = fullKey;
+        
+        // Skip dangerous property names
+        if (fullKey === '__proto__' || fullKey === 'constructor' || fullKey === 'prototype') {
+          continue;
+        }
         
         if (value) {
           target[fullKey] = this.castValue(value);
@@ -139,6 +148,10 @@ export class SkillLoader {
         // Continuation line (multiline string or nested content)
         let target = result;
         for (const { key: parentKey } of indentStack) {
+          // Skip dangerous property names
+          if (parentKey === '__proto__' || parentKey === 'constructor' || parentKey === 'prototype') {
+            continue;
+          }
           target = target[parentKey];
         }
         
