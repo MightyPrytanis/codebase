@@ -100,7 +100,7 @@ export function safeRemoveItem(key: string): void {
   try {
     localStorage.removeItem(key);
   } catch (error) {
-    console.error('Failed to remove localStorage item:', key);
+    console.error('Failed to remove localStorage item:', key, error);
   }
 }
 
@@ -158,7 +158,7 @@ export const safeSessionStorage = {
     try {
       sessionStorage.removeItem(key);
     } catch (error) {
-      console.error('Failed to remove sessionStorage item:', key);
+      console.error('Failed to remove sessionStorage item:', key, error);
     }
   },
 };
