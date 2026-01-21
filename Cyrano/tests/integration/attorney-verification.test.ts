@@ -9,7 +9,7 @@
  * Track Delta: Tests attorney verification workflows
  */
 
-import { describe, it, expect, beforeEach } from '@jest/globals';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   attorneyVerificationStore,
   requireAttorneyVerification,
@@ -22,7 +22,7 @@ import {
 describe('Attorney Verification Integration (Track Delta)', () => {
   beforeEach(() => {
     // Clear stores before each test
-    attorneyVerificationStore.getAllPendingReviews = jest.fn(() => []);
+    attorneyVerificationStore.getAllPendingReviews = vi.fn(() => []);
   });
 
   describe('Review Creation', () => {

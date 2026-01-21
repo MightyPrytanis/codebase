@@ -257,11 +257,3 @@ function InsightCard({ insight }: { insight: Insight }) {
         )}
     </div>
   );
-}
-
-}
-)
-}
-}
-}
-}

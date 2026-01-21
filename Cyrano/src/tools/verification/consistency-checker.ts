@@ -19,6 +19,13 @@ import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import type { ExtractedClaim } from './claim-extractor';
 
 /**
+ * Escape special regex characters in a string
+ */
+function escapeRegExp(string: string): string {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+/**
  * Consistency issue types
  */
 export enum ConsistencyIssueType {
@@ -482,7 +489,7 @@ export class ConsistencyChecker extends BaseTool {
    */
   private hasNegation(text: string): boolean {
     const negationWords = ['not', 'no', 'never', 'none', 'neither', 'nor', "don't", "doesn't", "didn't", "won't", "can't"];
-    return negationWords.some((word) => new RegExp(`\\b${word}\\b`, 'i').test(text));
+    return negationWords.some((word) => new RegExp(`\\b${escapeRegExp(word)}\\b`, 'i').test(text));
   }
 
   /**
@@ -559,7 +566,7 @@ export class ConsistencyChecker extends BaseTool {
    */
   private detectAmbiguity(claim: ExtractedClaim): { description: string; confidence: number } | null {
     const ambiguousWords = ['some', 'many', 'few', 'several', 'various', 'certain', 'unclear', 'ambiguous'];
-    const hasAmbiguous = ambiguousWords.some((word) => new RegExp(`\\b${word}\\b`, 'i').test(claim.text));
+    const hasAmbiguous = ambiguousWords.some((word) => new RegExp(`\\b${escapeRegExp(word)}\\b`, 'i').test(claim.text));
 
     if (hasAmbiguous) {
       return {
@@ -615,7 +622,7 @@ export class ConsistencyChecker extends BaseTool {
    */
   private needsSupport(text: string): boolean {
     const assertionWords = ['proves', 'shows', 'demonstrates', 'indicates', 'establishes'];
-    return assertionWords.some((word) => new RegExp(`\\b${word}\\b`, 'i').test(text));
+    return assertionWords.some((word) => new RegExp(`\\b${escapeRegExp(word)}\\b`, 'i').test(text));
   }
 
   /**
@@ -765,21 +772,4 @@ export const consistencyChecker = new ConsistencyChecker();
  */
 export async function handleConsistencyChecker(params: any): Promise<ConsistencyCheckResult> {
   return await consistencyChecker.checkConsistency(params);
-}
-
-}
-}
-}
-}
-)
-)
-}
-)
-}
-)
-)
-}
-}
-)
-)
 }

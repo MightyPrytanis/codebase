@@ -214,7 +214,3 @@ export function DraftingModeSelector({
       </CardContent>
     </Card>
   );
-}
-
-
-

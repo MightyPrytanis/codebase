@@ -7,7 +7,7 @@
 import React, { useState, useEffect } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { User, Mail, Briefcase, Edit, Phone, MapPin, Save } from "lucide-react";
-import { Link, useLocation } from "wouter";
+import { Link, useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -24,7 +24,7 @@ interface ProfilePanelProps {
 }
 
 export default function ProfilePanel({ isOpen, onClose, attorney }: ProfilePanelProps) {
-  const [, setLocation] = useLocation();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
@@ -281,8 +281,8 @@ export default function ProfilePanel({ isOpen, onClose, attorney }: ProfilePanel
             </div>
           )}
 
-          <Link href="/settings">
-            <div className="insight-card info p-4 cursor-pointer hover:bg-black/40 transition-colors" onClick={() => setLocation("/settings")}>
+          <Link to="/settings">
+            <div className="insight-card info p-4 cursor-pointer hover:bg-black/40 transition-colors" onClick={() => navigate("/settings")}>
               <div className="flex items-center gap-3 mb-2">
                 <Edit className="h-5 w-5" />
                 <h3 className="font-semibold text-warm-white">Full Settings Page</h3>
@@ -294,6 +294,3 @@ export default function ProfilePanel({ isOpen, onClose, attorney }: ProfilePanel
       </SheetContent>
     </Sheet>
   );
-}
-
-}

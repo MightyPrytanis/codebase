@@ -72,7 +72,7 @@ class EncryptionService {
     const fieldKey = this.deriveFieldKey(fieldName);
     const iv = randomBytes(this.ivLength);
     
-    const cipher = createCipheriv(this.algorithm, fieldKey, iv);
+    const cipher = createCipheriv(this.algorithm, fieldKey, iv, { authTagLength: this.tagLength });
     
     let encrypted = cipher.update(data, 'utf8');
     encrypted = Buffer.concat([encrypted, cipher.final()]);
@@ -105,7 +105,7 @@ class EncryptionService {
     const authTag = combined.subarray(this.ivLength, this.ivLength + this.tagLength);
     const encryptedData = combined.subarray(this.ivLength + this.tagLength);
     
-    const decipher = createDecipheriv(this.algorithm, fieldKey, iv);
+    const decipher = createDecipheriv(this.algorithm, fieldKey, iv, { authTagLength: this.tagLength });
     decipher.setAuthTag(authTag);
     
     let decrypted = decipher.update(encryptedData);
@@ -121,7 +121,7 @@ class EncryptionService {
     const iv = randomBytes(this.ivLength);
     
     // Use master key directly for file encryption (no field derivation for files)
-    const cipher = createCipheriv(this.algorithm, this.masterKey, iv);
+    const cipher = createCipheriv(this.algorithm, this.masterKey, iv, { authTagLength: this.tagLength });
     
     let encrypted = cipher.update(buffer);
     encrypted = Buffer.concat([encrypted, cipher.final()]);
@@ -153,7 +153,7 @@ class EncryptionService {
     const authTag = combined.subarray(this.ivLength, this.ivLength + this.tagLength);
     const encryptedData = combined.subarray(this.ivLength + this.tagLength);
     
-    const decipher = createDecipheriv(this.algorithm, this.masterKey, iv);
+    const decipher = createDecipheriv(this.algorithm, this.masterKey, iv, { authTagLength: this.tagLength });
     decipher.setAuthTag(authTag);
     
     let decrypted = decipher.update(encryptedData);
@@ -236,11 +236,3 @@ export const encryption = {
     return service.verifyHMAC(data, expectedHMAC);
   },
 };
-
-
-}
-}
-)
-}
-}
-}

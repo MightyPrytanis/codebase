@@ -323,5 +323,3 @@ export function GoodCounselRedesign({
       </div>
     </ExpandedPanel>
   );
-}
-

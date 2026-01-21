@@ -9,17 +9,17 @@
  * Track Epsilon: Tests time estimation engine (MRPC compliant)
  */
 
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { TimeEstimationEngine, WorkEvent, TimeEstimationPolicy } from '../../src/services/time-estimation-engine.js';
 import { AIService } from '../../src/services/ai-service.js';
 
 describe('Time Estimation Integration (Track Epsilon)', () => {
   let engine: TimeEstimationEngine;
-  let mockAIService: jest.Mocked<AIService>;
+  let mockAIService: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     mockAIService = {
-      call: jest.fn()
+      call: vi.fn()
     } as any;
     engine = new TimeEstimationEngine(mockAIService as any);
   });

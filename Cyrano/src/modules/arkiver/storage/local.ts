@@ -16,6 +16,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { createReadStream, createWriteStream } from 'fs';
 import crypto from 'crypto';
+import { safeJoin } from '../../utils/secure-path.js';
 
 /**
  * Storage configuration
@@ -137,14 +138,14 @@ export class LocalStorageProvider implements StorageProvider {
       const month = String(now.getMonth() + 1).padStart(2, '0');
       const day = String(now.getDate()).padStart(2, '0');
       const subdir = path.join(year.toString(), month, day);
-      const fullDir = path.join(this.config.uploadDir, subdir);
+      const fullDir = safeJoin(this.config.uploadDir, subdir);
 
       // Create subdirectory
       await fs.mkdir(fullDir, { recursive: true });
 
       // Full storage path
-      const storagePath = path.join(subdir, filename);
-      const fullPath = path.join(this.config.uploadDir, storagePath);
+      const storagePath = path.join(subdir, filename); // Safe - both are generated internally
+      const fullPath = safeJoin(this.config.uploadDir, storagePath);
 
       // Write file
       if (Buffer.isBuffer(file)) {
@@ -183,7 +184,7 @@ export class LocalStorageProvider implements StorageProvider {
    */
   async download(storagePath: string): Promise<Buffer | null> {
     try {
-      const fullPath = path.join(this.config.uploadDir, storagePath);
+      const fullPath = safeJoin(this.config.uploadDir, storagePath);
       const exists = await this.exists(storagePath);
       
       if (!exists) {
@@ -202,7 +203,7 @@ export class LocalStorageProvider implements StorageProvider {
    */
   async delete(storagePath: string): Promise<boolean> {
     try {
-      const fullPath = path.join(this.config.uploadDir, storagePath);
+      const fullPath = safeJoin(this.config.uploadDir, storagePath);
       await fs.unlink(fullPath);
       
       // Try to remove empty parent directories (optional cleanup)
@@ -220,7 +221,7 @@ export class LocalStorageProvider implements StorageProvider {
    */
   async exists(storagePath: string): Promise<boolean> {
     try {
-      const fullPath = path.join(this.config.uploadDir, storagePath);
+      const fullPath = safeJoin(this.config.uploadDir, storagePath);
       await fs.access(fullPath);
       return true;
     } catch {
@@ -273,7 +274,8 @@ export class LocalStorageProvider implements StorageProvider {
         const entries = await fs.readdir(dir, { withFileTypes: true });
 
         for (const entry of entries) {
-          const fullPath = path.join(dir, entry.name);
+          // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
+          const fullPath = path.join(dir, entry.name); // Safe - controlled directory scan
 
           if (entry.isDirectory()) {
             await processDirectory(fullPath);
@@ -333,7 +335,8 @@ export class LocalStorageProvider implements StorageProvider {
       const entries = await fs.readdir(dir, { withFileTypes: true });
 
       for (const entry of entries) {
-        const fullPath = path.join(dir, entry.name);
+        // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
+        const fullPath = path.join(dir, entry.name); // Safe - controlled directory scan
 
         if (entry.isDirectory()) {
           await this.cleanupRecursive(fullPath, cutoffDate, stats);
@@ -417,13 +420,3 @@ export const defaultStorage = new LocalStorageProvider({
   cleanupAfterDays: 30,
   inactivityCleanupDays: 7,
 });
-
-}
-}
-}
-}
-}
-}
-}
-}
-}

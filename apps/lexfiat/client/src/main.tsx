@@ -36,4 +36,3 @@ try {
   container.appendChild(messagePara);
   container.appendChild(helpPara);
   rootElement.appendChild(container);
-}
