@@ -149,7 +149,7 @@ export class MCRComplianceService {
     if (!metadata.caseNumber) {
       violations.push({
         rule: 'MCR 1.109',
-        description: 'Case number required for e-filing',
+        description: 'case number required for e-filing',
         severity: 'critical',
         location: { field: 'caseNumber' },
         fix: 'Provide case number in document metadata',
@@ -202,7 +202,7 @@ export class MCRComplianceService {
     const recommendations: string[] = [];
 
     // Check for proof of service indicators
-    const hasProofOfService = /proof of service|affidavit of service|certificate of service/i.test(processDoc);
+    const hasProofOfService = /^[\s]*(?:PROOF OF SERVICE|AFFIDAVIT OF SERVICE|CERTIFICATE OF SERVICE)/im.test(processDoc);
     if (!hasProofOfService) {
       violations.push({
         rule: 'MCR 2.105',

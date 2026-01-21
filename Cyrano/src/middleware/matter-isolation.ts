@@ -126,6 +126,14 @@ class MatterIsolationStore {
   clearMatterData(matterId: string): void {
     this.matterData.delete(matterId);
   }
+
+  /**
+   * Clear all matter data and agent contexts (for testing)
+   */
+  clearAll(): void {
+    this.matterData.clear();
+    this.agentContexts.clear();
+  }
 }
 
 // Singleton isolation store
