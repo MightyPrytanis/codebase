@@ -119,14 +119,23 @@ export class SkillLoader {
         const value = rest.join(':').trim();
         const fullKey = key.trim();
         
-        // Build nested path
+        // Build nested path (with prototype pollution protection)
         let target = result;
         for (const { key: parentKey } of indentStack) {
+          // Skip dangerous property names
+          if (parentKey === '__proto__' || parentKey === 'constructor' || parentKey === 'prototype') {
+            continue;
+          }
           if (!target[parentKey]) target[parentKey] = {};
           target = target[parentKey];
         }
         
         currentKey = fullKey;
+        
+        // Skip dangerous property names
+        if (fullKey === '__proto__' || fullKey === 'constructor' || fullKey === 'prototype') {
+          continue;
+        }
         
         if (value) {
           target[fullKey] = this.castValue(value);
@@ -139,6 +148,10 @@ export class SkillLoader {
         // Continuation line (multiline string or nested content)
         let target = result;
         for (const { key: parentKey } of indentStack) {
+          // Skip dangerous property names
+          if (parentKey === '__proto__' || parentKey === 'constructor' || parentKey === 'prototype') {
+            continue;
+          }
           target = target[parentKey];
         }
         
@@ -182,7 +195,8 @@ export class SkillLoader {
     const results: string[] = [];
     const entries = await fs.readdir(root, { withFileTypes: true });
     for (const entry of entries) {
-      const full = path.join(root, entry.name);
+      // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
+      const full = path.join(root, entry.name); // Safe: Walking controlled skills directory for markdown files
       if (entry.isDirectory()) {
         const sub = await this.walkMarkdown(full);
         results.push(...sub);
@@ -191,12 +205,5 @@ export class SkillLoader {
       }
     }
     return results;
-  }
-}
-
-
-}
-}
-}
 }
 }

@@ -241,8 +241,3 @@ export const burnoutDetector = {
     return service.analyzeBurnoutRisk(userId, timeframe, workflowData);
   },
 };
-
-
-
-}
-}

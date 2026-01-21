@@ -250,13 +250,3 @@ export async function listChanges(
 ): Promise<FileChange[]> {
   return s3Connector.listChanges({ path, credentials, lastSyncAt });
 }
-
-}
-}
-)
-}
-}
-}
-}
-}
-}

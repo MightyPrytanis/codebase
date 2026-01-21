@@ -1,5 +1,5 @@
 # Multi-stage build for optimal production image
-FROM node:25.2.1-alpine AS builder
+FROM node:25.3.0-alpine AS builder
 
 # Set working directory
 WORKDIR /app
@@ -17,7 +17,7 @@ COPY . .
 RUN npm run build
 
 # Production stage
-FROM node:25.2.1-alpine AS production
+FROM node:25.3.0-alpine AS production
 
 # Install dumb-init for proper signal handling
 RUN apk add --no-cache dumb-init

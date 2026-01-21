@@ -179,13 +179,3 @@ export function GoodCounselWidget({ onClick }: GoodCounselWidgetProps) {
       </CardContent>
     </Card>
   );
-}
-
-}
-]
-)
-)
-)
-)
-)
-)

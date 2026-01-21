@@ -342,19 +342,6 @@ Format your response in a clear, professional manner suitable for legal practice
     } catch (error) {
       console.error('Perplexity health check failed:', error);
       return false;
-    }
-  }
-}
-
-
-
-
-
 }
 }
 }
-)
-}
-}
-}
-)

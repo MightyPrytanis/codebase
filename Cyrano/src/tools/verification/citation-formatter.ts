@@ -646,6 +646,7 @@ export class CitationFormatter extends BaseTool {
       );
     }
   }
+}
 
 /**
  * Default instance
@@ -657,7 +658,4 @@ export const citationFormatter = new CitationFormatter();
  */
 export async function handleCitationFormatter(params: any): Promise<DocumentCitationResult | CitationCorrection> {
   return await citationFormatter.formatCitations(params);
-}
-
-
 }

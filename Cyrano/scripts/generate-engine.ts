@@ -204,7 +204,3 @@ console.log(`  3. Configure workflows`);
 console.log(`  4. Set up AI provider coordination`);
 console.log(`  5. Write tests`);
 console.log(`  6. Update documentation`);
-
-
-)
-)

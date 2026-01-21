@@ -178,6 +178,7 @@ export class ForensicReconstructionService {
       artifactSources
     );
   }
+}
 
 // Export singleton instance
 export const forensicReconstructionService = new ForensicReconstructionService();
