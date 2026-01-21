@@ -111,7 +111,7 @@ describe('Clio OAuth Integration (Track Alpha)', () => {
       
       expect(result.url).toBeDefined();
       expect(result.url).toContain('client_id=test_client_id');
-      expect(result.url).toContain('redirect_uri=https://example.com/callback');
+      expect(result.url).toContain('redirect_uri=https%3A%2F%2Fexample.com%2Fcallback');
       expect(result.url).toContain('scope=read+write');
       expect(result.url).toContain(`state=${state.state}`);
       expect(result.error).toBeUndefined();
