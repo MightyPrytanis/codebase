@@ -9,7 +9,7 @@
  * Track Alpha: Tests OAuth infrastructure ready for credential drop-in
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
   validateClioCredentials,
   generateOAuthState,
@@ -22,12 +22,12 @@ import {
 describe('Clio OAuth Integration (Track Alpha)', () => {
   beforeEach(() => {
     // Clear state store before each test
-    oauthStateStore.delete = jest.fn();
+    oauthStateStore.delete = vi.fn();
   });
 
   afterEach(() => {
     // Clean up
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Credential Validation', () => {
