@@ -71,5 +71,3 @@ export default function IntakePanel({ isOpen, onClose }: IntakePanelProps) {
       </DemoDataWrapper>
     </ExpandedPanel>
   );
-}
-

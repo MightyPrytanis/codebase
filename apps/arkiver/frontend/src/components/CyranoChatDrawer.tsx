@@ -58,6 +58,3 @@ export function CyranoChatDrawer({
       />
     </div>
   );
-}
-
-}

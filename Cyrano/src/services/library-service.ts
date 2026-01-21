@@ -609,12 +609,3 @@ export async function getLibraryStats(userId: string): Promise<LibraryStats> {
     queueDepth: queue.length,
   };
 }
-
-}
-}
-}
-}
-}
-}
-}
-}

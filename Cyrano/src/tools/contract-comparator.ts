@@ -7,6 +7,13 @@
 import { BaseTool } from './base-tool.js';
 import { z } from 'zod';
 
+/**
+ * Escape special regex characters in a string
+ */
+function escapeRegExp(string: string): string {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 const ContractComparatorSchema = z.object({
   document1_text: z.string().describe('First contract/agreement to compare'),
   document2_text: z.string().describe('Second contract/agreement to compare'),
@@ -440,8 +447,9 @@ export const contractComparator = new (class extends BaseTool {
     const differences: string[] = [];
     
     liabilityTerms.forEach(term => {
-      const count1 = (doc1.match(new RegExp(term, 'gi')) || []).length;
-      const count2 = (doc2.match(new RegExp(term, 'gi')) || []).length;
+      const escapedTerm = escapeRegExp(term);
+      const count1 = (doc1.match(new RegExp(escapedTerm, 'gi')) || []).length;
+      const count2 = (doc2.match(new RegExp(escapedTerm, 'gi')) || []).length;
       
       if (count1 !== count2) {
         differences.push(`${term}: Doc1 has ${count1}, Doc2 has ${count2}`);
@@ -456,8 +464,9 @@ export const contractComparator = new (class extends BaseTool {
     const differences: string[] = [];
     
     complianceTerms.forEach(term => {
-      const count1 = (doc1.match(new RegExp(term, 'gi')) || []).length;
-      const count2 = (doc2.match(new RegExp(term, 'gi')) || []).length;
+      const escapedTerm = escapeRegExp(term);
+      const count1 = (doc1.match(new RegExp(escapedTerm, 'gi')) || []).length;
+      const count2 = (doc2.match(new RegExp(escapedTerm, 'gi')) || []).length;
       
       if (count1 !== count2) {
         differences.push(`${term}: Doc1 has ${count1}, Doc2 has ${count2}`);
@@ -1191,64 +1200,3 @@ export const contractComparator = new (class extends BaseTool {
     }
   }
 })();
-
-)
-}
-}
-}
-}
-)
-}
-}
-}
-}
-}
-)
-}
-}
-)
-}
-)
-}
-}
-]
-)
-}
-}
-)
-}
-)
-}
-}
-}
-}
-)
-}
-}
-}
-}
-)
-}
-}
-}
-}
-}
-)
-}
-}
-)
-}
-)
-}
-}
-]
-)
-}
-}
-)
-}
-)
-}
-}
-}
-}

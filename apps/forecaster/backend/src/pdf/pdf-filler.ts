@@ -138,10 +138,3 @@ export async function applyBranding(params: {
 
   const bytes = await pdfDoc.save();
   return { pdfBase64: toBase64(bytes) };
-}
-
-
-}
-}
-}
-)

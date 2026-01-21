@@ -57,9 +57,3 @@ export function getDocumentAuditLog(documentId: string): AuditLogEntry[] {
 export function getAllAuditLogs(): AuditLogEntry[] {
   return [...auditLog];
 }
-
-
-
-
-
-}

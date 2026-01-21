@@ -217,10 +217,3 @@ export default function ComplianceChecker() {
       </div>
     </div>
   );
-}
-
-
-}
-)
-}
-)
