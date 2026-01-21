@@ -420,20 +420,36 @@ export function isValidEmail(email: string): boolean {
 export function sanitizeInputs(req: Request, res: Response, next: NextFunction) {
   // Sanitize query parameters
   if (req.query) {
+    const sanitizedQuery: Record<string, any> = {};
     for (const [key, value] of Object.entries(req.query)) {
+      // Skip prototype pollution properties
+      if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+        continue;
+      }
       if (typeof value === 'string') {
-        req.query[key] = sanitizeString(value);
+        sanitizedQuery[key] = sanitizeString(value);
+      } else {
+        sanitizedQuery[key] = value;
       }
     }
+    req.query = sanitizedQuery;
   }
 
   // Sanitize body parameters (only strings)
   if (req.body && typeof req.body === 'object') {
+    const sanitizedBody: Record<string, any> = {};
     for (const [key, value] of Object.entries(req.body)) {
+      // Skip prototype pollution properties
+      if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+        continue;
+      }
       if (typeof value === 'string') {
-        req.body[key] = sanitizeString(value);
+        sanitizedBody[key] = sanitizeString(value);
+      } else {
+        sanitizedBody[key] = value;
       }
     }
+    req.body = sanitizedBody;
   }
 
   next();
