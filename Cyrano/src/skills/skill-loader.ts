@@ -195,7 +195,8 @@ export class SkillLoader {
     const results: string[] = [];
     const entries = await fs.readdir(root, { withFileTypes: true });
     for (const entry of entries) {
-      const full = path.join(root, entry.name);
+      // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
+      const full = path.join(root, entry.name); // Safe: Walking controlled skills directory for markdown files
       if (entry.isDirectory()) {
         const sub = await this.walkMarkdown(full);
         results.push(...sub);
