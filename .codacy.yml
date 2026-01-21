@@ -1,7 +1,13 @@
 ---
-# Codacy configuration (disable PMD analyzers by omission)
-# Codacy configuration with disabled problematic analyzers
+# Codacy configuration with explicitly disabled PMD analyzers
+# This repository is TypeScript/React based and does not contain Java code
 engines:
+  # Explicitly disable PMD analyzers (no Java code in repository)
+  pmd:
+    enabled: false
+  pmd-legacy:
+    enabled: false
+  # Enable JavaScript/TypeScript analyzers
   eslint:
     enabled: true
   eslint-typescript:
