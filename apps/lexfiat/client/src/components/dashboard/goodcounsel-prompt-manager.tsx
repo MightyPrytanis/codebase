@@ -189,8 +189,3 @@ export function GoodCounselPromptManager({ userId }: { userId: string }) {
       </CardContent>
     </Card>
   );
-}
-
-
-
-

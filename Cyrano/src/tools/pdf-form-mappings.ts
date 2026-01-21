@@ -167,5 +167,5 @@ export function getFormMappings(formType: string): Record<string, string> {
       return MICHIGAN_CHILD_SUPPORT_MAPPINGS;
     default:
       return {};
-  }
+}
 }
