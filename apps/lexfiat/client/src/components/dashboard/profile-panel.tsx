@@ -294,6 +294,3 @@ export default function ProfilePanel({ isOpen, onClose, attorney }: ProfilePanel
       </SheetContent>
     </Sheet>
   );
-}
-
-}

@@ -164,6 +164,3 @@ export const qualityAssessor = new (class extends BaseTool {
     return wordCount > 500 ? 0.9 : 0.6;
   }
 })();
-
-
-)

@@ -1021,7 +1021,7 @@ const ForecastHttpRequestSchema = z.object({
   forecast_input: z.lazy(() => {
     // This will be validated in the handler after importing the schema
     // Using z.record allows flexibility for additional properties
-    return z.record(z.any());
+    return z.record(z.string(), z.any());
   }),
   branding: z.object({
     presentationMode: z.enum(['strip', 'watermark', 'none']).optional(),

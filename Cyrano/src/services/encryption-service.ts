@@ -236,10 +236,3 @@ export const encryption = {
     return service.verifyHMAC(data, expectedHMAC);
   },
 };
-
-
-}
-)
-}
-}
-}

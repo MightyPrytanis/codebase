@@ -253,5 +253,3 @@ export function logScopeElevation(
     { fromScopes, toScopes, reason }
   );
 }
-}
-)

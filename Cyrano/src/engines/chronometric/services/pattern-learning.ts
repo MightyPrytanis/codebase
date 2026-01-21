@@ -228,4 +228,3 @@ export async function clearPatternData(userId: string): Promise<void> {
   learnedPatterns.delete(userId);
   timeEntryHistory.delete(userId);
 }
-

@@ -137,8 +137,3 @@ export const micourtQuery: BaseTool = new (class extends BaseTool {
     }
   }
 })();
-
-)
-}
-}
-}

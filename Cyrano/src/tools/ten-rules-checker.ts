@@ -370,22 +370,3 @@ Return a JSON object:
     return `Content ${status.replace('_', ' ')}. Found: ${parts.join(', ')}. Review recommended.`;
   }
 })();
-
-)
-}
-}
-}
-}
-}
-}
-}
-)
-}
-}
-)
-}
-)
-}
-)
-}
-)

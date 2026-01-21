@@ -917,23 +917,4 @@ export const factChecker: BaseTool = new (class extends BaseTool {
     const supportScores = sources.map(source => this.calculateSourceConfidence(claim, source));
     return supportScores.reduce((sum, score) => sum + score, 0) / supportScores.length;
   }
-();
-
-)
-}
-}
-}
-}
-)
-}
-}
-}
-)
-}
-}
-}
-}
-)
-}
-}
-}
+})();

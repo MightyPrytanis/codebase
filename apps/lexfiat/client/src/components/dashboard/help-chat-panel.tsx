@@ -185,16 +185,3 @@ export default function HelpChatPanel({ isOpen, onClose }: HelpChatPanelProps) {
       </div>
     </>
   );
-}
-
-
-}
-}
-}
-)
-}
-}
-}
-}
-)
-}
