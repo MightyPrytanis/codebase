@@ -1068,7 +1068,7 @@ app.post('/api/forecast/tax', async (req, res) => {
       });
     }
     
-    const calculatedValues = calculateFederal(validationResult.data as any);
+    const calculatedValues = calculateFederal(validationResult.data);
 
     res.json({
       success: true,
@@ -1109,7 +1109,7 @@ app.post('/api/forecast/tax/pdf', async (req, res) => {
       });
     }
     
-    const calculated = calculateFederal(validationResult.data as any);
+    const calculated = calculateFederal(validationResult.data);
 
     // 2) Map to 1040 fill keys (minimal set; expands as module evolves)
     const filingStatusIndex: Record<string, number> = {
