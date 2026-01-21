@@ -70,7 +70,6 @@ export class TextProcessor {
    * Normalize text by removing extra whitespace while preserving structure
    */
   private normalizeText(text: string): string {
-    let normalized = text;
     // Normalize line endings
     let normalized = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
     
@@ -265,53 +264,3 @@ export class TextProcessor {
 }
 
 export const textProcessor = new TextProcessor();
-
-}
-}
-}
-)
-}
-}
-]
-}
-}
-}
-)
-}
-}
-]
-}
-}
-}
-)
-}
-}
-]
-}
-}
-}
-)
-}
-}
-]
-}
-}
-}
-)
-}
-}
-]
-}
-}
-}
-)
-}
-}
-]
-}
-}
-}
-)
-}
-}
-]

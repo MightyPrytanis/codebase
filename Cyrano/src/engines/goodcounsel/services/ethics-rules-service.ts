@@ -390,9 +390,3 @@ export class EthicsRulesService {
  * Default instance
  */
 export const ethicsRulesService = new EthicsRulesService();
-
-}
-}
-}
-)
-}

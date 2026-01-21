@@ -62,7 +62,7 @@ describe('Document Drafter Tool', () => {
         }
       });
     }
-  };
+  });
 
   describe('Format Support', () => {
     it('should generate docx format by default', async () => {

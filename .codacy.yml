@@ -1,15 +1,26 @@
 ---
-# Codacy configuration (disable PMD analyzers by omission)
 # Codacy configuration with disabled problematic analyzers
+# Explicitly disable PMD analyzers to prevent configuration errors
+# This repository is TypeScript/React based and does not contain Java code
 engines:
+  # Disable PMD analyzers (Java-specific, causes "No rules found" errors)
+  pmd:
+    enabled: false
+  pmd-legacy:
+    enabled: false
+  # Enable JavaScript/TypeScript analyzers
   eslint:
     enabled: true
   eslint-typescript:
     enabled: true
   jest:
     enabled: true
+  # Enable documentation and shell script analyzers
   shellcheck:
     enabled: true
+  remark-lint:
+    enabled: true
+  # Enable metrics
   metrics:
     enabled: true
 

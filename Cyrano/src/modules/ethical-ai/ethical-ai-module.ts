@@ -200,16 +200,3 @@ Check for compliance with all Ten Rules, especially:
  * Export singleton instance
  */
 export const ethicalAIModule = new EthicalAIModule();
-
-}
-}
-}
-}
-]
-}
-}
-}
-}
-}
-]
-}

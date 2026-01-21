@@ -126,8 +126,3 @@ export const documentArtifactCollector = new (class extends BaseTool {
     return 'other';
   }
 })();
-
-)
-}
-}
-}

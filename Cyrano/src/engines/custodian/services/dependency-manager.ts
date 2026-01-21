@@ -264,15 +264,3 @@ class DependencyManagerService {
 }
 
 export const dependencyManagerService = new DependencyManagerService();
-
-}
-}
-}
-}
-)
-}
-}
-}
-}
-}
-)

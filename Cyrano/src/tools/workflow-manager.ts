@@ -300,8 +300,3 @@ export const workflowManager = new (class extends BaseTool {
     return estimates[type] || '5-10 minutes';
   }
 })();
-
-
-)
-}
-}

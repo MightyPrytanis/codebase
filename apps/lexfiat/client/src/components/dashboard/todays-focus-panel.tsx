@@ -65,5 +65,3 @@ export default function TodaysFocusPanel({ isOpen, onClose }: TodaysFocusPanelPr
       </div>
     </ExpandedPanel>
   );
-}
-

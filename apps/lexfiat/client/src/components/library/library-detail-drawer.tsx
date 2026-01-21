@@ -277,6 +277,3 @@ export function LibraryDetailDrawer({
       </div>
     </>
   );
-}
-
-}
