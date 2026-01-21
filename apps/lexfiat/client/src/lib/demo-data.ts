@@ -188,7 +188,7 @@ export async function loadDemoDocumentContent(document: DemoDocument): Promise<s
         return await response.text();
       }
     } catch (error) {
-      console.error(`Failed to load demo document ${document.filename}:`, error);
+      console.error('Failed to load demo document', document.filename, ':', error);
     }
   }
   return null;

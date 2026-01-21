@@ -79,7 +79,7 @@ export class ResourceLoader {
 
         return buffer;
       } catch (error) {
-        console.error(`Failed to download resource ${resource.id} from ${resource.url}:`, error);
+        console.error('Failed to download resource', resource.id, 'from', resource.url, ':', error);
         throw error;
       }
     }
