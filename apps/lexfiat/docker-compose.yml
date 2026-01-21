@@ -5,6 +5,9 @@ services:
     build: .
     ports:
       - "5000:5000"
+    security_opt:
+      - no-new-privileges:true
+    read_only: false  # App needs write access for uploads
     environment:
       - NODE_ENV=production
       - DATABASE_URL=${DATABASE_URL}
@@ -22,8 +25,11 @@ services:
       - postgres
     restart: unless-stopped
 
-  postgres:
+  postgres: # nosemgrep: yaml.docker-compose.security.writable-filesystem-service.writable-filesystem-service
     image: postgres:15-alpine
+    security_opt:
+      - no-new-privileges:true
+    read_only: false  # Postgres requires write access for database operations
     environment:
       - POSTGRES_DB=${POSTGRES_DB:-lexfiat}
       - POSTGRES_USER=${POSTGRES_USER:-lexfiat}
