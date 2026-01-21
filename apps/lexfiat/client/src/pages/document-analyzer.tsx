@@ -335,12 +335,3 @@ export default function DocumentAnalyzer({ isOpen, onClose, documentText = "" }:
       </div>
     </ExpandedPanel>
   );
-}
-
-
-}
-)
-)
-}
-)
-)

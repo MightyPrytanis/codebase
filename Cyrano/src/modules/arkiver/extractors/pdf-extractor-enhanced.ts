@@ -303,11 +303,5 @@ export class EnhancedPDFExtractor extends PDFExtractor {
     // Fallback: check if operator list has sufficient complexity that might indicate images
     // This is a heuristic - if there are many operators but little text, might have images
     return false;
-  }
-}
-
-
-}
-}
 }
 }

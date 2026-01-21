@@ -3,4 +3,3 @@ export interface UploadedFile {
   name: string;
   status: "pending" | "processing" | "done" | "error";
   errorMessage?: string;
-}
