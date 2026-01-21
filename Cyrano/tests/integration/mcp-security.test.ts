@@ -9,7 +9,7 @@
  * Track Gamma: Tests token validation and scope minimization
  */
 
-import { describe, it, expect, beforeEach } from '@jest/globals';
+import { describe, it, expect, beforeEach } from 'vitest';
 import jwt from 'jsonwebtoken';
 import {
   validateTokenAudience,

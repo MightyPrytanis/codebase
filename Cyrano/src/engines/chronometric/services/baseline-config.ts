@@ -128,19 +128,3 @@ export async function addOffDay(userId: string, date: string): Promise<BaselineC
 /**
  * Remove an off-day
  */
-export async function removeOffDay(userId: string, date: string): Promise<BaselineConfig | null> {
-  const config = await getBaselineConfig(userId);
-  if (!config || !config.offDays) {
-    return config;
-  }
-  
-  const offDays = config.offDays.filter(d => d !== date);
-  
-  return await saveBaselineConfig({
-    ...config,
-    offDays,
-  });
-}
-
-
-}

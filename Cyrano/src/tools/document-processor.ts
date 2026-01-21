@@ -563,10 +563,14 @@ export const documentProcessor: BaseTool = new (class extends BaseTool {
       }
 
       // Dates of birth: MM/DD/YYYY, MM-DD-YYYY, YYYY-MM-DD
-      const dobPattern = /\b(0?[1-9]|1[0-2])[/-](0?[1-9]|[12][0-9]|3[01])[/-]\d{4}\b/g;
-      const dobMatches = document.match(dobPattern) || [];
+      const dobPattern1 = /\b(0?[1-9]|1[0-2])[/-](0?[1-9]|[12][0-9]|3[01])[/-]\d{4}\b/g;
+      const dobPattern2 = /\b\d{4}[/-](0?[1-9]|1[0-2])[/-](0?[1-9]|[12][0-9]|3[01])\b/g;
+      const dobMatches1 = document.match(dobPattern1) || [];
+      const dobMatches2 = document.match(dobPattern2) || [];
+      const dobMatches = [...dobMatches1, ...dobMatches2];
       if (dobMatches.length > 0) {
-        redacted = redacted.replace(dobPattern, '[REDACTED-DOB]');
+        redacted = redacted.replace(dobPattern1, '[REDACTED-DOB]');
+        redacted = redacted.replace(dobPattern2, '[REDACTED-DOB]');
         redactionLog.push({
           type: 'PII-DOB',
           pattern: 'Date of Birth',
@@ -618,7 +622,7 @@ export const documentProcessor: BaseTool = new (class extends BaseTool {
     // PHI/HIPAA Detection and Redaction
     if (rules.phi || rules.hipaa) {
       // Medical record numbers: MRN, MR#, Medical Record #
-      const mrnPattern = /\b(?:MRN|MR#?|Medical Record #?)[:\s]?\d{4,}\b/gi;
+      const mrnPattern = /\b(?:MRN|MR#?|Medical Record #?)[\s:]+\d{4,}\b/gi;
       const mrnMatches = document.match(mrnPattern) || [];
       if (mrnMatches.length > 0) {
         redacted = redacted.replace(mrnPattern, '[REDACTED-MRN]');
@@ -627,6 +631,19 @@ export const documentProcessor: BaseTool = new (class extends BaseTool {
           pattern: 'Medical Record Number',
           count: mrnMatches.length,
           examples: mrnMatches.slice(0, 3),
+        });
+      }
+
+      // Insurance IDs: Insurance ID, Policy Number, etc.
+      const insurancePattern = /\b(?:Insurance ID|Policy(?:\s+Number)?|Member ID)[\s:]+[A-Z0-9]{6,}\b/gi;
+      const insuranceMatches = document.match(insurancePattern) || [];
+      if (insuranceMatches.length > 0) {
+        redacted = redacted.replace(insurancePattern, '[REDACTED-INSURANCE]');
+        redactionLog.push({
+          type: 'PHI-INSURANCE',
+          pattern: 'Insurance ID',
+          count: insuranceMatches.length,
+          examples: insuranceMatches.slice(0, 3),
         });
       }
 
@@ -671,7 +688,7 @@ export const documentProcessor: BaseTool = new (class extends BaseTool {
     // FERPA Detection and Redaction
     if (rules.ferpa) {
       // Student ID numbers: Student ID, SID, Student #
-      const studentIdPattern = /\b(?:Student ID|SID|Student #?)[:\s]?\d{4,}\b/gi;
+      const studentIdPattern = /\b(?:Student ID|SID|Student #?)[\s:]+\d{4,}\b/gi;
       const studentIdMatches = document.match(studentIdPattern) || [];
       if (studentIdMatches.length > 0) {
         redacted = redacted.replace(studentIdPattern, '[REDACTED-STUDENT-ID]');
@@ -750,19 +767,3 @@ export const documentProcessor: BaseTool = new (class extends BaseTool {
     };
   }
 })();
-
-
-)
-}
-}
-}
-}
-}
-}
-}
-}
-}
-}
-}
-}
-}

@@ -363,13 +363,3 @@ switch (command) {
     console.log('  status  - Show current status');
     console.log('  update  - Update task status');
     console.log('\nExample: tsx scripts/agent-coordinator.ts init');
-}
-
-
-}
-}
-)
-}
-}
-)
-)

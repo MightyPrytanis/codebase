@@ -482,7 +482,7 @@ export class ForecastEngine extends BaseEngine {
 
     return {
       allowed: false,
-      error: 'Risk acknowledgement required to disable LexFiat Forecaster™ advisories/branding. You must explicitly acknowledge that forecast outputs may resemble official forms and are not filing-ready.',
+      error: 'Risk acknowledgement required to disable LexFiat Forecaster™ advisories/branding. LexFiat Forecaster simulates tax preparation software. Outputs are consistent with applicable law and tax formulas, but are not intended for actual tax preparation. These forecasts are for litigation and planning purposes only. The user must explicitly acknowledge that forecast outputs may resemble official forms and are not filing-ready.',
       presentationMode: 'strip',
     };
   }
@@ -538,9 +538,3 @@ export class ForecastEngine extends BaseEngine {
 
 // Export singleton instance
 export const forecastEngine = new ForecastEngine();
-
-
-}
-}
-}
-}

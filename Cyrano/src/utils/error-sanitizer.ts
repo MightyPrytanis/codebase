@@ -67,6 +67,7 @@ export function sanitizeErrorMessage(error: unknown, context?: string): string {
   }
   
   return sanitized;
+}
 
 /**
  * Log detailed error for server-side debugging
@@ -102,13 +103,4 @@ export function createUserFriendlyError(
   
   // Return sanitized message for user
   return sanitizeErrorMessage(error, userContext);
-}
-
-
-}
-}
-}
-}
-}
-)
 }

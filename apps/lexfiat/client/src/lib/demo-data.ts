@@ -218,7 +218,3 @@ export const mockRedFlags = [
  * Mock cases for demo mode (alias for DEMO_CASES)
  */
 export const mockCases = DEMO_CASES;
-
-
-}
-}

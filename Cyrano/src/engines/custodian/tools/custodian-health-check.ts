@@ -47,6 +47,3 @@ export const custodianHealthCheckTool = new (class extends BaseTool {
     }
   }
 })();
-
-)
-}

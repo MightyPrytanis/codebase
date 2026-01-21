@@ -17,8 +17,6 @@ const require = createRequire(import.meta.url);
 
 // Import pdf-parse - handle both CommonJS and ESM
 // Use dynamic require to avoid issues in test environments
-import { createRequire } from 'module';
-const require = createRequire(import.meta.url);
 let pdfParse: (buffer: Buffer) => Promise<any>;
 try {
   // Try CommonJS require first
@@ -262,6 +260,3 @@ export class PDFExtractor {
  * Default instance
  */
 export const pdfExtractor = new PDFExtractor();
-
-}
-}
