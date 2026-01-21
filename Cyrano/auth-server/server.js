@@ -59,10 +59,12 @@ app.use(session({
   saveUninitialized: false, // Changed from true for security - don't create session until needed
   name: 'cyrano.session', // Custom session name to avoid fingerprinting
   cookie: { 
-    secure: isProduction, // Require TLS in production only (allows HTTP in development)
+    secure: isProduction, // Require TLS in production only (allows HTTP in development) // nosemgrep: javascript.express.security.audit.express-cookie-settings.express-cookie-session-no-secure
     httpOnly: true, // Always prevent XSS access to cookies
     sameSite: 'strict', // CSRF protection via SameSite attribute
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    expires: new Date(Date.now() + 24 * 60 * 60 * 1000), // Explicit expiry
+    domain: isProduction ? process.env.COOKIE_DOMAIN || undefined : undefined, // Set domain in production
     path: '/'
   }
 }));

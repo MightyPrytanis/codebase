@@ -69,5 +69,5 @@ export class WestlawImportService {
       if (k) return k;
     }
     return undefined;
-  }
+}
 }

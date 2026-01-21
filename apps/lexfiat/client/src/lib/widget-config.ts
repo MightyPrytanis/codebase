@@ -195,20 +195,3 @@ export async function saveWidgetConfigToBackend(
   } catch (error) {
     console.error('Failed to save widget config to backend:', error);
     return false;
-  }
-}
-
-
-
-}
-}
-}
-}
-}
-}
-}
-}
-}
-}
-}
-}

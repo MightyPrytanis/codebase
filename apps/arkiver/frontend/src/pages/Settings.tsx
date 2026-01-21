@@ -262,6 +262,3 @@ function DataSettings() {
       </div>
     </div>
   );
-}
-
-}

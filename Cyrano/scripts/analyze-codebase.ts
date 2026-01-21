@@ -96,7 +96,8 @@ function analyzeCodebase() {
   function findFiles(dir: string) {
     const entries = fs.readdirSync(dir, { withFileTypes: true });
     entries.forEach(entry => {
-      const fullPath = path.join(dir, entry.name);
+      // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
+      const fullPath = path.join(dir, entry.name); // Safe: Development script analyzing trusted local codebase
       if (entry.isDirectory() && !entry.name.includes('node_modules') && !entry.name.includes('dist')) {
         findFiles(fullPath);
       } else if (entry.isFile() && entry.name.endsWith('.ts')) {
@@ -188,26 +189,3 @@ function analyzeCodebase() {
 }
 
 analyzeCodebase();
-
-
-]
-)
-]
-]
-)
-]
-]
-)
-]
-]
-)
-]
-]
-)
-]
-]
-)
-]
-]
-)
-]

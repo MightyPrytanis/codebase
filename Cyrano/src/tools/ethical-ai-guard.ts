@@ -278,6 +278,11 @@ Return a JSON object with:
         systemPrompt,
         temperature: 0.3,
         maxTokens: 2000,
+        metadata: {
+          skipEthicsCheck: true, // Prevent infinite recursion: this IS the ethics check
+          toolName: 'ethical_ai_guard',
+          actionType: 'content_generation',
+        },
       });
 
       // Parse AI response (may be JSON or text)
@@ -359,8 +364,3 @@ Return a JSON object with:
     return violations;
   }
 })();
-
-)
-}
-}
-}

@@ -396,23 +396,3 @@ export class ChildSupportForecastModule extends BaseModule {
 
 // Export singleton instance
 export const childSupportForecastModule = new ChildSupportForecastModule();
-
-
-}
-}
-}
-}
-)
-}
-}
-}
-}
-}
-}
-}
-)
-}
-]
-}
-)
-}

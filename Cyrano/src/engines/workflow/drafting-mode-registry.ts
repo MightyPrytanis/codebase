@@ -70,7 +70,3 @@ export function isModeAvailable(id: DraftingModeId): boolean {
   const mode = DRAFTING_MODES[id];
   return mode?.enabled ?? false;
 }
-
-
-
-

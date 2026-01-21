@@ -292,6 +292,7 @@ ${new Date().toISOString().split('T')[0]}
   clearData(): void {
     this.matters.clear();
   }
+}
 
 // Export singleton instance
 export const costEstimationService = new CostEstimationService();

@@ -1,4 +1,4 @@
-FROM node:25.2.0-alpine
+FROM node:25.3.0-alpine
 
 WORKDIR /app
 
@@ -16,6 +16,13 @@ RUN npm run build
 
 # Create uploads directory for file storage
 RUN mkdir -p uploads
+
+# Create non-root user for security
+RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
+RUN chown -R nodejs:nodejs /app
+
+# Switch to non-root user
+USER nodejs
 
 # Expose port
 EXPOSE 5000

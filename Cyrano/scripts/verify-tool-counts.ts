@@ -22,7 +22,8 @@ async function findToolFiles(): Promise<string[]> {
     cwd: toolsDir,
     ignore: ['**/*.test.ts', '**/*.spec.ts', '**/base-tool.ts', '**/__tests__/**'],
   });
-  return files.map(f => join(toolsDir, f));
+  // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
+  return files.map(f => join(toolsDir, f)); // Safe: Development script processing controlled local directory
 }
 
 async function extractToolExports(filePath: string): Promise<ToolInfo> {
@@ -113,10 +114,3 @@ async function main() {
 }
 
 main().catch(console.error);
-
-}
-}
-)
-}
-}
-)
