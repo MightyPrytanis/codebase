@@ -21,8 +21,7 @@ import {
 describe('Matter Isolation Integration (Track Beta)', () => {
   beforeEach(() => {
     // Clear stores before each test
-    matterIsolationStore.clearMatterData = vi.fn();
-    matterIsolationStore.clearAgentContext = vi.fn();
+    matterIsolationStore.clearAll();
   });
 
   describe('Matter Data Storage', () => {
