@@ -127,3 +127,10 @@ Legacy/archive/
 # Resource cache directory (downloaded forms, templates, etc.)
 resources/
 Cyrano/resources/
+
+# Compiled TypeScript outputs (except configs and intentional sources)
+Cyrano/src/**/*.js
+Cyrano/tests/**/*.js
+!**/*.config.js
+!Cyrano/http-bridge.js
+!Cyrano/mcp-integration.js

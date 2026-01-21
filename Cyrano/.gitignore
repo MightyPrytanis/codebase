@@ -20,6 +20,17 @@ dist/
 build/
 *.tsbuildinfo
 
+# Compiled JavaScript from TypeScript (should be generated at build time)
+# Keep config files and intentional JS source files
+src/**/*.js
+!src/**/*.config.js
+tests/**/*.js
+!tests/**/*.config.js
+
+# But allow these specific intentional JS files:
+!http-bridge.js
+!mcp-integration.js
+
 # Runtime files
 *.pid
 *.log

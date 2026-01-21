@@ -573,5 +573,3 @@ Current mode: ${mode === 'execute' ? 'EXECUTE (can call tools)' : 'GUIDE (Q&A on
     return stats;
   }
 })();
-}
-)

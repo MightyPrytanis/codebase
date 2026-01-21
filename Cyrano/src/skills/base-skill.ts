@@ -94,4 +94,3 @@ export interface LoadedSkill {
   skill: Skill;
   frontmatter: SkillFrontmatter;
 }
-

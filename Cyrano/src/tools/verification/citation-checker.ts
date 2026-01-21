@@ -598,6 +598,8 @@ export class CitationChecker extends BaseTool {
       );
     }
   }
+}
+
 /**
  * Default instance
  */

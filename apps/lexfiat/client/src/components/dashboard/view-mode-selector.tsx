@@ -98,7 +98,3 @@ export function ViewModeSelector() {
       </p>
     </div>
   );
-}
-
-}
-}

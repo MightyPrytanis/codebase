@@ -341,14 +341,3 @@ export async function listChanges(
 ): Promise<FileChange[]> {
   return googleDriveConnector.listChanges({ path, credentials, lastSyncAt });
 }
-
-}
-}
-}
-)
-}
-}
-}
-}
-)
-}
