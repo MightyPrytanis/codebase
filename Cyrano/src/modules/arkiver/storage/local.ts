@@ -16,7 +16,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { createReadStream, createWriteStream } from 'fs';
 import crypto from 'crypto';
-import { safeJoin } from '../../utils/secure-path.js';
+import { safeJoin } from '../../../utils/secure-path.js';
 
 /**
  * Storage configuration

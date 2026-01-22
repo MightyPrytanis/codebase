@@ -14,7 +14,7 @@
 import { promises as fs } from 'fs';
 import { join, dirname, basename } from 'path';
 import { FileChange, ConnectorConfig, StorageConnector, withRetry } from './base-connector.js';
-import { safeJoin } from '../../utils/secure-path.js';
+import { safeJoin } from '../../../utils/secure-path.js';
 
 // Supported file extensions for library items
 const SUPPORTED_EXTENSIONS = [
