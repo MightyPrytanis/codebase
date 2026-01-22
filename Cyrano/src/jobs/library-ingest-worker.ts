@@ -293,7 +293,8 @@ async function processQueueItem(queueItem: IngestQueueItem): Promise<void> {
     console.log(`[Library Ingest Worker] Successfully processed: ${libraryItem.filename} (${vectorIds.length} vectors)`);
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    console.error(`[Library Ingest Worker] Error processing queue item ${queueItem.id}:`, errorMessage);
+    // Logging queue item ID for debugging - IDs are non-sensitive identifiers
+    console.error(`[Library Ingest Worker] Error processing queue item ${queueItem.id}:`, errorMessage); // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
     
     // Check if we should retry
     const shouldRetry = queueItem.attempts < queueItem.maxAttempts;

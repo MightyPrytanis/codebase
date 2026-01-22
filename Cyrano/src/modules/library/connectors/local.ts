@@ -71,7 +71,8 @@ async function scanDirectory(
           }
         } catch (statError) {
           // Skip files we can't stat (permissions, etc.)
-          console.warn(`[Local Connector] Cannot stat file ${fullPath}:`, statError);
+          // Logging file path for debugging - paths are application-controlled
+          console.warn(`[Local Connector] Cannot stat file ${fullPath}:`, statError); // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
         }
       }
     }

@@ -335,7 +335,8 @@ export class ClaimExtractor extends BaseTool {
 
     // Penalize hedging language
     const hedgingWords = ['may', 'might', 'could', 'possibly', 'likely', 'probably'];
-    const hasHedging = hedgingWords.some((word) => new RegExp(`\\b${word}\\b`, 'i').test(text));
+    // Word from hardcoded array - safe for pattern matching
+    const hasHedging = hedgingWords.some((word) => new RegExp(`\\b${word}\\b`, 'i').test(text)); // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
     if (hasHedging) confidence -= 0.2;
 
     return Math.max(0, Math.min(1, confidence));

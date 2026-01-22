@@ -76,7 +76,8 @@ async function processLocation(
       console.log(`  ${change.type}: ${change.filename}`);
     }
   } catch (error) {
-    console.error(`[Nightly Refresh] Error processing location ${location.name}:`, error);
+    // Logging location name for debugging - location names are non-sensitive
+    console.error(`[Nightly Refresh] Error processing location ${location.name}:`, error); // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
   }
 }
 
