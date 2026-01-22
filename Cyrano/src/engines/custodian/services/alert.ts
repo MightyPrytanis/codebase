@@ -80,7 +80,7 @@ class AlertService {
             break;
         }
       } catch (error) {
-        console.error(`[Alert Service] Failed to send alert via ${contact.method}:`, error);
+        console.error('[Alert Service] Failed to send alert via', contact.method, ':', error);
       }
     }
 
@@ -166,7 +166,7 @@ class AlertService {
               break;
           }
         } catch (error) {
-          console.error(`[Alert Service] ASAP notification failed via ${contact.method}:`, error);
+          console.error('[Alert Service] ASAP notification failed via', contact.method, ':', error);
         }
       }
     }

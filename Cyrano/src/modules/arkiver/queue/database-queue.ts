@@ -161,7 +161,7 @@ export class DatabaseJobQueue implements JobQueue {
 
       return true;
     } catch (error) {
-      console.error(`Failed to update job status for ${jobId}:`, error);
+      console.error('Failed to update job status for', jobId, ':', error);
       return false;
     }
   }
@@ -180,7 +180,7 @@ export class DatabaseJobQueue implements JobQueue {
 
       return true;
     } catch (error) {
-      console.error(`Failed to update job progress for ${jobId}:`, error);
+      console.error('Failed to update job progress for', jobId, ':', error);
       return false;
     }
   }
@@ -202,7 +202,7 @@ export class DatabaseJobQueue implements JobQueue {
 
       return true;
     } catch (error) {
-      console.error(`Failed to complete job ${jobId}:`, error);
+      console.error('Failed to complete job', jobId, ':', error);
       return false;
     }
   }
@@ -232,7 +232,7 @@ export class DatabaseJobQueue implements JobQueue {
 
       return true;
     } catch (err) {
-      console.error(`Failed to fail job ${jobId}:`, err);
+      console.error('Failed to fail job', jobId, ':', err);
       return false;
     }
   }
@@ -260,7 +260,7 @@ export class DatabaseJobQueue implements JobQueue {
 
       return true;
     } catch (error) {
-      console.error(`Failed to cancel job ${jobId}:`, error);
+      console.error('Failed to cancel job', jobId, ':', error);
       return false;
     }
   }
@@ -323,7 +323,7 @@ export class DatabaseJobQueue implements JobQueue {
 
       return true;
     } catch (error) {
-      console.error(`Failed to retry job ${jobId}:`, error);
+      console.error('Failed to retry job', jobId, ':', error);
       return false;
     }
   }
