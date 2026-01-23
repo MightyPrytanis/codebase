@@ -20,8 +20,7 @@ export class ResourceProvisioner {
 
   constructor(resourcesDir?: string) {
     this.loader = new ResourceLoader(resourcesDir);
-    // Resources directory is application-controlled - safe for registry access
-    this.registryPath = path.join(resourcesDir || path.join(process.cwd(), 'Cyrano/resources'), 'registry.json'); // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
+    this.registryPath = path.join(resourcesDir || path.join(process.cwd(), 'Cyrano/resources'), 'registry.json');
   }
 
   /**

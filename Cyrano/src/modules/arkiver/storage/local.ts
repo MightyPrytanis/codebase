@@ -16,7 +16,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { createReadStream, createWriteStream } from 'fs';
 import crypto from 'crypto';
-import { safeJoin } from '../../../utils/secure-path.js';
+import { safeJoin } from '../../utils/secure-path.js';
 
 /**
  * Storage configuration
@@ -144,8 +144,7 @@ export class LocalStorageProvider implements StorageProvider {
       await fs.mkdir(fullDir, { recursive: true });
 
       // Full storage path
-      // Both subdir and filename are application-generated, not user-controlled - safe join
-      const storagePath = path.join(subdir, filename); // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
+      const storagePath = path.join(subdir, filename); // Safe - both are generated internally
       const fullPath = safeJoin(this.config.uploadDir, storagePath);
 
       // Write file
@@ -194,8 +193,7 @@ export class LocalStorageProvider implements StorageProvider {
 
       return await fs.readFile(fullPath);
     } catch (error) {
-      // Logging storage path for debugging - paths are application-controlled
-      console.error(`Failed to download file ${storagePath}:`, error); // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
+      console.error('Failed to download file', storagePath, ':', error);
       return null;
     }
   }
@@ -213,8 +211,7 @@ export class LocalStorageProvider implements StorageProvider {
       
       return true;
     } catch (error) {
-      // Logging storage path for debugging - paths are application-controlled
-      console.error(`Failed to delete file ${storagePath}:`, error); // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
+      console.error('Failed to delete file', storagePath, ':', error);
       return false;
     }
   }

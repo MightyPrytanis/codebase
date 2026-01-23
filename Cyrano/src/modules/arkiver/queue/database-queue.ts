@@ -161,8 +161,7 @@ export class DatabaseJobQueue implements JobQueue {
 
       return true;
     } catch (error) {
-      // Logging job ID for debugging - IDs are non-sensitive identifiers
-      console.error(`Failed to update job status for ${jobId}:`, error); // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
+      console.error('Failed to update job status for', jobId, ':', error);
       return false;
     }
   }
@@ -181,8 +180,7 @@ export class DatabaseJobQueue implements JobQueue {
 
       return true;
     } catch (error) {
-      // Logging job ID for debugging - IDs are non-sensitive identifiers
-      console.error(`Failed to update job progress for ${jobId}:`, error); // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
+      console.error('Failed to update job progress for', jobId, ':', error);
       return false;
     }
   }
@@ -204,8 +202,7 @@ export class DatabaseJobQueue implements JobQueue {
 
       return true;
     } catch (error) {
-      // Logging job ID for debugging - IDs are non-sensitive identifiers
-      console.error(`Failed to complete job ${jobId}:`, error); // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
+      console.error('Failed to complete job', jobId, ':', error);
       return false;
     }
   }
@@ -235,8 +232,7 @@ export class DatabaseJobQueue implements JobQueue {
 
       return true;
     } catch (err) {
-      // Logging job ID for debugging - IDs are non-sensitive identifiers
-      console.error(`Failed to fail job ${jobId}:`, err); // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
+      console.error('Failed to fail job', jobId, ':', err);
       return false;
     }
   }
@@ -264,8 +260,7 @@ export class DatabaseJobQueue implements JobQueue {
 
       return true;
     } catch (error) {
-      // Logging job ID for debugging - IDs are non-sensitive identifiers
-      console.error(`Failed to cancel job ${jobId}:`, error); // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
+      console.error('Failed to cancel job', jobId, ':', error);
       return false;
     }
   }
@@ -328,8 +323,7 @@ export class DatabaseJobQueue implements JobQueue {
 
       return true;
     } catch (error) {
-      // Logging job ID for debugging - IDs are non-sensitive identifiers
-      console.error(`Failed to retry job ${jobId}:`, error); // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
+      console.error('Failed to retry job', jobId, ':', error);
       return false;
     }
   }

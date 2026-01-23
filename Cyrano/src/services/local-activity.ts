@@ -49,8 +49,7 @@ export class LocalActivityService {
       return;
     }
     for (const entry of entries) {
-      // Entry from readdir() - filesystem traversal within application-controlled directory
-      const full = path.join(dir, entry.name); // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
+      const full = path.join(dir, entry.name);
       if (entry.isDirectory()) {
         await this.walk(full, onFile);
       } else if (entry.isFile()) {

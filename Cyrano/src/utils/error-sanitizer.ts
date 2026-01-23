@@ -75,16 +75,14 @@ export function sanitizeErrorMessage(error: unknown, context?: string): string {
  */
 export function logDetailedError(error: unknown, context?: string): void {
   if (error instanceof Error) {
-    // Logging context string for error tracking - context is developer-provided debug info
-    console.error(`[ERROR] ${context || 'Unhandled error'}:`, { // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
+    console.error('[ERROR]', context || 'Unhandled error', '-', {
       message: error.message,
       stack: error.stack,
       name: error.name,
       timestamp: new Date().toISOString(),
     });
   } else {
-    // Logging context string for error tracking - context is developer-provided debug info
-    console.error(`[ERROR] ${context || 'Unhandled error'}:`, { // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
+    console.error('[ERROR]', context || 'Unhandled error', '-', {
       error: String(error),
       timestamp: new Date().toISOString(),
     });

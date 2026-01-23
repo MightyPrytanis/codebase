@@ -42,8 +42,7 @@ function analyzeFile(filePath: string): any {
 
   // Check for mock patterns
   MOCK_PATTERNS.forEach((pattern, index) => {
-    // Pattern from internal MOCK_PATTERNS array - RegExp objects converted to string source
-    const matches = content.match(new RegExp(pattern.source, 'g')); // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
+    const matches = content.match(new RegExp(pattern.source, 'g'));
     if (matches) {
       issues.mocks.push({
         pattern: pattern.source,
@@ -54,8 +53,7 @@ function analyzeFile(filePath: string): any {
 
   // Check for missing implementations
   MISSING_PATTERNS.forEach((pattern) => {
-    // Pattern from internal MISSING_PATTERNS array - RegExp objects converted to string source
-    const matches = content.match(new RegExp(pattern.source, 'g')); // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
+    const matches = content.match(new RegExp(pattern.source, 'g'));
     if (matches) {
       issues.missing.push({
         pattern: pattern.source,

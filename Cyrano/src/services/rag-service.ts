@@ -231,8 +231,7 @@ export class RAGService {
       let keywordScore = 0;
       for (const word of queryWords) {
         if (word.length > 3) { // Only count substantial words
-          // Word from split query string - simple word matching for search relevance scoring
-          const matches = (textLower.match(new RegExp(word, 'g')) || []).length; // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
+          const matches = (textLower.match(new RegExp(word, 'g')) || []).length;
           keywordScore += matches * 0.1; // Boost for keyword matches
         }
       }

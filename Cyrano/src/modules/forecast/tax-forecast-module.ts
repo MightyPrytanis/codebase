@@ -103,8 +103,7 @@ export class TaxForecastModule extends BaseModule {
     const candidates = [`${formCode}--${year}.pdf`, `${formCode}.pdf`];
     for (const filename of candidates) {
       try {
-        // Filename from controlled template list - application-controlled directory
-        return await fs.readFile(path.join(this.templatesDir, filename)); // nosemgrep: javascript.lang.security.audit.path-traversal.path-join-resolve-traversal.path-join-resolve-traversal
+        return await fs.readFile(path.join(this.templatesDir, filename));
       } catch {
         // ignore missing
       }
@@ -159,8 +158,7 @@ export class TaxForecastModule extends BaseModule {
               });
             })
             .catch(error => {
-              // Logging resource ID for debugging - IDs are non-sensitive identifiers
-              console.warn(`Failed to load resource ${resource.id}:`, error); // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
+              console.warn(`Failed to load resource ${resource.id}:`, error);
               // Continue loading other resources even if one fails
             })
         );

@@ -107,8 +107,7 @@ export function filterOutput(
   let filtered = output;
   for (const pattern of config.outputFilters) {
     // Remove patterns that might leak confidential data
-    // Pattern from application config for data redaction - controlled by admin, not user input
-    const regex = new RegExp(pattern, 'gi'); // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
+    const regex = new RegExp(pattern, 'gi');
     filtered = filtered.replace(regex, '[REDACTED]');
   }
 

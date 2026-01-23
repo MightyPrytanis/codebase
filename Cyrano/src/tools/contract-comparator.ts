@@ -448,10 +448,8 @@ export const contractComparator = new (class extends BaseTool {
     
     liabilityTerms.forEach(term => {
       const escapedTerm = escapeRegExp(term);
-      // Input sanitized via escapeRegExp() to prevent regex injection
-      const count1 = (doc1.match(new RegExp(escapedTerm, 'gi')) || []).length; // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
-      // Input sanitized via escapeRegExp() to prevent regex injection
-      const count2 = (doc2.match(new RegExp(escapedTerm, 'gi')) || []).length; // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
+      const count1 = (doc1.match(new RegExp(escapedTerm, 'gi')) || []).length;
+      const count2 = (doc2.match(new RegExp(escapedTerm, 'gi')) || []).length;
       
       if (count1 !== count2) {
         differences.push(`${term}: Doc1 has ${count1}, Doc2 has ${count2}`);
@@ -467,10 +465,8 @@ export const contractComparator = new (class extends BaseTool {
     
     complianceTerms.forEach(term => {
       const escapedTerm = escapeRegExp(term);
-      // Input sanitized via escapeRegExp() to prevent regex injection
-      const count1 = (doc1.match(new RegExp(escapedTerm, 'gi')) || []).length; // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
-      // Input sanitized via escapeRegExp() to prevent regex injection
-      const count2 = (doc2.match(new RegExp(escapedTerm, 'gi')) || []).length; // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
+      const count1 = (doc1.match(new RegExp(escapedTerm, 'gi')) || []).length;
+      const count2 = (doc2.match(new RegExp(escapedTerm, 'gi')) || []).length;
       
       if (count1 !== count2) {
         differences.push(`${term}: Doc1 has ${count1}, Doc2 has ${count2}`);

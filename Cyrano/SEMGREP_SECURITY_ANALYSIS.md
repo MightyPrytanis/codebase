@@ -5,18 +5,15 @@ This document provides security justifications for Semgrep findings that were ei
 ## Summary
 
 - **Initial Findings:** 122 issues
-- **After First Round:** 70 issues (42% reduction, all 7 CRITICAL resolved)
-- **After Second Round:** 44 issues (64% reduction from initial)
-- **Current Findings (Cyrano src/):** 0 issues (100% resolution in core codebase)
-- **Remaining Findings:** 2 in auth-server (out of scope), 4 in build scripts
-- **All CRITICAL and ERROR issues resolved**
-- **All WARNING issues in Cyrano codebase resolved or justified**
+- **Current Findings:** ~70 issues  
+- **Fixed:** ~52 issues (43% reduction)
+- **All 7 CRITICAL (ERROR) issues resolved**
 
 ---
 
-## Path Traversal Issues (All Resolved in Cyrano)
+## Path Traversal Issues
 
-### Development Scripts (Annotated)
+### Development Scripts (False Positives - Annotated)
 
 **Files:** `add-license-headers.ts`, `analyze-codebase.ts`, `replace-full-headers.ts`, `verify-tool-counts.ts`
 
@@ -30,7 +27,7 @@ This document provides security justifications for Semgrep findings that were ei
 
 ---
 
-### Production Services (All Fixed or Justified)
+### Production Services (Mixed - Fixed and Annotated)
 
 #### Fixed with `safeJoin()` Utility
 
@@ -52,27 +49,15 @@ const fullPath = safeJoin(basePath, userProvidedPath);
 // safeJoin validates path is within basePath or throws
 ```
 
-#### Annotated (Controlled Paths - All Application-Controlled)
+#### Annotated (Controlled Paths)
 
-**Files:** 
-- `arkiver/storage/local.ts` (internal path generation)
-- `forecast/tax-forecast-module.ts` (template directory)
-- `local-activity.ts` (filesystem traversal)
-- `logic-audit-service.ts` (log directory)
-- `resource-provisioner.ts` (resources directory)
+**Files:** `skill-loader.ts`, `local-activity.ts`
 
-**Justification:** These services use controlled directories:
-- Template directories with hardcoded filenames
-- Application-generated subdirectories and filenames
-- Log directories for audit trails
-- Resource directories configured at startup
+**Justification:** These services walk controlled directories:
+- `skill-loader.ts`: Walks skills directory for markdown files (controlled by application)
+- `local-activity.ts`: Processes application-controlled activity logs
 
-All path operations use application-controlled base directories and either:
-- Generated filenames (timestamps, IDs)
-- Hardcoded filenames from controlled lists
-- Filesystem entries from `readdir()` within controlled directories
-
-**Decision:** Added `nosemgrep` annotations explaining the controlled nature of each operation.
+**Decision:** Added `nosemgrep` annotations explaining the controlled nature of these operations.
 
 ---
 
@@ -89,11 +74,11 @@ All path operations use application-controlled base directories and either:
 
 ---
 
-## Non-literal Regular Expressions (All Resolved)
+## Non-literal Regular Expressions
 
 ### Fixed with `escapeRegExp()` Helper
 
-**Files:** `contract-comparator.ts`, `consistency-checker.ts`, `citation-checker.ts`, `claim-extractor.ts`
+**Files:** `contract-comparator.ts`, `consistency-checker.ts`
 
 **Security Fix:** Created `escapeRegExp()` helper function and applied to all dynamic regex patterns:
 ```typescript
@@ -109,23 +94,15 @@ const pattern = new RegExp(escapeRegExp(userTerm), 'gi');
 
 ---
 
-### Annotated (Controlled Inputs)
+### Remaining (Low Risk - Controlled Inputs)
 
-**Files:** `gatekeeper.ts`, `base-module.ts`, `rag-service.ts`, `analyze-codebase.ts`
+**Files:** Various scripts and verification tools
 
-**Justification:** These use controlled inputs:
-- `gatekeeper.ts`: Patterns from application configuration (admin-controlled)
-- `base-module.ts`: Variable names from prompt template schema (not user-controlled)
-- `rag-service.ts`: Words from split query string (simple word matching)
-- `analyze-codebase.ts`: Patterns from internal arrays (RegExp objects)
-
-All instances that use hardcoded arrays (hedging words, negation words, assertion words) are also annotated with justification.
-
-**Decision:** Added `nosemgrep` annotations with clear justifications for each use case.
+**Status:** Need assessment - most use controlled, predefined string lists (e.g., legal terms, compliance keywords)
 
 ---
 
-## Prototype Pollution (All Resolved)
+## Prototype Pollution
 
 ### Fixed
 
@@ -150,8 +127,6 @@ All instances that use hardcoded arrays (hedging words, negation words, assertio
    }
    req.body = sanitizedBody;
    ```
-
-3. Added `nosemgrep` annotations after validation checks to suppress false positives where dangerous keys are already filtered.
 
 **Impact:** Prevents attackers from polluting the prototype chain through user-controlled object properties.
 
@@ -216,32 +191,18 @@ This is a documented tradeoff that enables local development while maintaining s
 
 ---
 
-## Unsafe Format Strings (All Resolved in Cyrano)
+## Unsafe Format Strings (INFO Severity)
 
-### Status: All Justified with Annotations
+### Status: Low Priority
 
-**Original Count:** 39 issues  
-**Current Count:** 0 issues in Cyrano src/
+**Count:** 39 issues
 
-**Resolution:** All unsafe format string warnings have been annotated with `nosemgrep` comments explaining:
-- The data being logged is non-sensitive (IDs, method names, paths)
-- Paths are application-controlled, not user-controlled
-- IDs are non-sensitive identifiers used for debugging
-- Context strings are developer-provided debug information
+**Analysis:** These are logging/formatting operations. Most use:
+- Template literals with controlled variables
+- Error messages with sanitized inputs
+- Debug output in development mode
 
-**Examples of Justified Logging:**
-```typescript
-// Job/File IDs for debugging - non-sensitive identifiers
-console.error(`Failed to update job ${jobId}:`, error); // nosemgrep
-
-// Application-controlled paths for debugging
-console.error(`Failed to download file ${storagePath}:`, error); // nosemgrep
-
-// Contact method types (email/sms/webhook) - no sensitive data
-console.error(`Failed to send via ${contact.method}:`, error); // nosemgrep
-```
-
-**Security Review:** Verified that no sensitive data (passwords, API keys, PII, tokens) is logged in any of the annotated locations.
+**Recommendation:** Review each instance to ensure no sensitive data (passwords, API keys, PII) is logged.
 
 ---
 
@@ -262,33 +223,10 @@ console.error(`Failed to send via ${contact.method}:`, error); // nosemgrep
 
 ## Conclusion
 
-All security vulnerabilities in the Cyrano codebase have been fully addressed:
-
-**100% Resolution in Core Codebase (src/):**
-- ✅ All CRITICAL/ERROR issues fixed
-- ✅ All WARNING issues fixed or justified
-- ✅ All INFO issues justified with annotations
-- ✅ 0 findings in Cyrano src/ directory
-
-**Security Measures Implemented:**
+All critical security vulnerabilities have been addressed through:
 1. **Targeted fixes** for real vulnerabilities (encryption, path traversal with user input, prototype pollution)
 2. **Security utilities** (`safeJoin()`, `escapeRegExp()`) for consistent protection
-3. **Documented justifications** for false positives with `nosemgrep` annotations including:
-   - Clear explanations of why each finding is safe
-   - Context about data sources (application-controlled vs user-controlled)
-   - Security reasoning for each annotation
+3. **Documented justifications** for false positives with `nosemgrep` annotations
 4. **Defense in depth** (container security, cookie flags, input validation)
 
-**Annotation Strategy:**
-- Each `nosemgrep` annotation includes a comment explaining the justification
-- Comments are placed on the same line as the code for proper suppression
-- Justifications focus on:
-  - Input source (application-controlled, hardcoded, sanitized)
-  - Data sensitivity (non-sensitive IDs, public information)
-  - Security controls (validation, filtering, escaping)
-
-**Out of Scope:**
-- 2 findings in `auth-server/` (separate authentication server)
-- 4 findings in `scripts/` (development-time utilities)
-
-The Cyrano codebase is now secure and production-ready with comprehensive security annotations and protections.
+The remaining findings are primarily low-severity informational issues or false positives in development tooling.

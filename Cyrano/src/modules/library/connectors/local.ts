@@ -14,7 +14,7 @@
 import { promises as fs } from 'fs';
 import { join, dirname, basename } from 'path';
 import { FileChange, ConnectorConfig, StorageConnector, withRetry } from './base-connector.js';
-import { safeJoin } from '../../../utils/secure-path.js';
+import { safeJoin } from '../../utils/secure-path.js';
 
 // Supported file extensions for library items
 const SUPPORTED_EXTENSIONS = [
@@ -71,8 +71,7 @@ async function scanDirectory(
           }
         } catch (statError) {
           // Skip files we can't stat (permissions, etc.)
-          // Logging file path for debugging - paths are application-controlled
-          console.warn(`[Local Connector] Cannot stat file ${fullPath}:`, statError); // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
+          console.warn(`[Local Connector] Cannot stat file ${fullPath}:`, statError);
         }
       }
     }

@@ -160,8 +160,7 @@ export abstract class BaseModule {
     if (prompt.variables) {
       prompt.variables.forEach(variable => {
         const value = variables[variable] || '';
-        // Variable name from prompt template schema - not user-controlled, safe for template substitution
-        rendered = rendered.replace(new RegExp(`\\{\\{${variable}\\}\\}`, 'g'), value); // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
+        rendered = rendered.replace(new RegExp(`\\{\\{${variable}\\}\\}`, 'g'), value);
       });
     }
 

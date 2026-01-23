@@ -80,8 +80,7 @@ class AlertService {
             break;
         }
       } catch (error) {
-        // Logging contact method type (email/sms/webhook) - no sensitive data
-        console.error(`[Alert Service] Failed to send alert via ${contact.method}:`, error); // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
+        console.error('[Alert Service] Failed to send alert via', contact.method, ':', error);
       }
     }
 
@@ -167,8 +166,7 @@ class AlertService {
               break;
           }
         } catch (error) {
-          // Logging contact method type (email/sms/webhook) - no sensitive data
-          console.error(`[Alert Service] ASAP notification failed via ${contact.method}:`, error); // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
+          console.error('[Alert Service] ASAP notification failed via', contact.method, ':', error);
         }
       }
     }

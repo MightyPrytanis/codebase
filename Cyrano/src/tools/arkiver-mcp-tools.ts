@@ -191,8 +191,7 @@ export class ArkiverProcessFileTool extends BaseTool {
       
       // Start processing (async)
       this.processFileAsync(jobId, fileId, file, settings).catch((error) => {
-        // Logging file ID for debugging - IDs are non-sensitive identifiers
-        console.error(`Error processing file ${fileId}:`, error); // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
+        console.error(`Error processing file ${fileId}:`, error);
       });
       
       return this.createSuccessResult(

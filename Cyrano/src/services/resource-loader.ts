@@ -40,8 +40,7 @@ export class ResourceLoader {
           : safeJoin(this.resourcesDir, resource.path); // Use safeJoin for security
         return await fs.readFile(fullPath);
       } catch (error) {
-        // Logging resource path for debugging - paths are application-controlled
-        console.warn(`Failed to load resource from path ${resource.path}:`, error); // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
+        console.warn(`Failed to load resource from path ${resource.path}:`, error);
         // Fall through to URL download
       }
     }
@@ -80,8 +79,7 @@ export class ResourceLoader {
 
         return buffer;
       } catch (error) {
-        // Logging resource ID and URL for debugging - URLs and IDs are application-controlled
-        console.error(`Failed to download resource ${resource.id} from ${resource.url}:`, error); // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
+        console.error('Failed to download resource', resource.id, 'from', resource.url, ':', error);
         throw error;
       }
     }

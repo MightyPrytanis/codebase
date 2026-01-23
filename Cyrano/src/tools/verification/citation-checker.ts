@@ -535,8 +535,7 @@ export class CitationChecker extends BaseTool {
    */
   private checkContext(citation: string, context: string): { found: boolean; count: number } {
     const escapedCitation = citation.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    // Citation text sanitized via regex escape to prevent injection
-    const regex = new RegExp(escapedCitation, 'gi'); // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
+    const regex = new RegExp(escapedCitation, 'gi');
     const matches = context.match(regex);
     const count = matches ? matches.length : 0;
 
