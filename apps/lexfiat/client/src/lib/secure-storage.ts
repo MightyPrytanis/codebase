@@ -25,7 +25,7 @@ export function safeGetItem(key: string): string | null {
     // The caller should sanitize when rendering
     return value;
   } catch (error) {
-    console.error(`Failed to get localStorage item ${key}:`, error);
+    console.error('Failed to get localStorage item:', key, error);
     return null;
   }
 }
@@ -53,7 +53,7 @@ export function safeSetItem(key: string, value: string): void {
     
     localStorage.setItem(key, value);
   } catch (error) {
-    console.error(`Failed to set localStorage item ${key}:`, error);
+    console.error('Failed to set localStorage item:', key, error);
     throw error;
   }
 }
@@ -74,7 +74,7 @@ export function safeGetJSON<T>(key: string): T | null {
     // Sanitize parsed data
     return sanitizeStorageData(parsed) as T;
   } catch (error) {
-    console.error(`Failed to parse JSON from localStorage item ${key}:`, error);
+    console.error('Failed to parse JSON from localStorage item:', key, error);
     return null;
   }
 }
@@ -88,7 +88,7 @@ export function safeSetJSON(key: string, value: any): void {
     const jsonString = JSON.stringify(value);
     safeSetItem(key, jsonString);
   } catch (error) {
-    console.error(`Failed to stringify JSON for localStorage item ${key}:`, error);
+    console.error('Failed to stringify JSON for localStorage item:', key, error);
     throw error;
   }
 }
@@ -100,7 +100,7 @@ export function safeRemoveItem(key: string): void {
   try {
     localStorage.removeItem(key);
   } catch (error) {
-    console.error(`Failed to remove localStorage item ${key}:`, error);
+    console.error('Failed to remove localStorage item:', key, error);
   }
 }
 
@@ -112,7 +112,7 @@ export const safeSessionStorage = {
     try {
       return sessionStorage.getItem(key);
     } catch (error) {
-      console.error(`Failed to get sessionStorage item ${key}:`, error);
+      console.error('Failed to get sessionStorage item:', key, error);
       return null;
     }
   },
@@ -127,7 +127,7 @@ export const safeSessionStorage = {
       }
       sessionStorage.setItem(key, value);
     } catch (error) {
-      console.error(`Failed to set sessionStorage item ${key}:`, error);
+      console.error('Failed to set sessionStorage item:', key, error);
       throw error;
     }
   },
@@ -139,7 +139,7 @@ export const safeSessionStorage = {
       const parsed = JSON.parse(value);
       return sanitizeStorageData(parsed) as T;
     } catch (error) {
-      console.error(`Failed to parse JSON from sessionStorage item ${key}:`, error);
+      console.error('Failed to parse JSON from sessionStorage item:', key, error);
       return null;
     }
   },
@@ -149,7 +149,7 @@ export const safeSessionStorage = {
       const jsonString = JSON.stringify(value);
       sessionStorage.setItem(key, jsonString);
     } catch (error) {
-      console.error(`Failed to stringify JSON for sessionStorage item ${key}:`, error);
+      console.error('Failed to stringify JSON for sessionStorage item:', key, error);
       throw error;
     }
   },
@@ -158,7 +158,7 @@ export const safeSessionStorage = {
     try {
       sessionStorage.removeItem(key);
     } catch (error) {
-      console.error(`Failed to remove sessionStorage item ${key}:`, error);
+      console.error('Failed to remove sessionStorage item:', key, error);
     }
   },
 };
