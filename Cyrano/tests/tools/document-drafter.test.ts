@@ -248,4 +248,4 @@ describe('Document Drafter Tool', () => {
       expect(result).toBeDefined();
     });
   });
-;
+});
