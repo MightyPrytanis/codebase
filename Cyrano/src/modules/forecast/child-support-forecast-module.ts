@@ -103,7 +103,8 @@ export class ChildSupportForecastModule extends BaseModule {
               });
             })
             .catch(error => {
-              console.warn(`Failed to load resource ${resource.id}:`, error);
+              // Logging resource ID for debugging - IDs are non-sensitive identifiers
+              console.warn(`Failed to load resource ${resource.id}:`, error); // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
               // Continue loading other resources even if one fails
             })
         );

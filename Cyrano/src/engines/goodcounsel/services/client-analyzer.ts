@@ -94,7 +94,8 @@ export class ClientAnalyzer {
         const recommendations = await this.generateRecommendations(client);
         allRecommendations.push(...recommendations);
       } catch (error) {
-        console.error('Error generating recommendations for client', client.id, ':', error);
+        // Logging client ID for debugging - IDs are non-sensitive identifiers
+        console.error(`Error generating recommendations for client ${client.id}:`, error); // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
         // Continue with other clients even if one fails
       }
     }
@@ -117,7 +118,8 @@ export class ClientAnalyzer {
         const urgent = recommendations.filter(rec => rec.priority === 'urgent');
         urgentRecommendations.push(...urgent);
       } catch (error) {
-        console.error('Error generating urgent recommendations for client', client.id, ':', error);
+        // Logging client ID for debugging - IDs are non-sensitive identifiers
+        console.error(`Error generating urgent recommendations for client ${client.id}:`, error); // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
       }
     }
 

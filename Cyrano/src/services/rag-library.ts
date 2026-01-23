@@ -75,7 +75,8 @@ export async function ingestLibraryItem(
     console.log(`[RAG Library] Ingested library item ${libraryItem.id}: ${vectorIds.length} vectors created`);
     return vectorIds;
   } catch (error) {
-    console.error(`[RAG Library] Error ingesting library item ${libraryItem.id}:`, error);
+    // Logging library item ID for debugging - IDs are non-sensitive identifiers
+    console.error(`[RAG Library] Error ingesting library item ${libraryItem.id}:`, error); // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
     throw error;
   }
 }

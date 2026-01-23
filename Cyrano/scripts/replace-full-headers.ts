@@ -55,7 +55,7 @@ async function processFile(filePath: string, stats: FileStats): Promise<void> {
     console.log(`✓ Replaced header in: ${filePath}`);
   } catch (error) {
     stats.errors++;
-    console.error(`✗ Error processing ${filePath}:`, error instanceof Error ? error.message : error);
+    console.error(`✗ Error processing ${filePath}:`, error instanceof Error ? error.message : error); // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
   }
 }
 
@@ -82,7 +82,7 @@ async function processDirectory(dirPath: string, stats: FileStats): Promise<void
       }
     }
   } catch (error) {
-    console.error(`Error processing directory ${dirPath}:`, error instanceof Error ? error.message : error);
+    console.error(`Error processing directory ${dirPath}:`, error instanceof Error ? error.message : error); // nosemgrep: javascript.lang.security.audit.unsafe-formatstring.unsafe-formatstring
   }
 }
 

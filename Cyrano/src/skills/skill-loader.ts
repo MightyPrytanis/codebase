@@ -127,7 +127,8 @@ export class SkillLoader {
             continue;
           }
           if (!target[parentKey]) target[parentKey] = {};
-          target = target[parentKey];
+          // Protected against pollution - dangerous keys are filtered above before this assignment
+          target = target[parentKey]; // nosemgrep: javascript.lang.security.audit.prototype-pollution.prototype-pollution-loop.prototype-pollution-loop
         }
         
         currentKey = fullKey;
@@ -152,7 +153,8 @@ export class SkillLoader {
           if (parentKey === '__proto__' || parentKey === 'constructor' || parentKey === 'prototype') {
             continue;
           }
-          target = target[parentKey];
+          // Protected against pollution - dangerous keys are filtered above before this traversal
+          target = target[parentKey]; // nosemgrep: javascript.lang.security.audit.prototype-pollution.prototype-pollution-loop.prototype-pollution-loop
         }
         
         const existing = target[currentKey];

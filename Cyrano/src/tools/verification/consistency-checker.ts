@@ -489,7 +489,8 @@ export class ConsistencyChecker extends BaseTool {
    */
   private hasNegation(text: string): boolean {
     const negationWords = ['not', 'no', 'never', 'none', 'neither', 'nor', "don't", "doesn't", "didn't", "won't", "can't"];
-    return negationWords.some((word) => new RegExp(`\\b${escapeRegExp(word)}\\b`, 'i').test(text));
+    // Word from hardcoded array, sanitized via escapeRegExp() - safe for negation detection
+    return negationWords.some((word) => new RegExp(`\\b${escapeRegExp(word)}\\b`, 'i').test(text)); // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
   }
 
   /**
@@ -566,7 +567,8 @@ export class ConsistencyChecker extends BaseTool {
    */
   private detectAmbiguity(claim: ExtractedClaim): { description: string; confidence: number } | null {
     const ambiguousWords = ['some', 'many', 'few', 'several', 'various', 'certain', 'unclear', 'ambiguous'];
-    const hasAmbiguous = ambiguousWords.some((word) => new RegExp(`\\b${escapeRegExp(word)}\\b`, 'i').test(claim.text));
+    // Word from hardcoded array, sanitized via escapeRegExp() - safe for ambiguity detection
+    const hasAmbiguous = ambiguousWords.some((word) => new RegExp(`\\b${escapeRegExp(word)}\\b`, 'i').test(claim.text)); // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
 
     if (hasAmbiguous) {
       return {
@@ -622,7 +624,8 @@ export class ConsistencyChecker extends BaseTool {
    */
   private needsSupport(text: string): boolean {
     const assertionWords = ['proves', 'shows', 'demonstrates', 'indicates', 'establishes'];
-    return assertionWords.some((word) => new RegExp(`\\b${escapeRegExp(word)}\\b`, 'i').test(text));
+    // Word from hardcoded array, sanitized via escapeRegExp() - safe for assertion detection
+    return assertionWords.some((word) => new RegExp(`\\b${escapeRegExp(word)}\\b`, 'i').test(text)); // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
   }
 
   /**
