@@ -55,7 +55,7 @@
     "@tailwindcss/postcss": "^4.1.18",
     "@types/express": "^5.0.6",
     "@types/node": "^25.0.9",
-    "@types/react": "^19.2.8",
+    "@types/react": "^19.2.9",
     "@types/react-dom": "^19.2.3",
     "autoprefixer": "^10.4.23",
     "esbuild": "^0.27.2",
