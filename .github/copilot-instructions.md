@@ -1,5 +1,9 @@
 # GitHub Copilot Instructions for Cyrano Ecosystem
 
+> **Last Updated:** 2026-02-08  
+> **Purpose:** Provide comprehensive guidelines for GitHub Copilot coding agent working on the Cyrano ecosystem  
+> **Audience:** GitHub Copilot coding agent, developers, contributors
+
 ## Repository Overview
 
 This is a monorepo consolidating all components of the Cyrano ecosystem - a legal workflow intelligence platform with AI orchestration capabilities.
@@ -8,6 +12,127 @@ This is a monorepo consolidating all components of the Cyrano ecosystem - a lega
 **Project Start:** July 2025  
 **License:** Apache License 2.0  
 **Copyright:** © 2025 Cognisint LLC
+
+## Working with GitHub Copilot
+
+### Task Assignment Best Practices
+
+When assigned a task, follow these principles:
+
+1. **Understand First, Code Second**
+   - Read and understand the full issue description and any comments
+   - Explore the relevant code areas before making changes
+   - Ask clarifying questions if requirements are ambiguous
+
+2. **Scope & Complexity**
+   - This repository is suitable for low-to-medium complexity tasks
+   - Focus on: bug fixes, refactoring, documentation, test coverage, tooling automation
+   - Escalate: highly complex business logic, architectural changes, security-critical changes
+
+3. **Minimal Changes**
+   - Make the smallest possible changes to address the issue
+   - Don't refactor unrelated code unless specifically requested
+   - Preserve existing patterns and conventions
+
+4. **Validation is Mandatory**
+   - Always run linters, builds, and tests before completing work
+   - Validate changes manually when appropriate (e.g., UI changes require screenshots)
+   - Never assume changes work without verification
+
+### Workflow Integration
+
+1. **Creating Pull Requests**
+   - All work is done on feature branches
+   - Use `report_progress` tool frequently to commit and push changes
+   - PR descriptions must include task summary and validation evidence
+
+2. **Code Review & Iteration**
+   - Use the `code_review` tool before finalizing work
+   - Address all valid feedback from code reviews
+   - Use the `codeql_checker` tool to scan for security vulnerabilities
+   - Iterate until changes meet quality standards
+
+3. **Solo Maintainer Workflow**
+   - Repository uses GitHub Actions for auto-approval (`.github/workflows/solo-maintainer-auto-approve.yml`)
+   - PRs created by the repository owner are automatically approved
+   - Branch protection rules still apply via GitHub rulesets
+
+### Examples of Well-Formed Tasks
+
+**Good Task Examples:**
+
+✅ **Specific and Actionable**
+```
+Title: Add unit tests for TimelineProcessor class
+Description: Create unit tests for the TimelineProcessor class in 
+apps/arkiver/src/processors/timeline-processor.ts covering:
+- Event parsing from different date formats
+- Chronological sorting
+- Edge cases (empty input, invalid dates)
+Use Vitest and follow existing test patterns in the project.
+```
+
+✅ **Clear Scope with Context**
+```
+Title: Fix memory leak in document extraction
+Description: The PDF processor in Cyrano/src/modules/arkiver/extractors/pdf-extractor.ts
+is not properly cleaning up resources after processing large files (>10MB).
+Add proper cleanup in finally blocks and verify with memory profiling.
+Acceptance criteria: Process 100MB PDF without memory growth.
+```
+
+✅ **Documentation Update**
+```
+Title: Update MAE engine documentation
+Description: Add usage examples to Cyrano/README.md section on MAE (Master Adaptive Engine).
+Include:
+- Basic initialization example
+- Sample workflow execution
+- Common configuration options
+Follow the existing documentation style and code formatting.
+```
+
+**Poor Task Examples:**
+
+❌ **Too Vague**
+```
+Title: Fix the tests
+Description: Some tests are failing, please fix them.
+(Missing: Which tests? What's failing? Expected vs actual behavior?)
+```
+
+❌ **Too Broad**
+```
+Title: Refactor the entire codebase
+Description: The code needs to be cleaner and more maintainable.
+(Missing: Specific areas, criteria, scope limitations)
+```
+
+❌ **Missing Context**
+```
+Title: Add feature X
+Description: We need feature X.
+(Missing: What is feature X? Where should it go? Requirements? Acceptance criteria?)
+```
+
+### Critical Safety Rules
+
+These rules are based on actual incidents in this repository and **MUST** be followed:
+
+1. **NEVER Auto-Fix Without Validation**
+   - Never blindly apply automated fixes to multiple files
+   - Always validate each change individually
+   - Reference: BraceCase Agent incident (2026-02-08) - 25 files corrupted by auto-adding closing delimiters
+
+2. **Validate ALL Files, Not Just Build Path**
+   - Check UI components, tests, scripts, documentation
+   - Corruption can exist outside the TypeScript build path
+   - Reference: BraceCase incident - corrupted files went undetected because they weren't in build path
+
+3. **Human Review for Automated Changes**
+   - Any batch operation must be reviewed file-by-file
+   - Provide clear summary of changes made
+   - Allow human verification before completing task
 
 ## Repository Structure
 
@@ -317,6 +442,49 @@ Modules are registered in the engine's `initialize()` method.
 2. **Monorepo:** This is a consolidated monorepo; be aware of cross-project dependencies
 3. **Active Development:** Project is in pre-beta "codebase optimization" phase
 4. **Documentation:** Extensive documentation in `docs/` - consult `ACTIVE_DOCUMENTATION_INDEX.md` for complete list
+
+## Feedback & Troubleshooting
+
+### Providing Feedback to Copilot
+
+When reviewing Copilot's work:
+- Comment on the PR with `@copilot` mentions for specific feedback
+- Be specific about what needs to change and why
+- Reference files and line numbers when possible
+- Copilot will iterate based on your feedback
+
+### Common Issues & Solutions
+
+1. **Build Failures**
+   - Check if failure is related to your changes or pre-existing
+   - Review build logs carefully
+   - Run builds locally before pushing: `npm run build` in relevant project directory
+
+2. **Test Failures**
+   - Verify tests pass before your changes: establish baseline
+   - Focus on tests related to your modifications
+   - Don't remove tests to make them pass - fix the underlying issue
+
+3. **Linting Issues**
+   - Use existing linters: ESLint for TypeScript/JavaScript
+   - Follow the repository's established code style
+   - Don't disable linting rules without good reason
+
+4. **Documentation Out of Sync**
+   - Update documentation when changing APIs or behavior
+   - Follow the versioning system: `vYWW` format
+   - Never create new documentation without explicit authorization
+
+### Quality Standards
+
+Before marking work as complete:
+- [ ] Code builds without errors
+- [ ] Tests pass (at minimum, tests related to your changes)
+- [ ] Linting passes
+- [ ] Security scan passes (CodeQL)
+- [ ] Code review feedback addressed
+- [ ] Documentation updated if APIs/behavior changed
+- [ ] Changes manually verified (screenshots for UI, logs for CLI)
 
 ## References
 

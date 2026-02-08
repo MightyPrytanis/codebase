@@ -2,6 +2,10 @@
 
 This directory contains GitHub repository rulesets for branch protection and workflow enforcement.
 
+## Solo Maintainer Support
+
+**For solo developers/maintainers:** This repository is configured to support self-approval and self-merging of PRs. See the [Solo Maintainer Configuration](#solo-maintainer-configuration) section below for details.
+
 ## Main Branch Ruleset
 
 The `main-ruleset.json` file defines protection rules for the `main` branch.
@@ -31,6 +35,131 @@ The `main-ruleset.json` file defines protection rules for the `main` branch.
 
 6. **Block Force Pushes**
    - Force pushes to the main branch are blocked (via `non_fast_forward` rule)
+
+## Solo Maintainer Configuration
+
+### Problem Statement
+
+Solo developers and maintainers often face a challenge with GitHub's branch protection rules: they cannot approve their own pull requests. This creates unnecessary friction for one-person repositories where the owner is both the contributor and the reviewer.
+
+### Solution Implemented
+
+This repository implements a two-part solution to enable solo maintainer self-approval:
+
+#### 1. Ruleset Bypass Configuration
+
+The `main-ruleset.json` file includes a `bypass_actors` configuration that allows **Repository Admins** to bypass pull request requirements:
+
+```json
+"bypass_actors": [
+  {
+    "_comment": "Repository admins can bypass pull request requirements for solo maintainer workflows.",
+    "actor_id": 5,
+    "actor_type": "RepositoryRole",
+    "bypass_mode": "always"
+  }
+]
+```
+
+**Key Details:**
+- `actor_id: 5` represents the "Repository Admin" role in GitHub
+- `actor_type: "RepositoryRole"` targets role-based access (not individual users)
+- `bypass_mode: "always"` allows admins to bypass all ruleset restrictions
+
+**GitHub Repository Roles by ID:**
+- `1` = Repository Reader
+- `2` = Repository Triager
+- `3` = Repository Writer
+- `4` = Repository Maintainer
+- `5` = Repository Admin
+
+#### 2. Auto-Approval Workflow
+
+The `.github/workflows/solo-maintainer-auto-approve.yml` workflow automatically approves PRs created by the repository owner:
+
+**Workflow Behavior:**
+- Triggers on PR events: `opened`, `synchronize`, `reopened`, `ready_for_review`
+- Only runs for PRs created by the repository owner (`MightyPrytanis`)
+- Skips draft PRs (only approves when ready for review)
+- Automatically approves the PR with a descriptive comment
+- Adds a `solo-maintainer-approved` label (if labels exist)
+- Posts an informative comment explaining the auto-approval
+
+**Workflow Features:**
+- ✓ Safe: Only activates for PRs created by the repository owner
+- ✓ Transparent: Adds comments explaining the auto-approval
+- ✓ Flexible: Can be disabled by deleting or editing the workflow file
+- ✓ Non-intrusive: Doesn't affect PRs from other contributors (if any)
+
+### How to Use
+
+1. **Create a PR as normal:**
+   ```bash
+   git checkout -b feature/my-feature
+   # Make your changes
+   git commit -m "Add feature"
+   git push origin feature/my-feature
+   # Create PR via GitHub UI or gh CLI
+   ```
+
+2. **Automatic approval:**
+   - The workflow automatically approves your PR
+   - You'll see an approval from "github-actions[bot]"
+   - A comment explains the auto-approval
+
+3. **Merge your PR:**
+   - Once status checks pass, you can merge immediately
+   - Use "Squash and merge" or "Rebase and merge" (merge commits are blocked)
+
+### Disabling Solo Maintainer Auto-Approval
+
+If you want to disable auto-approval (e.g., when adding team members):
+
+**Option 1: Delete the workflow**
+```bash
+git rm .github/workflows/solo-maintainer-auto-approve.yml
+git commit -m "Disable solo maintainer auto-approval"
+git push
+```
+
+**Option 2: Disable in GitHub UI**
+1. Go to Actions tab
+2. Find "Solo Maintainer Auto-Approve" workflow
+3. Click "..." → "Disable workflow"
+
+**Option 3: Update the condition**
+Edit `.github/workflows/solo-maintainer-auto-approve.yml` and change the `if` condition to always be false:
+```yaml
+if: false  # Disabled
+```
+
+### For Team Repositories
+
+If you're transitioning from solo to team:
+
+1. **Disable the auto-approval workflow** (see above)
+2. **Keep the ruleset bypass** for admin flexibility
+3. **Add team members** to CODEOWNERS file
+4. **Configure different approval rules** if needed
+
+### Troubleshooting
+
+**Problem:** Workflow doesn't approve my PR
+- Check that you're logged in as `MightyPrytanis` (the repository owner)
+- Ensure the PR is not in draft mode
+- Check Actions tab for workflow run logs
+- Verify workflow has necessary permissions (`contents: write`, `pull-requests: write`)
+
+**Problem:** Can't merge after approval
+- Ensure all required status checks pass
+- Check that your branch is up-to-date with main
+- Verify commit signatures if required
+- Review any pending conversation threads
+
+**Problem:** Want to require actual reviews for certain files
+- Update CODEOWNERS with specific reviewers for those files
+- Create a separate ruleset for sensitive directories
+- Use GitHub's "Required reviewers" feature in branch protection settings
 
 ### Updating Placeholder Status Check Names
 

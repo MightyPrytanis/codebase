@@ -50,9 +50,9 @@
   ],
   "bypass_actors": [
     {
-      "_comment": "Bypass actors allow specific users or teams to bypass ruleset rules. To enable, add GitHub user or team IDs. Example: MightyPrytanis would need their GitHub user ID here.",
-      "actor_id": null,
-      "actor_type": "User",
+      "_comment": "Repository admins can bypass pull request requirements for solo maintainer workflows.",
+      "actor_id": 5,
+      "actor_type": "RepositoryRole",
       "bypass_mode": "pull_request"
     }
   ]
