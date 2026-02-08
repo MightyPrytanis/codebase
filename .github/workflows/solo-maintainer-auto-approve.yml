@@ -29,8 +29,7 @@ jobs:
           echo "PR Author: ${{ github.event.pull_request.user.login }}"
           echo "Repository Owner: ${{ github.repository_owner }}"
 
-          if [ "${{ github.event.pull_request.user.login }}" == \
-               "${{ github.repository_owner }}" ]; then
+          if [ "${{ github.event.pull_request.user.login }}" == "${{ github.repository_owner }}" ]; then
             echo "is_owner=true" >> $GITHUB_OUTPUT
             echo "✓ PR author is the repository owner"
           else
