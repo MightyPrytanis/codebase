@@ -300,10 +300,11 @@ export default FileUpload;
 - [x] Verify build passes
 - [x] Verify tests run
 - [x] Create postmortem document
+- [x] Update PROJECT_CHANGE_LOG with incident summary
+- [x] Update ACTIVE_DOCUMENTATION_INDEX
 
 ### Pending 🔄
 - [ ] Archive BraceCase Agent to Legacy/
-- [ ] Update PROJECT_CHANGE_LOG with incident summary
 - [ ] Enhance pre-commit hooks to validate all files
 - [ ] Implement agent approval framework
 - [ ] Document agent development guidelines
