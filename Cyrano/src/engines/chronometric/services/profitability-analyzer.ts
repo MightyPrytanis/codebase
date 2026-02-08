@@ -263,3 +263,8 @@ export async function getProfitabilitySummary(userId: string): Promise<{
     overallVariance: totalActual - totalBudgeted,
   };
 }
+
+}
+}
+}
+}

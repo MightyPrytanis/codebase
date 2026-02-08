@@ -210,3 +210,5 @@ export default function LegalReviewerPanel({ isOpen, onClose, documentText = "" 
       </div>
     </ExpandedPanel>
   );
+
+}

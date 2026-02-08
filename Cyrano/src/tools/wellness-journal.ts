@@ -227,3 +227,7 @@ export const wellnessJournalTool = new (class extends BaseTool {
     }
   }
 })();
+)
+}
+}
+}

@@ -97,3 +97,6 @@ export default function PriorityTicker({ items = defaultItems }: PriorityTickerP
       </div>
     </div>
   );
+
+}
+)

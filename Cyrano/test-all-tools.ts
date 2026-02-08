@@ -625,3 +625,11 @@ runAllTests()
     console.error(`${colors.red}Fatal error: ${error}${colors.reset}`);
     process.exit(1);
   });
+}
+}
+}
+}
+}
+}
+)
+}

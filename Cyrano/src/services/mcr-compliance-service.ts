@@ -380,3 +380,4 @@ export class MCRComplianceService {
 
 // Export singleton instance
 export const mcrComplianceService = new MCRComplianceService();
+}

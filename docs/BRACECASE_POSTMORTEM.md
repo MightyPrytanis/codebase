@@ -143,8 +143,8 @@ The corruption went undetected for weeks because:
 
 All corrupted files had **extra closing delimiters** added at the end:
 - Extra `}` (closing braces)
-- Extra `)` (closing parentheses)
-- Extra `]` (closing brackets)
+- Extra `` (closing parentheses)
+- Extra `` (closing brackets)
 
 Example:
 ```javascript

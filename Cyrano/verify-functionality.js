@@ -337,3 +337,26 @@ if (!global.fetch) {
 
 runVerification().catch(console.error);
 }
+)
+}
+}
+}
+)
+}
+}
+}
+)
+}
+}
+}
+}
+)
+}
+}
+}
+)
+}
+}
+}
+)
+)

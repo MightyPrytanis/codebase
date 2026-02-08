@@ -134,3 +134,8 @@ export class LegalAnalysisModule extends BaseModule {
 }
 
 export const legalAnalysisModule = new LegalAnalysisModule();
+
+}
+}
+}
+}

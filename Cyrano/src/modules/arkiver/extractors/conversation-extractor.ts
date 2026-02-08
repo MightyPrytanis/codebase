@@ -339,3 +339,10 @@ export class ConversationExtractor {
     return conversation.messages.map(m => m.text).join('\n\n');
 }
 }
+
+}
+}
+}
+}
+}
+}

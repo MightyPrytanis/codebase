@@ -73,3 +73,5 @@ export function markAsDemo<T>(data: T, toolName: string): T & { _demo: boolean; 
     _demoWarning: getDemoModeWarning(toolName),
   } as T & { _demo: boolean; _demoWarning: string };
 }
+
+}

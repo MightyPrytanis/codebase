@@ -169,3 +169,5 @@ export const testMichiganCitations = async () => {
     console.log('---\n');
   }
 };
+
+}

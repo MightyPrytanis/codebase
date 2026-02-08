@@ -165,3 +165,11 @@ export class OpenRouterService {
     return response.choices[0]?.message?.content || 'AI response failed';
 }
 }
+
+}
+}
+}
+}
+}
+)
+}

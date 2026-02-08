@@ -1909,3 +1909,10 @@ export class MaeEngine extends BaseEngine {
 
 // Export singleton instance
 export const maeEngine = new MaeEngine();
+
+}
+}
+}
+}
+}
+}

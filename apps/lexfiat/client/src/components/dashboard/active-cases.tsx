@@ -225,3 +225,12 @@ export default function ActiveCases({ cases, redFlags, isLoading }: ActiveCasesP
       </div>
     </>
   );
+
+}
+)
+}
+}
+)
+}
+)
+}

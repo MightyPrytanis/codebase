@@ -280,3 +280,12 @@ export default function AiAssistant() {
       </div>
     </div>
   );
+
+}
+}
+}
+)
+}
+}
+)
+}

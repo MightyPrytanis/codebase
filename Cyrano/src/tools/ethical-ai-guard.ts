@@ -364,3 +364,8 @@ Return a JSON object with:
     return violations;
   }
 })();
+
+)
+}
+}
+}

@@ -232,3 +232,6 @@ export function GoodCounsel({ caseContext = "", timePressure = "medium" }: GoodC
       </CardContent>
     </Card>
   );
+
+}
+)

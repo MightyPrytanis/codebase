@@ -95,3 +95,5 @@ export function DemoModeBanner() {
       </div>
     </div>
   );
+
+}

@@ -14,3 +14,5 @@ export default function IconPreviewPage() {
       <IconPreview />
     </div>
   );
+
+}

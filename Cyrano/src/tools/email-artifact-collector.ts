@@ -278,3 +278,12 @@ export const emailArtifactCollector: BaseTool = new (class extends BaseTool {
     });
   }
 })();
+)
+}
+}
+}
+}
+}
+}
+}
+}

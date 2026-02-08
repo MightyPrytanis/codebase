@@ -178,3 +178,8 @@ console.log(`  1. Implement the tool logic in ${toolFile}`);
 console.log(`  2. Update the Zod schema with proper validation`);
 console.log(`  3. Write tests in ${testFile}`);
 console.log(`  4. Update documentation`);
+
+)
+)
+)
+)

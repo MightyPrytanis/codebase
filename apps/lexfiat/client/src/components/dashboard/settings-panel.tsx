@@ -116,3 +116,8 @@ export default function SettingsPanel({ isOpen, onClose }: SettingsPanelProps) {
       </SheetContent>
     </Sheet>
   );
+
+}
+}
+)
+)

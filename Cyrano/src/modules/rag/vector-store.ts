@@ -148,3 +148,5 @@ export class VectorStore {
     return Array.from(this.documents.values());
 }
 }
+
+}

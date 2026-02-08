@@ -402,3 +402,15 @@ export async function checkApiHealth(): Promise<boolean> {
     return response.ok;
   } catch {
     return false;
+
+}
+}
+}
+}
+}
+}
+}
+}
+}
+)
+}

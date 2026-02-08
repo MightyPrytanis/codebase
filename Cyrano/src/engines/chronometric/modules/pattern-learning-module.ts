@@ -369,3 +369,7 @@ export class PatternLearningModule extends BaseModule {
 
 // Export singleton instance
 export const patternLearningModule = new PatternLearningModule();
+
+}
+}
+}

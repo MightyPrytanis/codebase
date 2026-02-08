@@ -155,3 +155,8 @@ export function EthicsGuidanceWidget({ onClick }: EthicsGuidanceWidgetProps) {
       </CardContent>
     </Card>
   );
+
+}
+]
+)
+}

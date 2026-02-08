@@ -363,3 +363,6 @@ export const hume = {
     return service.processVoiceJournal(audioBuffer);
   },
 };
+
+}
+}

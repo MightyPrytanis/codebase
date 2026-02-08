@@ -376,3 +376,9 @@ export class EthicsRulesModule {
  * Default instance
  */
 export const ethicsRulesModule = new EthicsRulesModule();
+
+}
+}
+}
+)
+}

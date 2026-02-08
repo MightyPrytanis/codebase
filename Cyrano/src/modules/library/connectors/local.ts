@@ -217,3 +217,15 @@ export async function listChanges(
 ): Promise<FileChange[]> {
   return localConnector.listChanges({ path, lastSyncAt });
 }
+
+}
+}
+}
+}
+}
+}
+)
+}
+}
+}
+)

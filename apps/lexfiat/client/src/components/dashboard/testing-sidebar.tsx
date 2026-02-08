@@ -155,3 +155,6 @@ export default function TestingSidebar({ isOpen, onClose }: TestingSidebarProps)
       </div>
     </>
   );
+
+}
+)

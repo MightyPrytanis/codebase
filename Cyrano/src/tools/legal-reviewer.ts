@@ -924,3 +924,12 @@ export const legalReviewer = new (class extends BaseTool {
            document.toLowerCase().includes('workplace');
   }
 })();
+
+)
+}
+}
+}
+}
+}
+}
+}

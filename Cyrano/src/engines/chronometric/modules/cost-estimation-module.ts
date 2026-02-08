@@ -418,3 +418,13 @@ export class CostEstimationModule extends BaseModule {
 
 // Export singleton instance
 export const costEstimationModule = new CostEstimationModule();
+
+}
+}
+}
+}
+}
+}
+}
+}
+}
