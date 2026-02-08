@@ -1,0 +1,79 @@
+name: Solo Maintainer Auto-Approve
+
+# This workflow automatically approves PRs created by the repository owner/maintainer
+# to enable self-merging in solo developer repositories where the owner is also the
+# only contributor and reviewer.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-approve:
+    runs-on: ubuntu-latest
+    
+    # Only run for PRs created by the repository owner (MightyPrytanis)
+    # This ensures the workflow only activates for solo maintainer use cases
+    if: |
+      github.event.pull_request.user.login == 'MightyPrytanis' &&
+      github.event.pull_request.draft == false
+    
+    steps:
+      - name: Check if PR author is repository owner
+        id: check-owner
+        run: |
+          echo "PR Author: ${{ github.event.pull_request.user.login }}"
+          echo "Repository Owner: ${{ github.repository_owner }}"
+          
+          if [ "${{ github.event.pull_request.user.login }}" == "${{ github.repository_owner }}" ]; then
+            echo "is_owner=true" >> $GITHUB_OUTPUT
+            echo "✓ PR author is the repository owner - eligible for auto-approval"
+          else
+            echo "is_owner=false" >> $GITHUB_OUTPUT
+            echo "✗ PR author is not the repository owner - skipping auto-approval"
+          fi
+
+      - name: Auto-approve PR
+        if: steps.check-owner.outputs.is_owner == 'true'
+        run: |
+          echo "Auto-approving PR #${{ github.event.pull_request.number }}"
+          gh pr review ${{ github.event.pull_request.number }} \
+            --approve \
+            --body "✓ Auto-approved by solo maintainer workflow. This PR was created by the repository owner and is automatically approved to enable self-merging." \
+            --repo ${{ github.repository }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Add label
+        if: steps.check-owner.outputs.is_owner == 'true'
+        run: |
+          gh pr edit ${{ github.event.pull_request.number }} \
+            --add-label "solo-maintainer-approved" \
+            --repo ${{ github.repository }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
+
+      - name: Comment on PR
+        if: steps.check-owner.outputs.is_owner == 'true'
+        run: |
+          gh pr comment ${{ github.event.pull_request.number }} \
+            --body "🤖 **Solo Maintainer Auto-Approval**
+
+This PR has been automatically approved because:
+- You are the repository owner and sole maintainer
+- The PR is ready for review (not in draft mode)
+- Solo maintainer workflow is enabled
+
+You can now merge this PR once all required status checks pass.
+
+---
+*To disable this workflow, edit or delete `.github/workflows/solo-maintainer-auto-approve.yml`*" \
+            --repo ${{ github.repository }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
