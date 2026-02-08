@@ -143,13 +143,4 @@ export function CyranoIcon({
   );
 }
 
-}
-}
-}
-)
-)
-}
-}
-}
-)
-)
+export default CyranoIcon;
