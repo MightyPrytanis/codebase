@@ -26,11 +26,12 @@ Status: Active - Beta Ready
 
 ---
 
-## Project Management (3 documents)
+## Project Management (4 documents)
 
 1. **`cyrano-master-plan-viii.plan.md`** - Master plan (Priorities 1-8)
 2. **`PROJECT_CHANGE_LOG.md`** - Consolidated change log (all project history)
 3. **`HUMAN_USER_TODOS_STEP_12.md`** - Human user tasks (security, configuration)
+4. **`BRACECASE_POSTMORTEM.md`** - BraceCase Agent incident postmortem
 
 ---
 

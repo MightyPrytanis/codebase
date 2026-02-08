@@ -70,6 +70,48 @@ Related Documents: REALISTIC-WORK-PLAN
 - `docs/ACTIVE_DOCUMENTATION_INDEX.md` - Updated index
 
 **Date:** 2026-02-08
+## BraceCase Agent Corruption Incident (2026-02-08)
+
+**Status:** ✅ RESOLVED
+
+**Context:** A specialized agent designed to fix unbalanced braces (BraceCase Agent) caused mass corruption across the codebase by blindly adding closing delimiters to files. The incident was detected and resolved on February 8, 2026.
+
+**Impact:**
+- 25 files corrupted with extra closing braces, brackets, and parentheses
+- Files affected: UI components, test files, scripts, shared assets, auth server
+- Build still passed (corrupted files not in build path)
+- ESLint parsing errors in affected files
+
+**Resolution:**
+1. **Disabled BraceCase Agent** - Updated `.cursor/rules/bracecase-agent.mdc` with warning
+2. **Fixed Scanner Script** - Repaired `scripts/bracecase-scanner.ts` (was also corrupted)
+3. **Repaired 25 Files** - Removed extra closing delimiters from all affected files
+4. **Verified Build** - TypeScript compilation passes ✅
+5. **Verified Tests** - Unit tests run successfully ✅
+6. **Created Postmortem** - Full root cause analysis in `docs/BRACECASE_POSTMORTEM.md`
+
+**Files Fixed:**
+- 8 UI component files (admin-ui, arkiver-ui)
+- 8 test files
+- 2 script files
+- 5 shared asset files
+- 2 source code files
+
+**Lessons Learned:**
+- Never auto-fix code without validation
+- Require human review for broad automated operations
+- Validate all code files, not just build files
+- Test agents on real codebase before deployment
+
+**Preventive Measures:**
+- BraceCase Agent permanently disabled
+- Postmortem documentation created
+- Future: Enhanced pre-commit checks, agent safety framework
+
+**References:**
+- Postmortem: `docs/BRACECASE_POSTMORTEM.md`
+- Disabled Agent: `.cursor/rules/bracecase-agent.mdc`
+- Fixed Scanner: `scripts/bracecase-scanner.ts`
 
 ---
 
