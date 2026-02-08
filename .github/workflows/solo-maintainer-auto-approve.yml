@@ -14,10 +14,10 @@ jobs:
   auto-approve:
     runs-on: ubuntu-latest
 
-    # Only run for PRs created by the repository owner (MightyPrytanis)
+    # Only run for PRs created by the repository owner
     # This ensures the workflow only activates for solo maintainer use cases
     if: |
-      github.event.pull_request.user.login == 'MightyPrytanis' &&
+      github.event.pull_request.user.login == github.repository_owner &&
       github.event.pull_request.draft == false
 
     steps:

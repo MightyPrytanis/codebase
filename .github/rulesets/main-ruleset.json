@@ -53,7 +53,7 @@
       "_comment": "Repository admins can bypass pull request requirements for solo maintainer workflows.",
       "actor_id": 5,
       "actor_type": "RepositoryRole",
-      "bypass_mode": "always"
+      "bypass_mode": "pull_request"
     }
   ]
 }
