@@ -524,5 +524,3 @@ describe('Potemkin Tools Integration', () => {
     });
   });
 });
-)
-}
