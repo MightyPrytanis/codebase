@@ -129,4 +129,3 @@ export async function addOffDay(userId: string, date: string): Promise<BaselineC
  * Remove an off-day
  */
 
-}

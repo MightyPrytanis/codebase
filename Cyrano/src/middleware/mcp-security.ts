@@ -254,9 +254,3 @@ export function logScopeElevation(
   );
 }
 
-}
-}
-}
-}
-}
-)

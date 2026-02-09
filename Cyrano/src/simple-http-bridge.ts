@@ -120,6 +120,3 @@ app.listen(port, () => {
   console.log(`  GET  /mcp/status - Server status`);
 });
 
-)
-)
-}

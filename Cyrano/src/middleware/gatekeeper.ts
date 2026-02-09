@@ -229,10 +229,3 @@ export function registerGatekeeper(config: GatekeeperConfig): void {
   );
 }
 
-}
-}
-}
-}
-}
-}
-)

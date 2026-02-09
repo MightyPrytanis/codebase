@@ -187,13 +187,3 @@ class AlertService {
 
 export const alertService = new AlertService();
 
-}
-}
-}
-}
-)
-}
-)
-}
-)
-}

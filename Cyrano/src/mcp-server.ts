@@ -584,9 +584,3 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   server.run().catch(console.error);
 }
 
-}
-}
-}
-}
-)
-)

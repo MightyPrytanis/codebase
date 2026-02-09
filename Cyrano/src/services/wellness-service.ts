@@ -702,5 +702,3 @@ export const wellness = {
   },
 };
 
-}
-}

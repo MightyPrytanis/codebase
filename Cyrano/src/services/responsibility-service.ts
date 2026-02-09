@@ -39,5 +39,3 @@ export class ResponsibilityService {
 
 export const responsibilityService = new ResponsibilityService();
 
-}
-}

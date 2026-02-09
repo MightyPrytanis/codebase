@@ -251,5 +251,3 @@ export async function listChanges(
   return s3Connector.listChanges({ path, credentials, lastSyncAt });
 }
 
-}
-}

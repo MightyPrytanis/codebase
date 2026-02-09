@@ -1539,30 +1539,3 @@ if (shouldStartServer) {
   console.error('[HTTP Bridge] Not starting server (test environment detected)');
 }
 
-}
-}
-}
-)
-}
-)
-)
-}
-}
-}
-}
-}
-}
-}
-)
-}
-}
-)
-)
-)
-)
-}
-}
-)
-}
-}
-)

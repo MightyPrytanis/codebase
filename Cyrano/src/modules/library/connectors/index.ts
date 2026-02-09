@@ -40,5 +40,3 @@ export function getConnector(type: 'local' | 'onedrive' | 'gdrive' | 's3'): Stor
 }
 }
 
-}
-}

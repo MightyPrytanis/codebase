@@ -304,10 +304,3 @@ export class QDROForecastModule extends BaseModule {
 // Export singleton instance
 export const qdroForecastModule = new QDROForecastModule();
 
-}
-}
-}
-}
-)
-}
-}

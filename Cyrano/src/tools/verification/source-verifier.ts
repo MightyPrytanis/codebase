@@ -600,9 +600,3 @@ export async function handleSourceVerifier(params: any): Promise<SourceVerificat
   return await sourceVerifier.verifySources(params);
 }
 
-}
-}
-}
-}
-}
-}

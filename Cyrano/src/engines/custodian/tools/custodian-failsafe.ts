@@ -66,5 +66,3 @@ export const custodianFailsafeTool = new (class extends BaseTool {
   }
 })();
 
-)
-}

@@ -144,5 +144,3 @@ export const mcrValidator = new (class extends BaseTool {
   }
 })();
 
-)
-}

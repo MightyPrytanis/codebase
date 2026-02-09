@@ -201,9 +201,3 @@ export abstract class BaseModule {
 }
 }
 
-}
-}
-}
-)
-}
-)

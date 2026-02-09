@@ -149,4 +149,3 @@ export class VectorStore {
 }
 }
 
-}

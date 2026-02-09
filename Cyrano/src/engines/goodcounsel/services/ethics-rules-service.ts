@@ -391,8 +391,3 @@ export class EthicsRulesService {
  */
 export const ethicsRulesService = new EthicsRulesService();
 
-}
-}
-}
-)
-}

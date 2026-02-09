@@ -421,5 +421,3 @@ export const JURISPRUDENTIAL_MAXIMS = [
   },
 ];
 
-}
-}

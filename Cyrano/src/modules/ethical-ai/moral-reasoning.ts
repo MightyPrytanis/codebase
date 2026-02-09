@@ -625,10 +625,3 @@ Return JSON:
  */
 export const moralReasoningService = new MoralReasoningService();
 
-}
-}
-}
-}
-}
-}
-}

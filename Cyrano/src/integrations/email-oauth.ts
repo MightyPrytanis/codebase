@@ -261,11 +261,3 @@ export function filterEmailsByMatter(
   });
 }
 
-}
-}
-}
-}
-}
-}
-}
-}

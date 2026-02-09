@@ -202,8 +202,3 @@ export class HistoryRetriever extends BaseTool {
 // Export singleton instance
 export const historyRetriever = new HistoryRetriever();
 
-}
-}
-}
-}
-}

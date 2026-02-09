@@ -161,7 +161,3 @@ export class ArkExtractorModule extends BaseModule {
 
 export const arkExtractorModule = new ArkExtractorModule();
 
-}
-}
-}
-}

@@ -613,9 +613,3 @@ export async function handleCitationChecker(params: any): Promise<CitationCheckR
   return await citationChecker.checkCitations(params);
 }
 
-}
-}
-}
-}
-}
-}

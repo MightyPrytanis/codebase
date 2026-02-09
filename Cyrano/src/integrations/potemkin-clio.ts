@@ -141,13 +141,13 @@ export async function analyzeClioDocument(
         return { result };
       }
     );
-   catch (error) {
-    return {
-      result: {} as DocumentAnalysisResult,
-      error: `Document analysis error: ${error instanceof Error ? error.message : String(error)}`
-    };
+  } catch (error) {
+      return {
+        result: {} as DocumentAnalysisResult,
+        error: `Document analysis error: ${error instanceof Error ? error.message : String(error)}`
+      };
+    }
   }
-}
 
 /**
  * Sanitize document template
@@ -232,8 +232,3 @@ export async function batchAnalyzeClioDocuments(
   return { results, errors };
 }
 
-}
-}
-)
-}
-}

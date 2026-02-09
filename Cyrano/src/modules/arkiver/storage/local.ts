@@ -424,12 +424,3 @@ export const defaultStorage = new LocalStorageProvider({
   inactivityCleanupDays: 7,
 });
 
-}
-}
-}
-}
-}
-}
-}
-}
-}

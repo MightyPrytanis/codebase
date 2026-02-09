@@ -210,8 +210,3 @@ export class SkillLoader {
 }
 }
 
-}
-}
-}
-}
-}

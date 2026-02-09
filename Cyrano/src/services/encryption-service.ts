@@ -237,9 +237,3 @@ export const encryption = {
   },
 };
 
-}
-}
-)
-}
-}
-}

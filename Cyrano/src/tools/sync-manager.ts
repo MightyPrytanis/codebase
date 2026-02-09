@@ -512,14 +512,3 @@ export const syncManager: BaseTool = new (class extends BaseTool {
   }
 })();
 
-)
-}
-}
-}
-}
-}
-}
-}
-}
-}
-}

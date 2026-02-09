@@ -342,8 +342,3 @@ export async function listChanges(
   return googleDriveConnector.listChanges({ path, credentials, lastSyncAt });
 }
 
-}
-}
-}
-)
-}

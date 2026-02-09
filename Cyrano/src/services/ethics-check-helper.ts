@@ -334,9 +334,3 @@ export async function checkGeneratedContent(
   };
 }
 
-}
-}
-}
-}
-]
-)

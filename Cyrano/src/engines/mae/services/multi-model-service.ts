@@ -457,7 +457,3 @@ export class MultiModelService {
 
 export const multiModelService = new MultiModelService();
 
-}
-}
-}
-}

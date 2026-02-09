@@ -521,13 +521,3 @@ export async function handleClaimExtractor(params: any): Promise<ClaimExtraction
   return await claimExtractor.extractClaims(params);
 }
 
-}
-}
-)
-)
-}
-}
-}
-}
-)
-}

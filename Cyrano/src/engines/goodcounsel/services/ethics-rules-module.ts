@@ -377,8 +377,3 @@ export class EthicsRulesModule {
  */
 export const ethicsRulesModule = new EthicsRulesModule();
 
-}
-}
-}
-)
-}

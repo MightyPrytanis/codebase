@@ -919,12 +919,3 @@ export const factChecker: BaseTool = new (class extends BaseTool {
   }
 })();
 
-)
-}
-}
-}
-}
-)
-}
-}
-}

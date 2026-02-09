@@ -330,21 +330,3 @@ export class ArkiverIntegrityTestTool extends BaseTool {
 
 export const arkiverIntegrityTestTool = new ArkiverIntegrityTestTool();
 
-}
-}
-}
-}
-)
-}
-}
-)
-}
-)
-}
-)
-}
-)
-)
-}
-)
-}

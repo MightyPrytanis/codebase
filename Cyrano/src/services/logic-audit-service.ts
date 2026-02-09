@@ -30,5 +30,3 @@ export class LogicAuditService {
 
 export const logicAuditService = new LogicAuditService();
 
-}
-}

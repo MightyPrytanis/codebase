@@ -777,19 +777,3 @@ export async function handleConsistencyChecker(params: any): Promise<Consistency
   return await consistencyChecker.checkConsistency(params);
 }
 
-}
-}
-}
-}
-)
-)
-}
-)
-}
-)
-)
-}
-}
-)
-)
-}

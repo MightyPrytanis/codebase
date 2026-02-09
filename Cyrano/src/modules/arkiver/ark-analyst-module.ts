@@ -123,7 +123,3 @@ export class ArkAnalystModule extends BaseModule {
 
 export const arkAnalystModule = new ArkAnalystModule();
 
-}
-}
-}
-}

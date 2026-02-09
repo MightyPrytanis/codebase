@@ -220,7 +220,3 @@ export function extractMatterId(data: any): string | null {
   return null;
 }
 
-}
-}
-}
-}

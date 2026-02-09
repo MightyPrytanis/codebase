@@ -484,12 +484,3 @@ Format the response as JSON with a "red_flags" array containing objects with: de
   }
 })();
 
-)
-}
-}
-}
-}
-}
-}
-}
-}

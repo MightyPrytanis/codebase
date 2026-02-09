@@ -211,14 +211,3 @@ export async function syncEventsWithClio(
 }
 }
 
-}
-}
-}
-)
-)
-}
-)
-}
-}
-}
-)

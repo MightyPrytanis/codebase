@@ -133,11 +133,3 @@ export const authTool = new (class extends BaseTool {
   }
 })();
 
-)
-}
-}
-}
-}
-}
-}
-}

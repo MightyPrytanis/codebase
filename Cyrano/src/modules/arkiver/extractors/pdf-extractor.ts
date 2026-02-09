@@ -261,5 +261,3 @@ export class PDFExtractor {
  */
 export const pdfExtractor = new PDFExtractor();
 
-}
-}

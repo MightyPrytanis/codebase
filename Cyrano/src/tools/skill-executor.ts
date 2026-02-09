@@ -74,7 +74,3 @@ export const skillExecutor = new (class extends BaseTool {
   }
 })();
 
-)
-}
-}
-}

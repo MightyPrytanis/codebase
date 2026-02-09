@@ -504,16 +504,3 @@ export const defaultJobQueue = new DatabaseJobQueue({
   processingTimeoutMs: 300000, // 5 minutes
 });
 
-}
-}
-}
-}
-}
-}
-}
-}
-}
-}
-}
-}
-}

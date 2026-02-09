@@ -308,7 +308,7 @@ export class GmailService {
       headers: {
         'Authorization': `Bearer ${this.config.accessToken}`,
       },
-    };
+    });
 
     if (!response.ok) {
       if (response.status === 401) {
@@ -337,7 +337,7 @@ export class GmailService {
       headers: {
         'Authorization': `Bearer ${this.config.accessToken}`,
       },
-    };
+    });
 
     if (!response.ok) {
       if (response.status === 401) {

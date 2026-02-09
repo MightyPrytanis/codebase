@@ -278,8 +278,3 @@ export class LoggingService {
 // Export singleton instance
 export const loggingService = LoggingService.getInstance();
 
-}
-}
-}
-}
-}

@@ -148,16 +148,3 @@ export class ResourceLoader {
 }
 }
 
-}
-}
-}
-}
-}
-}
-}
-)
-}
-}
-)
-}
-}

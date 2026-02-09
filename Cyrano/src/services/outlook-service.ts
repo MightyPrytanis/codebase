@@ -210,7 +210,7 @@ export class OutlookService {
         'Authorization': `Bearer ${this.config.accessToken}`,
         'Content-Type': 'application/json',
       },
-    };
+    });
 
     if (!response.ok) {
       if (response.status === 401) {

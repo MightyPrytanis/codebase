@@ -242,5 +242,3 @@ export const burnoutDetector = {
   },
 };
 
-}
-}

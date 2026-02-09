@@ -181,6 +181,7 @@ export class LegalResearchService {
       console.error('Google Scholar search error:', error);
       return [];
     }
+  }
 
   /**
    * Search Justia (free legal research)
@@ -260,5 +261,5 @@ export class LegalResearchService {
       };
     }
     return null;
-}
+  }
 }

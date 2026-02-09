@@ -492,7 +492,3 @@ export class TimeReconstructionModule extends BaseModule {
 // Export singleton instance
 export const timeReconstructionModule = new TimeReconstructionModule();
 
-}
-}
-}
-}

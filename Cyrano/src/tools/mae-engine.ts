@@ -105,7 +105,3 @@ export const maeEngineTool = new (class extends BaseTool {
     }
   }
 })();
-)
-}
-}
-}

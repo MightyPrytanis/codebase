@@ -201,9 +201,3 @@ Check for compliance with all Ten Rules, especially:
  */
 export const ethicalAIModule = new EthicalAIModule();
 
-}
-}
-}
-}
-]
-}

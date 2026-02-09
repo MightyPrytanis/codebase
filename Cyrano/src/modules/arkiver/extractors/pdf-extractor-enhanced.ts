@@ -306,7 +306,3 @@ export class EnhancedPDFExtractor extends PDFExtractor {
 }
 }
 
-}
-}
-}
-}

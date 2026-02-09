@@ -467,19 +467,3 @@ export class ArkiverJobStatusTool extends BaseTool {
 export const arkiverProcessFileTool = new ArkiverProcessFileTool();
 export const arkiverJobStatusTool = new ArkiverJobStatusTool();
 
-}
-}
-}
-}
-)
-}
-)
-)
-}
-}
-}
-}
-}
-}
-}
-}

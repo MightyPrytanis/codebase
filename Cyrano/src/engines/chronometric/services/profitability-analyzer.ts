@@ -264,7 +264,3 @@ export async function getProfitabilitySummary(userId: string): Promise<{
   };
 }
 
-}
-}
-}
-}

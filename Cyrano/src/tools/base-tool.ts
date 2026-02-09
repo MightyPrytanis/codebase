@@ -67,4 +67,3 @@ export abstract class BaseTool {
 }
 }
 
-}

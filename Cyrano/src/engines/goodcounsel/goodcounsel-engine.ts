@@ -551,9 +551,3 @@ export class GoodcounselEngine extends BaseEngine {
 
 // Export singleton instance
 export const goodcounselEngine = new GoodcounselEngine();
-}
-}
-}
-}
-}
-}

@@ -247,10 +247,3 @@ export async function listChanges(
   return oneDriveConnector.listChanges({ path, credentials, lastSyncAt });
 }
 
-}
-}
-}
-}
-}
-)
-}

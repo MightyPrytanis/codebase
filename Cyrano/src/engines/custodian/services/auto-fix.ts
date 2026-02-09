@@ -227,6 +227,3 @@ class AutoFixService {
 
 export const autoFixService = new AutoFixService();
 
-}
-}
-}

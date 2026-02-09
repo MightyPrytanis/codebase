@@ -218,14 +218,3 @@ export async function listChanges(
   return localConnector.listChanges({ path, lastSyncAt });
 }
 
-}
-}
-}
-}
-}
-}
-)
-}
-}
-}
-)

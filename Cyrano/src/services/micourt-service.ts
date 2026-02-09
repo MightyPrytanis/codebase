@@ -547,7 +547,3 @@ export class MiCourtService {
 }
 }
 
-}
-}
-}
-}

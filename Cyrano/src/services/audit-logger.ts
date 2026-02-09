@@ -383,5 +383,3 @@ export function generateAuditReport(
   };
 }
 
-}
-}

@@ -165,4 +165,3 @@ export const qualityAssessor = new (class extends BaseTool {
   }
 })();
 
-)

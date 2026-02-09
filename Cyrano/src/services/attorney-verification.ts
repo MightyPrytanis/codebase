@@ -250,5 +250,3 @@ export function getReviewIntensity(workProductType: WorkProductType): ReviewInte
   return VERIFICATION_REQUIREMENTS[workProductType].intensity;
 }
 
-}
-}

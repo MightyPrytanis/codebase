@@ -58,4 +58,3 @@ export function getAllAuditLogs(): AuditLogEntry[] {
   return [...auditLog];
 }
 
-}

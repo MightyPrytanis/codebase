@@ -93,6 +93,7 @@ class RenderIntegrationService {
       console.error('[Render Integration] Error fetching Render metrics:', error);
       return null;
     }
+  }
 
   /**
    * Get current deployment status
