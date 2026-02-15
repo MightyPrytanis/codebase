@@ -27,7 +27,6 @@ export function escapeHtml(text: string): string {
   };
   
   return text.replace(/[&<>"'/]/g, (char) => map[char]);
-}
 
 /**
  * Sanitize string for safe HTML attribute values
@@ -411,3 +410,10 @@ export function sanitizeForContext(value: string, context: DOMContext): string {
       return escapeJavaScript(value);
     default:
       return escapeHtml(value);
+
+}
+}
+}
+}
+}
+}

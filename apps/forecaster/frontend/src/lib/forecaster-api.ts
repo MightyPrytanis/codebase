@@ -194,3 +194,9 @@ export async function generateCityTaxForecast(
   }
 
   return await response.json();
+
+}
+}
+}
+}
+)

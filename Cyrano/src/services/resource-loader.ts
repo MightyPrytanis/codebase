@@ -147,3 +147,4 @@ export class ResourceLoader {
     return path.join(this.resourcesDir, 'forecast');
 }
 }
+

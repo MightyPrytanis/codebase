@@ -180,3 +180,5 @@ export const GoodCounselWidget: React.FC<GoodCounselWidgetProps> = ({ className 
 };
 
 export default GoodCounselWidget;
+
+}

@@ -389,3 +389,8 @@ export default function Extractor() {
       </div>
     </div>
   );
+
+}
+)
+}
+)

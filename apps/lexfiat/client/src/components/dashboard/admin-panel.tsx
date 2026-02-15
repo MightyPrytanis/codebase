@@ -189,3 +189,12 @@ export default function AdminPanel({ isOpen, onClose }: AdminPanelProps) {
       </SheetContent>
     </Sheet>
   );
+
+}
+}
+)
+}
+)
+}
+}
+)

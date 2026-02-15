@@ -126,3 +126,7 @@ export async function getSecurityStatus(): Promise<SecurityStatus> {
   }
   return await response.json();
 }
+}
+}
+}
+}

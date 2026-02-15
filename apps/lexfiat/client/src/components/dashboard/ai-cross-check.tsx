@@ -157,3 +157,6 @@ export function AiCrossCheck({ documentId, primaryAnalysis }: AiCrossCheckProps)
       </CardContent>
     </Card>
   );
+
+}
+)

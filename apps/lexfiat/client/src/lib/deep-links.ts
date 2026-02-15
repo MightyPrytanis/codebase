@@ -127,3 +127,8 @@ export function openDeepLink(
       break;
     default:
       console.warn(`Unknown deep link type: ${type}`);
+
+}
+}
+}
+)

@@ -65,3 +65,4 @@ export class ClioClient {
     return this.request('POST', '/activities', { body });
 }
 }
+

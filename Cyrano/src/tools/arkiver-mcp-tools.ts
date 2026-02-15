@@ -466,3 +466,4 @@ export class ArkiverJobStatusTool extends BaseTool {
 // Export singleton instances
 export const arkiverProcessFileTool = new ArkiverProcessFileTool();
 export const arkiverJobStatusTool = new ArkiverJobStatusTool();
+

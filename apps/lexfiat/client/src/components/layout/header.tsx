@@ -107,7 +107,7 @@ export default function Header({ attorney, onAdminClick, onSettingsClick, onProf
                 <AlertTriangle className="status-indicator-icon" style={{ width: '12px', height: '12px', color: '#F59E0B' }} />
               )}
             </div>
-            <div className="status-indicator" onClick={() => expandPanel('multi-agent')}>
+            <div className="status-indicator" onClick={() => expandPanel('multi-agent')>
               <div className="multi-agent-icon-group">
                 <LiaSwimmerSolid style={{ width: '14px', height: '14px', position: 'absolute', top: '0px', left: '0px', opacity: 0.5 }} />
                 <LiaSwimmerSolid style={{ width: '14px', height: '14px', position: 'absolute', top: '4px', left: '4px', opacity: 0.7 }} />
@@ -120,7 +120,7 @@ export default function Header({ attorney, onAdminClick, onSettingsClick, onProf
                 <CheckCircle2 className="status-indicator-icon" style={{ width: '12px', height: '12px', color: '#10B981' }} />
               )}
             </div>
-            <div className="status-indicator" onClick={() => expandPanel('clio')}>
+            <div className="status-indicator" onClick={() => expandPanel('clio')>
               <Briefcase className="status-icon" style={{ width: '18px', height: '18px' }} />
               <div className="status-name">Clio</div>
               {demoMode ? (
@@ -129,7 +129,7 @@ export default function Header({ attorney, onAdminClick, onSettingsClick, onProf
                 <AlertTriangle className="status-indicator-icon" style={{ width: '12px', height: '12px', color: '#F59E0B' }} />
               )}
             </div>
-            <div className="status-indicator" onClick={() => expandPanel('calendar')}>
+            <div className="status-indicator" onClick={() => expandPanel('calendar')>
               <Calendar className="status-icon" style={{ width: '18px', height: '18px' }} />
               <div className="status-name">Calendar</div>
               {demoMode ? (
@@ -138,7 +138,7 @@ export default function Header({ attorney, onAdminClick, onSettingsClick, onProf
                 <CheckCircle2 className="status-indicator-icon" style={{ width: '12px', height: '12px', color: '#10B981' }} />
               )}
             </div>
-            <div className="status-indicator" onClick={() => expandPanel('research')}>
+            <div className="status-indicator" onClick={() => expandPanel('research')>
               <BookOpen className="status-icon" style={{ width: '18px', height: '18px' }} />
               <div className="status-name">Research</div>
               {demoMode ? (
@@ -182,12 +182,12 @@ export default function Header({ attorney, onAdminClick, onSettingsClick, onProf
                   <Settings size={18} />
                   <span>Admin</span>
                 </div>
-              )}
-              <div className="menu-panel-item" onClick={() => { if (onSettingsClick) onSettingsClick(); else expandPanel('settings'); }}>
+              )
+              <div className="menu-panel-item" onClick={() => { if (onSettingsClick) onSettingsClick(); else expandPanel('settings'); }>
                 <Settings size={18} />
                 <span>Settings</span>
               </div>
-              <div className="menu-panel-item" onClick={() => { if (onProfileClick) onProfileClick(); else expandPanel('profile'); }}>
+              <div className="menu-panel-item" onClick={() => { if (onProfileClick) onProfileClick(); else expandPanel('profile'); }>
                 <User size={18} />
                 <span>Profile</span>
               </div>
@@ -199,7 +199,7 @@ export default function Header({ attorney, onAdminClick, onSettingsClick, onProf
           </div>
 
           <div className="avatar-section">
-            <div className="avatar" onClick={() => { if (onProfileClick) onProfileClick(); else expandPanel('profile'); }} title="Click to edit profile">
+            <div className="avatar" onClick={() => { if (onProfileClick) onProfileClick(); else expandPanel('profile'); } title="Click to edit profile">
               <img 
                 src="/assets/avatars/mekel-miller.jpg" 
                 alt={attorney?.name || "Mekel S. Miller"}
@@ -214,4 +214,4 @@ export default function Header({ attorney, onAdminClick, onSettingsClick, onProf
       </div>
       {showHelpMenu && <HelpMenu onClose={() => setShowHelpMenu(false)} />}
     </div>
-  );
+  ;

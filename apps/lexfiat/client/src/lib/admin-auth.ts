@@ -100,3 +100,5 @@ export function getUserRole(): string | null {
     return localStorage.getItem('user_role');
   }
   return null;
+
+}

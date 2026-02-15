@@ -316,3 +316,4 @@ export const hipaaCompliance = {
     return service.enforceRetention();
   },
 };
+

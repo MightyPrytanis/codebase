@@ -35,3 +35,5 @@ export default function RedFlagsPanel({ redFlags }: RedFlagsPanelProps) {
       </button>
     </div>
   );
+
+}
