@@ -1,5 +1,25 @@
 # Dependabot configuration for Cyrano ecosystem
-# Scans only specific directories and excludes Legacy directory
+# Scans only active development directories
+# Explicitly excludes: /Legacy/, /archive/, and any archived code
+#
+# Active directories (scanned for dependency updates):
+#   - /Cyrano (MCP server and core modules)
+#   - /Cyrano/auth-server (authentication service)
+#   - /apps/lexfiat (LexFiat application)
+#   - /apps/arkiver (Arkiver application wrapper)
+#   - /apps/arkiver/frontend (Arkiver frontend)
+#   - /Labs/Potemkin/app (Potemkin experimental app)
+#   - /Labs/Potemkin/moral_reasoner (Potemkin moral reasoner)
+#
+# Excluded directories (NOT scanned, frozen):
+#   - /Legacy/ (all archived legacy code)
+#   - /Legacy/SwimMeet/ (archived SwimMeet application)
+#   - /Legacy/Arkiver/ (archived Arkiver version)
+#   - /Legacy/Cosmos/ (archived Cosmos project)
+#   - /Legacy/archive/ (general archive directory)
+#   - /Legacy/old-codebase-artifacts/ (historical artifacts)
+#   - All other undocumented paths
+#
 version: 2
 updates:
   # Cyrano main package
