@@ -1,6 +1,6 @@
 # Dependabot configuration for Cyrano ecosystem
 # Scans only active development directories
-# Explicitly excludes: /Legacy/, /archive/, and any archived code
+# Uses exclude-paths to prevent scanning /Legacy/ and /archive/ directories
 #
 # Active directories (scanned for dependency updates):
 #   - /Cyrano (MCP server and core modules)
@@ -11,14 +11,12 @@
 #   - /Labs/Potemkin/app (Potemkin experimental app)
 #   - /Labs/Potemkin/moral_reasoner (Potemkin moral reasoner)
 #
-# Excluded directories (NOT scanned, frozen):
-#   - /Legacy/ (all archived legacy code)
-#   - /Legacy/SwimMeet/ (archived SwimMeet application)
-#   - /Legacy/Arkiver/ (archived Arkiver version)
-#   - /Legacy/Cosmos/ (archived Cosmos project)
-#   - /Legacy/archive/ (general archive directory)
-#   - /Legacy/old-codebase-artifacts/ (historical artifacts)
-#   - All other undocumented paths
+# Excluded paths (NOT scanned, frozen):
+#   - Legacy/** (all archived legacy code)
+#   - archive/** (all archive directories)
+#
+# Note: The exclude-paths configuration prevents Dependabot from creating
+# PRs for dependencies in legacy/archived code that should remain frozen.
 #
 version: 2
 updates:
@@ -29,6 +27,9 @@ updates:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 10
+    exclude-paths:
+      - "Legacy/**"
+      - "archive/**"
     labels:
       - "dependencies"
       - "cyrano"
@@ -40,6 +41,9 @@ updates:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 10
+    exclude-paths:
+      - "Legacy/**"
+      - "archive/**"
     labels:
       - "dependencies"
       - "cyrano"
@@ -52,6 +56,9 @@ updates:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 10
+    exclude-paths:
+      - "Legacy/**"
+      - "archive/**"
     labels:
       - "dependencies"
       - "lexfiat"
@@ -63,6 +70,9 @@ updates:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 10
+    exclude-paths:
+      - "Legacy/**"
+      - "archive/**"
     labels:
       - "dependencies"
       - "arkiver"
@@ -74,6 +84,9 @@ updates:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 10
+    exclude-paths:
+      - "Legacy/**"
+      - "archive/**"
     labels:
       - "dependencies"
       - "arkiver"
@@ -85,6 +98,9 @@ updates:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 5
+    exclude-paths:
+      - "Legacy/**"
+      - "archive/**"
     labels:
       - "dependencies"
       - "labs"
@@ -97,6 +113,9 @@ updates:
       interval: "weekly"
       day: "monday"
     open-pull-requests-limit: 5
+    exclude-paths:
+      - "Legacy/**"
+      - "archive/**"
     labels:
       - "dependencies"
       - "labs"
