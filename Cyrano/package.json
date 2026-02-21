@@ -84,13 +84,13 @@
     "@vitest/ui": "^4.0.17",
     "csv-parse": "^6.1.0",
     "drizzle-kit": "^0.31.8",
-    "eslint": "^9.39.2",
+    "eslint": "^10.0.1",
     "globals": "^17.0.0",
     "imapflow": "^1.2.4",
     "patch-package": "^8.0.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.53.0",
+    "typescript-eslint": "^8.56.0",
     "vitest": "^4.0.17"
   }
 }
