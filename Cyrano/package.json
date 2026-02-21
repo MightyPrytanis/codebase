@@ -56,7 +56,7 @@
     "jsonwebtoken": "^9.0.3",
     "lucide-react": "^0.575.0",
     "mammoth": "^1.11.0",
-    "marked": "^17.0.1",
+    "marked": "^17.0.3",
     "multer": "^2.0.2",
     "node-fetch": "^3.3.2",
     "openai": "^6.22.0",
