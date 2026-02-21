@@ -63,7 +63,7 @@
     "pdf-lib": "^1.17.1",
     "pdf-parse": "^2.4.5",
     "pdfjs-dist": "^5.4.530",
-    "playwright": "^1.57.0",
+    "playwright": "^1.58.0",
     "postgres": "^3.4.8",
     "puppeteer": "^24.35.0",
     "react-icons": "^5.5.0",
