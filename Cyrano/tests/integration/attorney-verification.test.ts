@@ -30,7 +30,6 @@ describe('Attorney Verification Integration (Track Delta)', () => {
       const review = requireAttorneyVerification(
         'work-product-123',
         'court_filing',
-        true,
         'Original AI-generated content'
       );
 
