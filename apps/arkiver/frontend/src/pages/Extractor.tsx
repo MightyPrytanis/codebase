@@ -391,6 +391,3 @@ export default function Extractor() {
   );
 
 }
-)
-}
-)

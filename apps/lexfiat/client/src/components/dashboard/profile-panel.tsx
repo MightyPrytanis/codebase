@@ -296,4 +296,3 @@ export default function ProfilePanel({ isOpen, onClose, attorney }: ProfilePanel
   );
 
 }
-)
