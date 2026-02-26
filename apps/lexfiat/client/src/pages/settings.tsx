@@ -377,5 +377,3 @@ export default function SettingsPage() {
   );
 
 }
-)
-}

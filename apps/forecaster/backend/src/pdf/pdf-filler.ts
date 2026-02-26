@@ -140,7 +140,3 @@ export async function applyBranding(params: {
   return { pdfBase64: toBase64(bytes) };
 
 }
-}
-}
-)
-}

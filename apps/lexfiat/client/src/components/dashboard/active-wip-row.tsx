@@ -588,8 +588,3 @@ export function ActiveWIPRow({
   );
 
 }
-)
-}
-}
-)
-}

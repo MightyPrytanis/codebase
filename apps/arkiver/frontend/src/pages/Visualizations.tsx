@@ -211,6 +211,3 @@ function NetworkView({ insights }: { insights: any[] }) {
   );
 
 }
-}
-}
-}

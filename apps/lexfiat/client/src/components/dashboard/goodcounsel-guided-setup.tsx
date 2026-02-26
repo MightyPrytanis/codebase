@@ -716,17 +716,3 @@ async function generateAIInsights(data: any): Promise<string> {
   return "Based on your responses, GoodCounsel will provide personalized support tailored to your goals, values, and current state. Your privacy is protected, and we're here to help you practice law with excellence and balance.";
 
 }
-}
-)
-}
-)
-)
-}
-)
-)
-}
-)
-)
-}
-}
-)
