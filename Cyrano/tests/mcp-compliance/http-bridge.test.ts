@@ -214,7 +214,7 @@ describe('MCP HTTP Bridge Compliance', () => {
       expect(data).toHaveProperty('content');
       expect(Array.isArray(data.content)).toBe(true);
     });
-  };
+  });
 
   describe('Module Exposure', () => {
     it('should expose chronometric_module via HTTP', async () => {
@@ -288,6 +288,34 @@ describe('MCP HTTP Bridge Compliance', () => {
       expect(data).toHaveProperty('content');
     });
   });
+
+  describe('MCP Error Response Shape', () => {
+    it('should return JSON for unknown /mcp routes', async () => {
+      const response = await fetch(`${baseUrl}/mcp/unknown-route-xyz`);
+      expect(response.headers.get('content-type')).toContain('application/json');
+      const data = await response.json();
+      expect(data.isError).toBe(true);
+      expect(Array.isArray(data.content)).toBe(true);
+      expect(typeof data.content[0].text).toBe('string');
+    });
+
+    it('should return JSON with correct shape for /mcp/execute validation errors', async () => {
+      const response = await fetch(`${baseUrl}/mcp/execute`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken,
+          'Cookie': `sessionId=${sessionCookie}`
+        },
+        body: JSON.stringify({ notATool: 'bad body' })
+      });
+      expect(response.headers.get('content-type')).toContain('application/json');
+      const data = await response.json();
+      expect(data.isError).toBe(true);
+      expect(Array.isArray(data.content)).toBe(true);
+      expect(typeof data.content[0].text).toBe('string');
+    });
+  });
 });
 
 /**
@@ -300,5 +328,3 @@ describe('MCP HTTP Bridge Compliance', () => {
  * 
  * For now, these tests can be run manually with: npm run http
  */
-)
-}
