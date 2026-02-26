@@ -74,7 +74,7 @@ describe('Onboarding API Integration Tests', () => {
     
     // Additional wait to ensure server is fully ready
     await new Promise(resolve => setTimeout(resolve, 200));
-  };
+  });
 
   afterAll(async () => {
     if (server) {
