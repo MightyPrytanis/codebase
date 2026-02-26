@@ -40,4 +40,3 @@ export function AIIcon({ className = '', size = 24, style, color }: AIIconProps)
   );
 
 }
-)

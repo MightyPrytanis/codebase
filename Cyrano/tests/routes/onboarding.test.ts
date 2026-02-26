@@ -61,7 +61,7 @@ describe('Onboarding API Integration Tests', () => {
             resolve();
           }, 200);
         });
-      ;
+      });
       server!.on('error', (err: any) => {
         clearTimeout(timeout);
         if (err.code === 'EADDRINUSE') {
@@ -74,7 +74,7 @@ describe('Onboarding API Integration Tests', () => {
     
     // Additional wait to ensure server is fully ready
     await new Promise(resolve => setTimeout(resolve, 200));
-  };
+  });
 
   afterAll(async () => {
     if (server) {
@@ -501,29 +501,4 @@ describe('Onboarding API Integration Tests', () => {
 });
 }
 )
-}
-)
-}
-)
-}
-)
-}
-)
-}
-)
-}
-)
-}
-)
-}
-)
-}
-)
-}
-)
-}
-)
-}
-)
-}
 )

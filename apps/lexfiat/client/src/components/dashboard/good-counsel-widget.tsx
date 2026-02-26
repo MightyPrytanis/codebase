@@ -181,11 +181,3 @@ export function GoodCounselWidget({ onClick }: GoodCounselWidgetProps) {
   );
 
 }
-]
-)
-)
-)
-)
-)
-)
-}

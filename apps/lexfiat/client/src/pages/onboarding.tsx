@@ -1630,23 +1630,3 @@ export default function Onboarding() {
   );
 
 }
-}
-}
-}
-}
-)
-}
-)
-}
-)
-}
-}
-}
-)
-}
-)
-}
-)
-}
-}
-)

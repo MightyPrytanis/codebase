@@ -198,7 +198,3 @@ export async function saveWidgetConfigToBackend(
 
 }
 }
-}
-}
-}
-}
