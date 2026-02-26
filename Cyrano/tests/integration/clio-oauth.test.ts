@@ -165,5 +165,3 @@ describe('Clio OAuth Integration (Track Alpha)', () => {
     });
   });
 });
-)
-}
