@@ -27,3 +27,5 @@ export function DemoWarning({ message, toolName, className = "" }: DemoWarningPr
       </AlertDescription>
     </Alert>
   );
+
+}

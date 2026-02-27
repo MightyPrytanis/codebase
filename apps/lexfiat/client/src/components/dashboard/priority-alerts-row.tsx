@@ -337,3 +337,5 @@ export function PriorityAlertsRow({
       </div>
     </div>
   );
+
+}

@@ -55,3 +55,5 @@ export default function AttorneyReviewPanel({ isOpen, onClose }: AttorneyReviewP
       </div>
     </ExpandedPanel>
   );
+
+}

@@ -583,3 +583,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const server = new CyranoMCPServer();
   server.run().catch(console.error);
 }
+

@@ -149,7 +149,7 @@ function analyzeCodebase() {
       mockContent += `- Pattern: \`${mock.pattern}\` (${mock.matches} occurrences)\n`;
     });
     mockContent += '\n';
-  });
+  );
   fs.writeFileSync(mockReportFile, mockContent);
   console.log(`✅ Generated ${mockReportFile}`);
 
@@ -163,7 +163,7 @@ function analyzeCodebase() {
       missingContent += `- Pattern: \`${miss.pattern}\` (${miss.matches} occurrences)\n`;
     });
     missingContent += '\n';
-  });
+  ;
   fs.writeFileSync(missingReportFile, missingContent);
   console.log(`✅ Generated ${missingReportFile}`);
 
@@ -177,7 +177,7 @@ function analyzeCodebase() {
       qualityContent += `- ${issue}\n`;
     });
     qualityContent += '\n';
-  });
+  );
   fs.writeFileSync(qualityReportFile, qualityContent);
   console.log(`✅ Generated ${qualityReportFile}`);
 
@@ -191,3 +191,4 @@ function analyzeCodebase() {
 }
 
 analyzeCodebase();
+)

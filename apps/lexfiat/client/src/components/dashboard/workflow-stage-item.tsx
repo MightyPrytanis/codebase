@@ -94,3 +94,5 @@ export default function WorkflowStageItem({
       <div className="resize-handle"></div>
     </div>
   );
+
+}

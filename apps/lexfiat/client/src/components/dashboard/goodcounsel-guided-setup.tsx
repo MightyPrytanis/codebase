@@ -714,3 +714,5 @@ async function generateAIInsights(data: any): Promise<string> {
   // TODO: Integrate with AI service to generate personalized insights
   // For now, return a placeholder
   return "Based on your responses, GoodCounsel will provide personalized support tailored to your goals, values, and current state. Your privacy is protected, and we're here to help you practice law with excellence and balance.";
+
+}

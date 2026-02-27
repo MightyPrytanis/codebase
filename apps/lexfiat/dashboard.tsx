@@ -295,4 +295,4 @@ export default function Dashboard() {
         </div>
       </main>
     </div>
-  ;
+  );

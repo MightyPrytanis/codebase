@@ -382,3 +382,6 @@ export function playFanfare(volume: number = 0.4) {
     
   } catch (error) {
     console.warn('Failed to play fanfare:', error);
+
+}
+}

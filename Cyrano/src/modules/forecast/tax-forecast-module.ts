@@ -339,3 +339,4 @@ export class TaxForecastModule extends BaseModule {
 
 // Export singleton instance
 export const taxForecastModule = new TaxForecastModule();
+

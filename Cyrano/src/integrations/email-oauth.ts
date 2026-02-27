@@ -260,3 +260,4 @@ export function filterEmailsByMatter(
            (email.metadata && email.metadata.matterId === matterId);
   });
 }
+

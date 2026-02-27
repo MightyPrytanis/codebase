@@ -150,3 +150,4 @@ export class VerificationModule extends BaseModule {
 }
 
 export const verificationModule = new VerificationModule();
+

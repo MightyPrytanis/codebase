@@ -163,3 +163,5 @@ export function CompactHUD({
       )}
     </div>
   );
+
+}

@@ -36,63 +36,8 @@ on:
     - cron: '25 14 * * 4'
 
 jobs:
-  detect:
-    name: Detect Changed Files
-    runs-on: ubuntu-latest
-    outputs:
-      python_changed: ${{ steps.detect_python.outputs.python_changed }}
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      
-      - name: Detect Python file changes
-        id: detect_python
-        shell: bash
-        run: |
-          echo "Detecting Python file changes..."
-          
-          if [ "${{ github.event_name }}" == "pull_request" ]; then
-            echo "Pull request event detected"
-            BASE_REF="${{ github.event.pull_request.base.sha }}"
-            HEAD_REF="${{ github.event.pull_request.head.sha }}"
-            echo "Comparing $BASE_REF...$HEAD_REF"
-            CHANGED_FILES=$(git diff --name-only "$BASE_REF" "$HEAD_REF")
-          elif [ "${{ github.event_name }}" == "push" ]; then
-            echo "Push event detected"
-            BEFORE_SHA="${{ github.event.before }}"
-            AFTER_SHA="${{ github.sha }}"
-            
-            # Handle initial commit case
-            if [ "$BEFORE_SHA" == "0000000000000000000000000000000000000000" ]; then
-              echo "Initial commit detected, checking all files"
-              CHANGED_FILES=$(git ls-files)
-            else
-              echo "Comparing $BEFORE_SHA...$AFTER_SHA"
-              CHANGED_FILES=$(git diff --name-only "$BEFORE_SHA" "$AFTER_SHA")
-            fi
-          else
-            echo "Schedule or other event type - checking for any Python files in repository"
-            CHANGED_FILES=$(git ls-files)
-          fi
-          
-          echo "Changed files:"
-          echo "$CHANGED_FILES"
-          
-          if echo "$CHANGED_FILES" | grep -q "\.py$"; then
-            echo "Python files detected in changes"
-            echo "python_changed=true" >> $GITHUB_OUTPUT
-          else
-            echo "No Python files detected in changes"
-            echo "python_changed=false" >> $GITHUB_OUTPUT
-          fi
-
   analyze:
     name: Analyze (${{ matrix.language }})
-    needs: detect
-    # Skip Python analysis if no Python files were changed
-    if: matrix.language != 'python' || needs.detect.outputs.python_changed == 'true'
     # Runner size impacts CodeQL analysis time. To learn more, please see:
     #   - https://gh.io/recommended-hardware-resources-for-running-codeql
     #   - https://gh.io/supported-runners-and-hardware-resources
