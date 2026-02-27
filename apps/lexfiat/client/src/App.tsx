@@ -28,7 +28,7 @@ const Dashboard = lazy(() =>
       ),
     };
   })
-;
+);
 const Settings = lazy(() => import("@/pages/settings"));
 const NotFound = lazy(() => import("@/pages/not-found"));
 const PerformancePage = lazy(() => import("@/pages/performance"));

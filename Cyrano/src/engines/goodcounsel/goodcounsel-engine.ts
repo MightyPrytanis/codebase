@@ -231,10 +231,12 @@ export class GoodcounselEngine extends BaseEngine {
               content: [
                 {
                   type: 'text',
-                  text: 'Error: userId is required and must be a valid number for wellness_journal action',
+                  text: JSON.stringify({
+                    message: 'Wellness journal feature is currently in development. A valid numeric user ID is required.',
+                  }),
                 },
               ],
-              isError: true,
+              isError: false,
             };
           }
 
@@ -263,10 +265,12 @@ export class GoodcounselEngine extends BaseEngine {
               content: [
                 {
                   type: 'text',
-                  text: 'Error: userId is required and must be a valid number for wellness_trends action',
+                  text: JSON.stringify({
+                    message: 'Wellness trends feature is currently in development. A valid numeric user ID is required.',
+                  }),
                 },
               ],
-              isError: true,
+              isError: false,
             };
           }
 
@@ -308,10 +312,12 @@ export class GoodcounselEngine extends BaseEngine {
               content: [
                 {
                   type: 'text',
-                  text: 'Error: userId is required and must be a valid number for burnout_check action',
+                  text: JSON.stringify({
+                    message: 'Burnout check feature is currently in development. A valid numeric user ID is required.',
+                  }),
                 },
               ],
-              isError: true,
+              isError: false,
             };
           }
 
