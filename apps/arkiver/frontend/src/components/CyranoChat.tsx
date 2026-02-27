@@ -360,7 +360,3 @@ export function CyranoChat({
   );
 
 }
-}
-)
-}
-)

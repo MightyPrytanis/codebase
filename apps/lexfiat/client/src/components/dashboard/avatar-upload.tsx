@@ -181,7 +181,3 @@ export function AvatarUpload({ currentAvatarUrl, attorneyName, attorneyId }: Ava
   );
 
 }
-)
-}
-}
-)

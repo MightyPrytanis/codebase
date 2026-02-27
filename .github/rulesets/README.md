@@ -19,10 +19,11 @@ The `main-ruleset.json` file defines protection rules for the `main` branch.
    - All conversations must be resolved before merging
 
 2. **Required Status Checks**
-   - Strict status checks enabled (branches must be up-to-date before merging)
-   - Required checks (placeholders - update with actual job names):
-     - `snyk/scan` - Snyk security scanning
-     - `zap-scan` - OWASP ZAP security scanning
+   - Strict status checks disabled (up-to-date requirement relaxed for bot PRs)
+   - Required checks (matched to actual CI job names in `.github/workflows/ci.yml`):
+     - `Run Tests` - Cyrano TypeScript build and unit tests
+     - `Security Scan` - Snyk code security scanning
+   - **Important**: The `main-ruleset.json` in this directory is documentation for the ruleset configuration. After merging this PR, you must also manually update the **enforced** ruleset in GitHub Settings → Rules → Rulesets → Main Branch Protection to replace the old placeholder check names (`snyk/scan`, `zap-scan`) with the ones above. The old placeholders never matched any real check and prevented all PRs from auto-merging.
 
 3. **Required Commit Signatures**
    - All commits must be signed with GPG/SSH keys

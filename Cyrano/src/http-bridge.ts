@@ -877,7 +877,7 @@ app.get('/mcp/tools', async (req, res) => {
     }
   } catch (error) {
     console.error('[HTTP] Failed to get tools:', error);
-    res.status(500).json({ error: 'Failed to get tools' });
+    res.status(500).json({ isError: true, content: [{ text: 'Failed to get tools' }] });
   }
 });
 
@@ -892,8 +892,8 @@ app.post('/mcp/execute', async (req, res) => {
     const validationResult = ExecuteRequestSchema.safeParse(req.body);
     if (!validationResult.success) {
       return res.status(400).json({
-        error: 'Invalid request body',
-        details: validationResult.error.issues,
+        isError: true,
+        content: [{ text: `Invalid request body: ${validationResult.error.issues.map(i => i.message).join(', ')}` }],
       });
     }
     
@@ -976,14 +976,14 @@ app.post('/mcp/tools/:toolName/reload', async (req, res) => {
   const { toolName } = req.params;
   
   if (!toolImportMap[toolName]) {
-    return res.status(404).json({ error: `Tool ${toolName} not found` });
+    return res.status(404).json({ isError: true, content: [{ text: `Tool ${toolName} not found` }] });
   }
   
   const success = await reloadTool(toolName);
   if (success) {
     res.json({ success: true, message: `Tool ${toolName} reloaded successfully` });
   } else {
-    res.status(500).json({ success: false, message: `Failed to reload tool ${toolName}` });
+    res.status(500).json({ isError: true, content: [{ text: `Failed to reload tool ${toolName}` }] });
   }
 });
 
@@ -1237,8 +1237,13 @@ app.get('/mcp/tools/info', async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to get tools info' });
+    res.status(500).json({ isError: true, content: [{ text: 'Failed to get tools info' }] });
   }
+});
+
+// Catch-all for unknown /mcp routes - always return JSON
+app.all('/mcp/*', (req, res) => {
+  res.status(404).json({ isError: true, content: [{ text: `Unknown MCP route: ${req.path}` }] });
 });
 
 // Arkiver File Upload Endpoint

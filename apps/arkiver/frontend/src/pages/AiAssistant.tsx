@@ -282,10 +282,3 @@ export default function AiAssistant() {
   );
 
 }
-}
-}
-)
-}
-}
-)
-}

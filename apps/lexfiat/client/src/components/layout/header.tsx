@@ -214,4 +214,4 @@ export default function Header({ attorney, onAdminClick, onSettingsClick, onProf
       </div>
       {showHelpMenu && <HelpMenu onClose={() => setShowHelpMenu(false)} />}
     </div>
-  ;
+  );
