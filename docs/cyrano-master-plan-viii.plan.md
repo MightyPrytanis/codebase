@@ -3066,7 +3066,7 @@ The blueprint mentions "RAG Intake" generically. Arkiver is an entire subsystem 
 
 **10. MiCourt Integration (Michigan Courts)**
 
-The codebase has a `micourt-service.ts` and `micourt-query.ts` exposing a `court_query` tool for querying Michigan court dockets. This is domain-specific legal infrastructure the blueprint cannot have known about — and a key differentiator. Note the correct tool name is `court_query`, not `court_scraper` (the blueprint's hypothetical name); this is user-initiated docket querying, not scraping.
+The codebase has a `micourt-service.ts` and `micourt-query.ts` exposing a `court_query` tool for querying Michigan court dockets. This is domain-specific legal infrastructure the blueprint cannot have known about — and a key differentiator. The blueprint's Section I.1 used `scrape_court_docket` as a generic illustrative example of what a Tool looks like (alongside `query_supabase`) — not as a proposed tool name. The important naming and framing correction: this system's tool is `court_query`, and the interaction model is explicit user-initiated docket querying, not scraping.
 
 **11. The "Real vs. Mock" Gap Is the Actual Blockers List**
 
@@ -3121,7 +3121,7 @@ The blueprint correctly identifies vector storage (pgvector) as needed for the R
 | "Build the routing layer" | `ai-provider-selector.ts` + `multi-model-service.ts` already exist |
 | "Deploy the HTTP bridge" | `http-bridge.ts` already production-ready |
 | "LexFiat is a thin client" | Architecturally accurate — LexFiat is a React SPA (no own backend); Cyrano IS the backend. Correction: LexFiat is not *lightweight* — 30+ components, Tailwind 4, Radix UI, full workflow UI |
-| Blueprint `court_scraper` tool | The actual tool is `court_query` (from `micourt-query.ts`) — user-initiated docket queries, not scraping |
+| Blueprint Sec. I.1 example: `scrape_court_docket` | That was a generic illustration of the Tool concept, not a proposed tool name. The actual tool is `court_query` (`micourt-query.ts`) — explicit user-initiated docket queries, not scraping |
 | Wellness as a background task | GoodCounsel is a first-class Engine |
 | maxDuration: 300 | Fixed to 60s (Hobby) / 300s (Pro) |
 
