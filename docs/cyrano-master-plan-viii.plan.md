@@ -3010,9 +3010,9 @@ The blueprint recommends Vercel KV (Redis) for "Current Matter Context" persiste
 
 The blueprint describes building "a lightweight logic layer in Vercel" that checks Supabase for user model preferences. The codebase already has `src/services/ai-provider-selector.ts`, `src/services/ai-performance-tracker.ts`, `src/engines/mae/services/multi-model-service.ts`, and `src/services/openrouter.ts`. Role-based parallel multi-model verification with weighted confidence scoring already exists in MAE.
 
-**6. LexFiat Is Not a "Thin Client"**
+**6. LexFiat's "Thin Client" Label Is Architecturally Correct — But Understates the Frontend**
 
-The blueprint frames LexFiat as a "lightweight TypeScript app (Vercel)" — a thin client. LexFiat is actually a full-stack application with its own Express backend, Drizzle ORM schema, PostgreSQL database, workflow state machine, 30+ React components, and its own auth system. It is not a simple static site calling Vercel Functions.
+The blueprint frames LexFiat as a "lightweight TypeScript app (Vercel)" — a thin client. The *architecture* here is actually accurate: LexFiat is a client-side React SPA with no backend of its own. Its backend IS Cyrano (Express + PostgreSQL/Drizzle). The `drizzle.config.ts` in LexFiat points to `Cyrano/src/lexfiat-schema.ts`; auth lives in Cyrano's `auth-server/`. What the "thin client" framing understates is the scale of the frontend: LexFiat is a fully-featured React 19 + Vite application with 30+ components, Tailwind CSS 4, Radix UI, TanStack Query, react-router-dom, and a complete workflow pipeline UI. It is not "lightweight" in the sense of minimal functionality — it is lightweight only in the sense that it carries no server-side code.
 
 **7. Vercel `maxDuration: 10` Is Already Fixed (As of This PR)**
 
@@ -3066,7 +3066,7 @@ The blueprint mentions "RAG Intake" generically. Arkiver is an entire subsystem 
 
 **10. MiCourt Integration (Michigan Courts)**
 
-The codebase has a `micourt-service.ts` and `micourt-query.ts` for querying Michigan court dockets. This is domain-specific legal infrastructure the blueprint cannot have known about but that is a key differentiator.
+The codebase has a `micourt-service.ts` and `micourt-query.ts` exposing a `court_query` tool for querying Michigan court dockets. This is domain-specific legal infrastructure the blueprint cannot have known about — and a key differentiator. Note the correct tool name is `court_query`, not `court_scraper` (the blueprint's hypothetical name); this is user-initiated docket querying, not scraping.
 
 **11. The "Real vs. Mock" Gap Is the Actual Blockers List**
 
@@ -3120,7 +3120,8 @@ The blueprint correctly identifies vector storage (pgvector) as needed for the R
 | "Vercel KV for state" | PostgreSQL schema already handles state |
 | "Build the routing layer" | `ai-provider-selector.ts` + `multi-model-service.ts` already exist |
 | "Deploy the HTTP bridge" | `http-bridge.ts` already production-ready |
-| "LexFiat is a thin client" | LexFiat is a full-stack app |
+| "LexFiat is a thin client" | Architecturally accurate — LexFiat is a React SPA (no own backend); Cyrano IS the backend. Correction: LexFiat is not *lightweight* — 30+ components, Tailwind 4, Radix UI, full workflow UI |
+| Blueprint `court_scraper` tool | The actual tool is `court_query` (from `micourt-query.ts`) — user-initiated docket queries, not scraping |
 | Wellness as a background task | GoodCounsel is a first-class Engine |
 | maxDuration: 300 | Fixed to 60s (Hobby) / 300s (Pro) |
 
