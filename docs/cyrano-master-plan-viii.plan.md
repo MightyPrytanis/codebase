@@ -3132,3 +3132,79 @@ The blueprint correctly identifies vector storage (pgvector) as needed for the R
 4. **Fix the 8 non-functional/placeholder tools** — or remove them from MCP registration
 5. **Run MCP Inspector** against the HTTP bridge to confirm all production tools are visible
 6. **Deploy to staging** (Fly.io/Render, per existing config) and run E2E tests
+
+---
+
+## Appendix: Unmerged Cursor Work — Codebase Status After BraceCase
+
+**Context:** After the BraceCase incident (Jan–Feb 2026), there was uncertainty about whether 700–900 Cursor-generated changes were done but never successfully uploaded and merged. This appendix documents the investigation findings.
+
+---
+
+### What Was Found in GitHub
+
+**Cursor branches in the repository:**
+
+| Branch | Unique Cursor commits | Status |
+|---|---|---|
+| `cursor/general-codebase-debugging-18e6` | **1** (Jan 12, 2026) | Unmerged — PR #211, **closed** Jan 12 |
+| `cursor/general-codebase-debugging-81bc` | 0 (identical to main) | Inactive |
+
+**PR #211 — "Refactor: Remove unused code and fix minor issues" (Jan 12, 2026):**
+- **591 files changed** (+564 / -2565 lines)
+- Single commit authored by the Cursor Agent
+- Closed without merging the same day it was opened
+- CodeRabbit flagged "Too many files!" (150 of 300 reviewed)
+- **Content:** All changes are BraceCase cleanup (removing/relocating orphan `}`, `)`, `]` delimiters from end-of-file positions) — **not new feature work**
+
+---
+
+### What This Means
+
+**PR #211 was a FAILED BRACE CASE CLEANUP attempt, not lost feature work.**
+
+The Cursor Agent's Jan 12 session was specifically trying to fix the BraceCase corruption. The PR was closed because:
+1. It was partially incorrect (e.g., `});` changed to `};` in some service files, breaking closure syntax)
+2. It was too large to review safely
+3. It was subsequently superseded by the proper Feb 9, 2026 BraceCase fix
+
+The Feb 9 fix (commits `0d247f4` and `aa57b1f`) correctly repaired all 203 corrupted files and IS in `main`.
+
+---
+
+### Current Codebase State (post-BraceCase fix, Feb 2026)
+
+- **266 TypeScript source files** in `Cyrano/src/`
+- **All 6 engines present:** MAE, GoodCounsel, Potemkin, Forecast, Chronometric, Custodian
+- **All modules present:** arkiver, billing-reconciliation, ethical-ai, legal-analysis, rag, verification
+- **50+ tools** in `Cyrano/src/tools/`
+- TypeScript build: ✅ **passes** (263 JS files generated, per postmortem)
+- Unit tests: ✅ **pass** (399 passing, 1 pre-existing failure, per postmortem)
+
+---
+
+### On the "700–900 Missing Changes"
+
+**Verdict: No evidence of large-scale missing feature work in GitHub.**
+
+The most likely explanations for the user's memory of "700–900 changes":
+1. **The BraceCase cleanup numbers** — The corruption affected 203 files; the Cursor cleanup PR touched 591 files. These large numbers may have created the impression of lost work.
+2. **Local-only Cursor work** — If changes were made in Cursor locally but never committed and pushed to any GitHub branch, they are not visible here and are not recoverable from the repository.
+3. **Incremental changes across many sessions** — Cursor sessions generate many small edits; over months these can appear large in aggregate.
+
+**What IS genuinely "unbuilt" in the current codebase (by design, not loss):**
+- ~15 tools use mock AI implementations (return simulated responses)
+- ~8 tools are non-functional stubs or placeholders
+- Several `TODO` markers for in-memory → database persistence upgrades
+- Auth-server beta route stubs (JWT, account creation)
+- GoodCounsel client-analyzer stubs (need data service calls)
+
+These are pre-beta planned items, not lost work. They are tracked in the main checklist above.
+
+---
+
+### Recommendation
+
+The `cursor/general-codebase-debugging-18e6` branch can be **safely deleted** — its only unique commit is a superseded BraceCase cleanup attempt that was done better in the Feb 2026 fix. There is no missing feature work in that branch.
+
+If the user believes specific features were written in Cursor but are missing from `main`, the best approach is to identify specific file paths or functionality and compare against the current `main` branch — not to try to merge the Cursor branch.
