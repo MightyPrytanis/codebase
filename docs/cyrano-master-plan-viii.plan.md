@@ -2994,9 +2994,9 @@ This section evaluates the "Master Blueprint for Your Legal AI OS" submitted for
 
 The blueprint's top priority is creating a `lib/mcp-registry.ts` registry loop that maps the hierarchy into an MCP tool list. This already exists — and has for some time. `src/engines/registry.ts` and `src/modules/registry.ts` are fully functional, self-registering singletons. Tools are auto-registered in `mcp-server.ts` and `http-bridge.ts`. No "registry loop" needs to be written; the MCP tool list is already computed dynamically from registered tool classes.
 
-**2. The Hierarchy Is Engine → Module → Tool, Not App → Engine → Module → Tool**
+**2. "Litigation Suite" Is the Suite/Platform Level, Not the App Level**
 
-The blueprint describes a four-level hierarchy with "App" at the top (e.g., "Litigation Suite"). The actual codebase has no "App" class or abstraction above Engines. The Engines (MAE, GoodCounsel, Potemkin, Forecast, Chronometric, Custodian) are the top-level orchestrators. LexFiat is the *client application* — it is not an Engine-level class inside Cyrano.
+The blueprint describes a four-level hierarchy with "App" at the top, using "Litigation Suite" as an example. The codebase actually has a *five*-level hierarchy: **Tool → Module → Engine → App → Suite/Platform**. The App layer is real and documented — LexFiat and Arkiver are both Apps (per `docs/architecture/ARKIVER_ARCHITECTURE_GUIDE.md`). "Litigation Suite" would sit at the *Suite* level above Apps, not the App level. The Engines (MAE, GoodCounsel, Potemkin, Forecast, Chronometric, Custodian) are one level *below* Apps. The blueprint's direction was correct (Apps above Engines) but it conflated the Suite/Platform tier with the App tier, and missed the fifth level entirely.
 
 **3. Supabase Is Not the Database Layer**
 
@@ -3022,9 +3022,9 @@ The blueprint correctly identifies the 10-second timeout as a problem and recomm
 
 ### Question 2: What Did the Blueprint Mostly or Entirely Miss?
 
-**1. The Skills Layer**
+**1. The Suite/Platform Tier and the Skills Layer**
 
-The blueprint's hierarchy stops at Tool. The codebase has an additional abstraction: **Skills** (`src/skills/`). Skills are declarative, markdown-defined capability descriptors that are loaded, registered, and dispatched by `skill-loader.ts`, `skill-registry.ts`, and `skill-dispatcher.ts`. This is a significant innovation the blueprint is entirely unaware of.
+The blueprint's four-level hierarchy (App → Engine → Module → Tool) is actually five levels: Tool → Module → Engine → App → **Suite/Platform**. "Litigation Suite" would be a *Suite* sitting above Apps like LexFiat, not an App itself. Additionally, the codebase has a **Skills** abstraction (`src/skills/`) — declarative, markdown-defined capability descriptors loaded, registered, and dispatched by `skill-loader.ts`, `skill-registry.ts`, and `skill-dispatcher.ts`. These sit alongside or below the Tool layer and are entirely absent from the blueprint.
 
 **2. The Mock/Prototype Status of Many AI Tools**
 
@@ -3078,7 +3078,7 @@ The TOOL_CATEGORIZATION document (referenced in the README) is the real checklis
 
 **1. The Core Hierarchy Concept Is Correct**
 
-The Engine → Module → Tool pattern is accurate. The metaphors ("The Monster" for the backend hierarchy, "The Nervous System" for MCP) are apt and useful for communication, even if the details of the hierarchy need correction.
+The Engine → Module → Tool pattern is accurate — and the blueprint's placement of Apps *above* Engines is also correct. The full documented hierarchy is Tool → Module → Engine → App → Suite/Platform, where LexFiat and Arkiver are both Apps (per `docs/architecture/ARKIVER_ARCHITECTURE_GUIDE.md`). The metaphors ("The Monster" for the backend hierarchy, "The Nervous System" for MCP) are apt and useful for communication. The main correction is that the blueprint's four-level description missed the fifth tier (Suite/Platform above Apps), and it conflated "Litigation Suite" (Suite-level) with the App tier.
 
 **2. MCP as the Unifying Protocol**
 
@@ -3115,7 +3115,7 @@ The blueprint correctly identifies vector storage (pgvector) as needed for the R
 | Blueprint Claim | Corrected Reality |
 |---|---|
 | "Create the registry" (Step 1) | Registry already exists — skip this step |
-| App → Engine → Module → Tool | Engine → Module → Tool → (Skills) |
+| App → Engine → Module → Tool (4 levels) | Tool → Module → Engine → App → Suite/Platform (5 levels); direction is correct, top tier is Suite not App |
 | "Connect Supabase" | PostgreSQL/Drizzle already connected; Supabase optional as host |
 | "Vercel KV for state" | PostgreSQL schema already handles state |
 | "Build the routing layer" | `ai-provider-selector.ts` + `multi-model-service.ts` already exist |
