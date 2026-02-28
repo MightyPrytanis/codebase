@@ -25,7 +25,7 @@ console.error('[HTTP Bridge] Starting module load...');
 // ESSENTIAL IMPORTS ONLY - These must load before server starts
 // ============================================================================
 
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 console.error('[HTTP Bridge] Express imported');
 import cors, { CorsOptions } from 'cors';
 console.error('[HTTP Bridge] CORS imported');
@@ -1242,7 +1242,8 @@ app.get('/mcp/tools/info', async (req, res) => {
 });
 
 // Catch-all for unknown /mcp routes - always return JSON
-app.all('/mcp/*', (req, res) => {
+// Using '/mcp/*path' (named wildcard) for compatibility with path-to-regexp v8+
+app.all('/mcp/*path', (req, res) => {
   res.status(404).json({ isError: true, content: [{ text: `Unknown MCP route: ${req.path}` }] });
 });
 
@@ -1459,6 +1460,21 @@ app.use('/api', onboardingRoutes);
 
 // Mount beta portal routes
 app.use('/api/beta', betaRoutes);
+
+// ============================================================================
+// GLOBAL ERROR HANDLER
+// ============================================================================
+
+// Must be registered after all routes. Catches any unhandled errors and
+// returns a JSON response so tests never receive HTML/DOCTYPE error pages.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
+  console.error('[HTTP Bridge] Unhandled error:', err.message);
+  res.status(500).json({
+    isError: true,
+    content: [{ type: 'text', text: err.message || 'Internal server error' }],
+  });
+});
 
 // ============================================================================
 // SERVER STARTUP
