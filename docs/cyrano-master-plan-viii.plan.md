@@ -2977,3 +2977,158 @@ Complete remaining production readiness tasks: error handling verification, load
 - [ ] Documentation complete
 - [ ] Beta testing plan ready
 - [ ] Known issues documented
+
+---
+
+## Appendix: Blueprint Review — "Master Blueprint" LLM Advisory Analysis
+
+*Added 2026-02-28. Review requested via GitHub Issue #446.*
+
+This section evaluates the "Master Blueprint for Your Legal AI OS" submitted for review, answering the three posed questions: what it got wrong, what it missed, and what it got right. The goal is to use this analysis as a foundation for further refinement into an actionable plan.
+
+---
+
+### Question 1: What Did the Blueprint Get Wrong?
+
+**1. The Registry "Translation" (Step 1) Is Already Done**
+
+The blueprint's top priority is creating a `lib/mcp-registry.ts` registry loop that maps the hierarchy into an MCP tool list. This already exists — and has for some time. `src/engines/registry.ts` and `src/modules/registry.ts` are fully functional, self-registering singletons. Tools are auto-registered in `mcp-server.ts` and `http-bridge.ts`. No "registry loop" needs to be written; the MCP tool list is already computed dynamically from registered tool classes.
+
+**2. The Hierarchy Is Engine → Module → Tool, Not App → Engine → Module → Tool**
+
+The blueprint describes a four-level hierarchy with "App" at the top (e.g., "Litigation Suite"). The actual codebase has no "App" class or abstraction above Engines. The Engines (MAE, GoodCounsel, Potemkin, Forecast, Chronometric, Custodian) are the top-level orchestrators. LexFiat is the *client application* — it is not an Engine-level class inside Cyrano.
+
+**3. Supabase Is Not the Database Layer**
+
+The blueprint repeatedly recommends Supabase as the memory/storage layer (pgvector, file storage, auth). The codebase uses **PostgreSQL with Drizzle ORM** directly (via the `postgres` npm package), **not** the Supabase SDK. Supabase-as-a-service could host the Postgres database, but there is no Supabase client in the codebase. Recommending "link your Supabase project in the Vercel dashboard" understates a real migration/integration effort.
+
+**4. Vercel KV (Redis) for State Is Unnecessary**
+
+The blueprint recommends Vercel KV (Redis) for "Current Matter Context" persistence. The codebase already uses the PostgreSQL schema for persistent state (matter data, wellness journals, ethics audits, email drafts). Adding Redis would be additional infrastructure complexity without clear benefit given the existing Drizzle ORM schema.
+
+**5. The Multi-Model Router Is Already More Sophisticated Than Described**
+
+The blueprint describes building "a lightweight logic layer in Vercel" that checks Supabase for user model preferences. The codebase already has `src/services/ai-provider-selector.ts`, `src/services/ai-performance-tracker.ts`, `src/engines/mae/services/multi-model-service.ts`, and `src/services/openrouter.ts`. Role-based parallel multi-model verification with weighted confidence scoring already exists in MAE.
+
+**6. LexFiat Is Not a "Thin Client"**
+
+The blueprint frames LexFiat as a "lightweight TypeScript app (Vercel)" — a thin client. LexFiat is actually a full-stack application with its own Express backend, Drizzle ORM schema, PostgreSQL database, workflow state machine, 30+ React components, and its own auth system. It is not a simple static site calling Vercel Functions.
+
+**7. Vercel `maxDuration: 10` Is Already Fixed (As of This PR)**
+
+The blueprint correctly identifies the 10-second timeout as a problem and recommends 300 seconds. The `Cyrano/vercel.json` had `maxDuration: 10` — this has been corrected in this PR to `60` seconds with `memory: 1024` (Vercel Hobby tier maximum is 60s; Pro/Enterprise allows up to 300s for the full blueprint recommendation).
+
+---
+
+### Question 2: What Did the Blueprint Mostly or Entirely Miss?
+
+**1. The Skills Layer**
+
+The blueprint's hierarchy stops at Tool. The codebase has an additional abstraction: **Skills** (`src/skills/`). Skills are declarative, markdown-defined capability descriptors that are loaded, registered, and dispatched by `skill-loader.ts`, `skill-registry.ts`, and `skill-dispatcher.ts`. This is a significant innovation the blueprint is entirely unaware of.
+
+**2. The Mock/Prototype Status of Many AI Tools**
+
+The most critical near-term blocker is that approximately 15 tools are MOCK implementations that return simulated responses without calling real AI APIs. The Cyrano README explicitly warns: "Do not use in production where real AI capabilities are expected." The blueprint assumes a working system that needs to be "animated" — in reality, real AI integration work is still pending for many tools. This is the actual critical path, not registry translation.
+
+**3. GoodCounsel as a First-Class Ethics/Wellness Engine**
+
+The blueprint treats wellness as a background post-process (`waitUntil` fire-and-forget). In Cyrano, **GoodCounsel** is a full Engine with wellness journaling, burnout detection, HIPAA-compliant encryption, crisis support pathways, and ethics review as first-class, synchronous features. It is not an afterthought.
+
+**4. Clio Integration as the Primary Practice Management System**
+
+The blueprint doesn't mention Clio at all. For the target user (a practicing attorney), Clio OAuth integration (`clio-oauth.ts`, `clio-webhooks.ts`, `clio-client.ts`, `clio-api.ts`) is arguably the most important third-party integration. Without Clio sync, matter data, time entries, and billing are disconnected from the attorney's actual workflow.
+
+**5. Six Engines Beyond MAE**
+
+The blueprint only describes a generic "Research Engine" and "Billing Engine." The codebase has six named, specialized Engines, each with distinct responsibilities:
+- **MAE** (Multi-Agent Engine) — workflow orchestration
+- **GoodCounsel** — ethics and wellness
+- **Potemkin** — simulation and workflow validation
+- **Forecast** — financial forecasting (tax, child support, QDRO)
+- **Chronometric** — time reconstruction and billing
+- **Custodian** — data governance and audit trails
+
+**6. The Verification Module**
+
+The blueprint doesn't address fact-checking or citation verification at all. The codebase has a dedicated `src/tools/verification/` subdirectory with `claim-extractor.ts`, `citation-checker.ts`, `citation-formatter.ts`, `source-verifier.ts`, and `consistency-checker.ts`. For a legal AI, this is critical for avoiding hallucinated case citations — a disbarment-level risk.
+
+**7. The HTTP Bridge as the Real MCP-to-Web Adapter**
+
+The blueprint describes building a Vercel AI SDK orchestrator route as Step 4. The codebase already has a production-grade HTTP Bridge (`src/http-bridge.ts`) with hybrid lazy-loading, race condition protection, timeout protection (30s), circuit breaker pattern, tool health monitoring, and hot reload. The "brain deployment" step is already done.
+
+**8. Auth Server as a Separate Service**
+
+The blueprint treats auth as a Supabase feature. Cyrano has its own dedicated auth server (`auth-server/` directory) with JWT, bcrypt, and separate deployment configuration. This is independent infrastructure that needs to be accounted for in any deployment plan.
+
+**9. The Arkiver Subsystem**
+
+The blueprint mentions "RAG Intake" generically. Arkiver is an entire subsystem with its own UI, MCP tools, processor pipeline (text, email, entity, insight, timeline), three engine modules (extractor, processor, analyst), and document integrity verification. It is far more complete and complex than the blueprint implies.
+
+**10. MiCourt Integration (Michigan Courts)**
+
+The codebase has a `micourt-service.ts` and `micourt-query.ts` for querying Michigan court dockets. This is domain-specific legal infrastructure the blueprint cannot have known about but that is a key differentiator.
+
+**11. The "Real vs. Mock" Gap Is the Actual Blockers List**
+
+The TOOL_CATEGORIZATION document (referenced in the README) is the real checklist to beta: ~19 production-grade tools, ~15 mock AI tools, ~10 credential-dependent tools, ~8 non-functional placeholders. The blueprint's 6-step plan implies a working system needing configuration. The actual work is completing real AI integrations for those 15+ mock tools.
+
+---
+
+### Question 3: What Did the Blueprint Get Right?
+
+**1. The Core Hierarchy Concept Is Correct**
+
+The Engine → Module → Tool pattern is accurate. The metaphors ("The Monster" for the backend hierarchy, "The Nervous System" for MCP) are apt and useful for communication, even if the details of the hierarchy need correction.
+
+**2. MCP as the Unifying Protocol**
+
+The blueprint correctly identifies MCP as the mechanism that allows any LLM (Perplexity, Claude, GPT-4) to discover and call the tool hierarchy. This is exactly how the system works — the MCP Inspector validation step (Step 6) is genuinely useful for confirming tool visibility.
+
+**3. Multi-Model Strategy Is the Right Approach**
+
+The concept of an "Auto" mode with intelligent routing, plus "Manual" override for attorney control, correctly mirrors the `ai-provider-selector.ts` philosophy in the codebase. Naming Perplexity for research tasks and Claude/GPT-4 for drafting is sound, though the existing `openrouter.ts` adds further flexibility.
+
+**4. The Timeout Identification Is a Real Bug**
+
+The blueprint flagged the 10-second Vercel timeout as a problem — and it was correct. Legal research tasks that chain tool calls will absolutely exceed 10 seconds. This has been fixed in this PR (10s → 60s, the Hobby tier maximum; upgrading to Vercel Pro/Enterprise allows up to 300s as the blueprint recommends).
+
+**5. Background Processing for Wellness/Timekeeping**
+
+The concept of returning the legal answer immediately while async-processing wellness monitoring and time entry is sound engineering. Vercel's `waitUntil`/`after()` pattern, or equivalent background job processing, is the right approach for perceived responsiveness.
+
+**6. Human-in-the-Loop for Legal Writing Is Non-Negotiable**
+
+The blueprint's recommendation for a mandatory `await_approval` step before sending legal communications is correct and already partially implemented in the workflow manager. This is an ethical and liability requirement, not just a UX feature.
+
+**7. PII Guardrails Must Be Pre-Processing Steps**
+
+The recommendation to redact sensitive client data before it reaches external LLM APIs is aligned with the codebase's `sensitive-data-encryption.ts` and `hipaa-compliance.ts` services. The Arkiver's entity extraction pipeline is the right place to enforce this.
+
+**8. Vector Storage for RAG Is Essential**
+
+The blueprint correctly identifies vector storage (pgvector) as needed for the RAG/Librarian functionality. The codebase's `embedding-service.ts`, `rag-service.ts`, and `rag-library.ts` confirm this is real, implemented infrastructure — not a future wish.
+
+---
+
+### Recommended Corrections to the Blueprint for the Next Iteration
+
+| Blueprint Claim | Corrected Reality |
+|---|---|
+| "Create the registry" (Step 1) | Registry already exists — skip this step |
+| App → Engine → Module → Tool | Engine → Module → Tool → (Skills) |
+| "Connect Supabase" | PostgreSQL/Drizzle already connected; Supabase optional as host |
+| "Vercel KV for state" | PostgreSQL schema already handles state |
+| "Build the routing layer" | `ai-provider-selector.ts` + `multi-model-service.ts` already exist |
+| "Deploy the HTTP bridge" | `http-bridge.ts` already production-ready |
+| "LexFiat is a thin client" | LexFiat is a full-stack app |
+| Wellness as a background task | GoodCounsel is a first-class Engine |
+| maxDuration: 300 | Fixed to 60s (Hobby) / 300s (Pro) |
+
+### Real Next Steps (Replacing the Blueprint's 6-Step Plan)
+
+1. **Complete mock AI replacements** — the 15 mock tools are the actual critical path
+2. **Validate credential-dependent tools** — Clio OAuth, Gmail/Outlook OAuth, Perplexity key
+3. **Complete LexFiat ↔ Cyrano integration** — HTTP bridge is ready; LexFiat integration is ~50%
+4. **Fix the 8 non-functional/placeholder tools** — or remove them from MCP registration
+5. **Run MCP Inspector** against the HTTP bridge to confirm all production tools are visible
+6. **Deploy to staging** (Fly.io/Render, per existing config) and run E2E tests

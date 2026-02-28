@@ -22,7 +22,8 @@
   ],
   "functions": {
     "dist/index.js": {
-      "maxDuration": 10
+      "maxDuration": 60,
+      "memory": 1024
     }
   },
   "env": {
