@@ -42,8 +42,9 @@ describe('MCP HTTP Bridge Compliance', () => {
       });
     });
     
-    // Wait a bit for server to be fully ready
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Wait for server to be fully ready before issuing test requests
+    // Increased from 100ms to 500ms to avoid race condition on slow CI runners
+    await new Promise(resolve => setTimeout(resolve, 500));
     
     // Get CSRF token for POST requests
     try {
