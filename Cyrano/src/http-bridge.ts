@@ -504,7 +504,7 @@ async function loadTool(toolName: string, loadDependencies: boolean = true): Pro
   // Get tool config
   const toolConfig = toolImportMap[toolName];
   if (!toolConfig) {
-    throw new Error(`Unknown tool: ${toolName}`);
+    throw new Error(`Tool not found: ${toolName}`);
   }
   
   // Initialize metadata
