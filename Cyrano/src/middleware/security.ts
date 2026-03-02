@@ -432,7 +432,12 @@ export function sanitizeInputs(req: Request, res: Response, next: NextFunction) 
         sanitizedQuery[key] = value;
       }
     }
-    req.query = sanitizedQuery;
+    Object.defineProperty(req, 'query', {
+      value: sanitizedQuery,
+      writable: true,
+      enumerable: true,
+      configurable: true,
+    });
   }
 
   // Sanitize body parameters (only strings)

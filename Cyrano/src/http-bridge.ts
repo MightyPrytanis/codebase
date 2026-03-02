@@ -504,7 +504,7 @@ async function loadTool(toolName: string, loadDependencies: boolean = true): Pro
   // Get tool config
   const toolConfig = toolImportMap[toolName];
   if (!toolConfig) {
-    throw new Error(`Unknown tool: ${toolName}`);
+    throw new Error(`Tool not found: ${toolName}`);
   }
   
   // Initialize metadata
@@ -1242,7 +1242,7 @@ app.get('/mcp/tools/info', async (req, res) => {
 });
 
 // Catch-all for unknown /mcp routes - always return JSON
-app.all('/mcp/*', (req, res) => {
+app.all('/mcp/*path', (req, res) => {
   res.status(404).json({ isError: true, content: [{ text: `Unknown MCP route: ${req.path}` }] });
 });
 
