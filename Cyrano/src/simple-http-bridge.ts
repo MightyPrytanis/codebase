@@ -110,6 +110,11 @@ app.get('/mcp/status', (req, res) => {
   res.json({ status: 'running', server: 'cyrano-simple-bridge' });
 });
 
+// Catch-all for unknown /mcp routes - always return JSON
+app.all('/mcp/*', (req, res) => {
+  res.status(404).json({ isError: true, content: [{ text: `Unknown MCP route: ${req.path}` }] });
+});
+
 // Start server
 app.listen(port, () => {
   console.log(`Cyrano Simple HTTP Bridge running on port ${port}`);

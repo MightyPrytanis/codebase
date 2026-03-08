@@ -194,8 +194,8 @@ describe('PotemkinEngine', () => {
       expect(result.isError).toBe(true);
       const content = result.content[0];
       if (content.type === 'text' && 'text' in content) {
-        // Zod returns detailed validation error, check for invalid_enum_value
-        expect(content.text).toContain('invalid_enum_value');
+        // Zod returns detailed validation error, check for invalid_value (Zod v4)
+        expect(content.text).toContain('invalid_value');
       }
     });
 

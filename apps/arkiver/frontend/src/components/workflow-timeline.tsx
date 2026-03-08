@@ -205,7 +205,3 @@ export function WorkflowTimeline({ result }: WorkflowTimelineProps) {
   );
 
 }
-}
-)
-}
-)

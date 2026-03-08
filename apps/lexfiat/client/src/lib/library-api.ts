@@ -291,13 +291,3 @@ export async function uploadLibraryDocument(
   return response.json();
 
 }
-}
-}
-}
-}
-}
-}
-}
-}
-}
-)

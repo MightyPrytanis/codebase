@@ -279,4 +279,3 @@ export function LibraryDetailDrawer({
   );
 
 }
-}

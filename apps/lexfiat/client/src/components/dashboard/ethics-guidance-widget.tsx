@@ -157,6 +157,3 @@ export function EthicsGuidanceWidget({ onClick }: EthicsGuidanceWidgetProps) {
   );
 
 }
-]
-)
-}

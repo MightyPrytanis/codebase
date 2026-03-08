@@ -577,9 +577,3 @@ export default function VisualWorkflowBuilder({
   );
 
 }
-)
-)
-}
-}
-)
-}

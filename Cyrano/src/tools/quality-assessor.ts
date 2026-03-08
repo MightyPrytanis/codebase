@@ -6,11 +6,16 @@
 
 import { BaseTool } from './base-tool.js';
 import { z } from 'zod';
+import { aiService, AIProvider } from '../services/ai-service.js';
+import { apiValidator } from '../utils/api-validator.js';
+import { aiProviderSelector } from '../services/ai-provider-selector.js';
+import { isDemoModeEnabled, markAsDemo } from '../utils/demo-mode.js';
 
 const QualityAssessorSchema = z.object({
   document_text: z.string().describe('The document to assess for quality'),
   assessment_criteria: z.array(z.string()).optional().describe('Specific quality criteria to assess'),
   quality_standard: z.enum(['basic', 'professional', 'excellent']).default('professional'),
+  ai_provider: z.enum(['openai', 'anthropic', 'perplexity', 'google', 'xai', 'deepseek', 'auto']).optional().default('auto').describe('AI provider to use (default: auto-select)'),
 });
 
 export const qualityAssessor = new (class extends BaseTool {
@@ -36,6 +41,12 @@ export const qualityAssessor = new (class extends BaseTool {
             default: 'professional',
             description: 'Quality standard to measure against',
           },
+          ai_provider: {
+            type: 'string',
+            enum: ['openai', 'anthropic', 'perplexity', 'google', 'xai', 'deepseek', 'auto'],
+            default: 'auto',
+            description: 'AI provider to use (default: auto-select)',
+          },
         },
         required: ['document_text'],
       },
@@ -44,12 +55,93 @@ export const qualityAssessor = new (class extends BaseTool {
 
   async execute(args: any) {
     try {
-      const { document_text, assessment_criteria, quality_standard } = QualityAssessorSchema.parse(args);
-      const assessment = this.assessQuality(document_text, assessment_criteria, quality_standard);
-      return this.createSuccessResult(JSON.stringify(assessment, null, 2));
+      const { document_text, assessment_criteria, quality_standard, ai_provider } = QualityAssessorSchema.parse(args);
+
+      // Demo mode: return placeholder scores with disclaimer (opt-in only via DEMO_MODE=true)
+      if (isDemoModeEnabled()) {
+        const demoAssessment = markAsDemo(
+          this.assessQuality(document_text, assessment_criteria, quality_standard),
+          'Quality Assessor'
+        );
+        return this.createSuccessResult(JSON.stringify(demoAssessment, null, 2));
+      }
+
+      if (!apiValidator.hasAnyValidProviders()) {
+        return this.createErrorResult(
+          'No AI providers configured. Quality assessment requires an AI provider. Configure API keys, or set DEMO_MODE=true to enable demo mode.'
+        );
+      }
+
+      let provider: AIProvider;
+      if (ai_provider === 'auto' || !ai_provider) {
+        provider = aiProviderSelector.getProviderForTask({
+          taskType: 'analysis',
+          complexity: quality_standard === 'excellent' ? 'high' : 'medium',
+          requiresSafety: false,
+          preferredProvider: 'auto',
+        });
+      } else {
+        const validation = apiValidator.validateProvider(ai_provider as AIProvider);
+        if (!validation.valid) {
+          return this.createErrorResult(
+            `Selected AI provider ${ai_provider} is not configured: ${validation.error}`
+          );
+        }
+        provider = ai_provider as AIProvider;
+      }
+
+      try {
+        const prompt = this.buildAssessmentPrompt(document_text, assessment_criteria, quality_standard);
+        const aiResponse = await aiService.call(provider, prompt, {
+          systemPrompt: 'You are an expert document quality analyst. Provide objective, evidence-based quality assessment with specific scores and actionable recommendations.',
+          maxTokens: 2000,
+          temperature: 0.3,
+          metadata: {
+            toolName: 'quality_assessor',
+            actionType: 'content_generation',
+          },
+        });
+
+        const structuralAssessment = this.assessQuality(document_text, assessment_criteria, quality_standard);
+        const assessment = {
+          ...structuralAssessment,
+          ai_analysis: {
+            provider,
+            analysis: aiResponse,
+            timestamp: new Date().toISOString(),
+          },
+        };
+
+        return this.createSuccessResult(JSON.stringify(assessment, null, 2), {
+          quality_standard,
+          ai_provider: provider,
+          document_length: document_text.length,
+        });
+      } catch (aiError) {
+        return this.createErrorResult(`AI quality assessment failed: ${aiError instanceof Error ? aiError.message : String(aiError)}`);
+      }
     } catch (error) {
       return this.createErrorResult(`Quality assessment failed: ${error instanceof Error ? error.message : String(error)}`);
     }
+  }
+
+  public buildAssessmentPrompt(document: string, criteria?: string[], standard: 'basic' | 'professional' | 'excellent' = 'professional'): string {
+    let prompt = `Assess the quality of the following document to a ${standard} standard:\n\n${document}\n\n`;
+
+    prompt += `Provide a structured quality assessment including:
+- Overall quality score (0-10) with justification
+- Writing quality: clarity, grammar, style, and professional tone
+- Structure quality: organization, flow, and completeness
+- Content quality: accuracy, relevance, depth, and coherence
+- Specific strengths
+- Specific weaknesses
+- Actionable recommendations for improvement`;
+
+    if (criteria && criteria.length > 0) {
+      prompt += `\n\nPay special attention to these criteria: ${criteria.join(', ')}`;
+    }
+
+    return prompt;
   }
 
   public assessQuality(document: string, criteria?: string[], standard: string = 'professional') {
