@@ -721,17 +721,3 @@ export default function Onboarding() {
   );
 
 }
-}
-}
-}
-}
-)
-}
-)
-}
-)
-}
-}
-}
-)
-}

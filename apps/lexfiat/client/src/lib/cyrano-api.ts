@@ -58,10 +58,11 @@ export async function executeTool(
         isError: true,
         _serviceUnavailable: true,
       };
+    }
 
     const result = await response.json();
     return result;
-   catch (error) {
+  } catch (error) {
     // Only log unexpected errors, not network/permission errors
     if (error instanceof TypeError && error.message.includes('fetch')) {
       // Network error - return gracefully but transparently
@@ -89,6 +90,7 @@ export async function executeTool(
       _executionError: true,
     };
   }
+}
 /**
  * Get workflow data from workflow_manager
  */
@@ -250,6 +252,4 @@ export async function checkApiHealth(): Promise<boolean> {
     return false;
 
 }
-}
-)
 }

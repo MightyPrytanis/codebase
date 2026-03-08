@@ -475,5 +475,3 @@ export default function MaeWorkflowsPage() {
   );
 
 }
-)
-)
