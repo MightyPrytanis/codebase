@@ -107,7 +107,8 @@ describe('ClientAnonymizationService', () => {
       // Extract person token from first anonymization
       const tokenMatch = first.anonymizedText.match(/PERSON_\d+/);
       expect(tokenMatch).not.toBeNull();
-      const token = tokenMatch![0];
+      const token = tokenMatch?.[0] ?? '';
+      expect(token).toBeTruthy();
 
       // The same token should appear in the second anonymization
       expect(second.anonymizedText).toContain(token);

@@ -94,13 +94,13 @@ export class AIService {
 
     // CONFIDENTIALITY ENFORCEMENT: Anonymize prompt before sending to provider
     let activePrompt = prompt;
-    let anonymizationSessionId: string | undefined;
+    let activeAnonymizationSessionId: string | undefined;
     if (options.anonymize) {
       const anonResult = clientAnonymizationService.anonymize(
         prompt,
         options.anonymizationSessionId
       );
-      anonymizationSessionId = anonResult.sessionId;
+      activeAnonymizationSessionId = anonResult.sessionId;
 
       // Category 3 content must never be sent to a cloud provider
       if (anonResult.riskCategory === 3) {
@@ -204,8 +204,8 @@ export class AIService {
       }
 
       // CONFIDENTIALITY: De-anonymize the AI response locally before returning
-      if (options.anonymize && anonymizationSessionId) {
-        result = clientAnonymizationService.deanonymize(result, anonymizationSessionId);
+      if (options.anonymize && activeAnonymizationSessionId) {
+        result = clientAnonymizationService.deanonymize(result, activeAnonymizationSessionId);
       }
 
       const latency = Date.now() - startTime;

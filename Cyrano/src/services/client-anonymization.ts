@@ -24,7 +24,6 @@
  */
 
 import { randomUUID } from 'crypto';
-import { entityProcessor } from '../modules/arkiver/processors/entity-processor.js';
 
 // ---------------------------------------------------------------------------
 // Types
