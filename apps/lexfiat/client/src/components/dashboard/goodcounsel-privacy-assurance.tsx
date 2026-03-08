@@ -209,3 +209,5 @@ export function PrivacyAssurance({ onAcknowledge }: PrivacyAssuranceProps) {
       </CardContent>
     </Card>
   );
+
+}

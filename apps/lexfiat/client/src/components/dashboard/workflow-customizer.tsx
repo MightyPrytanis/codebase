@@ -210,3 +210,5 @@ export default function WorkflowCustomizer({ currentStages, onSave, onClose }: W
       </CardContent>
     </Card>
   );
+
+}

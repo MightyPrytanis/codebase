@@ -132,7 +132,6 @@ class RenderIntegrationService {
       return null;
     }
   }
-
   /**
    * Trigger a new deployment (for dependency updates)
    */

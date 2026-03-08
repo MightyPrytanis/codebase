@@ -301,3 +301,5 @@ export function WorkflowStatusPanels({
       </div>
     </div>
   );
+
+}

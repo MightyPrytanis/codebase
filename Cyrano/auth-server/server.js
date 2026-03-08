@@ -204,3 +204,5 @@ app.get('/setup/success', (req, res) => {
 app.listen(port, () => {
   console.log(`Cyrano MCP - Integrations server running at http://localhost:${port}`);
 });
+)
+}

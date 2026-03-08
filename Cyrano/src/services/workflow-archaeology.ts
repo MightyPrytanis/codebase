@@ -287,3 +287,4 @@ export class WorkflowArchaeologyService {
 
 // Export singleton instance
 export const workflowArchaeologyService = new WorkflowArchaeologyService();
+

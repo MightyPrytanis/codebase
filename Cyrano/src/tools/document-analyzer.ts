@@ -268,7 +268,7 @@ export const documentAnalyzer = new (class extends BaseTool {
           result.compliance = await this.analyzeWithAI(text, 'compliance', provider);
           break;
         default:
-          result[area] = `Analysis for ${area} not implemented`;
+          result[area] = await this.analyzeWithAI(text, area, provider);
       }
     }
     
@@ -423,3 +423,4 @@ Provide a detailed analysis of ${focusArea} aspects, including key findings, pot
     };
   }
 })();
+

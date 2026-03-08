@@ -25,7 +25,7 @@ console.error('[HTTP Bridge] Starting module load...');
 // ESSENTIAL IMPORTS ONLY - These must load before server starts
 // ============================================================================
 
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 console.error('[HTTP Bridge] Express imported');
 import cors, { CorsOptions } from 'cors';
 console.error('[HTTP Bridge] CORS imported');
@@ -504,7 +504,7 @@ async function loadTool(toolName: string, loadDependencies: boolean = true): Pro
   // Get tool config
   const toolConfig = toolImportMap[toolName];
   if (!toolConfig) {
-    throw new Error(`Unknown tool: ${toolName}`);
+    throw new Error(`Tool not found: ${toolName}`);
   }
   
   // Initialize metadata
@@ -877,7 +877,7 @@ app.get('/mcp/tools', async (req, res) => {
     }
   } catch (error) {
     console.error('[HTTP] Failed to get tools:', error);
-    res.status(500).json({ error: 'Failed to get tools' });
+    res.status(500).json({ isError: true, content: [{ text: 'Failed to get tools' }] });
   }
 });
 
@@ -892,8 +892,8 @@ app.post('/mcp/execute', async (req, res) => {
     const validationResult = ExecuteRequestSchema.safeParse(req.body);
     if (!validationResult.success) {
       return res.status(400).json({
-        error: 'Invalid request body',
-        details: validationResult.error.issues,
+        isError: true,
+        content: [{ text: `Invalid request body: ${validationResult.error.issues.map(i => i.message).join(', ')}` }],
       });
     }
     
@@ -976,14 +976,14 @@ app.post('/mcp/tools/:toolName/reload', async (req, res) => {
   const { toolName } = req.params;
   
   if (!toolImportMap[toolName]) {
-    return res.status(404).json({ error: `Tool ${toolName} not found` });
+    return res.status(404).json({ isError: true, content: [{ text: `Tool ${toolName} not found` }] });
   }
   
   const success = await reloadTool(toolName);
   if (success) {
     res.json({ success: true, message: `Tool ${toolName} reloaded successfully` });
   } else {
-    res.status(500).json({ success: false, message: `Failed to reload tool ${toolName}` });
+    res.status(500).json({ isError: true, content: [{ text: `Failed to reload tool ${toolName}` }] });
   }
 });
 
@@ -1237,8 +1237,14 @@ app.get('/mcp/tools/info', async (req, res) => {
       }
     });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to get tools info' });
+    res.status(500).json({ isError: true, content: [{ text: 'Failed to get tools info' }] });
   }
+});
+
+// Catch-all for unknown /mcp routes - always return JSON
+// Using '/mcp/*path' (named wildcard) for compatibility with path-to-regexp v8+
+app.all('/mcp/*path', (req, res) => {
+  res.status(404).json({ isError: true, content: [{ text: `Unknown MCP route: ${req.path}` }] });
 });
 
 // Arkiver File Upload Endpoint
@@ -1456,6 +1462,21 @@ app.use('/api', onboardingRoutes);
 app.use('/api/beta', betaRoutes);
 
 // ============================================================================
+// GLOBAL ERROR HANDLER
+// ============================================================================
+
+// Must be registered after all routes. Catches any unhandled errors and
+// returns a JSON response so tests never receive HTML/DOCTYPE error pages.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((err: Error, req: Request, res: Response, _next: NextFunction) => {
+  console.error('[HTTP Bridge] Unhandled error:', err.message);
+  res.status(500).json({
+    isError: true,
+    content: [{ type: 'text', text: err.message || 'Internal server error' }],
+  });
+});
+
+// ============================================================================
 // SERVER STARTUP
 // ============================================================================
 
@@ -1538,3 +1559,4 @@ if (shouldStartServer) {
 } else {
   console.error('[HTTP Bridge] Not starting server (test environment detected)');
 }
+

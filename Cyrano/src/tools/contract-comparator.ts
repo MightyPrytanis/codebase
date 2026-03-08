@@ -6,6 +6,10 @@
 
 import { BaseTool } from './base-tool.js';
 import { z } from 'zod';
+import { aiService, AIProvider } from '../services/ai-service.js';
+import { apiValidator } from '../utils/api-validator.js';
+import { aiProviderSelector } from '../services/ai-provider-selector.js';
+import { isDemoModeEnabled, markAsDemo } from '../utils/demo-mode.js';
 
 /**
  * Escape special regex characters in a string
@@ -19,6 +23,7 @@ const ContractComparatorSchema = z.object({
   document2_text: z.string().describe('Second contract/agreement to compare'),
   comparison_type: z.enum(['comprehensive', 'clauses', 'terms', 'structure', 'risk_analysis', 'obligations', 'choice_of_law', 'financial', 'rights_remedies', 'term_termination']).default('comprehensive'),
   focus_areas: z.array(z.string()).optional().describe('Specific areas to focus comparison on'),
+  ai_provider: z.enum(['openai', 'anthropic', 'perplexity', 'google', 'xai', 'deepseek', 'auto']).optional().default('auto').describe('AI provider to use (default: auto-select based on task and performance)'),
 });
 
 export const contractComparator = new (class extends BaseTool {
@@ -48,6 +53,12 @@ export const contractComparator = new (class extends BaseTool {
             items: { type: 'string' },
             description: 'Specific areas to focus comparison on',
           },
+          ai_provider: {
+            type: 'string',
+            enum: ['openai', 'anthropic', 'perplexity', 'google', 'xai', 'deepseek', 'auto'],
+            default: 'auto',
+            description: 'AI provider to use (default: auto-select based on task and performance)',
+          },
         },
         required: ['document1_text', 'document2_text'],
       },
@@ -56,24 +67,125 @@ export const contractComparator = new (class extends BaseTool {
 
   async execute(args: any) {
     try {
-      const { document1_text, document2_text, comparison_type, focus_areas } = ContractComparatorSchema.parse(args);
+      const { document1_text, document2_text, comparison_type, focus_areas, ai_provider } = ContractComparatorSchema.parse(args);
 
-      const comparison = this.performComparison(document1_text, document2_text, comparison_type, focus_areas);
+      // Demo mode: return structural (regex) comparison with disclaimer (opt-in only via DEMO_MODE=true)
+      if (isDemoModeEnabled()) {
+        const structuralComparison = this.performComparison(document1_text, document2_text, comparison_type, focus_areas);
+        const demoComparison = markAsDemo(structuralComparison, 'Contract Comparator');
+        return this.createSuccessResult(JSON.stringify(demoComparison, null, 2), {
+          comparison_type,
+          document1_word_count: document1_text.split(' ').length,
+          document2_word_count: document2_text.split(' ').length,
+          focus_areas: focus_areas || [],
+        });
+      }
 
-      // Use formatted output for comprehensive analysis
-      const output = comparison_type === 'comprehensive'
-        ? this.formatEnhancedAnalysis(comparison)
-        : JSON.stringify(comparison, null, 2);
+      if (!apiValidator.hasAnyValidProviders()) {
+        return this.createErrorResult(
+          'No AI providers configured. Contract comparison requires an AI provider. Configure API keys, or set DEMO_MODE=true to enable demo mode.'
+        );
+      }
 
-      return this.createSuccessResult(output, {
-        comparison_type,
-        document1_word_count: document1_text.split(' ').length,
-        document2_word_count: document2_text.split(' ').length,
-        focus_areas: focus_areas || [],
-      });
+      let provider: AIProvider;
+      if (ai_provider === 'auto' || !ai_provider) {
+        provider = aiProviderSelector.getProviderForTask({
+          taskType: 'legal_review',
+          complexity: comparison_type === 'comprehensive' ? 'high' : 'medium',
+          requiresSafety: true,
+          preferredProvider: 'auto',
+          balanceQualitySpeed: 'quality',
+        });
+      } else {
+        const validation = apiValidator.validateProvider(ai_provider as AIProvider);
+        if (!validation.valid) {
+          return this.createErrorResult(
+            `Selected AI provider ${ai_provider} is not configured: ${validation.error}`
+          );
+        }
+        provider = ai_provider as AIProvider;
+      }
+
+      try {
+        const prompt = this.buildComparisonPrompt(document1_text, document2_text, comparison_type, focus_areas);
+        const aiResponse = await aiService.call(provider, prompt, {
+          systemPrompt: 'You are an expert contract attorney. Provide precise, actionable legal analysis when comparing contracts.',
+          maxTokens: 4000,
+          temperature: 0.3,
+          metadata: {
+            toolName: 'contract_comparator',
+            actionType: 'content_generation',
+          },
+        });
+
+        const structuralComparison = this.performComparison(document1_text, document2_text, comparison_type, focus_areas);
+        const output = JSON.stringify({
+          ...structuralComparison,
+          ai_analysis: {
+            provider,
+            analysis: aiResponse,
+            timestamp: new Date().toISOString(),
+          },
+        }, null, 2);
+
+        return this.createSuccessResult(output, {
+          comparison_type,
+          document1_word_count: document1_text.split(' ').length,
+          document2_word_count: document2_text.split(' ').length,
+          focus_areas: focus_areas || [],
+          ai_provider: provider,
+        });
+      } catch (aiError) {
+        return this.createErrorResult(`AI contract comparison failed: ${aiError instanceof Error ? aiError.message : String(aiError)}`);
+      }
     } catch (error) {
       return this.createErrorResult(`Legal comparison failed: ${error instanceof Error ? error.message : String(error)}`);
     }
+  }
+
+  public buildComparisonPrompt(doc1: string, doc2: string, comparisonType: 'comprehensive' | 'clauses' | 'terms' | 'structure' | 'risk_analysis' | 'obligations' | 'choice_of_law' | 'financial' | 'rights_remedies' | 'term_termination', focusAreas?: string[]): string {
+    let prompt = `Compare the following two contracts and provide a detailed legal analysis:\n\n`;
+    prompt += `CONTRACT 1:\n${doc1}\n\n`;
+    prompt += `CONTRACT 2:\n${doc2}\n\n`;
+
+    switch (comparisonType) {
+      case 'comprehensive':
+        prompt += `Provide a comprehensive comparison including:
+- Key differences in obligations, rights, and remedies
+- Risk profile differences between the two contracts
+- Choice of law and jurisdiction differences
+- Financial term differences
+- Term and termination differences
+- Which contract is more favorable and why
+- Specific recommendations for the reviewing attorney`;
+        break;
+      case 'risk_analysis':
+        prompt += 'Focus on risk analysis: identify which contract exposes the client to greater risk and explain why.';
+        break;
+      case 'obligations':
+        prompt += 'Focus on obligations: compare the duties and responsibilities assigned to each party in both contracts.';
+        break;
+      case 'choice_of_law':
+        prompt += 'Focus on choice of law and jurisdiction clauses, and the legal implications of any differences.';
+        break;
+      case 'financial':
+        prompt += 'Focus on financial terms: payment amounts, schedules, penalties, and any financial obligations.';
+        break;
+      case 'rights_remedies':
+        prompt += 'Focus on rights and remedies: what recourse each party has upon breach or dispute.';
+        break;
+      case 'term_termination':
+        prompt += 'Focus on term and termination: contract duration, renewal options, and termination conditions.';
+        break;
+      default:
+        prompt += `Focus the comparison on: ${comparisonType}`;
+    }
+
+    if (focusAreas && focusAreas.length > 0) {
+      prompt += `\n\nAdditionally focus on these specific areas: ${focusAreas.join(', ')}`;
+    }
+
+    return prompt;
   }
 
   public performComparison(doc1: string, doc2: string, comparisonType: string, focusAreas?: string[]) {
@@ -404,7 +516,7 @@ export const contractComparator = new (class extends BaseTool {
           result.compliance = this.compareComplianceElements(doc1, doc2);
           break;
         default:
-          result[area] = `Focused comparison for ${area} not implemented`;
+          result[area] = this.compareByKeyword(doc1, doc2, area);
       }
     });
     
@@ -433,6 +545,21 @@ export const contractComparator = new (class extends BaseTool {
       doc1_compliance_mentions: (doc1.match(/compliance|regulation/gi) || []).length,
       doc2_compliance_mentions: (doc2.match(/compliance|regulation/gi) || []).length,
       compliance_differences: this.findComplianceDifferences(doc1, doc2),
+    };
+  }
+
+  public compareByKeyword(doc1: string, doc2: string, area: string): { area: string; doc1_mentions: number; doc2_mentions: number; difference: number; note?: string } {
+    const keyword = escapeRegExp(area.toLowerCase());
+    // Input sanitized via escapeRegExp() to prevent regex injection
+    const count1 = (doc1.toLowerCase().match(new RegExp(keyword, 'g')) || []).length; // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
+    // Input sanitized via escapeRegExp() to prevent regex injection
+    const count2 = (doc2.toLowerCase().match(new RegExp(keyword, 'g')) || []).length; // nosemgrep: javascript.lang.security.audit.detect-non-literal-regexp.detect-non-literal-regexp
+    return {
+      area,
+      doc1_mentions: count1,
+      doc2_mentions: count2,
+      difference: count1 - count2,
+      note: count1 === 0 && count2 === 0 ? `"${area}" not found in either document` : undefined,
     };
   }
 
@@ -1204,3 +1331,4 @@ export const contractComparator = new (class extends BaseTool {
     }
   }
 })();
+

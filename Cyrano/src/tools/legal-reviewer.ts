@@ -659,7 +659,10 @@ export const legalReviewer = new (class extends BaseTool {
     };
     
     return areaSpecificChecks[practiceArea.toLowerCase()] || {
-      message: `Practice area specific review for ${practiceArea} not implemented`
+      practice_area: practiceArea,
+      keywords_found: (document.toLowerCase().match(new RegExp(practiceArea.replace(/_/g, '\\s*'), 'g')) || []).length,
+      general_legal_elements: this.identifyLegalRequirements(document),
+      note: `Structural analysis for "${practiceArea}" — for full AI-powered review, use the main execute() path`,
     };
   }
 
@@ -924,3 +927,4 @@ export const legalReviewer = new (class extends BaseTool {
            document.toLowerCase().includes('workplace');
   }
 })();
+

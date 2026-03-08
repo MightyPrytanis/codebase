@@ -575,3 +575,5 @@ export default function VisualWorkflowBuilder({
       </Card>
     </div>
   );
+
+}

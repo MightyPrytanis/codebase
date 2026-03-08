@@ -289,3 +289,5 @@ export async function uploadLibraryDocument(
     throw new Error(`Failed to upload document: ${response.statusText}`);
   }
   return response.json();
+
+}

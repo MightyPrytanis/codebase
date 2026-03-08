@@ -795,3 +795,4 @@ export const deontologicalFramework = new DeontologicalFramework();
 export const consequentialistFramework = new ConsequentialistFramework();
 export const virtueEthicsFramework = new VirtueEthicsFramework();
 export const legalEthicsFramework = new LegalEthicsFramework();
+

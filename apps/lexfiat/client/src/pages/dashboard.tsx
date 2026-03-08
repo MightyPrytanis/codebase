@@ -402,7 +402,7 @@ export default function Dashboard() {
         <div style={{ width: '100%', marginTop: '1.5rem', display: 'grid', gridTemplateColumns: '60px 1fr', gap: '1rem', alignItems: 'stretch' }}>
           <div style={{ width: '100%', height: '100%' }}></div>
           <div style={{ display: 'grid', width: '100%', maxWidth: '100%', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: '1.5rem', boxSizing: 'border-box' }}>
-          <div className="widget background-widget" onClick={() => expandPanel('chronometric')>
+          <div className="widget background-widget" onClick={() => expandPanel('chronometric')}>
             <div className="widget-header">
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -420,7 +420,7 @@ export default function Dashboard() {
               <p style={{ color: 'rgba(255, 255, 255, 0.7)', fontSize: '0.875rem' }}>Time tracking and analytics</p>
             </div>
           </div>
-          <div className="widget background-widget" onClick={() => expandPanel('mae')>
+          <div className="widget background-widget" onClick={() => expandPanel('mae')}>
             <div className="widget-header">
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -463,9 +463,9 @@ export default function Dashboard() {
       </div>
 
       {/* Testing Sidebar */}
-      <TestingSidebar isOpen={testingSidebarOpen onClose={() => setTestingSidebarOpen(false)} />
+      <TestingSidebar isOpen={testingSidebarOpen} onClose={() => setTestingSidebarOpen(false)} />
       
-      {/* Footer Banner */
+      {/* Footer Banner */}
       <FooterBanner />
 
       {/* Tracking Card Overlay */}
@@ -564,3 +564,5 @@ export default function Dashboard() {
       )}
     </>
   );
+
+}

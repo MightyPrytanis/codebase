@@ -701,3 +701,4 @@ export const wellness = {
     return service.getWellnessTrends(userId, period);
   },
 };
+

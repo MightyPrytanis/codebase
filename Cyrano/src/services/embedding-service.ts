@@ -137,3 +137,4 @@ export class EmbeddingService {
     return [this.defaultModel, this.fallbackModel];
 }
 }
+

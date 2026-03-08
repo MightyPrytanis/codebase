@@ -235,3 +235,5 @@ export function EvidenceChain({ result }: EvidenceChainProps) {
       </div>
     </div>
   );
+
+}

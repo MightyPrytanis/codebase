@@ -411,3 +411,6 @@ export function sanitizeForContext(value: string, context: DOMContext): string {
       return escapeJavaScript(value);
     default:
       return escapeHtml(value);
+
+}
+}

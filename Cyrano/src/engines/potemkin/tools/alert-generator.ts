@@ -226,3 +226,4 @@ export class AlertGenerator extends BaseTool {
 
 // Export singleton instance
 export const alertGenerator = new AlertGenerator();
+

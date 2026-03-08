@@ -68,3 +68,5 @@ export function useViewMode() {
     throw new Error('useViewMode must be used within a ViewModeProvider');
   }
   return context;
+
+}

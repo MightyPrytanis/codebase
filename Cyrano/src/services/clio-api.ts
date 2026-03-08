@@ -435,3 +435,4 @@ export class ClioAPIService {
     return this.makeRequest<ClioPaginationResponse<ClioBill>>(`/bills?${params.toString()}`);
 }
 }
+

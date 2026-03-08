@@ -344,7 +344,6 @@ function scanFile(filePath: string): DelimiterError[] {
   }
   
   return errors;
-}
 
 function getContext(lines: string[], lineNum: number, contextLines: number): string[] {
   const start = Math.max(0, lineNum - contextLines);

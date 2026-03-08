@@ -944,3 +944,4 @@ Focus on extracting ${settings.type} insights with a minimum confidence threshol
 }
 
 export const insightProcessor = new InsightProcessor();
+

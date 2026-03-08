@@ -270,3 +270,4 @@ class EthicsAuditService {
  * Export singleton instance
  */
 export const ethicsAuditService = new EthicsAuditService();
+

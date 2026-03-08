@@ -677,3 +677,4 @@ export function calculateFederal(input: FederalTaxInput): FederalTaxResult {
     refundOrBalance
   };
 }
+

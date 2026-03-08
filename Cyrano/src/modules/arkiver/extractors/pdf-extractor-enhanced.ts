@@ -305,3 +305,4 @@ export class EnhancedPDFExtractor extends PDFExtractor {
     return false;
 }
 }
+

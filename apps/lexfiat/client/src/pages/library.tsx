@@ -359,7 +359,7 @@ export default function Library() {
         onSuccess={handleLocationAdded}
       />
 
-      {/* Upload Document Dialog */
+      {/* Upload Document Dialog */}
       <UploadDocumentDialog
         isOpen={isUploadOpen}
         onClose={() => setIsUploadOpen(false)}
@@ -367,4 +367,6 @@ export default function Library() {
         locations={locations}
       />
     </div>
-  ;
+  );
+
+}

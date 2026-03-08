@@ -216,7 +216,6 @@ export class LegalResearchService {
       return [];
     }
   }
-
   /**
    * Search Michigan Legal Help (free Michigan-specific resources)
    */
@@ -262,5 +261,5 @@ export class LegalResearchService {
       };
     }
     return null;
-}
+  }
 }
