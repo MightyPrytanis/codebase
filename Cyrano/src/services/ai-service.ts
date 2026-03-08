@@ -19,6 +19,7 @@ import { aiPerformanceTracker } from './ai-performance-tracker.js';
 import { injectTenRulesIntoSystemPrompt } from './ethics-prompt-injector.js';
 import { systemicEthicsService } from './systemic-ethics-service.js';
 import { ethicsAuditService } from './ethics-audit-service.js';
+import { clientAnonymizationService } from './client-anonymization.js';
 
 export type AIProvider = 'openai' | 'anthropic' | 'perplexity' | 'google' | 'xai' | 'deepseek' | 'openrouter';
 
@@ -27,6 +28,24 @@ export interface AICallOptions {
   maxTokens?: number;
   temperature?: number;
   systemPrompt?: string;
+  /**
+   * Client confidentiality anonymization options.
+   *
+   * When `anonymize` is true the prompt is passed through the
+   * ClientAnonymizationService before being sent to the provider; all
+   * sensitive entities (names, dates, amounts, emails, phones, etc.) are
+   * replaced with deterministic session-scoped tokens.  The AI response is
+   * then de-anonymized locally before being returned to the caller.
+   *
+   * Provide `anonymizationSessionId` to continue an existing session (for
+   * multi-turn conversations so the same token map is reused).
+   *
+   * ⚠️  Category 3 content (identifiable PII – SSNs, account numbers, etc.)
+   * will never be sent regardless of this flag; the call will throw instead.
+   */
+  anonymize?: boolean;
+  /** Session ID returned by a previous anonymized call (multi-turn support). */
+  anonymizationSessionId?: string;
   /**
    * Metadata for ethics audit logging
    */
@@ -55,6 +74,12 @@ export class AIService {
    * - Checks all outputs with systemic ethics service
    * - Logs all ethics checks to audit trail
    * - Blocks non-compliant outputs
+   *
+   * CONFIDENTIALITY (when options.anonymize is true):
+   * - Assesses the risk category of the prompt (MRPC 1.6 / SBM AI guidance)
+   * - Blocks Category 3 content (identifiable PII) from ever reaching the provider
+   * - Tokenizes all sensitive entities before transmission
+   * - Reverses tokenization locally after the provider responds
    */
   async call(
     provider: AIProvider,
@@ -65,6 +90,28 @@ export class AIService {
     const validation = this.apiValidator.validateProvider(provider);
     if (!validation.valid) {
       throw new Error(`AI provider ${provider} not configured: ${validation.error}`);
+    }
+
+    // CONFIDENTIALITY ENFORCEMENT: Anonymize prompt before sending to provider
+    let activePrompt = prompt;
+    let anonymizationSessionId: string | undefined;
+    if (options.anonymize) {
+      const anonResult = clientAnonymizationService.anonymize(
+        prompt,
+        options.anonymizationSessionId
+      );
+      anonymizationSessionId = anonResult.sessionId;
+
+      // Category 3 content must never be sent to a cloud provider
+      if (anonResult.riskCategory === 3) {
+        throw new Error(
+          'Prompt contains identifiable PII (Category 3 content: SSN, account numbers, or ' +
+          'date-of-birth references). This content cannot be sent to a cloud AI provider. ' +
+          'Use a self-hosted model or remove the sensitive information before proceeding.'
+        );
+      }
+
+      activePrompt = anonResult.anonymizedText;
     }
 
     // ETHICS ENFORCEMENT: Inject Ten Rules into system prompt if not already injected
@@ -96,57 +143,57 @@ export class AIService {
       
       switch (provider) {
         case 'anthropic':
-          result = await this.callAnthropic(prompt, optionsWithEthics);
+          result = await this.callAnthropic(activePrompt, optionsWithEthics);
           // Estimate tokens (rough: ~4 chars per token)
-          inputTokens = Math.ceil((prompt.length + systemPrompt.length) / 4);
+          inputTokens = Math.ceil((activePrompt.length + systemPrompt.length) / 4);
           outputTokens = Math.ceil(result.length / 4);
           // Rough cost estimate: $15 per 1M input tokens, $75 per 1M output tokens
           cost = (inputTokens / 1_000_000) * 15 + (outputTokens / 1_000_000) * 75;
           break;
         
         case 'openai':
-          result = await this.callOpenAI(prompt, optionsWithEthics);
-          inputTokens = Math.ceil((prompt.length + systemPrompt.length) / 4);
+          result = await this.callOpenAI(activePrompt, optionsWithEthics);
+          inputTokens = Math.ceil((activePrompt.length + systemPrompt.length) / 4);
           outputTokens = Math.ceil(result.length / 4);
           // Rough cost estimate: $5 per 1M input tokens, $15 per 1M output tokens (gpt-4o)
           cost = (inputTokens / 1_000_000) * 5 + (outputTokens / 1_000_000) * 15;
           break;
         
         case 'perplexity':
-          result = await this.callPerplexity(prompt, optionsWithEthics);
-          inputTokens = Math.ceil((prompt.length + systemPrompt.length) / 4);
+          result = await this.callPerplexity(activePrompt, optionsWithEthics);
+          inputTokens = Math.ceil((activePrompt.length + systemPrompt.length) / 4);
           outputTokens = Math.ceil(result.length / 4);
           // Rough cost estimate: $0.20 per 1M input tokens, $1.00 per 1M output tokens
           cost = (inputTokens / 1_000_000) * 0.2 + (outputTokens / 1_000_000) * 1.0;
           break;
         
         case 'google':
-          result = await this.callGoogle(prompt, optionsWithEthics);
-          inputTokens = Math.ceil((prompt.length + systemPrompt.length) / 4);
+          result = await this.callGoogle(activePrompt, optionsWithEthics);
+          inputTokens = Math.ceil((activePrompt.length + systemPrompt.length) / 4);
           outputTokens = Math.ceil(result.length / 4);
           // Rough cost estimate: $0.075 per 1M input tokens, $0.30 per 1M output tokens (flash)
           cost = (inputTokens / 1_000_000) * 0.075 + (outputTokens / 1_000_000) * 0.3;
           break;
         
         case 'xai':
-          result = await this.callXAI(prompt, optionsWithEthics);
-          inputTokens = Math.ceil((prompt.length + systemPrompt.length) / 4);
+          result = await this.callXAI(activePrompt, optionsWithEthics);
+          inputTokens = Math.ceil((activePrompt.length + systemPrompt.length) / 4);
           outputTokens = Math.ceil(result.length / 4);
           // Rough cost estimate: $2 per 1M input tokens, $10 per 1M output tokens
           cost = (inputTokens / 1_000_000) * 2 + (outputTokens / 1_000_000) * 10;
           break;
         
         case 'deepseek':
-          result = await this.callDeepSeek(prompt, optionsWithEthics);
-          inputTokens = Math.ceil((prompt.length + systemPrompt.length) / 4);
+          result = await this.callDeepSeek(activePrompt, optionsWithEthics);
+          inputTokens = Math.ceil((activePrompt.length + systemPrompt.length) / 4);
           outputTokens = Math.ceil(result.length / 4);
           // Rough cost estimate: $0.14 per 1M input tokens, $0.28 per 1M output tokens
           cost = (inputTokens / 1_000_000) * 0.14 + (outputTokens / 1_000_000) * 0.28;
           break;
         
         case 'openrouter':
-          result = await this.callOpenRouter(prompt, optionsWithEthics);
-          inputTokens = Math.ceil((prompt.length + systemPrompt.length) / 4);
+          result = await this.callOpenRouter(activePrompt, optionsWithEthics);
+          inputTokens = Math.ceil((activePrompt.length + systemPrompt.length) / 4);
           outputTokens = Math.ceil(result.length / 4);
           // Rough cost estimate: Varies by model (free models available), average $0.10 per 1M input, $0.30 per 1M output
           cost = (inputTokens / 1_000_000) * 0.10 + (outputTokens / 1_000_000) * 0.30;
@@ -154,6 +201,11 @@ export class AIService {
         
         default:
           throw new Error(`Unsupported AI provider: ${provider}`);
+      }
+
+      // CONFIDENTIALITY: De-anonymize the AI response locally before returning
+      if (options.anonymize && anonymizationSessionId) {
+        result = clientAnonymizationService.deanonymize(result, anonymizationSessionId);
       }
 
       const latency = Date.now() - startTime;
