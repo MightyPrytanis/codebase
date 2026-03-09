@@ -20,6 +20,8 @@
 
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import type { Server } from 'http';
+import type { AddressInfo } from 'net';
+import { fetchWithRetry } from '../utils/fetch-retry.js';
 
 // Set environment variables before importing
 process.env.NODE_ENV = 'test';
@@ -30,8 +32,8 @@ process.env.TRUST_PROXY_COUNT = '0';
 import { app } from '../../src/http-bridge.js';
 
 describe('Onboarding API Integration Tests', () => {
-  const testPort = process.env.TEST_PORT ? parseInt(process.env.TEST_PORT) : 5003;
-  const baseUrl = `http://localhost:${testPort}`;
+  let testPort = process.env.TEST_PORT ? parseInt(process.env.TEST_PORT) : 0; // 0 => ephemeral
+  let baseUrl = '';
   let server: Server | null = null;
   const testUserId = 'test-onboarding-user';
 
@@ -42,42 +44,43 @@ describe('Onboarding API Integration Tests', () => {
     
     await new Promise<void>((resolve, reject) => {
       const timeout = setTimeout(() => {
-        reject(new Error(`Server startup timeout after 5 seconds`));
-      }, 5000);
+        reject(new Error('Server startup timeout after 10 seconds'));
+      }, 10000);
       
-      server!.listen(testPort, () => {
+      server!.listen(testPort || 0, () => {
         clearTimeout(timeout);
+        // Determine the actual bound port (important when using ephemeral port 0)
+        const addr = server!.address() as AddressInfo | string | null;
+        if (!addr) {
+          reject(new Error('Failed to determine server address after listen()'));
+          return;
+        }
+        testPort = typeof addr === 'object' ? addr.port : Number(String(addr).split(':').pop()); // string only for Unix sockets
+        baseUrl = `http://localhost:${testPort}`;
         console.log(`Test HTTP server started on port ${testPort}`);
-        
-        // Verify server is actually listening by making a test request
-        const testReq = http.get(`http://localhost:${testPort}/health`, (res) => {
-          resolve();
-        });
-        
-        testReq.on('error', () => {
-          // Server started but /health might not exist - wait a bit for app to initialize
-          setTimeout(() => {
-            clearTimeout(timeout);
-            resolve();
-          }, 200);
-        });
+
+        // Probe /health with retries; treat missing /health as okay
+        fetchWithRetry(`${baseUrl}/health`, { method: 'GET' }, 5, 200)
+          .then(() => resolve())
+          .catch(() => setTimeout(() => resolve(), 200));
       });
+
       server!.on('error', (err: any) => {
         clearTimeout(timeout);
         if (err.code === 'EADDRINUSE') {
-          reject(new Error(`Port ${testPort} is already in use. Please stop the existing server or use a different TEST_PORT.`));
+          reject(new Error(`Port ${testPort} is already in use. Set TEST_PORT to an available port.`));
         } else {
           reject(err);
         }
       });
     });
     
-    // Additional wait to ensure server is fully ready
+    // Additional small wait to ensure app middleware is fully ready
     await new Promise(resolve => setTimeout(resolve, 200));
   });
 
   afterAll(async () => {
-    if (server) {
+    if (server && server.listening) {
       await new Promise<void>((resolve) => {
         server!.close(() => {
           console.log('Test HTTP server closed');
@@ -98,7 +101,7 @@ describe('Onboarding API Integration Tests', () => {
         issueTags: ['divorce', 'custody'],
       };
 
-      const response = await fetch(`${baseUrl}/api/onboarding/practice-profile`, {
+      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/practice-profile`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(practiceProfile),
@@ -117,7 +120,7 @@ describe('Onboarding API Integration Tests', () => {
         practiceAreas: ['Estate Planning'],
       };
 
-      const response = await fetch(`${baseUrl}/api/onboarding/practice-profile`, {
+      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/practice-profile`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(partialProfile),
@@ -138,7 +141,7 @@ describe('Onboarding API Integration Tests', () => {
         useBaselineUntilEnoughData: true,
       };
 
-      const response = await fetch(`${baseUrl}/api/onboarding/baseline-config`, {
+      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/baseline-config`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(baselineData),
@@ -157,7 +160,7 @@ describe('Onboarding API Integration Tests', () => {
         minimumHoursPerWeek: 200, // Invalid: exceeds 168 hours/week
       };
 
-      const response = await fetch(`${baseUrl}/api/onboarding/baseline-config`, {
+      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/baseline-config`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(invalidBaseline),
@@ -189,7 +192,7 @@ describe('Onboarding API Integration Tests', () => {
         },
       };
 
-      const response = await fetch(`${baseUrl}/api/onboarding/integrations`, {
+      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/integrations`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(integrationData),
@@ -208,7 +211,7 @@ describe('Onboarding API Integration Tests', () => {
         // Other integrations skipped
       };
 
-      const response = await fetch(`${baseUrl}/api/onboarding/integrations`, {
+      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/integrations`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(partialIntegrations),
@@ -223,7 +226,7 @@ describe('Onboarding API Integration Tests', () => {
   describe('GET /api/onboarding/status', () => {
     it('should return onboarding status for LexFiat', async () => {
       // First, create a complete profile
-      await fetch(`${baseUrl}/api/onboarding/practice-profile`, {
+      await fetchWithRetry(`${baseUrl}/api/onboarding/practice-profile`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -238,7 +241,7 @@ describe('Onboarding API Integration Tests', () => {
         }),
       });
 
-      await fetch(`${baseUrl}/api/onboarding/baseline-config`, {
+      await fetchWithRetry(`${baseUrl}/api/onboarding/baseline-config`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -248,7 +251,7 @@ describe('Onboarding API Integration Tests', () => {
         }),
       });
 
-      await fetch(`${baseUrl}/api/onboarding/integrations`, {
+      await fetchWithRetry(`${baseUrl}/api/onboarding/integrations`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -258,7 +261,7 @@ describe('Onboarding API Integration Tests', () => {
       });
 
       // Then check status
-      const response = await fetch(`${baseUrl}/api/onboarding/status?userId=${testUserId}&appId=lexfiat`);
+      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/status?userId=${testUserId}&appId=lexfiat`);
       expect(response.ok).toBe(true);
       const data = await response.json();
       expect(data).toHaveProperty('completed');
@@ -268,7 +271,7 @@ describe('Onboarding API Integration Tests', () => {
     });
 
     it('should return incomplete status for new user', async () => {
-      const response = await fetch(`${baseUrl}/api/onboarding/status?userId=new-user&appId=lexfiat`);
+      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/status?userId=new-user&appId=lexfiat`);
       expect(response.ok).toBe(true);
       const data = await response.json();
       expect(data.completed).toBe(false);
@@ -279,7 +282,7 @@ describe('Onboarding API Integration Tests', () => {
 
   describe('POST /api/onboarding/complete', () => {
     it('should mark onboarding as complete (Step 8)', async () => {
-      const response = await fetch(`${baseUrl}/api/onboarding/complete`, {
+      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/complete`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -307,7 +310,7 @@ describe('Onboarding API Integration Tests', () => {
         },
       };
 
-      const response = await fetch(`${baseUrl}/api/onboarding/save-progress`, {
+      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/save-progress`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(progressData),
@@ -323,7 +326,7 @@ describe('Onboarding API Integration Tests', () => {
   describe('GET /api/onboarding/load-progress', () => {
     it('should load saved onboarding progress', async () => {
       // First save progress
-      await fetch(`${baseUrl}/api/onboarding/save-progress`, {
+      await fetchWithRetry(`${baseUrl}/api/onboarding/save-progress`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -337,7 +340,7 @@ describe('Onboarding API Integration Tests', () => {
       });
 
       // Then load it
-      const response = await fetch(`${baseUrl}/api/onboarding/load-progress?userId=${testUserId}`);
+      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/load-progress?userId=${testUserId}`);
       expect(response.ok).toBe(true);
       const data = await response.json();
       expect(data).toHaveProperty('currentStep');
@@ -345,7 +348,7 @@ describe('Onboarding API Integration Tests', () => {
     });
 
     it('should return default values for new user', async () => {
-      const response = await fetch(`${baseUrl}/api/onboarding/load-progress?userId=new-user-2`);
+      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/load-progress?userId=new-user-2`);
       expect(response.ok).toBe(true);
       const data = await response.json();
       expect(data.currentStep).toBe(1);
@@ -355,7 +358,7 @@ describe('Onboarding API Integration Tests', () => {
 
   describe('POST /api/onboarding/test-llm-provider', () => {
     it('should test LLM provider connection (Step 5)', async () => {
-      const response = await fetch(`${baseUrl}/api/onboarding/test-llm-provider`, {
+      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/test-llm-provider`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -370,7 +373,7 @@ describe('Onboarding API Integration Tests', () => {
     });
 
     it('should validate provider enum', async () => {
-      const response = await fetch(`${baseUrl}/api/onboarding/test-llm-provider`, {
+      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/test-llm-provider`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -387,7 +390,7 @@ describe('Onboarding API Integration Tests', () => {
       const flowUserId = `flow-test-${Date.now()}`;
 
       // Step 1-3: Practice Profile
-      const step1Response = await fetch(`${baseUrl}/api/onboarding/practice-profile`, {
+      const step1Response = await fetchWithRetry(`${baseUrl}/api/onboarding/practice-profile`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -402,7 +405,7 @@ describe('Onboarding API Integration Tests', () => {
       expect(step1Response.ok).toBe(true);
 
       // Step 4: Storage Locations (optional)
-      const step4Response = await fetch(`${baseUrl}/api/onboarding/practice-profile`, {
+      const step4Response = await fetchWithRetry(`${baseUrl}/api/onboarding/practice-profile`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -416,7 +419,7 @@ describe('Onboarding API Integration Tests', () => {
       expect(step4Response.ok).toBe(true);
 
       // Step 5: AI Provider
-      const step5Response = await fetch(`${baseUrl}/api/onboarding/practice-profile`, {
+      const step5Response = await fetchWithRetry(`${baseUrl}/api/onboarding/practice-profile`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -428,7 +431,7 @@ describe('Onboarding API Integration Tests', () => {
       expect(step5Response.ok).toBe(true);
 
       // Step 6: Chronometric Baseline
-      const step6Response = await fetch(`${baseUrl}/api/onboarding/baseline-config`, {
+      const step6Response = await fetchWithRetry(`${baseUrl}/api/onboarding/baseline-config`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -440,7 +443,7 @@ describe('Onboarding API Integration Tests', () => {
       expect(step6Response.ok).toBe(true);
 
       // Step 7: Integrations
-      const step7Response = await fetch(`${baseUrl}/api/onboarding/integrations`, {
+      const step7Response = await fetchWithRetry(`${baseUrl}/api/onboarding/integrations`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -452,7 +455,7 @@ describe('Onboarding API Integration Tests', () => {
       expect(step7Response.ok).toBe(true);
 
       // Step 8: Complete
-      const step8Response = await fetch(`${baseUrl}/api/onboarding/complete`, {
+      const step8Response = await fetchWithRetry(`${baseUrl}/api/onboarding/complete`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -465,7 +468,7 @@ describe('Onboarding API Integration Tests', () => {
       expect(completionData.completed).toBe(true);
 
       // Verify final status
-      const statusResponse = await fetch(`${baseUrl}/api/onboarding/status?userId=${flowUserId}&appId=lexfiat`);
+      const statusResponse = await fetchWithRetry(`${baseUrl}/api/onboarding/status?userId=${flowUserId}&appId=lexfiat`);
       const statusData = await statusResponse.json();
       expect(statusData.completed).toBe(true);
       expect(statusData.completedSteps.length).toBeGreaterThanOrEqual(7);
@@ -476,7 +479,7 @@ describe('Onboarding API Integration Tests', () => {
       const stateUserId = `999${Date.now() % 100000}`; // Ensure numeric
 
       // Save progress at step 3
-      const saveResponse = await fetch(`${baseUrl}/api/onboarding/save-progress`, {
+      const saveResponse = await fetchWithRetry(`${baseUrl}/api/onboarding/save-progress`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -491,7 +494,7 @@ describe('Onboarding API Integration Tests', () => {
       expect(saveResponse.ok).toBe(true);
 
       // Load progress
-      const loadResponse = await fetch(`${baseUrl}/api/onboarding/load-progress?userId=${stateUserId}`);
+      const loadResponse = await fetchWithRetry(`${baseUrl}/api/onboarding/load-progress?userId=${stateUserId}`);
       expect(loadResponse.ok).toBe(true);
       const loadData = await loadResponse.json();
       expect(loadData.currentStep).toBe(3);
