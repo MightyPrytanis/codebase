@@ -90,6 +90,13 @@ import { app } from '../../src/http-bridge.js';
 
 describe('Onboarding API Integration Tests', () => {
   let baseUrl = '';
+// These are integration tests that require a database and authentication.
+// Skip when DATABASE_URL is not configured (e.g., in standard unit test CI runs).
+const describeIfDatabaseConfigured = process.env.DATABASE_URL ? describe : describe.skip;
+
+describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
+  const testPort = process.env.TEST_PORT ? parseInt(process.env.TEST_PORT) : 5003;
+  const baseUrl = `http://localhost:${testPort}`;
   let server: Server | null = null;
   let authHeaders: Record<string, string> = {};
   const testUserId = 'test-onboarding-user';
