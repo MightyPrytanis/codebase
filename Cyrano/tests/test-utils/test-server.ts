@@ -46,7 +46,7 @@ export async function startAppServer(
       10000
     );
 
-    server.listen(port || 0, () => {
+    server.listen(port, () => {
       clearTimeout(timeout);
       resolve();
     });

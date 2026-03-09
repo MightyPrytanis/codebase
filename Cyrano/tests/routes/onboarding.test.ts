@@ -28,6 +28,11 @@ import { generateAccessToken } from '../../src/middleware/security.js';
 // Uses an in-memory store that is cleared before each test for isolation.
 // ---------------------------------------------------------------------------
 
+/** Returns true for plain (non-array) objects */
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
 /** Deep-merge two plain objects, preferring source values over target values */
 function deepMerge(target: Record<string, any>, source: Record<string, any>): Record<string, any> {
   const result: Record<string, any> = { ...target };
@@ -35,7 +40,7 @@ function deepMerge(target: Record<string, any>, source: Record<string, any>): Re
     const sv = source[key];
     const tv = result[key];
     if (sv !== undefined && sv !== null) {
-      if (typeof sv === 'object' && !Array.isArray(sv) && typeof tv === 'object' && tv !== null && !Array.isArray(tv)) {
+      if (isPlainObject(sv) && isPlainObject(tv)) {
         result[key] = deepMerge(tv, sv);
       } else {
         result[key] = sv;
@@ -45,6 +50,8 @@ function deepMerge(target: Record<string, any>, source: Record<string, any>): Re
   return result;
 }
 
+// vi.hoisted ensures profileStore is created before module mocking occurs,
+// allowing it to be shared across all mock implementations below.
 const { profileStore } = vi.hoisted(() => ({ profileStore: new Map<string, Record<string, any>>() }));
 
 vi.mock('../../src/services/library-service.js', () => ({
@@ -106,7 +113,9 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
     server = started.server;
     baseUrl = started.baseUrl;
 
-    // Generate a test JWT token for authenticated requests (userId=1 used by all routes)
+    // Generate a test JWT token for authenticated requests.
+    // All routes extract userId from the JWT (user.userId = 1) regardless of any
+    // userId value sent in the request body or query string.
     const token = generateAccessToken({ userId: 1, email: 'test@example.com', role: 'admin' });
     authHeaders = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
   });
