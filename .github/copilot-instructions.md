@@ -1,6 +1,6 @@
 # GitHub Copilot Instructions for Cyrano Ecosystem
 
-> **Last Updated:** 2026-02-08  
+> **Last Updated:** 2026-03-09  
 > **Purpose:** Provide comprehensive guidelines for GitHub Copilot coding agent working on the Cyrano ecosystem  
 > **Audience:** GitHub Copilot coding agent, developers, contributors
 
@@ -139,12 +139,14 @@ These rules are based on actual incidents in this repository and **MUST** be fol
 ```
 codebase/
 ├── Cyrano/              # MCP server, engines, modules, tools
-├── LexFiat/            # Legal workflow platform (client + backend)
 ├── apps/
-│   └── arkiver/        # Arkiver frontend application
-├── docs/               # Active documentation
-├── Labs/               # Experimental projects
-└── Legacy/             # Archived projects (excluded from main branch)
+│   ├── arkiver/         # Arkiver document-processing frontend
+│   ├── forecaster/      # LexFiat Forecaster standalone app
+│   └── lexfiat/         # LexFiat legal intelligence platform
+├── packages/
+│   └── shared/          # Shared types used across apps
+├── docs/                # Active documentation
+└── Legacy/              # Archived projects (excluded from main branch)
 ```
 
 ## Key Projects
@@ -159,12 +161,21 @@ MCP-compliant AI orchestration server with modular architecture:
 
 ### LexFiat
 Legal intelligence platform with adaptive workflow:
+- **Location:** `apps/lexfiat/`
 - **Features:** Dashboard UI, workflow pipeline (Intake → Analysis → Draft → Review)
 - **Technology:** React 19, TypeScript, Vite, Tailwind CSS 4, Radix UI, TanStack Query
+- **Routing:** react-router-dom
 - **UI Style:** Glass-morphism design
+- **Note:** Pure SPA — Cyrano (Express + PostgreSQL) serves as its backend
+
+### Forecaster
+Standalone application for generating legal forecasts (tax returns, child support, QDROs):
+- **Location:** `apps/forecaster/`
+- **Technology:** TypeScript, React
 
 ### Arkiver
 Universal data extraction system:
+- **Location:** `apps/arkiver/`
 - **Components:** Document extractors (PDF, DOCX), processors (text, email, entity, timeline)
 - **Technology:** TypeScript, React
 
@@ -182,7 +193,7 @@ Universal data extraction system:
 - **Styling:** Tailwind CSS 4, PostCSS
 - **UI Components:** Radix UI, Lucide React icons
 - **State Management:** TanStack Query (React Query)
-- **Routing:** Wouter
+- **Routing:** react-router-dom (LexFiat), Wouter (other apps)
 
 ### Backend
 - **Server:** Express.js
@@ -221,7 +232,7 @@ npm run rebuild      # Clean and rebuild
 
 ### LexFiat
 ```bash
-cd LexFiat
+cd apps/lexfiat
 npm install          # Install dependencies
 npm run dev          # Development server with Vite
 npm run build        # Production build
