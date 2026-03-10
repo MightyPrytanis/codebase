@@ -95,15 +95,13 @@ process.env.TRUST_PROXY_COUNT = '0';
 // Import app after setting env vars
 import { app } from '../../src/http-bridge.js';
 
-describe('Onboarding API Integration Tests', () => {
-  let baseUrl = '';
 // These are integration tests that require a database and authentication.
 // Skip when DATABASE_URL is not configured (e.g., in standard unit test CI runs).
 const describeIfDatabaseConfigured = process.env.DATABASE_URL ? describe : describe.skip;
 
 describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
   const testPort = process.env.TEST_PORT ? parseInt(process.env.TEST_PORT) : 5003;
-  const baseUrl = `http://localhost:${testPort}`;
+  let baseUrl = `http://localhost:${testPort}`;
   let server: Server | null = null;
   let authHeaders: Record<string, string> = {};
   const testUserId = 'test-onboarding-user';
@@ -118,7 +116,7 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
     // userId value sent in the request body or query string.
     const token = generateAccessToken({ userId: 1, email: 'test@example.com', role: 'admin' });
     authHeaders = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
-  });
+  }, 20000);
 
   beforeEach(() => {
     // Reset in-memory profile store so each test starts with a clean slate
