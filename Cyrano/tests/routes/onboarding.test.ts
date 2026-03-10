@@ -18,10 +18,10 @@
  * Also tests state persistence and completion flow.
  */
 
-import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest';
-import type { Server } from 'http';
-import type { AddressInfo } from 'net';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { fetchWithRetry } from '../utils/fetch-retry.js';
+import { startAppServer } from '../test-utils/test-server.js';
+import { generateAccessToken } from '../../src/middleware/security.js';
 
 // Set environment variables before importing
 process.env.NODE_ENV = 'test';
@@ -31,62 +31,36 @@ process.env.TRUST_PROXY_COUNT = '0';
 // Import app after setting env vars
 import { app } from '../../src/http-bridge.js';
 
-describe('Onboarding API Integration Tests', () => {
-  let baseUrl = '';
 // These are integration tests that require a database and authentication.
 // Skip when DATABASE_URL is not configured (e.g., in standard unit test CI runs).
 const describeIfDatabaseConfigured = process.env.DATABASE_URL ? describe : describe.skip;
 
 describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
-  const testPort = process.env.TEST_PORT ? parseInt(process.env.TEST_PORT) : 5003;
-  const baseUrl = `http://localhost:${testPort}`;
-  let server: Server | null = null;
+  let baseUrl = '';
+  let stopServer: (() => Promise<void>) | null = null;
   let authHeaders: Record<string, string> = {};
   const testUserId = 'test-onboarding-user';
 
   beforeAll(async () => {
-    // Start the HTTP bridge server for testing
-    const http = await import('http');
-    server = http.createServer(app);
-    
-    await new Promise<void>((resolve, reject) => {
-      const timeout = setTimeout(() => {
-        reject(new Error('Server startup timeout after 10 seconds'));
-      }, 10000);
-      
-      server!.listen(testPort || 0, () => {
-        clearTimeout(timeout);
-        // Determine the actual bound port (important when using ephemeral port 0)
-        const addr = server!.address() as AddressInfo | string | null;
-        if (!addr) {
-          reject(new Error('Failed to determine server address after listen()'));
-          return;
-        }
-        testPort = typeof addr === 'object' ? addr.port : Number(String(addr).split(':').pop()); // string only for Unix sockets
-        baseUrl = `http://localhost:${testPort}`;
-        console.log(`Test HTTP server started on port ${testPort}`);
+    // Use TEST_PORT env var if set, otherwise fall back to port 0 (OS-assigned ephemeral port).
+    // Port 0 avoids EADDRINUSE conflicts in CI and local parallel runs.
+    const preferredPort = process.env.TEST_PORT;
+    console.log(
+      `[Onboarding Tests] Starting test server on ${preferredPort ? `port ${preferredPort}` : 'ephemeral port (0)'}...`
+    );
 
-        // Probe /health with retries; treat missing /health as okay
-        fetchWithRetry(`${baseUrl}/health`, { method: 'GET' }, 5, 200)
-          .then(() => resolve())
-          .catch(() => setTimeout(() => resolve(), 200));
-      });
-
-      server!.on('error', (err: any) => {
-        clearTimeout(timeout);
-        if (err.code === 'EADDRINUSE') {
-          reject(new Error(`Port ${testPort} is already in use. Set TEST_PORT to an available port.`));
-        } else {
-          reject(err);
-        }
-      });
-    });
-    
-    // Additional small wait to ensure app middleware is fully ready
-    await new Promise(resolve => setTimeout(resolve, 200));
-    const started = await startAppServer(app, process.env.TEST_PORT);
-    server = started.server;
-    baseUrl = started.baseUrl;
+    try {
+      const started = await startAppServer(app, preferredPort);
+      baseUrl = started.baseUrl;
+      stopServer = started.stop;
+      console.log(`[Onboarding Tests] ✅ Server ready at ${baseUrl}`);
+    } catch (err: any) {
+      const portHint = preferredPort
+        ? `Port ${preferredPort} may already be in use. Set TEST_PORT to a different available port, or unset it to use an ephemeral port.`
+        : 'Ephemeral port allocation failed — check system resource limits.';
+      console.error(`[Onboarding Tests] ❌ Server startup failed: ${err.message}. ${portHint}`);
+      throw err;
+    }
 
     // Generate a test JWT token for authenticated requests.
     // All routes extract userId from the JWT (user.userId = 1) regardless of any
@@ -95,19 +69,9 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
     authHeaders = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
   });
 
-  beforeEach(() => {
-    // Reset in-memory profile store so each test starts with a clean slate
-    profileStore.clear();
-  });
-
   afterAll(async () => {
-    if (server && server.listening) {
-      await new Promise<void>((resolve) => {
-        server!.close(() => {
-          console.log('Test HTTP server closed');
-          resolve();
-        });
-      });
+    if (stopServer) {
+      await stopServer();
     }
   });
 
@@ -130,8 +94,8 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
 
       expect(response.ok).toBe(true);
       const data = await response.json();
-      // Library route returns the raw profile (not a success wrapper)
-      expect(data.primaryJurisdiction).toBe('California');
+      expect(data.success).toBe(true);
+      expect(data.profile?.primaryJurisdiction).toBe('California');
     });
 
     it('should handle partial profile data', async () => {
@@ -149,8 +113,8 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
 
       expect(response.ok).toBe(true);
       const data = await response.json();
-      // Library route returns the raw profile (not a success wrapper)
-      expect(data.primaryJurisdiction).toBe('New York');
+      expect(data.success).toBe(true);
+      expect(data.profile?.primaryJurisdiction).toBe('New York');
     });
   });
 
@@ -171,8 +135,8 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
 
       expect(response.ok).toBe(true);
       const data = await response.json();
-      // Library route calls saveBaselineConfig which returns the config object directly
-      expect(data.minimumHoursPerWeek).toBe(40);
+      expect(data.success).toBe(true);
+      expect(data.baseline?.minimumHoursPerWeek).toBe(40);
     });
 
     it('should validate baseline hours range', async () => {
