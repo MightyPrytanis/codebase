@@ -26,6 +26,7 @@ src/**/*.js
 !src/**/*.config.js
 tests/**/*.js
 !tests/**/*.config.js
+!tests/**/mock-*.js
 
 # But allow these specific intentional JS files:
 !http-bridge.js

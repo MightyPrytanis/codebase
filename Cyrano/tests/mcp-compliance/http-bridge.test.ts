@@ -6,8 +6,7 @@
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import type { Server } from 'http';
-import type { AddressInfo } from 'net';
-import { fetchWithRetry } from '../utils/fetch-retry.js';
+import { startAppServer, fetchWithRetry } from '../test-utils/test-server.js';
 
 // Set environment variables before importing
 process.env.NODE_ENV = 'test';
@@ -351,13 +350,4 @@ describe('MCP HTTP Bridge Compliance', () => {
   });
 });
 
-/**
- * Note: These tests require the HTTP bridge server to be running.
- * In a real test environment, we would:
- * 1. Start the server in beforeAll
- * 2. Wait for it to be ready
- * 3. Run tests
- * 4. Kill the server in afterAll
- * 
- * For now, these tests can be run manually with: npm run http
- */
+

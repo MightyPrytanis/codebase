@@ -18,7 +18,7 @@
  * Also tests state persistence and completion flow.
  */
 
-import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest';
 import type { Server } from 'http';
 import type { AddressInfo } from 'net';
 import { fetchWithRetry } from '../utils/fetch-retry.js';
@@ -32,9 +32,16 @@ process.env.TRUST_PROXY_COUNT = '0';
 import { app } from '../../src/http-bridge.js';
 
 describe('Onboarding API Integration Tests', () => {
-  let testPort = process.env.TEST_PORT ? parseInt(process.env.TEST_PORT) : 0; // 0 => ephemeral
   let baseUrl = '';
+// These are integration tests that require a database and authentication.
+// Skip when DATABASE_URL is not configured (e.g., in standard unit test CI runs).
+const describeIfDatabaseConfigured = process.env.DATABASE_URL ? describe : describe.skip;
+
+describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
+  const testPort = process.env.TEST_PORT ? parseInt(process.env.TEST_PORT) : 5003;
+  const baseUrl = `http://localhost:${testPort}`;
   let server: Server | null = null;
+  let authHeaders: Record<string, string> = {};
   const testUserId = 'test-onboarding-user';
 
   beforeAll(async () => {
@@ -77,6 +84,20 @@ describe('Onboarding API Integration Tests', () => {
     
     // Additional small wait to ensure app middleware is fully ready
     await new Promise(resolve => setTimeout(resolve, 200));
+    const started = await startAppServer(app, process.env.TEST_PORT);
+    server = started.server;
+    baseUrl = started.baseUrl;
+
+    // Generate a test JWT token for authenticated requests.
+    // All routes extract userId from the JWT (user.userId = 1) regardless of any
+    // userId value sent in the request body or query string.
+    const token = generateAccessToken({ userId: 1, email: 'test@example.com', role: 'admin' });
+    authHeaders = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
+  });
+
+  beforeEach(() => {
+    // Reset in-memory profile store so each test starts with a clean slate
+    profileStore.clear();
   });
 
   afterAll(async () => {
@@ -103,14 +124,14 @@ describe('Onboarding API Integration Tests', () => {
 
       const response = await fetchWithRetry(`${baseUrl}/api/onboarding/practice-profile`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders,
         body: JSON.stringify(practiceProfile),
       });
 
       expect(response.ok).toBe(true);
       const data = await response.json();
-      expect(data.success).toBe(true);
-      expect(data.profile).toBeDefined();
+      // Library route returns the raw profile (not a success wrapper)
+      expect(data.primaryJurisdiction).toBe('California');
     });
 
     it('should handle partial profile data', async () => {
@@ -122,13 +143,14 @@ describe('Onboarding API Integration Tests', () => {
 
       const response = await fetchWithRetry(`${baseUrl}/api/onboarding/practice-profile`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders,
         body: JSON.stringify(partialProfile),
       });
 
       expect(response.ok).toBe(true);
       const data = await response.json();
-      expect(data.success).toBe(true);
+      // Library route returns the raw profile (not a success wrapper)
+      expect(data.primaryJurisdiction).toBe('New York');
     });
   });
 
@@ -143,15 +165,14 @@ describe('Onboarding API Integration Tests', () => {
 
       const response = await fetchWithRetry(`${baseUrl}/api/onboarding/baseline-config`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders,
         body: JSON.stringify(baselineData),
       });
 
       expect(response.ok).toBe(true);
       const data = await response.json();
-      expect(data.success).toBe(true);
-      expect(data.baseline).toBeDefined();
-      expect(data.baseline.minimumHoursPerWeek).toBe(40);
+      // Library route calls saveBaselineConfig which returns the config object directly
+      expect(data.minimumHoursPerWeek).toBe(40);
     });
 
     it('should validate baseline hours range', async () => {
@@ -162,7 +183,7 @@ describe('Onboarding API Integration Tests', () => {
 
       const response = await fetchWithRetry(`${baseUrl}/api/onboarding/baseline-config`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders,
         body: JSON.stringify(invalidBaseline),
       });
 
@@ -194,7 +215,7 @@ describe('Onboarding API Integration Tests', () => {
 
       const response = await fetchWithRetry(`${baseUrl}/api/onboarding/integrations`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders,
         body: JSON.stringify(integrationData),
       });
 
@@ -213,7 +234,7 @@ describe('Onboarding API Integration Tests', () => {
 
       const response = await fetchWithRetry(`${baseUrl}/api/onboarding/integrations`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders,
         body: JSON.stringify(partialIntegrations),
       });
 
@@ -228,7 +249,7 @@ describe('Onboarding API Integration Tests', () => {
       // First, create a complete profile
       await fetchWithRetry(`${baseUrl}/api/onboarding/practice-profile`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders,
         body: JSON.stringify({
           userId: testUserId,
           primaryJurisdiction: 'California',
@@ -243,7 +264,7 @@ describe('Onboarding API Integration Tests', () => {
 
       await fetchWithRetry(`${baseUrl}/api/onboarding/baseline-config`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders,
         body: JSON.stringify({
           userId: testUserId,
           minimumHoursPerWeek: 40,
@@ -253,7 +274,7 @@ describe('Onboarding API Integration Tests', () => {
 
       await fetchWithRetry(`${baseUrl}/api/onboarding/integrations`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders,
         body: JSON.stringify({
           userId: testUserId,
           clio: { connected: true },
@@ -284,7 +305,7 @@ describe('Onboarding API Integration Tests', () => {
     it('should mark onboarding as complete (Step 8)', async () => {
       const response = await fetchWithRetry(`${baseUrl}/api/onboarding/complete`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders,
         body: JSON.stringify({
           userId: testUserId,
           appId: 'lexfiat',
@@ -312,7 +333,7 @@ describe('Onboarding API Integration Tests', () => {
 
       const response = await fetchWithRetry(`${baseUrl}/api/onboarding/save-progress`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders,
         body: JSON.stringify(progressData),
       });
 
@@ -328,7 +349,7 @@ describe('Onboarding API Integration Tests', () => {
       // First save progress
       await fetchWithRetry(`${baseUrl}/api/onboarding/save-progress`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders,
         body: JSON.stringify({
           userId: testUserId,
           currentStep: 4,
@@ -360,7 +381,7 @@ describe('Onboarding API Integration Tests', () => {
     it('should test LLM provider connection (Step 5)', async () => {
       const response = await fetchWithRetry(`${baseUrl}/api/onboarding/test-llm-provider`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders,
         body: JSON.stringify({
           provider: 'openai',
         }),
@@ -375,7 +396,7 @@ describe('Onboarding API Integration Tests', () => {
     it('should validate provider enum', async () => {
       const response = await fetchWithRetry(`${baseUrl}/api/onboarding/test-llm-provider`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders,
         body: JSON.stringify({
           provider: 'invalid-provider',
         }),
@@ -392,7 +413,7 @@ describe('Onboarding API Integration Tests', () => {
       // Step 1-3: Practice Profile
       const step1Response = await fetchWithRetry(`${baseUrl}/api/onboarding/practice-profile`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders,
         body: JSON.stringify({
           userId: flowUserId,
           primaryJurisdiction: 'California',
@@ -407,7 +428,7 @@ describe('Onboarding API Integration Tests', () => {
       // Step 4: Storage Locations (optional)
       const step4Response = await fetchWithRetry(`${baseUrl}/api/onboarding/practice-profile`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders,
         body: JSON.stringify({
           userId: flowUserId,
           storagePreferences: {
@@ -421,7 +442,7 @@ describe('Onboarding API Integration Tests', () => {
       // Step 5: AI Provider
       const step5Response = await fetchWithRetry(`${baseUrl}/api/onboarding/practice-profile`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders,
         body: JSON.stringify({
           userId: flowUserId,
           llmProvider: 'openai',
@@ -433,7 +454,7 @@ describe('Onboarding API Integration Tests', () => {
       // Step 6: Chronometric Baseline
       const step6Response = await fetchWithRetry(`${baseUrl}/api/onboarding/baseline-config`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders,
         body: JSON.stringify({
           userId: flowUserId,
           minimumHoursPerWeek: 40,
@@ -445,7 +466,7 @@ describe('Onboarding API Integration Tests', () => {
       // Step 7: Integrations
       const step7Response = await fetchWithRetry(`${baseUrl}/api/onboarding/integrations`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders,
         body: JSON.stringify({
           userId: flowUserId,
           clio: { connected: true },
@@ -457,7 +478,7 @@ describe('Onboarding API Integration Tests', () => {
       // Step 8: Complete
       const step8Response = await fetchWithRetry(`${baseUrl}/api/onboarding/complete`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders,
         body: JSON.stringify({
           userId: flowUserId,
           appId: 'lexfiat',
@@ -481,7 +502,7 @@ describe('Onboarding API Integration Tests', () => {
       // Save progress at step 3
       const saveResponse = await fetchWithRetry(`${baseUrl}/api/onboarding/save-progress`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders,
         body: JSON.stringify({
           userId: stateUserId,
           currentStep: 3,
