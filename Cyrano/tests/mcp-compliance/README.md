@@ -80,9 +80,9 @@ The server exposes:
 - `POST /v1/bridge*` — echoes the request payload (mock bridge endpoint)
 - All other routes — 404
 
-**`HTTP_BRIDGE_URL` env var:** Tests should read `HTTP_BRIDGE_URL` when
-available and fall back to `http://127.0.0.1:5003`. This makes it easy to point
-tests at the real Cyrano server or the mock without code changes:
+**`HTTP_BRIDGE_URL` env var:** If `HTTP_BRIDGE_URL` is set, tests should use it;
+otherwise they should default to `http://127.0.0.1:5003`. This makes it easy to
+point tests at the real Cyrano server or the mock without code changes:
 
 ```bash
 HTTP_BRIDGE_URL=http://127.0.0.1:5003 npm run test:mcp
@@ -106,8 +106,10 @@ health-checked with `npx wait-on`:
   working-directory: ${{ github.workspace }}
 
 - name: Wait for mock bridge to be ready
-  # use npx wait-on to avoid adding a hard dependency to package.json
+  # Option A: npx wait-on (no extra dependency needed)
   run: npx wait-on http://127.0.0.1:5003/health --timeout 10000
+  # Option B: curl with retries (if npx is unavailable)
+  # run: curl --retry 5 --retry-delay 1 --fail http://127.0.0.1:5003/health
 
 - name: Run MCP compliance tests
   run: npm run test:mcp
