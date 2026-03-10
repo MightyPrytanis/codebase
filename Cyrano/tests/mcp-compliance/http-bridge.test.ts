@@ -17,19 +17,68 @@ process.env.TRUST_PROXY_COUNT = '0'; // Disable trust proxy for tests
 import { app } from '../../src/http-bridge.js';
 
 describe('MCP HTTP Bridge Compliance', () => {
+  // Use ephemeral port by default; honor TEST_PORT override if provided
+  let testPort = process.env.TEST_PORT ? parseInt(process.env.TEST_PORT) : 0; // 0 => ephemeral
   let baseUrl = '';
   let server: Server | null = null;
   let csrfToken: string = '';
   let sessionCookie: string = '';
 
   beforeAll(async () => {
-    const started = await startAppServer(app, process.env.TEST_PORT);
-    server = started.server;
-    baseUrl = started.baseUrl;
+    // Start the HTTP bridge server for testing
+    const http = await import('http');
+    server = http.createServer(app);
+    await new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error('Server startup timeout after 10 seconds'));
+      }, 10000);
 
+      server!.listen(testPort || 0, () => {
+        clearTimeout(timeout);
+        // Determine the actual bound port (important when using ephemeral port 0)
+        const addr = server!.address() as AddressInfo | string | null;
+        if (!addr) {
+          reject(new Error('Failed to determine server address after listen()'));
+          return;
+        }
+        testPort = typeof addr === 'object' ? addr.port : Number(String(addr).split(':').pop()); // string only for Unix sockets
+        baseUrl = `http://localhost:${testPort}`;
+        console.log(`Test HTTP server started on port ${testPort}`);
+
+        // Probe /health with retries; treat missing /health as okay
+        fetchWithRetry(`${baseUrl}/health`, { method: 'GET' }, 5, 200)
+          .then(() => resolve())
+          .catch(() => setTimeout(() => resolve(), 200));
+      });
+
+      server!.on('error', (err: any) => {
+        clearTimeout(timeout);
+        if (err.code === 'EADDRINUSE') {
+          console.warn(`Port ${testPort} in use, trying ephemeral port`);
+          // Fallback: try ephemeral port
+          testPort = 0;
+          server!.listen(0, () => {
+            const addr2 = server!.address() as AddressInfo | string | null;
+            testPort = addr2 && typeof addr2 === 'object' ? addr2.port : testPort;
+            baseUrl = `http://localhost:${testPort}`;
+            console.log(`Test HTTP server started on fallback port ${testPort}`);
+            resolve();
+          });
+          server!.once('error', (fallbackErr: any) => {
+            reject(new Error(`Fallback ephemeral listen failed: ${fallbackErr.message}`));
+          });
+        } else {
+          reject(err);
+        }
+      });
+    });
+    
+    // Wait for server to be fully ready
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
     // Get CSRF token for POST requests
     try {
-      const csrfResponse = await fetchWithRetry(`${baseUrl}/csrf-token`);
+      const csrfResponse = await fetchWithRetry(`${baseUrl}/csrf-token`, undefined, 5, 200);
       if (csrfResponse.ok) {
         const csrfData = await csrfResponse.json();
         csrfToken = csrfData.csrfToken || '';
@@ -45,6 +94,7 @@ describe('MCP HTTP Bridge Compliance', () => {
             }
           }
         }
+        console.log(`CSRF token acquired: ${csrfToken ? 'yes' : 'no'}, sessionCookie: ${sessionCookie ? 'yes' : 'no'}`);
       }
     } catch (error) {
       console.warn('Could not get CSRF token:', error);
@@ -54,7 +104,7 @@ describe('MCP HTTP Bridge Compliance', () => {
 
   afterAll(async () => {
     // Clean up: close server
-    if (server) {
+    if (server && server.listening) {
       await new Promise<void>((resolve) => {
         server!.close(() => {
           console.log('Test HTTP server closed');

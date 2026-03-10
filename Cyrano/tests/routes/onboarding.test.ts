@@ -20,72 +20,8 @@
 
 import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest';
 import type { Server } from 'http';
-import { startAppServer, fetchWithRetry } from '../test-utils/test-server.js';
-import { generateAccessToken } from '../../src/middleware/security.js';
-
-// ---------------------------------------------------------------------------
-// Mock library-service to avoid database dependency in unit/integration tests.
-// Uses an in-memory store that is cleared before each test for isolation.
-// ---------------------------------------------------------------------------
-
-/** Returns true for plain (non-array) objects */
-function isPlainObject(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-/** Deep-merge two plain objects, preferring source values over target values */
-function deepMerge(target: Record<string, any>, source: Record<string, any>): Record<string, any> {
-  const result: Record<string, any> = { ...target };
-  for (const key of Object.keys(source)) {
-    const sv = source[key];
-    const tv = result[key];
-    if (sv !== undefined && sv !== null) {
-      if (isPlainObject(sv) && isPlainObject(tv)) {
-        result[key] = deepMerge(tv, sv);
-      } else {
-        result[key] = sv;
-      }
-    }
-  }
-  return result;
-}
-
-// vi.hoisted ensures profileStore is created before module mocking occurs,
-// allowing it to be shared across all mock implementations below.
-const { profileStore } = vi.hoisted(() => ({ profileStore: new Map<string, Record<string, any>>() }));
-
-vi.mock('../../src/services/library-service.js', () => ({
-  upsertPracticeProfile: vi.fn(async (userId: string, data: Record<string, any>) => {
-    const existing = profileStore.get(userId) ?? {};
-    const merged = deepMerge({ userId: parseInt(userId, 10) || 1, practiceAreas: [], counties: [], courts: [], issueTags: [] }, existing);
-    const updated = deepMerge(merged, data);
-    profileStore.set(userId, updated);
-    return updated;
-  }),
-  getPracticeProfile: vi.fn(async (userId: string) => profileStore.get(userId) ?? null),
-}));
-
-// Mock saveBaselineConfig to also update profileStore so the status route
-// can detect step 6 (chronometric baseline) as complete without a real database.
-vi.mock('../../src/engines/chronometric/services/baseline-config.js', () => ({
-  saveBaselineConfig: vi.fn(async (config: Record<string, any>) => {
-    const now = new Date().toISOString();
-    const result = {
-      ...config,
-      minimumHoursPerDay: config.minimumHoursPerDay ?? config.minimumHoursPerWeek / 5,
-      createdAt: now,
-      updatedAt: now,
-    };
-    // Also persist to profileStore so onboarding/status route sees step 6 complete
-    const existing = profileStore.get(config.userId) ?? {};
-    const updated = deepMerge(existing, {
-      integrations: { chronometric: { baseline: { minimumHoursPerWeek: config.minimumHoursPerWeek } } },
-    });
-    profileStore.set(config.userId, updated);
-    return result;
-  }),
-  getBaselineConfig: vi.fn(async (_userId: string) => null),
-}));
+import type { AddressInfo } from 'net';
+import { fetchWithRetry } from '../utils/fetch-retry.js';
 
 // Set environment variables before importing
 process.env.NODE_ENV = 'test';
@@ -107,6 +43,45 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
   const testUserId = 'test-onboarding-user';
 
   beforeAll(async () => {
+    // Start the HTTP bridge server for testing
+    const http = await import('http');
+    server = http.createServer(app);
+    
+    await new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error('Server startup timeout after 10 seconds'));
+      }, 10000);
+      
+      server!.listen(testPort || 0, () => {
+        clearTimeout(timeout);
+        // Determine the actual bound port (important when using ephemeral port 0)
+        const addr = server!.address() as AddressInfo | string | null;
+        if (!addr) {
+          reject(new Error('Failed to determine server address after listen()'));
+          return;
+        }
+        testPort = typeof addr === 'object' ? addr.port : Number(String(addr).split(':').pop()); // string only for Unix sockets
+        baseUrl = `http://localhost:${testPort}`;
+        console.log(`Test HTTP server started on port ${testPort}`);
+
+        // Probe /health with retries; treat missing /health as okay
+        fetchWithRetry(`${baseUrl}/health`, { method: 'GET' }, 5, 200)
+          .then(() => resolve())
+          .catch(() => setTimeout(() => resolve(), 200));
+      });
+
+      server!.on('error', (err: any) => {
+        clearTimeout(timeout);
+        if (err.code === 'EADDRINUSE') {
+          reject(new Error(`Port ${testPort} is already in use. Set TEST_PORT to an available port.`));
+        } else {
+          reject(err);
+        }
+      });
+    });
+    
+    // Additional small wait to ensure app middleware is fully ready
+    await new Promise(resolve => setTimeout(resolve, 200));
     const started = await startAppServer(app, process.env.TEST_PORT);
     server = started.server;
     baseUrl = started.baseUrl;
@@ -124,7 +99,7 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
   });
 
   afterAll(async () => {
-    if (server) {
+    if (server && server.listening) {
       await new Promise<void>((resolve) => {
         server!.close(() => {
           console.log('Test HTTP server closed');
@@ -305,7 +280,7 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
       });
 
       // Then check status
-      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/status?userId=${testUserId}&appId=lexfiat`, { headers: authHeaders });
+      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/status?userId=${testUserId}&appId=lexfiat`);
       expect(response.ok).toBe(true);
       const data = await response.json();
       expect(data).toHaveProperty('completed');
@@ -315,7 +290,7 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
     });
 
     it('should return incomplete status for new user', async () => {
-      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/status?userId=new-user&appId=lexfiat`, { headers: authHeaders });
+      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/status?userId=new-user&appId=lexfiat`);
       expect(response.ok).toBe(true);
       const data = await response.json();
       expect(data.completed).toBe(false);
@@ -384,7 +359,7 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
       });
 
       // Then load it
-      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/load-progress?userId=${testUserId}`, { headers: authHeaders });
+      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/load-progress?userId=${testUserId}`);
       expect(response.ok).toBe(true);
       const data = await response.json();
       expect(data).toHaveProperty('currentStep');
@@ -392,7 +367,7 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
     });
 
     it('should return default values for new user', async () => {
-      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/load-progress?userId=new-user-2`, { headers: authHeaders });
+      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/load-progress?userId=new-user-2`);
       expect(response.ok).toBe(true);
       const data = await response.json();
       expect(data.currentStep).toBe(1);
@@ -512,7 +487,7 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
       expect(completionData.completed).toBe(true);
 
       // Verify final status
-      const statusResponse = await fetchWithRetry(`${baseUrl}/api/onboarding/status?userId=${flowUserId}&appId=lexfiat`, { headers: authHeaders });
+      const statusResponse = await fetchWithRetry(`${baseUrl}/api/onboarding/status?userId=${flowUserId}&appId=lexfiat`);
       const statusData = await statusResponse.json();
       expect(statusData.completed).toBe(true);
       expect(statusData.completedSteps.length).toBeGreaterThanOrEqual(7);
@@ -538,7 +513,7 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
       expect(saveResponse.ok).toBe(true);
 
       // Load progress
-      const loadResponse = await fetchWithRetry(`${baseUrl}/api/onboarding/load-progress?userId=${stateUserId}`, { headers: authHeaders });
+      const loadResponse = await fetchWithRetry(`${baseUrl}/api/onboarding/load-progress?userId=${stateUserId}`);
       expect(loadResponse.ok).toBe(true);
       const loadData = await loadResponse.json();
       expect(loadData.currentStep).toBe(3);
