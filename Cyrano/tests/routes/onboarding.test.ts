@@ -53,7 +53,6 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
       const started = await startAppServer(app, preferredPort);
       baseUrl = started.baseUrl;
       stopServer = started.stop;
-      console.log(`[Onboarding Tests] ✅ Server ready at ${baseUrl}`);
     } catch (err: any) {
       const portHint = preferredPort
         ? `Port ${preferredPort} may already be in use. Set TEST_PORT to a different available port, or unset it to use an ephemeral port.`
