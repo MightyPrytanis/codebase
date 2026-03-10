@@ -62,7 +62,11 @@ jobs:
         continue-on-error: true
 
       - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium
+        run: |
+          npx playwright install --with-deps chromium || {
+            echo "::error::Playwright browser installation failed"
+            exit 1
+          }
 
       - name: Run linter
         run: npm run lint
