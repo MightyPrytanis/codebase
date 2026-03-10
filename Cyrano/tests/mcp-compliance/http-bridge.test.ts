@@ -6,6 +6,7 @@
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import type { Server } from 'http';
+import { startAppServer, fetchWithRetry } from '../test-utils/test-server.js';
 
 // Set environment variables before importing
 process.env.NODE_ENV = 'test';
@@ -16,9 +17,9 @@ process.env.TRUST_PROXY_COUNT = '0'; // Disable trust proxy for tests
 import { app } from '../../src/http-bridge.js';
 
 describe('MCP HTTP Bridge Compliance', () => {
-  // Use a different port for tests to avoid conflicts
-  const testPort = process.env.TEST_PORT ? parseInt(process.env.TEST_PORT) : 5003;
-  const baseUrl = `http://localhost:${testPort}`;
+  // Use ephemeral port by default; honor TEST_PORT override if provided
+  let testPort = process.env.TEST_PORT ? parseInt(process.env.TEST_PORT) : 0; // 0 => ephemeral
+  let baseUrl = '';
   let server: Server | null = null;
   let csrfToken: string = '';
   let sessionCookie: string = '';
@@ -28,26 +29,56 @@ describe('MCP HTTP Bridge Compliance', () => {
     const http = await import('http');
     server = http.createServer(app);
     await new Promise<void>((resolve, reject) => {
-      server!.listen(testPort, () => {
+      const timeout = setTimeout(() => {
+        reject(new Error('Server startup timeout after 10 seconds'));
+      }, 10000);
+
+      server!.listen(testPort || 0, () => {
+        clearTimeout(timeout);
+        // Determine the actual bound port (important when using ephemeral port 0)
+        const addr = server!.address() as AddressInfo | string | null;
+        if (!addr) {
+          reject(new Error('Failed to determine server address after listen()'));
+          return;
+        }
+        testPort = typeof addr === 'object' ? addr.port : Number(String(addr).split(':').pop()); // string only for Unix sockets
+        baseUrl = `http://localhost:${testPort}`;
         console.log(`Test HTTP server started on port ${testPort}`);
-        resolve();
+
+        // Probe /health with retries; treat missing /health as okay
+        fetchWithRetry(`${baseUrl}/health`, { method: 'GET' }, 5, 200)
+          .then(() => resolve())
+          .catch(() => setTimeout(() => resolve(), 200));
       });
+
       server!.on('error', (err: any) => {
+        clearTimeout(timeout);
         if (err.code === 'EADDRINUSE') {
-          console.warn(`Port ${testPort} in use, skipping server start`);
-          resolve(); // Continue without server if port is in use
+          console.warn(`Port ${testPort} in use, trying ephemeral port`);
+          // Fallback: try ephemeral port
+          testPort = 0;
+          server!.listen(0, () => {
+            const addr2 = server!.address() as AddressInfo | string | null;
+            testPort = addr2 && typeof addr2 === 'object' ? addr2.port : testPort;
+            baseUrl = `http://localhost:${testPort}`;
+            console.log(`Test HTTP server started on fallback port ${testPort}`);
+            resolve();
+          });
+          server!.once('error', (fallbackErr: any) => {
+            reject(new Error(`Fallback ephemeral listen failed: ${fallbackErr.message}`));
+          });
         } else {
           reject(err);
         }
       });
     });
     
-    // Wait a bit for server to be fully ready
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Wait for server to be fully ready
+    await new Promise(resolve => setTimeout(resolve, 300));
     
     // Get CSRF token for POST requests
     try {
-      const csrfResponse = await fetch(`${baseUrl}/csrf-token`);
+      const csrfResponse = await fetchWithRetry(`${baseUrl}/csrf-token`, undefined, 5, 200);
       if (csrfResponse.ok) {
         const csrfData = await csrfResponse.json();
         csrfToken = csrfData.csrfToken || '';
@@ -63,6 +94,7 @@ describe('MCP HTTP Bridge Compliance', () => {
             }
           }
         }
+        console.log(`CSRF token acquired: ${csrfToken ? 'yes' : 'no'}, sessionCookie: ${sessionCookie ? 'yes' : 'no'}`);
       }
     } catch (error) {
       console.warn('Could not get CSRF token:', error);
@@ -72,7 +104,7 @@ describe('MCP HTTP Bridge Compliance', () => {
 
   afterAll(async () => {
     // Clean up: close server
-    if (server) {
+    if (server && server.listening) {
       await new Promise<void>((resolve) => {
         server!.close(() => {
           console.log('Test HTTP server closed');
@@ -84,7 +116,7 @@ describe('MCP HTTP Bridge Compliance', () => {
 
   describe('REST API Compliance', () => {
     it('should respond to GET /mcp/tools', async () => {
-      const response = await fetch(`${baseUrl}/mcp/tools`);
+      const response = await fetchWithRetry(`${baseUrl}/mcp/tools`);
       if (response.status !== 200) {
         const errorText = await response.text();
         console.error('Error response:', errorText);
@@ -96,14 +128,14 @@ describe('MCP HTTP Bridge Compliance', () => {
     });
 
     it('should list all registered tools', async () => {
-      const response = await fetch(`${baseUrl}/mcp/tools`);
+      const response = await fetchWithRetry(`${baseUrl}/mcp/tools`);
       const data = await response.json();
       // Should have 32+ tools (updated from original 17)
       expect(data.tools.length).toBeGreaterThanOrEqual(32);
     });
 
     it('should return tools in correct format', async () => {
-      const response = await fetch(`${baseUrl}/mcp/tools`);
+      const response = await fetchWithRetry(`${baseUrl}/mcp/tools`);
       const data = await response.json();
       const firstTool = data.tools[0];
       expect(firstTool).toHaveProperty('name');
@@ -112,7 +144,7 @@ describe('MCP HTTP Bridge Compliance', () => {
     });
 
     it('should respond to POST /mcp/execute', async () => {
-      const response = await fetch(`${baseUrl}/mcp/execute`, {
+      const response = await fetchWithRetry(`${baseUrl}/mcp/execute`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -130,7 +162,7 @@ describe('MCP HTTP Bridge Compliance', () => {
     });
 
     it('should return CallToolResult format', async () => {
-      const response = await fetch(`${baseUrl}/mcp/execute`, {
+      const response = await fetchWithRetry(`${baseUrl}/mcp/execute`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -152,7 +184,7 @@ describe('MCP HTTP Bridge Compliance', () => {
 
   describe('CORS Handling', () => {
     it('should include CORS headers', async () => {
-      const response = await fetch(`${baseUrl}/mcp/tools`, {
+      const response = await fetchWithRetry(`${baseUrl}/mcp/tools`, {
         method: 'OPTIONS'
       });
       // Check for CORS headers (implementation dependent)
@@ -162,7 +194,7 @@ describe('MCP HTTP Bridge Compliance', () => {
 
   describe('Error Handling', () => {
     it('should handle invalid tool names', async () => {
-      const response = await fetch(`${baseUrl}/mcp/execute`, {
+      const response = await fetchWithRetry(`${baseUrl}/mcp/execute`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -180,7 +212,7 @@ describe('MCP HTTP Bridge Compliance', () => {
     });
 
     it('should handle invalid input schemas', async () => {
-      const response = await fetch(`${baseUrl}/mcp/execute`, {
+      const response = await fetchWithRetry(`${baseUrl}/mcp/execute`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -197,7 +229,7 @@ describe('MCP HTTP Bridge Compliance', () => {
     });
 
     it('should return errors in MCP format', async () => {
-      const response = await fetch(`${baseUrl}/mcp/execute`, {
+      const response = await fetchWithRetry(`${baseUrl}/mcp/execute`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -214,18 +246,18 @@ describe('MCP HTTP Bridge Compliance', () => {
       expect(data).toHaveProperty('content');
       expect(Array.isArray(data.content)).toBe(true);
     });
-  };
+  });
 
   describe('Module Exposure', () => {
     it('should expose chronometric_module via HTTP', async () => {
-      const response = await fetch(`${baseUrl}/mcp/tools`);
+      const response = await fetchWithRetry(`${baseUrl}/mcp/tools`);
       const data = await response.json();
       const chronometricModule = data.tools.find((t: any) => t.name === 'chronometric_module');
       expect(chronometricModule).toBeDefined();
     });
 
     it('should execute chronometric_module', async () => {
-      const response = await fetch(`${baseUrl}/mcp/execute`, {
+      const response = await fetchWithRetry(`${baseUrl}/mcp/execute`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -248,28 +280,28 @@ describe('MCP HTTP Bridge Compliance', () => {
 
   describe('Engine Exposure', () => {
     it('should expose mae_engine via HTTP', async () => {
-      const response = await fetch(`${baseUrl}/mcp/tools`);
+      const response = await fetchWithRetry(`${baseUrl}/mcp/tools`);
       const data = await response.json();
       const maeEngine = data.tools.find((t: any) => t.name === 'mae_engine');
       expect(maeEngine).toBeDefined();
     });
 
     it('should expose goodcounsel_engine via HTTP', async () => {
-      const response = await fetch(`${baseUrl}/mcp/tools`);
+      const response = await fetchWithRetry(`${baseUrl}/mcp/tools`);
       const data = await response.json();
       const goodcounselEngine = data.tools.find((t: any) => t.name === 'goodcounsel_engine');
       expect(goodcounselEngine).toBeDefined();
     });
 
     it('should expose potemkin_engine via HTTP', async () => {
-      const response = await fetch(`${baseUrl}/mcp/tools`);
+      const response = await fetchWithRetry(`${baseUrl}/mcp/tools`);
       const data = await response.json();
       const potemkinEngine = data.tools.find((t: any) => t.name === 'potemkin_engine');
       expect(potemkinEngine).toBeDefined();
     });
 
     it('should execute mae_engine', async () => {
-      const response = await fetch(`${baseUrl}/mcp/execute`, {
+      const response = await fetchWithRetry(`${baseUrl}/mcp/execute`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -288,17 +320,34 @@ describe('MCP HTTP Bridge Compliance', () => {
       expect(data).toHaveProperty('content');
     });
   });
+
+  describe('MCP Error Response Shape', () => {
+    it('should return JSON for unknown /mcp routes', async () => {
+      const response = await fetchWithRetry(`${baseUrl}/mcp/unknown-route-xyz`);
+      expect(response.headers.get('content-type')).toContain('application/json');
+      const data = await response.json();
+      expect(data.isError).toBe(true);
+      expect(Array.isArray(data.content)).toBe(true);
+      expect(typeof data.content[0].text).toBe('string');
+    });
+
+    it('should return JSON with correct shape for /mcp/execute validation errors', async () => {
+      const response = await fetchWithRetry(`${baseUrl}/mcp/execute`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRF-Token': csrfToken,
+          'Cookie': `sessionId=${sessionCookie}`
+        },
+        body: JSON.stringify({ notATool: 'bad body' })
+      });
+      expect(response.headers.get('content-type')).toContain('application/json');
+      const data = await response.json();
+      expect(data.isError).toBe(true);
+      expect(Array.isArray(data.content)).toBe(true);
+      expect(typeof data.content[0].text).toBe('string');
+    });
+  });
 });
 
-/**
- * Note: These tests require the HTTP bridge server to be running.
- * In a real test environment, we would:
- * 1. Start the server in beforeAll
- * 2. Wait for it to be ready
- * 3. Run tests
- * 4. Kill the server in afterAll
- * 
- * For now, these tests can be run manually with: npm run http
- */
-)
-}
+

@@ -2977,3 +2977,235 @@ Complete remaining production readiness tasks: error handling verification, load
 - [ ] Documentation complete
 - [ ] Beta testing plan ready
 - [ ] Known issues documented
+
+---
+
+## Appendix: Blueprint Review — "Master Blueprint" LLM Advisory Analysis
+
+*Added 2026-02-28. Review requested via GitHub Issue #446.*
+
+This section evaluates the "Master Blueprint for Your Legal AI OS" submitted for review, answering the three posed questions: what it got wrong, what it missed, and what it got right. The goal is to use this analysis as a foundation for further refinement into an actionable plan.
+
+---
+
+### Question 1: What Did the Blueprint Get Wrong?
+
+**1. The Registry "Translation" (Step 1) Is Already Done**
+
+The blueprint's top priority is creating a `lib/mcp-registry.ts` registry loop that maps the hierarchy into an MCP tool list. This already exists — and has for some time. `src/engines/registry.ts` and `src/modules/registry.ts` are fully functional, self-registering singletons. Tools are auto-registered in `mcp-server.ts` and `http-bridge.ts`. No "registry loop" needs to be written; the MCP tool list is already computed dynamically from registered tool classes.
+
+**2. "Litigation Suite" Is the Suite/Platform Level, Not the App Level**
+
+The blueprint describes a four-level hierarchy with "App" at the top, using "Litigation Suite" as an example. The codebase actually has a *five*-level hierarchy: **Tool → Module → Engine → App → Suite/Platform**. The App layer is real and documented — LexFiat and Arkiver are both Apps (per `docs/architecture/ARKIVER_ARCHITECTURE_GUIDE.md`). "Litigation Suite" would sit at the *Suite* level above Apps, not the App level. The Engines (MAE, GoodCounsel, Potemkin, Forecast, Chronometric, Custodian) are one level *below* Apps. The blueprint's direction was correct (Apps above Engines) but it conflated the Suite/Platform tier with the App tier, and missed the fifth level entirely.
+
+**3. Supabase Is Not the Database Layer**
+
+The blueprint repeatedly recommends Supabase as the memory/storage layer (pgvector, file storage, auth). The codebase uses **PostgreSQL with Drizzle ORM** directly (via the `postgres` npm package), **not** the Supabase SDK. Supabase-as-a-service could host the Postgres database, but there is no Supabase client in the codebase. Recommending "link your Supabase project in the Vercel dashboard" understates a real migration/integration effort.
+
+**4. Vercel KV (Redis) for State Is Unnecessary**
+
+The blueprint recommends Vercel KV (Redis) for "Current Matter Context" persistence. The codebase already uses the PostgreSQL schema for persistent state (matter data, wellness journals, ethics audits, email drafts). Adding Redis would be additional infrastructure complexity without clear benefit given the existing Drizzle ORM schema.
+
+**5. The Multi-Model Router Is Already More Sophisticated Than Described**
+
+The blueprint describes building "a lightweight logic layer in Vercel" that checks Supabase for user model preferences. The codebase already has `src/services/ai-provider-selector.ts`, `src/services/ai-performance-tracker.ts`, `src/engines/mae/services/multi-model-service.ts`, and `src/services/openrouter.ts`. Role-based parallel multi-model verification with weighted confidence scoring already exists in MAE.
+
+**6. LexFiat's "Thin Client" Label Is Architecturally Correct — But Understates the Frontend**
+
+The blueprint frames LexFiat as a "lightweight TypeScript app (Vercel)" — a thin client. The *architecture* here is actually accurate: LexFiat is a client-side React SPA with no backend of its own. Its backend IS Cyrano (Express + PostgreSQL/Drizzle). The `drizzle.config.ts` in LexFiat points to `Cyrano/src/lexfiat-schema.ts`; auth lives in Cyrano's `auth-server/`. What the "thin client" framing understates is the scale of the frontend: LexFiat is a fully-featured React 19 + Vite application with 30+ components, Tailwind CSS 4, Radix UI, TanStack Query, react-router-dom, and a complete workflow pipeline UI. It is not "lightweight" in the sense of minimal functionality — it is lightweight only in the sense that it carries no server-side code.
+
+**7. Vercel `maxDuration: 10` Is Already Fixed (As of This PR)**
+
+The blueprint correctly identifies the 10-second timeout as a problem and recommends 300 seconds. The `Cyrano/vercel.json` had `maxDuration: 10` — this has been corrected in this PR to `60` seconds with `memory: 1024` (Vercel Hobby tier maximum is 60s; Pro/Enterprise allows up to 300s for the full blueprint recommendation).
+
+---
+
+### Question 2: What Did the Blueprint Mostly or Entirely Miss?
+
+**1. The Suite/Platform Tier and the Skills Layer**
+
+The blueprint's four-level hierarchy (App → Engine → Module → Tool) is actually five levels: Tool → Module → Engine → App → **Suite/Platform**. "Litigation Suite" would be a *Suite* sitting above Apps like LexFiat, not an App itself. Additionally, the codebase has a **Skills** abstraction (`src/skills/`) — declarative, markdown-defined capability descriptors loaded, registered, and dispatched by `skill-loader.ts`, `skill-registry.ts`, and `skill-dispatcher.ts`. These sit alongside or below the Tool layer and are entirely absent from the blueprint.
+
+**2. The Mock/Prototype Status of Many AI Tools**
+
+The most critical near-term blocker is that approximately 15 tools are MOCK implementations that return simulated responses without calling real AI APIs. The Cyrano README explicitly warns: "Do not use in production where real AI capabilities are expected." The blueprint assumes a working system that needs to be "animated" — in reality, real AI integration work is still pending for many tools. This is the actual critical path, not registry translation.
+
+**3. GoodCounsel as a First-Class Ethics/Wellness Engine**
+
+The blueprint treats wellness as a background post-process (`waitUntil` fire-and-forget). In Cyrano, **GoodCounsel** is a full Engine with wellness journaling, burnout detection, HIPAA-compliant encryption, crisis support pathways, and ethics review as first-class, synchronous features. It is not an afterthought.
+
+**4. Clio Integration as the Primary Practice Management System**
+
+The blueprint doesn't mention Clio at all. For the target user (a practicing attorney), Clio OAuth integration (`clio-oauth.ts`, `clio-webhooks.ts`, `clio-client.ts`, `clio-api.ts`) is arguably the most important third-party integration. Without Clio sync, matter data, time entries, and billing are disconnected from the attorney's actual workflow.
+
+**5. Six Engines Beyond MAE**
+
+The blueprint only describes a generic "Research Engine" and "Billing Engine." The codebase has six named, specialized Engines, each with distinct responsibilities:
+- **MAE** (Multi-Agent Engine) — workflow orchestration
+- **GoodCounsel** — ethics and wellness
+- **Potemkin** — simulation and workflow validation
+- **Forecast** — financial forecasting (tax, child support, QDRO)
+- **Chronometric** — time reconstruction and billing
+- **Custodian** — data governance and audit trails
+
+**6. The Verification Module**
+
+The blueprint doesn't address fact-checking or citation verification at all. The codebase has a dedicated `src/tools/verification/` subdirectory with `claim-extractor.ts`, `citation-checker.ts`, `citation-formatter.ts`, `source-verifier.ts`, and `consistency-checker.ts`. For a legal AI, this is critical for avoiding hallucinated case citations — a disbarment-level risk.
+
+**7. The HTTP Bridge as the Real MCP-to-Web Adapter**
+
+The blueprint describes building a Vercel AI SDK orchestrator route as Step 4. The codebase already has a production-grade HTTP Bridge (`src/http-bridge.ts`) with hybrid lazy-loading, race condition protection, timeout protection (30s), circuit breaker pattern, tool health monitoring, and hot reload. The "brain deployment" step is already done.
+
+**8. Auth Server as a Separate Service**
+
+The blueprint treats auth as a Supabase feature. Cyrano has its own dedicated auth server (`auth-server/` directory) with JWT, bcrypt, and separate deployment configuration. This is independent infrastructure that needs to be accounted for in any deployment plan.
+
+**9. The Arkiver Subsystem**
+
+The blueprint mentions "RAG Intake" generically. Arkiver is an entire subsystem with its own UI, MCP tools, processor pipeline (text, email, entity, insight, timeline), three engine modules (extractor, processor, analyst), and document integrity verification. It is far more complete and complex than the blueprint implies.
+
+**10. MiCourt Integration (Michigan Courts)**
+
+The codebase has a `micourt-service.ts` and `micourt-query.ts` exposing a `court_query` tool for querying Michigan court dockets. This is domain-specific legal infrastructure the blueprint cannot have known about — and a key differentiator. The blueprint's Section I.1 used `scrape_court_docket` as a generic illustrative example of what a Tool looks like (alongside `query_supabase`) — not as a proposed tool name. The important naming and framing correction: this system's tool is `court_query`, and the interaction model is explicit user-initiated docket querying, not scraping.
+
+**11. The "Real vs. Mock" Gap Is the Actual Blockers List**
+
+The TOOL_CATEGORIZATION document (referenced in the README) is the real checklist to beta: ~19 production-grade tools, ~15 mock AI tools, ~10 credential-dependent tools, ~8 non-functional placeholders. The blueprint's 6-step plan implies a working system needing configuration. The actual work is completing real AI integrations for those 15+ mock tools.
+
+---
+
+### Question 3: What Did the Blueprint Get Right?
+
+**1. The Core Hierarchy Concept Is Correct**
+
+The Engine → Module → Tool pattern is accurate — and the blueprint's placement of Apps *above* Engines is also correct. The full documented hierarchy is Tool → Module → Engine → App → Suite/Platform, where LexFiat and Arkiver are both Apps (per `docs/architecture/ARKIVER_ARCHITECTURE_GUIDE.md`). The metaphors ("The Monster" for the backend hierarchy, "The Nervous System" for MCP) are apt and useful for communication. The main correction is that the blueprint's four-level description missed the fifth tier (Suite/Platform above Apps), and it conflated "Litigation Suite" (Suite-level) with the App tier.
+
+**2. MCP as the Unifying Protocol**
+
+The blueprint correctly identifies MCP as the mechanism that allows any LLM (Perplexity, Claude, GPT-4) to discover and call the tool hierarchy. This is exactly how the system works — the MCP Inspector validation step (Step 6) is genuinely useful for confirming tool visibility.
+
+**3. Multi-Model Strategy Is the Right Approach**
+
+The concept of an "Auto" mode with intelligent routing, plus "Manual" override for attorney control, correctly mirrors the `ai-provider-selector.ts` philosophy in the codebase. Naming Perplexity for research tasks and Claude/GPT-4 for drafting is sound, though the existing `openrouter.ts` adds further flexibility.
+
+**4. The Timeout Identification Is a Real Bug**
+
+The blueprint flagged the 10-second Vercel timeout as a problem — and it was correct. Legal research tasks that chain tool calls will absolutely exceed 10 seconds. This has been fixed in this PR (10s → 60s, the Hobby tier maximum; upgrading to Vercel Pro/Enterprise allows up to 300s as the blueprint recommends).
+
+**5. Background Processing for Wellness/Timekeeping**
+
+The concept of returning the legal answer immediately while async-processing wellness monitoring and time entry is sound engineering. Vercel's `waitUntil`/`after()` pattern, or equivalent background job processing, is the right approach for perceived responsiveness.
+
+**6. Human-in-the-Loop for Legal Writing Is Non-Negotiable**
+
+The blueprint's recommendation for a mandatory `await_approval` step before sending legal communications is correct and already partially implemented in the workflow manager. This is an ethical and liability requirement, not just a UX feature.
+
+**7. PII Guardrails Must Be Pre-Processing Steps**
+
+The recommendation to redact sensitive client data before it reaches external LLM APIs is aligned with the codebase's `sensitive-data-encryption.ts` and `hipaa-compliance.ts` services. The Arkiver's entity extraction pipeline is the right place to enforce this.
+
+**8. Vector Storage for RAG Is Essential**
+
+The blueprint correctly identifies vector storage (pgvector) as needed for the RAG/Librarian functionality. The codebase's `embedding-service.ts`, `rag-service.ts`, and `rag-library.ts` confirm this is real, implemented infrastructure — not a future wish.
+
+---
+
+### Recommended Corrections to the Blueprint for the Next Iteration
+
+| Blueprint Claim | Corrected Reality |
+|---|---|
+| "Create the registry" (Step 1) | Registry already exists — skip this step |
+| App → Engine → Module → Tool (4 levels) | Tool → Module → Engine → App → Suite/Platform (5 levels); direction is correct, top tier is Suite not App |
+| "Connect Supabase" | PostgreSQL/Drizzle already connected; Supabase optional as host |
+| "Vercel KV for state" | PostgreSQL schema already handles state |
+| "Build the routing layer" | `ai-provider-selector.ts` + `multi-model-service.ts` already exist |
+| "Deploy the HTTP bridge" | `http-bridge.ts` already production-ready |
+| "LexFiat is a thin client" | Architecturally accurate — LexFiat is a React SPA (no own backend); Cyrano IS the backend. Correction: LexFiat is not *lightweight* — 30+ components, Tailwind 4, Radix UI, full workflow UI |
+| Blueprint Sec. I.1 example: `scrape_court_docket` | That was a generic illustration of the Tool concept, not a proposed tool name. The actual tool is `court_query` (`micourt-query.ts`) — explicit user-initiated docket queries, not scraping |
+| Wellness as a background task | GoodCounsel is a first-class Engine |
+| maxDuration: 300 | Fixed to 60s (Hobby) / 300s (Pro) |
+
+### Real Next Steps (Replacing the Blueprint's 6-Step Plan)
+
+1. **Complete mock AI replacements** — the 15 mock tools are the actual critical path
+2. **Validate credential-dependent tools** — Clio OAuth, Gmail/Outlook OAuth, Perplexity key
+3. **Complete LexFiat ↔ Cyrano integration** — HTTP bridge is ready; LexFiat integration is ~50%
+4. **Fix the 8 non-functional/placeholder tools** — or remove them from MCP registration
+5. **Run MCP Inspector** against the HTTP bridge to confirm all production tools are visible
+6. **Deploy to staging** (Fly.io/Render, per existing config) and run E2E tests
+
+---
+
+## Appendix: Unmerged Cursor Work — Codebase Status After BraceCase
+
+**Context:** After the BraceCase incident (Jan–Feb 2026), there was uncertainty about whether 700–900 Cursor-generated changes were done but never successfully uploaded and merged. This appendix documents the investigation findings.
+
+---
+
+### What Was Found in GitHub
+
+**Cursor branches in the repository:**
+
+| Branch | Unique Cursor commits | Status |
+|---|---|---|
+| `cursor/general-codebase-debugging-18e6` | **1** (Jan 12, 2026) | Unmerged — PR #211, **closed** Jan 12 |
+| `cursor/general-codebase-debugging-81bc` | 0 (identical to main) | Inactive |
+
+**PR #211 — "Refactor: Remove unused code and fix minor issues" (Jan 12, 2026):**
+- **591 files changed** (+564 / -2565 lines)
+- Single commit authored by the Cursor Agent
+- Closed without merging the same day it was opened
+- CodeRabbit flagged "Too many files!" (150 of 300 reviewed)
+- **Content:** All changes are BraceCase cleanup (removing/relocating orphan `}`, `)`, `]` delimiters from end-of-file positions) — **not new feature work**
+
+---
+
+### What This Means
+
+**PR #211 was a FAILED BRACE CASE CLEANUP attempt, not lost feature work.**
+
+The Cursor Agent's Jan 12 session was specifically trying to fix the BraceCase corruption. The PR was closed because:
+1. It was partially incorrect (e.g., `});` changed to `};` in some service files, breaking closure syntax)
+2. It was too large to review safely
+3. It was subsequently superseded by the proper Feb 9, 2026 BraceCase fix
+
+The Feb 9 fix (commits `0d247f4` and `aa57b1f`) correctly repaired all 203 corrupted files and IS in `main`.
+
+---
+
+### Current Codebase State (post-BraceCase fix, Feb 2026)
+
+- **266 TypeScript source files** in `Cyrano/src/`
+- **All 6 engines present:** MAE, GoodCounsel, Potemkin, Forecast, Chronometric, Custodian
+- **All modules present:** arkiver, billing-reconciliation, ethical-ai, legal-analysis, rag, verification
+- **50+ tools** in `Cyrano/src/tools/`
+- TypeScript build: ✅ **passes** (263 JS files generated, per postmortem)
+- Unit tests: ✅ **pass** (399 passing, 1 pre-existing failure, per postmortem)
+
+---
+
+### On the "700–900 Missing Changes"
+
+**Verdict: No evidence of large-scale missing feature work in GitHub.**
+
+The most likely explanations for the user's memory of "700–900 changes":
+1. **The BraceCase cleanup numbers** — The corruption affected 203 files; the Cursor cleanup PR touched 591 files. These large numbers may have created the impression of lost work.
+2. **Local-only Cursor work** — If changes were made in Cursor locally but never committed and pushed to any GitHub branch, they are not visible here and are not recoverable from the repository.
+3. **Incremental changes across many sessions** — Cursor sessions generate many small edits; over months these can appear large in aggregate.
+
+**What IS genuinely "unbuilt" in the current codebase (by design, not loss):**
+- ~15 tools use mock AI implementations (return simulated responses)
+- ~8 tools are non-functional stubs or placeholders
+- Several `TODO` markers for in-memory → database persistence upgrades
+- Auth-server beta route stubs (JWT, account creation)
+- GoodCounsel client-analyzer stubs (need data service calls)
+
+These are pre-beta planned items, not lost work. They are tracked in the main checklist above.
+
+---
+
+### Recommendation
+
+The `cursor/general-codebase-debugging-18e6` branch can be **safely deleted** — its only unique commit is a superseded BraceCase cleanup attempt that was done better in the Feb 2026 fix. There is no missing feature work in that branch.
+
+If the user believes specific features were written in Cursor but are missing from `main`, the best approach is to identify specific file paths or functionality and compare against the current `main` branch — not to try to merge the Cursor branch.

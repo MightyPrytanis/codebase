@@ -111,6 +111,7 @@ export default function DocumentComparison() {
                 <p className="text-secondary text-xs mt-2">
                   {doc2.length} characters
                 </p>
+              )}
             </div>
           </div>
 
@@ -297,3 +298,4 @@ export default function DocumentComparison() {
       </div>
     </div>
   );
+}
