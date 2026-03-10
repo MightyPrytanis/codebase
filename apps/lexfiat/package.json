@@ -52,7 +52,7 @@
     "react-router-dom": "^7.13.0"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.2.0",
+    "@tailwindcss/postcss": "^4.2.1",
     "@types/express": "^5.0.6",
     "@types/node": "^25.3.0",
     "@types/react": "^19.2.14",
@@ -60,7 +60,7 @@
     "autoprefixer": "^10.4.24",
     "esbuild": "^0.27.3",
     "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.18",
+    "tailwindcss": "^4.2.1",
     "typescript": "^5.9.2"
   }
 }

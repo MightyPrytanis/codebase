@@ -377,6 +377,3 @@ function CustomWorkflowBuilder({
   );
 
 }
-)
-}
-}

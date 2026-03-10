@@ -573,5 +573,3 @@ export function GoodCounselEnhanced({
   );
 
 }
-)
-}

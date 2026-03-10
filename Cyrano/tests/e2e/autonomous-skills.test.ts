@@ -5,14 +5,23 @@
  * Copyright 2025 Cognisint LLC
  */
 
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi } from 'vitest';
 import { skillRegistry } from '../../src/skills/skill-registry.js';
 import { cyranoPathfinder } from '../../src/tools/cyrano-pathfinder.js';
+import { aiService } from '../../src/services/ai-service.js';
+import { apiValidator } from '../../src/utils/api-validator.js';
 
 describe('Autonomous Skills E2E', () => {
   beforeAll(async () => {
     // Load skills
     await skillRegistry.loadAll();
+
+    // Mock AI provider validation and calls so tests run without real API keys
+    vi.spyOn(apiValidator, 'validateProvider').mockReturnValue({ valid: true });
+    vi.spyOn(apiValidator, 'getAvailableProviders').mockReturnValue(['perplexity']);
+    vi.spyOn(aiService, 'call').mockResolvedValue(
+      JSON.stringify({ response: 'Mock skill execution response', skills_used: [] })
+    );
   });
 
   it('should automatically identify relevant skills for user queries', async () => {

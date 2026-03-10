@@ -13,6 +13,3 @@ function Skeleton({
 }
 
 export { Skeleton }
-
-}
-)

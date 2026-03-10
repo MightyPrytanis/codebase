@@ -139,5 +139,3 @@ export async function getWorkflowStatus(): Promise<WorkflowStatus> {
   return fetchWorkflowStatus();
 
 }
-)
-}
