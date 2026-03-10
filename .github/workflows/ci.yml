@@ -57,9 +57,12 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Clear Playwright cache
+        run: rm -rf ~/.cache/ms-playwright/
+        continue-on-error: true
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
-        continue-on-error: true
 
       - name: Run linter
         run: npm run lint
@@ -71,9 +74,13 @@ jobs:
       - name: Run unit tests
         run: npm run test:unit
         continue-on-error: true
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Generate coverage report
         run: npm run test:unit -- --coverage || true
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -121,6 +128,8 @@ jobs:
         id: test-results
         run: |
           npm run test:coverage 2>&1 | tee test-output.txt || true
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Extract test results
         run: |
