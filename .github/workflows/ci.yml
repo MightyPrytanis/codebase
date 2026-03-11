@@ -32,6 +32,9 @@ jobs:
     name: Run Tests
     runs-on: ubuntu-latest
 
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
     defaults:
       run:
         working-directory: ./Cyrano
@@ -70,14 +73,10 @@ jobs:
 
       - name: Run unit tests
         run: npm run test:unit
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         continue-on-error: true
 
       - name: Generate coverage report
         run: npm run test:unit -- --coverage || true
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -104,6 +103,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: test
 
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+
     defaults:
       run:
         working-directory: ./Cyrano
@@ -125,8 +127,6 @@ jobs:
         id: test-results
         run: |
           npm run test:coverage 2>&1 | tee test-output.txt || true
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
       - name: Extract test results
         run: |
