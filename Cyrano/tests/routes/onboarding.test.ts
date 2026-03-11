@@ -36,8 +36,9 @@ import { app } from '../../src/http-bridge.js';
 const describeIfDatabaseConfigured = process.env.DATABASE_URL ? describe : describe.skip;
 
 describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
-  let baseUrl = '';
-  let stopServer: (() => Promise<void>) | null = null;
+  const testPort = process.env.TEST_PORT ? parseInt(process.env.TEST_PORT) : 5003;
+  let baseUrl = `http://localhost:${testPort}`;
+  let server: Server | null = null;
   let authHeaders: Record<string, string> = {};
   const testUserId = 'test-onboarding-user';
 
@@ -66,7 +67,7 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
     // userId value sent in the request body or query string.
     const token = generateAccessToken({ userId: 1, email: 'test@example.com', role: 'admin' });
     authHeaders = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
-  });
+  }, 20000);
 
   afterAll(async () => {
     if (stopServer) {
