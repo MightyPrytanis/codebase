@@ -37,6 +37,10 @@ import { app } from '../../src/http-bridge.js';
 const describeIfDatabaseConfigured = process.env.DATABASE_URL ? describe : describe.skip;
 
 describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
+  // Bind explicitly to the IPv4 loopback address to avoid ECONNREFUSED errors on
+  // systems where 'localhost' resolves to ::1 (IPv6) while the server binds to
+  // 127.0.0.1 (IPv4).  TEST_HOST / TEST_PORT can override for special environments.
+  const host = process.env.TEST_HOST ?? '127.0.0.1';
   let testPort = process.env.TEST_PORT ? parseInt(process.env.TEST_PORT) : 0;
   let baseUrl = '';
   let server: Server | null = null;
@@ -55,20 +59,21 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
         reject(new Error('Server startup timeout after 15 seconds'));
       }, 15000);
 
-      server!.listen(testPort, () => {
+      server!.listen(testPort, host, () => {
         clearTimeout(timeout);
-        // Resolve the actual bound port (critical when testPort is 0/ephemeral)
+        // Resolve the actual bound port (critical when testPort is 0/ephemeral).
+        // We bound to a specific IP so address() always returns an AddressInfo object.
         const addr = server!.address() as AddressInfo | string | null;
-        if (!addr) {
-          reject(new Error('Failed to determine server address after listen()'));
+        if (!addr || typeof addr === 'string') {
+          reject(new Error('Failed to determine server TCP address after listen()'));
           return;
         }
-        testPort = typeof addr === 'object' ? addr.port : Number(String(addr).split(':').pop());
-        baseUrl = `http://localhost:${testPort}`;
-        console.log(`Test HTTP server started on port ${testPort}`);
+        testPort = addr.port;
+        baseUrl = `http://${host}:${testPort}`;
+        console.log(`Test HTTP server started on ${host}:${testPort}`);
 
         // Probe /health with retries; ignore if endpoint is unavailable
-        fetchWithRetry(`${baseUrl}/health`, { method: 'GET' }, 5, 200)
+        fetchWithRetry(`${baseUrl}/health`, { method: 'GET' }, 10, 250)
           .then(() => resolve())
           .catch(() => setTimeout(() => resolve(), 200));
       });
