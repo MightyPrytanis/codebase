@@ -493,7 +493,7 @@ const SidebarGroupContent = React.forwardRef<
     className={cn("w-full text-sm", className)}
     {...props}
   />
-)
+))
 SidebarGroupContent.displayName = "SidebarGroupContent"
 
 const SidebarMenu = React.forwardRef<
@@ -772,4 +772,4 @@ export {
   SidebarTrigger,
   useSidebar,
 
-)
+}
