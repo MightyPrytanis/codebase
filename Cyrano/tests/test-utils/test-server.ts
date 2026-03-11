@@ -42,18 +42,59 @@ export async function startAppServer(
 
   await new Promise<void>((resolve, reject) => {
     const timeout = setTimeout(
-      () => reject(new Error('Server startup timeout after 10s')),
-      10000
+      () => reject(new Error('Server startup timeout after 15s')),
+      15000
     );
 
-    server.listen(port, () => {
+    server.listen(port, async () => {
       clearTimeout(timeout);
+
+      const addr = server.address() as AddressInfo | string | null;
+      const boundPort =
+        addr && typeof addr === 'object'
+          ? addr.port
+          : Number(String(addr ?? port).split(':').pop());
+
+      let connected = false;
+      let lastStatus: number | null = null;
+      for (let i = 0; i < 10; i++) {
+        try {
+          const res = await fetch(`http://localhost:${boundPort}/health`);
+          if (res.ok) {
+            connected = true;
+            break;
+          }
+          lastStatus = res.status;
+        } catch {
+          // Server not yet accepting connections — retry after delay
+          lastStatus = null;
+        }
+        await new Promise((r) => setTimeout(r, 300));
+      }
+
+      if (!connected) {
+        const statusInfo =
+          lastStatus !== null
+            ? ` (last HTTP status: ${lastStatus})`
+            : ' (connection refused)';
+        reject(new Error(`Server did not respond on /health endpoint${statusInfo}`));
+        return;
+      }
+
       resolve();
     });
 
     server.on('error', (err: any) => {
       clearTimeout(timeout);
-      reject(err);
+      if (err.code === 'EADDRINUSE') {
+        reject(
+          new Error(
+            `Port ${port} is already in use. Please stop the existing server or use a different TEST_PORT.`
+          )
+        );
+      } else {
+        reject(err);
+      }
     });
   });
 
