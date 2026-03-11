@@ -103,13 +103,8 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
   }, 30000);
 
   afterAll(async () => {
-    if (server && server.listening) {
-      await new Promise<void>((resolve) => {
-        server!.close(() => {
-          console.log('Test HTTP server closed');
-          resolve();
-        });
-      });
+    if (stopServer) {
+      await stopServer();
     }
   });
 
@@ -132,8 +127,8 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
 
       expect(response.ok).toBe(true);
       const data = await response.json();
-      // Library route returns the raw profile (not a success wrapper)
-      expect(data.primaryJurisdiction).toBe('California');
+      expect(data.success).toBe(true);
+      expect(data.profile?.primaryJurisdiction).toBe('California');
     });
 
     it('should handle partial profile data', async () => {
@@ -151,8 +146,8 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
 
       expect(response.ok).toBe(true);
       const data = await response.json();
-      // Library route returns the raw profile (not a success wrapper)
-      expect(data.primaryJurisdiction).toBe('New York');
+      expect(data.success).toBe(true);
+      expect(data.profile?.primaryJurisdiction).toBe('New York');
     });
   });
 
@@ -173,8 +168,8 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
 
       expect(response.ok).toBe(true);
       const data = await response.json();
-      // Library route calls saveBaselineConfig which returns the config object directly
-      expect(data.minimumHoursPerWeek).toBe(40);
+      expect(data.success).toBe(true);
+      expect(data.baseline?.minimumHoursPerWeek).toBe(40);
     });
 
     it('should validate baseline hours range', async () => {
@@ -524,4 +519,5 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
       expect(loadData.formData).toHaveProperty('primaryJurisdiction', 'Texas');
     });
   });
+});
 });

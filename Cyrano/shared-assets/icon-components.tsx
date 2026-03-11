@@ -171,6 +171,7 @@ export function ArkiverBrandIcon({ className = '', size = 24, style, color }: Ic
       />
     </div>
   );
+}
 
 /**
  * MAE Brand Icon - bx:swim ONLY (BiSwim from react-icons)
@@ -245,5 +246,4 @@ export function BillingTimeIcon({ className = '', size = 24, style, color }: Ico
       </div>
     </div>
   );
-}
 }
