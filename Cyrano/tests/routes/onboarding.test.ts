@@ -18,9 +18,10 @@
  * Also tests state persistence and completion flow.
  */
 
-import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { describe, it, expect, beforeAll, beforeEach, afterAll } from 'vitest';
+import type { Server } from 'http';
+import type { AddressInfo } from 'net';
 import { fetchWithRetry } from '../utils/fetch-retry.js';
-import { startAppServer } from '../test-utils/test-server.js';
 import { generateAccessToken } from '../../src/middleware/security.js';
 
 // Set environment variables before importing
@@ -36,38 +37,70 @@ import { app } from '../../src/http-bridge.js';
 const describeIfDatabaseConfigured = process.env.DATABASE_URL ? describe : describe.skip;
 
 describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
-  const testPort = process.env.TEST_PORT ? parseInt(process.env.TEST_PORT) : 5003;
-  let baseUrl = `http://localhost:${testPort}`;
+  // Bind explicitly to the IPv4 loopback address to avoid ECONNREFUSED errors on
+  // systems where 'localhost' resolves to ::1 (IPv6) while the server binds to
+  // 127.0.0.1 (IPv4).  TEST_HOST / TEST_PORT can override for special environments.
+  const host = process.env.TEST_HOST ?? '127.0.0.1';
+  let testPort = process.env.TEST_PORT ? parseInt(process.env.TEST_PORT) : 0;
+  let baseUrl = '';
   let server: Server | null = null;
   let authHeaders: Record<string, string> = {};
   const testUserId = 'test-onboarding-user';
 
   beforeAll(async () => {
-    // Use TEST_PORT env var if set, otherwise fall back to port 0 (OS-assigned ephemeral port).
-    // Port 0 avoids EADDRINUSE conflicts in CI and local parallel runs.
-    const preferredPort = process.env.TEST_PORT;
-    console.log(
-      `[Onboarding Tests] Starting test server on ${preferredPort ? `port ${preferredPort}` : 'ephemeral port (0)'}...`
-    );
+    // Start the HTTP bridge server for testing on an ephemeral port (0) to avoid
+    // conflicts with other running services. The OS assigns a free port, which is
+    // then retrieved from server.address() and used for all subsequent requests.
+    const http = await import('http');
+    server = http.createServer(app);
 
-    try {
-      const started = await startAppServer(app, preferredPort);
-      baseUrl = started.baseUrl;
-      stopServer = started.stop;
-    } catch (err: any) {
-      const portHint = preferredPort
-        ? `Port ${preferredPort} may already be in use. Set TEST_PORT to a different available port, or unset it to use an ephemeral port.`
-        : 'Ephemeral port allocation failed — check system resource limits.';
-      console.error(`[Onboarding Tests] ❌ Server startup failed: ${err.message}. ${portHint}`);
-      throw err;
-    }
+    await new Promise<void>((resolve, reject) => {
+      const timeout = setTimeout(() => {
+        reject(new Error('Server startup timeout after 15 seconds'));
+      }, 15000);
+
+      server!.listen(testPort, host, () => {
+        clearTimeout(timeout);
+        // Resolve the actual bound port (critical when testPort is 0/ephemeral).
+        // We bound to a specific IP so address() always returns an AddressInfo object.
+        const addr = server!.address() as AddressInfo | string | null;
+        if (!addr || typeof addr === 'string') {
+          reject(new Error('Failed to determine server TCP address after listen()'));
+          return;
+        }
+        testPort = addr.port;
+        baseUrl = `http://${host}:${testPort}`;
+        console.log(`Test HTTP server started on ${host}:${testPort}`);
+
+        // Probe /health with retries; ignore if endpoint is unavailable
+        fetchWithRetry(`${baseUrl}/health`, { method: 'GET' }, 10, 250)
+          .then(() => resolve())
+          .catch(() => setTimeout(() => resolve(), 200));
+      });
+
+      server!.on('error', (err: any) => {
+        clearTimeout(timeout);
+        if (err.code === 'EADDRINUSE') {
+          reject(new Error(`Port ${testPort} is already in use. Use TEST_PORT=0 or unset it to let the OS pick a free port.`));
+        } else {
+          reject(err);
+        }
+      });
+    });
+
+    // Additional small wait to ensure app middleware is fully initialised
+    await new Promise(resolve => setTimeout(resolve, 200));
 
     // Generate a test JWT token for authenticated requests.
     // All routes extract userId from the JWT (user.userId = 1) regardless of any
     // userId value sent in the request body or query string.
+    // NOTE: CSRF protection is disabled when NODE_ENV=test (see http-bridge.ts),
+    // so only the Authorization header is required for POST requests.
     const token = generateAccessToken({ userId: 1, email: 'test@example.com', role: 'admin' });
     authHeaders = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
-  }, 20000);
+  // Vitest timeout is set higher than the internal 15 s server-start timeout so we
+  // get a descriptive error from our code rather than a generic "Test timed out".
+  }, 30000);
 
   afterAll(async () => {
     if (stopServer) {
@@ -246,7 +279,7 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
       });
 
       // Then check status
-      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/status?userId=${testUserId}&appId=lexfiat`);
+      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/status?userId=${testUserId}&appId=lexfiat`, { headers: authHeaders });
       expect(response.ok).toBe(true);
       const data = await response.json();
       expect(data).toHaveProperty('completed');
@@ -256,7 +289,7 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
     });
 
     it('should return incomplete status for new user', async () => {
-      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/status?userId=new-user&appId=lexfiat`);
+      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/status?userId=new-user&appId=lexfiat`, { headers: authHeaders });
       expect(response.ok).toBe(true);
       const data = await response.json();
       expect(data.completed).toBe(false);
@@ -325,7 +358,7 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
       });
 
       // Then load it
-      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/load-progress?userId=${testUserId}`);
+      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/load-progress?userId=${testUserId}`, { headers: authHeaders });
       expect(response.ok).toBe(true);
       const data = await response.json();
       expect(data).toHaveProperty('currentStep');
@@ -333,7 +366,7 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
     });
 
     it('should return default values for new user', async () => {
-      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/load-progress?userId=new-user-2`);
+      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/load-progress?userId=new-user-2`, { headers: authHeaders });
       expect(response.ok).toBe(true);
       const data = await response.json();
       expect(data.currentStep).toBe(1);
@@ -453,7 +486,7 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
       expect(completionData.completed).toBe(true);
 
       // Verify final status
-      const statusResponse = await fetchWithRetry(`${baseUrl}/api/onboarding/status?userId=${flowUserId}&appId=lexfiat`);
+      const statusResponse = await fetchWithRetry(`${baseUrl}/api/onboarding/status?userId=${flowUserId}&appId=lexfiat`, { headers: authHeaders });
       const statusData = await statusResponse.json();
       expect(statusData.completed).toBe(true);
       expect(statusData.completedSteps.length).toBeGreaterThanOrEqual(7);
@@ -479,7 +512,7 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
       expect(saveResponse.ok).toBe(true);
 
       // Load progress
-      const loadResponse = await fetchWithRetry(`${baseUrl}/api/onboarding/load-progress?userId=${stateUserId}`);
+      const loadResponse = await fetchWithRetry(`${baseUrl}/api/onboarding/load-progress?userId=${stateUserId}`, { headers: authHeaders });
       expect(loadResponse.ok).toBe(true);
       const loadData = await loadResponse.json();
       expect(loadData.currentStep).toBe(3);
