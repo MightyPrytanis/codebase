@@ -18,10 +18,11 @@
  * Also tests state persistence and completion flow.
  */
 
-import { describe, it, expect, beforeAll, beforeEach, afterAll, vi } from 'vitest';
+import { describe, it, expect, beforeAll, beforeEach, afterAll } from 'vitest';
 import type { Server } from 'http';
 import type { AddressInfo } from 'net';
 import { fetchWithRetry } from '../utils/fetch-retry.js';
+import { generateAccessToken } from '../../src/middleware/security.js';
 
 // Set environment variables before importing
 process.env.NODE_ENV = 'test';
@@ -36,35 +37,37 @@ import { app } from '../../src/http-bridge.js';
 const describeIfDatabaseConfigured = process.env.DATABASE_URL ? describe : describe.skip;
 
 describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
-  const testPort = process.env.TEST_PORT ? parseInt(process.env.TEST_PORT) : 5003;
-  let baseUrl = `http://localhost:${testPort}`;
+  let testPort = process.env.TEST_PORT ? parseInt(process.env.TEST_PORT) : 0;
+  let baseUrl = '';
   let server: Server | null = null;
   let authHeaders: Record<string, string> = {};
   const testUserId = 'test-onboarding-user';
 
   beforeAll(async () => {
-    // Start the HTTP bridge server for testing
+    // Start the HTTP bridge server for testing on an ephemeral port (0) to avoid
+    // conflicts with other running services. The OS assigns a free port, which is
+    // then retrieved from server.address() and used for all subsequent requests.
     const http = await import('http');
     server = http.createServer(app);
-    
+
     await new Promise<void>((resolve, reject) => {
       const timeout = setTimeout(() => {
-        reject(new Error('Server startup timeout after 10 seconds'));
-      }, 10000);
-      
-      server!.listen(testPort || 0, () => {
+        reject(new Error('Server startup timeout after 15 seconds'));
+      }, 15000);
+
+      server!.listen(testPort, () => {
         clearTimeout(timeout);
-        // Determine the actual bound port (important when using ephemeral port 0)
+        // Resolve the actual bound port (critical when testPort is 0/ephemeral)
         const addr = server!.address() as AddressInfo | string | null;
         if (!addr) {
           reject(new Error('Failed to determine server address after listen()'));
           return;
         }
-        testPort = typeof addr === 'object' ? addr.port : Number(String(addr).split(':').pop()); // string only for Unix sockets
+        testPort = typeof addr === 'object' ? addr.port : Number(String(addr).split(':').pop());
         baseUrl = `http://localhost:${testPort}`;
         console.log(`Test HTTP server started on port ${testPort}`);
 
-        // Probe /health with retries; treat missing /health as okay
+        // Probe /health with retries; ignore if endpoint is unavailable
         fetchWithRetry(`${baseUrl}/health`, { method: 'GET' }, 5, 200)
           .then(() => resolve())
           .catch(() => setTimeout(() => resolve(), 200));
@@ -73,30 +76,26 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
       server!.on('error', (err: any) => {
         clearTimeout(timeout);
         if (err.code === 'EADDRINUSE') {
-          reject(new Error(`Port ${testPort} is already in use. Set TEST_PORT to an available port.`));
+          reject(new Error(`Port ${testPort} is already in use. Use TEST_PORT=0 or unset it to let the OS pick a free port.`));
         } else {
           reject(err);
         }
       });
     });
-    
-    // Additional small wait to ensure app middleware is fully ready
+
+    // Additional small wait to ensure app middleware is fully initialised
     await new Promise(resolve => setTimeout(resolve, 200));
-    const started = await startAppServer(app, process.env.TEST_PORT);
-    server = started.server;
-    baseUrl = started.baseUrl;
 
     // Generate a test JWT token for authenticated requests.
     // All routes extract userId from the JWT (user.userId = 1) regardless of any
     // userId value sent in the request body or query string.
+    // NOTE: CSRF protection is disabled when NODE_ENV=test (see http-bridge.ts),
+    // so only the Authorization header is required for POST requests.
     const token = generateAccessToken({ userId: 1, email: 'test@example.com', role: 'admin' });
     authHeaders = { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' };
-  }, 20000);
-
-  beforeEach(() => {
-    // Reset in-memory profile store so each test starts with a clean slate
-    profileStore.clear();
-  });
+  // Vitest timeout is set higher than the internal 15 s server-start timeout so we
+  // get a descriptive error from our code rather than a generic "Test timed out".
+  }, 30000);
 
   afterAll(async () => {
     if (server && server.listening) {
@@ -280,7 +279,7 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
       });
 
       // Then check status
-      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/status?userId=${testUserId}&appId=lexfiat`);
+      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/status?userId=${testUserId}&appId=lexfiat`, { headers: authHeaders });
       expect(response.ok).toBe(true);
       const data = await response.json();
       expect(data).toHaveProperty('completed');
@@ -290,7 +289,7 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
     });
 
     it('should return incomplete status for new user', async () => {
-      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/status?userId=new-user&appId=lexfiat`);
+      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/status?userId=new-user&appId=lexfiat`, { headers: authHeaders });
       expect(response.ok).toBe(true);
       const data = await response.json();
       expect(data.completed).toBe(false);
@@ -359,7 +358,7 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
       });
 
       // Then load it
-      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/load-progress?userId=${testUserId}`);
+      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/load-progress?userId=${testUserId}`, { headers: authHeaders });
       expect(response.ok).toBe(true);
       const data = await response.json();
       expect(data).toHaveProperty('currentStep');
@@ -367,7 +366,7 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
     });
 
     it('should return default values for new user', async () => {
-      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/load-progress?userId=new-user-2`);
+      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/load-progress?userId=new-user-2`, { headers: authHeaders });
       expect(response.ok).toBe(true);
       const data = await response.json();
       expect(data.currentStep).toBe(1);
@@ -487,7 +486,7 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
       expect(completionData.completed).toBe(true);
 
       // Verify final status
-      const statusResponse = await fetchWithRetry(`${baseUrl}/api/onboarding/status?userId=${flowUserId}&appId=lexfiat`);
+      const statusResponse = await fetchWithRetry(`${baseUrl}/api/onboarding/status?userId=${flowUserId}&appId=lexfiat`, { headers: authHeaders });
       const statusData = await statusResponse.json();
       expect(statusData.completed).toBe(true);
       expect(statusData.completedSteps.length).toBeGreaterThanOrEqual(7);
@@ -513,7 +512,7 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
       expect(saveResponse.ok).toBe(true);
 
       // Load progress
-      const loadResponse = await fetchWithRetry(`${baseUrl}/api/onboarding/load-progress?userId=${stateUserId}`);
+      const loadResponse = await fetchWithRetry(`${baseUrl}/api/onboarding/load-progress?userId=${stateUserId}`, { headers: authHeaders });
       expect(loadResponse.ok).toBe(true);
       const loadData = await loadResponse.json();
       expect(loadData.currentStep).toBe(3);
