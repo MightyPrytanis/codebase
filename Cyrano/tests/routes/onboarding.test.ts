@@ -487,3 +487,4 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
     });
   });
 });
+});
