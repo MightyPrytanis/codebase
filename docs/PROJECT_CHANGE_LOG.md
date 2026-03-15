@@ -37,7 +37,7 @@ Following the BraceCase Agent incident (see `docs/BRACECASE_POSTMORTEM.md`), ext
 
 Upon investigation, all Phase 1 code changes were already present in the main branch as a result of prior integration work:
 
-1. ✅ **XSS Prevention Fix** (`apps/lexfiat/client/src/lib/dom-xss-security.ts`): The `escapeCSS()` function already strips `data:` and `vbscript:` schemes (from code scanning alert no. 181). Applied via commit `faad17b` / `ea29cf0`.
+1. ✅ **XSS Prevention Fix** (`apps/lexfiat/client/src/lib/dom-xss-security.ts`): The `escapeCSS()` function already strips `data:` and `vbscript:` schemes (from code scanning alert no. 181); this fix is present on the `main` branch as of 2026-03-15 (2026-W11).
 
 2. ✅ **Variable Scope Fixes**:
    - `Cyrano/src/engines/mae/tools/ai-orchestrator.ts` — Eliminated unnecessary `basePrompt` variable (verificationResults array retained for synthesis input)
