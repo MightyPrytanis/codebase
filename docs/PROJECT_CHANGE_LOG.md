@@ -3,10 +3,10 @@ Document ID: PROJECT-CHANGE-LOG
 Title: Cyrano Project Change Log
 Subject(s): Project | History | Development
 Project: Cyrano
-Version: v606
+Version: v611
 Created: 2025-11-28 (2025-W48)
-Last Substantive Revision: 2026-02-08 (2026-W06)
-Last Format Update: 2026-02-08 (2026-W06)
+Last Substantive Revision: 2026-03-15 (2026-W11)
+Last Format Update: 2026-03-15 (2026-W11)
 Owner: David W Towne / Cognisint LLC
 Copyright: © 2025 Cognisint LLC
 Summary: Consolidated running log of all project changes, structured by work plan steps.
@@ -17,7 +17,68 @@ Related Documents: REALISTIC-WORK-PLAN
 # Cyrano Project Change Log
 
 **Project Start:** July 2025  
-**Last Updated:** 2026-02-08 (2026-W06)  
+**Last Updated:** 2026-03-15 (2026-W11)
+
+---
+
+## Phase 1 Integration: cursor/general-codebase-debugging-18e6 (2026-03-15)
+
+**Status:** ✅ COMPLETE  
+**Branch Evaluated:** `cursor/general-codebase-debugging-18e6`  
+**Purpose:** Salvage valuable unmerged work from the Cursor agent debugging branch
+
+### Context
+
+Following the BraceCase Agent incident (see `docs/BRACECASE_POSTMORTEM.md`), extensive work from the `cursor/general-codebase-debugging-18e6` branch was evaluated for integration. This branch contained approximately 30+ commits from January 2026 representing significant work including security fixes, code quality improvements, new features, and infrastructure improvements.
+
+### Findings
+
+**Phase 1 Evaluation (Security + Code Quality):**
+
+Upon investigation, all Phase 1 code changes were already present in the main branch as a result of prior integration work:
+
+1. ✅ **XSS Prevention Fix** (`apps/lexfiat/client/src/lib/dom-xss-security.ts`): The `escapeCSS()` function already strips `data:` and `vbscript:` schemes (from code scanning alert no. 181); this fix is present on the `main` branch as of 2026-03-15 (2026-W11).
+
+2. ✅ **Variable Scope Fixes**:
+   - `Cyrano/src/engines/mae/tools/ai-orchestrator.ts` — Eliminated unnecessary `basePrompt` variable (verificationResults array retained for synthesis input)
+   - `Cyrano/src/modules/arkiver/extractors/pdf-extractor.ts` — Moved `createRequire` import outside try block to fix scope error
+   - `Cyrano/src/modules/arkiver/processors/email-processor.ts` — Changed `bodyLines` from `const` to `let`
+   - `Cyrano/src/modules/arkiver/processors/text-processor.ts` — Added `let normalized = text;` before use
+   
+3. ✅ **ESLint Config Cleanup** (`.eslintrc.json`): Removed stale `_comment` field from legacy config
+
+4. ✅ **Auth Server ES Modules** (`Cyrano/auth-server/index.ts`): Switched from CommonJS `require`/`module.exports` to ES module `import`/`export default`
+
+5. ✅ **Type Safety Improvements** (Custodian engine and tools): `z.record(z.any())` → `z.record(z.string(), z.any())` for proper key type enforcement
+
+6. ✅ **SMS Service Hardening** (`Cyrano/src/engines/custodian/services/sms-service.ts`): Added Twilio credentials validation before attempting to create client
+
+### Critical Finding: BraceCase Corruption in Source Branch
+
+The `cursor/general-codebase-debugging-18e6` branch **itself contains BraceCase corruption** — the same corruption that was cleaned up from the main branch in February 2026. Files including `dom-xss-security.ts`, `sms-service.ts`, `clio-webhooks.ts`, `potemkin-clio.ts`, `mcp-security.ts`, and `prompt-injection-defense.ts` all contain orphaned closing delimiters at EOF in the branch.
+
+Additionally, the branch's `security.ts` contains a **security regression** — it removes the prototype pollution protection (`__proto__`, `constructor`, `prototype` key filtering) from the `sanitizeInputs` middleware. **This regression must NOT be integrated.**
+
+**Conclusion**: The current main branch is superior to the source branch for all Phase 1 files. The good changes were already integrated; the corrupted/regressed portions must be skipped.
+
+### Documentation Added
+
+This Phase 1 integration PR also adds comprehensive cautionary documentation to `docs/GENERAL_GUIDE_PROJECT_POLICIES.md`:
+- AI Agent Integrity Risks section documenting Cursor agent false claims pattern
+- Dependency Update Policy with explicit safeguards
+- Breaking Changes Policy with mandatory isolation and review requirements
+
+### Phase 2+ (Future Work)
+
+Remaining phases of the integration plan are deferred:
+- **Phase 2** (Dependency updates): Requires individual verification of each bump against current dependency state
+- **Phase 3** (Tax forecasting features): Full standalone feature, needs isolated branch
+- **Phase 4** (Agent architecture framework): Large structural addition, needs dedicated review
+
+**Date:** 2026-03-15 (2026-W11)
+
+---
+  
 **Last Substantive Revision:** 2026-02-08 (2026-W06)  
 **Auditor General DRAFT Report:** Issued 2025-12-21 (see `docs/AUDITOR_GENERAL_REPORT.md`)  
 **Structure:** Organized by work plan steps (see REALISTIC_WORK_PLAN.md)
