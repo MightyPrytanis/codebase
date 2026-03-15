@@ -21,6 +21,60 @@ Related Documents: REALISTIC-WORK-PLAN
 
 ---
 
+## Phase 2 Integration: cursor/general-codebase-debugging-18e6 — Dependency Updates (2026-03-15)
+
+**Status:** COMPLETE
+**Branch Evaluated:** `cursor/general-codebase-debugging-18e6`
+**Purpose:** Evaluate and apply dependency bumps from the cursor debugging branch
+
+### Evaluation Summary
+
+Each dependency bump present in the cursor source branch was individually verified against the
+current state of `main`. In every case, `main` already carries a **newer** version than the
+cursor branch proposed. No dependency rollbacks or downgrades are needed.
+
+| Package | Cursor branch | `main` (current) | Action |
+|---|---|---|---|
+| `@modelcontextprotocol/sdk` | 1.25.2 | ^1.26.0 (resolved 1.26.0) | No action — main is newer |
+| `react-router` / `react-router-dom` | bumped | superseded | No action — main is newer |
+| `react` / `@types/react` (arkiver) | bumped | superseded | No action — main is newer |
+| `lucide-react` | 0.562.0 | 0.575.0 | No action — main is newer |
+| `drizzle-orm` | 0.45.1 | 0.45.1 | Already at same version |
+| `puppeteer` | 24.34.0 | 24.37.5 | No action — main is newer |
+| `zod` | 4.3.5 | 4.3.6 | No action — main is newer |
+| `react-dom` | bumped | superseded | No action — main is newer |
+| `tailwind-merge` | 3.4.0 | superseded | No action — main is newer |
+| `@vitejs/plugin-react` | 5.1.2 | superseded | No action — main is newer |
+| `tmp` + `patch-package` | bumped | see below | Special handling (see below) |
+
+### Special Case: patch-package and the MCP SDK ReDoS Patch
+
+The cursor branch introduced a `patch-package` workflow to fix a ReDoS vulnerability in
+`@modelcontextprotocol/sdk@1.25.1` (`UriTemplate.partToRegExp()`). The fix changed the
+vulnerable regex `([^/]+(?:,[^/]+)*)` to `([^/,]+(?:,[^/,]+)*)` in the ESM and CJS builds.
+
+**The fix was upstreamed in `@modelcontextprotocol/sdk@1.25.2`**. Because `main` already specifies
+`^1.26.0` (resolved 1.26.0), the patch is no longer needed and the versioned patch file
+(`patches/@modelcontextprotocol+sdk+1.25.1.patch`) would fail a version-mismatch check on
+`npm install`.
+
+**Actions taken:**
+- Deleted `Cyrano/patches/@modelcontextprotocol+sdk+1.25.1.patch` (stale — targets removed version)
+- Removed `patch-package` from `devDependencies` in `Cyrano/package.json`
+- Removed `"postinstall": "patch-package"` from scripts in `Cyrano/package.json`
+- Updated `Cyrano/patches/README.md` to document the retirement and provide guidance for future patches
+- Retained `Cyrano/tests/security/redos-uri-template.test.ts` as a regression guard
+  (the test verifies the SDK's actual behavior, independent of whether a patch delivered the fix)
+
+### Phase 3+ (Remaining Future Work)
+
+- **Phase 3** (Tax forecasting features): Full standalone feature, needs isolated branch
+- **Phase 4** (Agent architecture framework): Large structural addition, needs dedicated review
+
+**Date:** 2026-03-15 (2026-W11)
+
+---
+
 ## Phase 1 Integration: cursor/general-codebase-debugging-18e6 (2026-03-15)
 
 **Status:** COMPLETE  
@@ -68,10 +122,10 @@ This Phase 1 integration PR also adds comprehensive cautionary documentation to 
 - Dependency Update Policy with explicit safeguards
 - Breaking Changes Policy with mandatory isolation and review requirements
 
-### Phase 2+ (Future Work)
+### Phase 2+ (Future Work — as of Phase 1 completion)
 
-Remaining phases of the integration plan are deferred:
-- **Phase 2** (Dependency updates): Requires individual verification of each bump against current dependency state
+Remaining phases of the integration plan were deferred at Phase 1 completion:
+- **Phase 2** (Dependency updates): COMPLETE — see Phase 2 entry above (2026-03-15)
 - **Phase 3** (Tax forecasting features): Full standalone feature, needs isolated branch
 - **Phase 4** (Agent architecture framework): Large structural addition, needs dedicated review
 
