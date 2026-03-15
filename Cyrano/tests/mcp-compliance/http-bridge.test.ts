@@ -6,7 +6,8 @@
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import type { Server } from 'http';
-import { startAppServer, fetchWithRetry } from '../test-utils/test-server.js';
+import type { AddressInfo } from 'net';
+import { fetchWithRetry } from '../test-utils/test-server.js';
 
 // Set environment variables before importing
 process.env.NODE_ENV = 'test';
@@ -17,6 +18,9 @@ process.env.TRUST_PROXY_COUNT = '0'; // Disable trust proxy for tests
 import { app } from '../../src/http-bridge.js';
 
 describe('MCP HTTP Bridge Compliance', () => {
+  // Bind explicitly to the IPv4 loopback address to avoid ECONNREFUSED on systems
+  // where 'localhost' resolves to ::1 (IPv6) while the server binds to 127.0.0.1 (IPv4).
+  const host = process.env.TEST_HOST ?? '127.0.0.1';
   // Use ephemeral port by default; honor TEST_PORT override if provided
   let testPort = process.env.TEST_PORT ? parseInt(process.env.TEST_PORT) : 0; // 0 => ephemeral
   let baseUrl = '';
@@ -25,7 +29,9 @@ describe('MCP HTTP Bridge Compliance', () => {
   let sessionCookie: string = '';
 
   beforeAll(async () => {
-    // Start the HTTP bridge server for testing
+    // Start the HTTP bridge server for testing on an ephemeral port, bound to IPv4
+    // loopback (127.0.0.1) to avoid connection issues on systems where 'localhost'
+    // resolves to ::1 (IPv6).
     const http = await import('http');
     server = http.createServer(app);
     await new Promise<void>((resolve, reject) => {
@@ -33,17 +39,18 @@ describe('MCP HTTP Bridge Compliance', () => {
         reject(new Error('Server startup timeout after 10 seconds'));
       }, 10000);
 
-      server!.listen(testPort || 0, () => {
+      server!.listen(testPort || 0, host, () => {
         clearTimeout(timeout);
-        // Determine the actual bound port (important when using ephemeral port 0)
-        const addr = server!.address() as AddressInfo | string | null;
+        // Determine the actual bound port (critical when testPort is 0/ephemeral).
+        // Bound to a specific IP so address() always returns an AddressInfo object.
+        const addr = server!.address() as AddressInfo | null;
         if (!addr) {
-          reject(new Error('Failed to determine server address after listen()'));
+          reject(new Error('Failed to determine server TCP address after listen()'));
           return;
         }
-        testPort = typeof addr === 'object' ? addr.port : Number(String(addr).split(':').pop()); // string only for Unix sockets
-        baseUrl = `http://localhost:${testPort}`;
-        console.log(`Test HTTP server started on port ${testPort}`);
+        testPort = addr.port;
+        baseUrl = `http://${host}:${testPort}`;
+        console.log(`Test HTTP server started on ${host}:${testPort}`);
 
         // Probe /health with retries; treat missing /health as okay
         fetchWithRetry(`${baseUrl}/health`, { method: 'GET' }, 5, 200)
@@ -53,23 +60,7 @@ describe('MCP HTTP Bridge Compliance', () => {
 
       server!.on('error', (err: any) => {
         clearTimeout(timeout);
-        if (err.code === 'EADDRINUSE') {
-          console.warn(`Port ${testPort} in use, trying ephemeral port`);
-          // Fallback: try ephemeral port
-          testPort = 0;
-          server!.listen(0, () => {
-            const addr2 = server!.address() as AddressInfo | string | null;
-            testPort = addr2 && typeof addr2 === 'object' ? addr2.port : testPort;
-            baseUrl = `http://localhost:${testPort}`;
-            console.log(`Test HTTP server started on fallback port ${testPort}`);
-            resolve();
-          });
-          server!.once('error', (fallbackErr: any) => {
-            reject(new Error(`Fallback ephemeral listen failed: ${fallbackErr.message}`));
-          });
-        } else {
-          reject(err);
-        }
+        reject(err);
       });
     });
     

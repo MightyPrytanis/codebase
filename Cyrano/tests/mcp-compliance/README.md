@@ -5,8 +5,8 @@ Subject(s): Cyrano | Reference | Testing
 Project: Cyrano
 Version: v611
 Created: Unknown
-Last Substantive Revision: 2026-03-10 (2026-W11)
-Last Format Update: 2026-03-10 (2026-W11)
+Last Substantive Revision: 2026-03-15 (2026-W11)
+Last Format Update: 2026-03-15 (2026-W11)
 Owner: David W Towne / Cognisint LLC
 Copyright: © 2025 Cognisint LLC
 Status: Active
@@ -57,70 +57,48 @@ npm test -- tests/mcp-compliance/mcp-compliance.test.ts
 
 ## HTTP Bridge for Tests
 
-Tests that exercise the HTTP bridge expect a local HTTP endpoint during test
-runs. If no server is listening on the expected address (default
-`http://127.0.0.1:5003`), tests will fail with `ECONNREFUSED` (see logs showing
-attempts to `::1:5003` and `127.0.0.1:5003`).
+The HTTP bridge integration tests (`http-bridge.test.ts`) start their own test
+server on an ephemeral port — **no external server or mock needs to be started
+before running the test suite**.
 
-A lightweight mock server is provided at:
+The test server:
+- Binds to `127.0.0.1` (IPv4 loopback) to avoid IPv6/IPv4 mismatches on systems
+  where `localhost` resolves to `::1`.
+- Uses port `0` (OS-assigned ephemeral port) by default to prevent port conflicts.
+  Set the `TEST_PORT` env var to override.
+- Polls `/health` with retry logic before running tests to ensure the server is
+  fully ready.
+- Cleans up by closing the server in `afterAll`.
+
+```bash
+# Run all MCP compliance tests (no external server needed)
+npm run test:mcp
+
+# Override port if needed (e.g., for debugging)
+TEST_PORT=5003 npm run test:mcp
+```
+
+### Mock HTTP Bridge Server (manual / legacy use only)
+
+A lightweight mock server is still provided at:
 
 ```
 Cyrano/tests/mcp-compliance/mock-http-bridge-server.js
 ```
 
-**Start locally:**
+This is **not required for running the automated tests** (they manage their own
+server). It is useful for manual exploration or pointing external tools at a
+running bridge endpoint:
 
 ```bash
 node Cyrano/tests/mcp-compliance/mock-http-bridge-server.js
 ```
 
 The server exposes:
-- `GET /health` — returns `{ "status": "ok" }`, used by CI health waiters
+- `GET /health` — returns `{ "status": "ok" }`
 - `GET /` — same as `/health`
-- `POST /v1/bridge*` — echoes the request payload (mock bridge endpoint)
+- `POST /v1/bridge*` — echoes the request payload
 - All other routes — 404
-
-**`HTTP_BRIDGE_URL` env var:** If `HTTP_BRIDGE_URL` is set, tests should use it;
-otherwise they should default to `http://127.0.0.1:5003`. This makes it easy to
-point tests at the real Cyrano server or the mock without code changes:
-
-```bash
-HTTP_BRIDGE_URL=http://127.0.0.1:5003 npm run test:mcp
-```
-
-**Note on IPv6:** Node resolves `"localhost"` to `::1` on some systems (macOS,
-some Linux distros), causing an extra connection attempt to `[::1]:5003` before
-falling back to `127.0.0.1`. To avoid `AggregateError` / spurious `ECONNREFUSED`
-failures, the mock server binds to `127.0.0.1` explicitly, and tests should use
-`127.0.0.1` in their base URL (or the `HTTP_BRIDGE_URL` env var).
-
-**CI — starting the mock bridge:**
-
-The mock server can be started as a background process before the test step and
-health-checked with `npx wait-on`:
-
-```yaml
-- name: Start mock HTTP bridge
-  # binds to 127.0.0.1:5003 by default; set PORT env var to override
-  run: node Cyrano/tests/mcp-compliance/mock-http-bridge-server.js &
-  working-directory: ${{ github.workspace }}
-
-- name: Wait for mock bridge to be ready
-  # Option A: npx wait-on (no extra dependency needed)
-  run: npx wait-on http://127.0.0.1:5003/health --timeout 10000
-  # Option B: curl with retries (if npx is unavailable)
-  # run: curl --retry 5 --retry-delay 1 --fail http://127.0.0.1:5003/health
-
-- name: Run MCP compliance tests
-  run: npm run test:mcp
-  env:
-    HTTP_BRIDGE_URL: http://127.0.0.1:5003
-```
-
-**Alternatives:**
-- Use request-mocking libraries (`nock` or `msw`) inside the test harness to stub
-  HTTP calls — no port binding required.
-- Start a Docker container that serves the required endpoints on port 5003.
 
 ## Test Implementation Status
 
