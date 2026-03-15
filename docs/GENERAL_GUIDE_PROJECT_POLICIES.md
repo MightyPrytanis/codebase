@@ -18,7 +18,6 @@ Related Documents: PROJECT-CHANGE-LOG, ACTIVE-DOCS-INDEX
 
 **Purpose:** Establish mandatory policies for Cursor agents and all other agents working on Project Cyrano  
 **Status:** Active - All agents must observe these policies  
-**Last Updated:** 2026-03-15
 
 ---
 
