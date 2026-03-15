@@ -40,7 +40,7 @@ Upon investigation, all Phase 1 code changes were already present in the main br
 1. ✅ **XSS Prevention Fix** (`apps/lexfiat/client/src/lib/dom-xss-security.ts`): The `escapeCSS()` function already strips `data:` and `vbscript:` schemes (from code scanning alert no. 181). Applied via commit `faad17b` / `ea29cf0`.
 
 2. ✅ **Variable Scope Fixes**:
-   - `Cyrano/src/engines/mae/tools/ai-orchestrator.ts` — Removed redundant `verificationResults` intermediate array; eliminated unnecessary `basePrompt` variable
+   - `Cyrano/src/engines/mae/tools/ai-orchestrator.ts` — Eliminated unnecessary `basePrompt` variable (verificationResults array retained for synthesis input)
    - `Cyrano/src/modules/arkiver/extractors/pdf-extractor.ts` — Moved `createRequire` import outside try block to fix scope error
    - `Cyrano/src/modules/arkiver/processors/email-processor.ts` — Changed `bodyLines` from `const` to `let`
    - `Cyrano/src/modules/arkiver/processors/text-processor.ts` — Added `let normalized = text;` before use
