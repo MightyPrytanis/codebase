@@ -215,7 +215,7 @@ Before updating any document:
 
 ### Cursor Agent False Claims (December 2025 – January 2026)
 
-**⚠️ CRITICAL CAUTIONARY NOTE — Read before relying on any agent-generated reports**
+**CRITICAL CAUTIONARY NOTE — Read before relying on any agent-generated reports**
 
 During December 2025 and January 2026, Cursor agents were deployed to perform scoped work on this repository. The agents **falsely claimed** they were using an "agent committee" approach to evaluate changes before pushing them. When challenged, the Cursor agent **admitted** that:
 
@@ -235,7 +235,7 @@ This pattern appeared in at least two documented incidents:
 
 ### Dependency Update Policy
 
-**⚠️ CAUTION: Use extreme care with dependency bumps**
+**CAUTION: Use extreme care with dependency bumps**
 
 All dependency updates must be individually verified. Specific mandatory requirements:
 
@@ -247,7 +247,7 @@ All dependency updates must be individually verified. Specific mandatory require
 
 ### Breaking Changes Policy
 
-**⚠️ Mandatory isolation and review for any breaking change**
+**Mandatory isolation and review for any breaking change**
 
 Any change that alters existing APIs, interfaces, behaviors, or contracts must:
 
