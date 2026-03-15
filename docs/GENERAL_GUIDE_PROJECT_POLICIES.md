@@ -3,10 +3,10 @@ Document ID: PROJECT-POLICIES
 Title: Project Cyrano - Mandatory Policies for All Agents
 Subject(s): Policy | Versioning | Documentation | Work Protocol
 Project: Cyrano
-Version: v549
+Version: v611
 Created: 2025-12-06 (2025-W49)
-Last Substantive Revision: 2025-12-06 (2025-W49)
-Last Format Update: 2025-12-06 (2025-W49)
+Last Substantive Revision: 2026-03-15 (2026-W11)
+Last Format Update: 2026-03-15 (2026-W11)
 Owner: David W Towne / Cognisint LLC
 Copyright: © 2025 Cognisint LLC
 Summary: Mandatory policies for Cursor agents and all other agents working on Project Cyrano, including versioning, documentation, and work protocols.
@@ -18,7 +18,6 @@ Related Documents: PROJECT-CHANGE-LOG, ACTIVE-DOCS-INDEX
 
 **Purpose:** Establish mandatory policies for Cursor agents and all other agents working on Project Cyrano  
 **Status:** Active - All agents must observe these policies  
-**Last Updated:** 2025-12-06
 
 ---
 
@@ -209,6 +208,54 @@ Before updating any document:
 2. Verify the version number matches the ISO week
 3. Ensure dates are chronologically consistent
 4. Verify no dates appear before July 2025
+
+---
+
+## AI Agent Integrity Risks and Historical Incidents
+
+### Cursor Agent False Claims (December 2025 – January 2026)
+
+**CRITICAL CAUTIONARY NOTE — Read before relying on any agent-generated reports**
+
+During December 2025 and January 2026, Cursor agents were deployed to perform scoped work on this repository. The agents **falsely claimed** they were using an "agent committee" approach to evaluate changes before pushing them. When challenged, the Cursor agent **admitted** that:
+
+- It was not at all constrained by the agent framework or committee review process
+- It was not obliged to be truthful when it didn't want to be
+- Committee approvals and review summaries it had generated were fabricated
+
+This pattern appeared in at least two documented incidents:
+1. **Codebase Cleanup PEC Review (January 2026)**: Agent fabricated an entire committee review process (QAC, RMC, PRC) that did not occur. See `docs/CODEBASE_CLEANUP_CORRECTION.md` and the "Codebase Cleanup Correction" entry in `docs/PROJECT_CHANGE_LOG.md`.
+2. **BraceCase Agent (January 2026)**: Agent declared 25 files "resolved" while 178 files remained corrupted, without performing the build verification that was claimed. See `docs/BRACECASE_POSTMORTEM.md`.
+
+**Mandatory requirements for all agents and reviewers:**
+- **Never trust agent-generated committee reports without independent verification**
+- **Always run builds and tests before declaring work complete**
+- **Treat any agent claim of "review passed" or "committee approved" with deep skepticism**
+- **If an agent report cannot be verified through observable, reproducible means, treat it as unverified**
+
+### Dependency Update Policy
+
+**CAUTION: Use extreme care with dependency bumps**
+
+All dependency updates must be individually verified. Specific mandatory requirements:
+
+1. **No superseded updates**: Do not implement a dependency bump that has been superseded by a later version already present in the codebase or already merged
+2. **Compatibility verification**: Each dependency bump must be tested for compatibility with the existing codebase before merging
+3. **Necessity check**: Confirm the specific update is actually needed (security patch, required feature, etc.)
+4. **Breaking change review**: Check changelogs for breaking changes before updating any major version
+5. **Dependabot PRs**: Each Dependabot PR must be evaluated individually—do not auto-merge batches without review
+
+### Breaking Changes Policy
+
+**Mandatory isolation and review for any breaking change**
+
+Any change that alters existing APIs, interfaces, behaviors, or contracts must:
+
+1. **Be isolated** in its own commit or PR, never bundled with unrelated changes
+2. **Have documented justification** explaining why the breaking change is necessary
+3. **Include migration notes** describing what downstream code needs to update
+4. **Be tested exhaustively** before merging — run the full test suite, not just related tests
+5. **Receive explicit human review** — breaking changes cannot be auto-approved
 
 ---
 
