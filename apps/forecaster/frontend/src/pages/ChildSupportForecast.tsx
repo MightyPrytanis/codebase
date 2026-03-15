@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { Calculator } from 'lucide-react';
-import { generateChildSupportForecast, type ChildSupportForecastRequest } from '../lib/forecaster-api';
 
 export default function ChildSupportForecast() {
   const [formData, setFormData] = useState({
-    jurisdiction: 'michigan' as 'michigan' | 'other',
+    jurisdiction: 'michigan',
     payerIncome: '',
     payeeIncome: '',
     numberOfChildren: '1',
@@ -17,30 +16,22 @@ export default function ChildSupportForecast() {
 
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
 
     try {
-      const request: ChildSupportForecastRequest = {
-        jurisdiction: formData.jurisdiction,
-        payerIncome: parseFloat(formData.payerIncome) || 0,
-        payeeIncome: parseFloat(formData.payeeIncome) || 0,
-        numberOfChildren: parseInt(formData.numberOfChildren, 10),
-        overnightsPayer: parseInt(formData.overnightsPayer, 10),
-        overnightsPayee: parseInt(formData.overnightsPayee, 10),
-        healthInsurance: parseFloat(formData.healthInsurance) || 0,
-        childcare: parseFloat(formData.childcare) || 0,
-        otherChildren: parseInt(formData.otherChildren, 10),
-      };
-      const response = await generateChildSupportForecast(request);
-      setResult(response);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred while calculating the child support forecast.');
-    } finally {
+      // TODO: Connect to actual forecast engine API
+      setTimeout(() => {
+        setResult({
+          message: 'Child support forecast calculation would be performed here',
+          note: 'Connect to forecast engine API endpoint',
+        });
+        setLoading(false);
+      }, 1000);
+    } catch (error) {
+      console.error('Error calculating child support forecast:', error);
       setLoading(false);
     }
   };
@@ -187,51 +178,12 @@ export default function ChildSupportForecast() {
         </button>
       </form>
 
-      {error && (
-        <div className="mt-4 bg-red-50 border border-red-200 p-4 rounded-lg">
-          <p className="text-red-700 text-sm">{error}</p>
-        </div>
-      )}
-
-      {result && result.success && (
+      {result && (
         <div className="mt-6 bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-xl font-semibold mb-4">Forecast Results</h2>
-          {result.brandingApplied && (
-            <div className="mb-4 p-3 bg-yellow-50 border-l-4 border-yellow-400">
-              <p className="text-yellow-800 text-sm font-medium">
-                ⚠️ Hypothetical Forecast — For Planning Purposes Only
-              </p>
-              <p className="text-yellow-700 text-xs mt-1">
-                This is not a legal determination. Consult a qualified attorney before relying on these figures.
-              </p>
-            </div>
-          )}
-          {result.calculatedValues && (
-            <div className="space-y-2">
-              <div className="flex justify-between py-2 border-b">
-                <span className="text-gray-600">Combined Income</span>
-                <span className="font-medium">${result.calculatedValues.combinedIncome?.toLocaleString('en-US', { minimumFractionDigits: 2 })}/yr</span>
-              </div>
-              <div className="flex justify-between py-2 border-b">
-                <span className="text-gray-600">Payer Income Share</span>
-                <span className="font-medium">{(result.calculatedValues.payerPercentage != null ? result.calculatedValues.payerPercentage * 100 : 0).toFixed(1)}%</span>
-              </div>
-              <div className="flex justify-between py-2 border-b">
-                <span className="text-gray-600">Base Support Obligation</span>
-                <span className="font-medium">${result.calculatedValues.baseSupportObligation?.toLocaleString('en-US', { minimumFractionDigits: 2 })}/mo</span>
-              </div>
-              {result.calculatedValues.parentingTimeAdjustment !== 0 && (
-                <div className="flex justify-between py-2 border-b">
-                  <span className="text-gray-600">Parenting Time Adjustment</span>
-                  <span className="font-medium">-${result.calculatedValues.parentingTimeAdjustment?.toLocaleString('en-US', { minimumFractionDigits: 2 })}/mo</span>
-                </div>
-              )}
-              <div className="flex justify-between py-2 border-b bg-green-50 px-2 rounded">
-                <span className="text-gray-800 font-semibold">Estimated Monthly Support</span>
-                <span className="font-bold text-green-800 text-lg">${result.calculatedValues.finalSupportAmount?.toLocaleString('en-US', { minimumFractionDigits: 2 })}/mo</span>
-              </div>
-            </div>
-          )}
+          <pre className="bg-gray-50 p-4 rounded overflow-auto">
+            {JSON.stringify(result, null, 2)}
+          </pre>
         </div>
       )}
     </div>

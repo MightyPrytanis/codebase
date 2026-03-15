@@ -9,8 +9,6 @@ import { calculateFederal, type FederalTaxInput } from './tax/federal.js';
 import { FORM_1040_MAPPINGS, type PresentationMode } from './pdf/form-mappings.js';
 import { applyBranding, fillPdfForm } from './pdf/pdf-filler.js';
 import { calculateCityTax } from './city/city-tax.js';
-import { calculateQDRO } from './qdro/qdro.js';
-import { calculateChildSupport } from './support/child-support.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -243,118 +241,6 @@ app.post('/api/forecast/city-tax/pdf', async (req, res) => {
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename=\"LexFiat-Forecaster-CityTax-${calc.city}-${calc.year}.pdf\"`);
     res.send(pdfBytes);
-  } catch (err) {
-    const status = (err as any)?.statusCode ?? 500;
-    res.status(status).json({ success: false, error: err instanceof Error ? err.message : 'Unknown error' });
-  }
-});
-
-// ---------------------------------------------------------------------------
-// QDRO forecaster
-// ---------------------------------------------------------------------------
-
-const QDRORequestSchema = z.object({
-  forecast_input: z.object({
-    planType: z.enum(['defined_contribution', 'defined_benefit']),
-    accountBalance: z.number().nonnegative().optional(),
-    monthlyBenefit: z.number().nonnegative().optional(),
-    maritalServiceStart: z.string().min(1),
-    maritalServiceEnd: z.string().min(1),
-    retirementAge: z.number().min(55).max(75).optional(),
-    divisionPercentage: z.number().min(0).max(100),
-    participantDOB: z.string().optional(),
-    alternatePayeeDOB: z.string().optional(),
-  }),
-  branding: z
-    .object({
-      presentationMode: z.enum(['strip', 'watermark', 'none']).optional(),
-      riskAcknowledged: z.boolean().optional()
-    })
-    .optional()
-});
-
-app.post('/api/forecast/qdro', async (req, res) => {
-  try {
-    const parsed = QDRORequestSchema.parse(req.body);
-    const mode: PresentationMode = parsed.branding?.presentationMode ?? 'strip';
-    requireRiskAck(mode, parsed.branding?.riskAcknowledged);
-
-    const fi = parsed.forecast_input;
-    const calc = calculateQDRO({
-      planType: fi.planType,
-      accountBalance: fi.accountBalance,
-      monthlyBenefit: fi.monthlyBenefit,
-      maritalServiceStart: new Date(fi.maritalServiceStart),
-      maritalServiceEnd: new Date(fi.maritalServiceEnd),
-      retirementAge: fi.retirementAge,
-      divisionPercentage: fi.divisionPercentage,
-      participantDOB: fi.participantDOB ? new Date(fi.participantDOB) : undefined,
-      alternatePayeeDOB: fi.alternatePayeeDOB ? new Date(fi.alternatePayeeDOB) : undefined,
-    });
-
-    res.json({
-      success: true,
-      forecastType: 'qdro',
-      calculatedValues: calc,
-      brandingApplied: mode !== 'none',
-      presentationMode: mode
-    });
-  } catch (err) {
-    const status = (err as any)?.statusCode ?? 500;
-    res.status(status).json({ success: false, error: err instanceof Error ? err.message : 'Unknown error' });
-  }
-});
-
-// ---------------------------------------------------------------------------
-// Child support forecaster
-// ---------------------------------------------------------------------------
-
-const ChildSupportRequestSchema = z.object({
-  forecast_input: z.object({
-    jurisdiction: z.enum(['michigan', 'other']),
-    payerIncome: z.number().nonnegative(),
-    payeeIncome: z.number().nonnegative(),
-    numberOfChildren: z.number().int().min(1),
-    overnightsPayer: z.number().min(0).max(365),
-    overnightsPayee: z.number().min(0).max(365),
-    healthInsurance: z.number().nonnegative().optional(),
-    childcare: z.number().nonnegative().optional(),
-    otherChildren: z.number().int().min(0).optional(),
-  }),
-  branding: z
-    .object({
-      presentationMode: z.enum(['strip', 'watermark', 'none']).optional(),
-      riskAcknowledged: z.boolean().optional()
-    })
-    .optional()
-});
-
-app.post('/api/forecast/support', async (req, res) => {
-  try {
-    const parsed = ChildSupportRequestSchema.parse(req.body);
-    const mode: PresentationMode = parsed.branding?.presentationMode ?? 'strip';
-    requireRiskAck(mode, parsed.branding?.riskAcknowledged);
-
-    const fi = parsed.forecast_input;
-    const calc = calculateChildSupport({
-      jurisdiction: fi.jurisdiction,
-      payerIncome: fi.payerIncome,
-      payeeIncome: fi.payeeIncome,
-      numberOfChildren: fi.numberOfChildren,
-      overnightsPayer: fi.overnightsPayer,
-      overnightsPayee: fi.overnightsPayee,
-      healthInsurance: fi.healthInsurance ?? 0,
-      childcare: fi.childcare ?? 0,
-      otherChildren: fi.otherChildren ?? 0,
-    });
-
-    res.json({
-      success: true,
-      forecastType: 'child_support',
-      calculatedValues: calc,
-      brandingApplied: mode !== 'none',
-      presentationMode: mode
-    });
   } catch (err) {
     const status = (err as any)?.statusCode ?? 500;
     res.status(status).json({ success: false, error: err instanceof Error ? err.message : 'Unknown error' });

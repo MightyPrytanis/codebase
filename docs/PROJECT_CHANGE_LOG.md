@@ -21,42 +21,44 @@ Related Documents: REALISTIC-WORK-PLAN
 
 ---
 
-## Phase 2 Integration: Forecasting Features and Package Fixes (2026-03-15)
+## Phase 2 Integration: Dependency Evaluation and Stale Patch Retirement (2026-03-15)
 
 **Status:** COMPLETE  
-**Purpose:** Implement deferred Phase 2/3/4 work identified in the Phase 1 integration assessment
+**Purpose:** Individual verification of cursor/general-codebase-debugging-18e6 dependency bumps against current main-branch state; retire one stale local patch.
 
-### Phase 2: Dependency / Package Fixes
+### Dependency Evaluation
 
-**Finding:** `apps/arkiver/package.json` contained a duplicate `"dependencies"` key — the first entry was an empty object (`{}`), and the second contained the real dependencies. While most JSON parsers silently take the last value, the duplicate key is non-conformant JSON and confusing. Corrected by removing the empty duplicate.
+All dependency bumps present in the cursor branch were individually verified. In every case, `main` already carries a newer (or equivalent) version, so no rollbacks or additional bumps are required:
 
-**Other dependency updates:** Individual review of all outstanding Dependabot PRs shows the most critical packages (`multer`, `express-rate-limit`, `undici`) are already at current versions in `Cyrano/package.json`. No additional bumps are needed at this time.
+| Package | Cursor branch | `main` (current) | Action |
+|---|---|---|---|
+| `@modelcontextprotocol/sdk` | 1.25.2 | ^1.26.0 (resolved 1.26.0) | none — main newer |
+| `react-router` / `react-router-dom` | bumped | superseded by current versions | none |
+| `react` / `@types/react` | bumped | superseded by current versions | none |
+| `lucide-react` | 0.562.0 | 0.575.0 | none — main newer |
+| `drizzle-orm` | 0.45.1 | 0.45.1 | at parity |
+| `puppeteer` | 24.34.0 | 24.37.5 | none — main newer |
+| `zod` | 4.3.5 | 4.3.6 | none — main newer |
+| `patch-package` + SDK patch | present | **retired** | action taken (see below) |
 
-### Phase 3: Tax Forecasting Features — QDRO and Child Support
+### Stale Patch Retired
 
-**Background:** The forecaster app already had complete UI pages for QDRO and Child Support forecasts, a shared API client library (`forecaster-api.ts`) with typed `generateQDROForecast()` and `generateChildSupportForecast()` functions, and Cyrano modules with fully implemented calculation formulas (`qdro-formulas.ts`, `child-support-formulas.ts`). The only missing piece was the backend API routes and the frontend connection.
+The cursor branch introduced a `patch-package` workflow to fix a ReDoS vulnerability (`UriTemplate.partToRegExp()`) in `@modelcontextprotocol/sdk@1.25.1`. That fix was upstreamed in **v1.25.2**; `main` already resolves to v1.26.0. The patch file therefore:
+- would fail a version-mismatch check on every `npm install`, and
+- is no longer needed since the fix ships natively in the resolved version.
 
-**Changes Made:**
+**Changes made:**
+- Deleted `Cyrano/patches/@modelcontextprotocol+sdk+1.25.1.patch`
+- Removed `patch-package` from `devDependencies` in `Cyrano/package.json`
+- Removed `"postinstall": "patch-package"` from `scripts` in `Cyrano/package.json`
+- Updated `Cyrano/patches/README.md` to document the retirement
+- Updated `Cyrano/package-lock.json` (removed all `patch-package` entries)
+- Retained `Cyrano/tests/security/redos-uri-template.test.ts` as a regression guard
 
-1. **`apps/forecaster/backend/src/qdro/qdro.ts`** (new file)  
-   Re-exports `calculateQDRO`, `calculateDefinedContributionQDRO`, `calculateDefinedBenefitQDRO` and related types from Cyrano's shared QDRO formula module — following the same pattern as `src/tax/federal.ts`.
+### Phase 3+ (Future Work)
 
-2. **`apps/forecaster/backend/src/support/child-support.ts`** (new file)  
-   Re-exports `calculateChildSupport`, `calculateMichiganChildSupport` and related types from Cyrano's shared child support formula module.
-
-3. **`apps/forecaster/backend/src/index.ts`** — added two new API routes:
-   - `POST /api/forecast/qdro` — Accepts QDRO inputs, runs ERISA-compliant division calculation via `calculateQDRO()`, returns results with branding metadata.
-   - `POST /api/forecast/support` — Accepts Michigan child support inputs, runs income-shares formula calculation via `calculateChildSupport()`, returns results with branding metadata.
-
-4. **`apps/forecaster/frontend/src/pages/QDROForecast.tsx`** — replaced `setTimeout` placeholder with a real call to `generateQDROForecast()` from `forecaster-api`. Added structured result display (marital service period, division amounts, compliance notes) and error handling.
-
-5. **`apps/forecaster/frontend/src/pages/ChildSupportForecast.tsx`** — replaced `setTimeout` placeholder with a real call to `generateChildSupportForecast()` from `forecaster-api`. Added structured result display (combined income, payer share, support obligation, parenting-time adjustment, final amount) and error handling.
-
-6. **`apps/forecaster/backend/tsconfig.json`** — fixed pre-existing cross-project `zod` module resolution error by adding `paths` to map `zod` to the backend's own `node_modules/zod/index.d.cts`; also added QDRO and child-support formula files to the `include` array so they are properly type-checked.
-
-### Phase 4: Agent Architecture Framework
-
-**Finding:** The MAE (Multi-Agent Engine) in `Cyrano/src/engines/mae/` is already fully implemented with multi-model orchestration, cross-engine workflow discovery, topological dependency resolution, and weighted confidence scoring. No structural additions are required at this time. The Phase 1 note of "large structural addition, needs dedicated review" appears to have been addressed by prior PRs. This phase is marked complete by evaluation.
+- **Phase 3** (Tax forecasting features): Full standalone feature, needs isolated branch
+- **Phase 4** (Agent architecture framework): Large structural addition, needs dedicated review
 
 **Date:** 2026-03-15 (2026-W11)
 

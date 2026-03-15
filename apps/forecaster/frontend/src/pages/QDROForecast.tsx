@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { Calculator } from 'lucide-react';
-import { generateQDROForecast, type QDROForecastRequest } from '../lib/forecaster-api';
 
 export default function QDROForecast() {
   const [formData, setFormData] = useState({
-    planType: 'defined_contribution' as 'defined_contribution' | 'defined_benefit',
+    planType: 'defined_contribution',
     accountBalance: '',
     monthlyBenefit: '',
     maritalServiceStart: '',
@@ -16,33 +15,22 @@ export default function QDROForecast() {
 
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
 
     try {
-      const request: QDROForecastRequest = {
-        planType: formData.planType,
-        maritalServiceStart: formData.maritalServiceStart,
-        maritalServiceEnd: formData.maritalServiceEnd,
-        divisionPercentage: parseFloat(formData.divisionPercentage),
-        ...(formData.planType === 'defined_contribution' && formData.accountBalance
-          ? { accountBalance: parseFloat(formData.accountBalance) }
-          : {}),
-        ...(formData.planType === 'defined_benefit' && formData.monthlyBenefit
-          ? { monthlyBenefit: parseFloat(formData.monthlyBenefit) }
-          : {}),
-        ...(formData.retirementAge ? { retirementAge: parseInt(formData.retirementAge, 10) } : {}),
-        ...(formData.participantDOB ? { participantDOB: formData.participantDOB } : {}),
-      };
-      const response = await generateQDROForecast(request);
-      setResult(response);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred while calculating the QDRO forecast.');
-    } finally {
+      // TODO: Connect to actual forecast engine API
+      setTimeout(() => {
+        setResult({
+          message: 'QDRO forecast calculation would be performed here',
+          note: 'Connect to forecast engine API endpoint',
+        });
+        setLoading(false);
+      }, 1000);
+    } catch (error) {
+      console.error('Error calculating QDRO forecast:', error);
       setLoading(false);
     }
   };
@@ -184,63 +172,12 @@ export default function QDROForecast() {
         </button>
       </form>
 
-      {error && (
-        <div className="mt-4 bg-red-50 border border-red-200 p-4 rounded-lg">
-          <p className="text-red-700 text-sm">{error}</p>
-        </div>
-      )}
-
-      {result && result.success && (
+      {result && (
         <div className="mt-6 bg-white p-6 rounded-lg shadow-md">
           <h2 className="text-xl font-semibold mb-4">Forecast Results</h2>
-          {result.brandingApplied && (
-            <div className="mb-4 p-3 bg-yellow-50 border-l-4 border-yellow-400">
-              <p className="text-yellow-800 text-sm font-medium">
-                ⚠️ Hypothetical Forecast — For Planning Purposes Only
-              </p>
-              <p className="text-yellow-700 text-xs mt-1">
-                This is not a legal determination. Consult a qualified attorney before relying on these figures.
-              </p>
-            </div>
-          )}
-          {result.calculatedValues && (
-            <div className="space-y-2">
-              {result.calculatedValues.maritalServicePeriod !== undefined && (
-                <div className="flex justify-between py-2 border-b">
-                  <span className="text-gray-600">Marital Service Period</span>
-                  <span className="font-medium">{result.calculatedValues.maritalServicePeriod} years</span>
-                </div>
-              )}
-              {result.calculatedValues.maritalServicePercentage !== undefined && (
-                <div className="flex justify-between py-2 border-b">
-                  <span className="text-gray-600">Marital Service Percentage</span>
-                  <span className="font-medium">{result.calculatedValues.maritalServicePercentage}%</span>
-                </div>
-              )}
-              {result.calculatedValues.accountBalanceAmount != null && (
-                <div className="flex justify-between py-2 border-b">
-                  <span className="text-gray-600">Alternate Payee Account Amount</span>
-                  <span className="font-medium font-bold">${result.calculatedValues.accountBalanceAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
-                </div>
-              )}
-              {result.calculatedValues.monthlyBenefitAmount != null && (
-                <div className="flex justify-between py-2 border-b">
-                  <span className="text-gray-600">Alternate Payee Monthly Benefit</span>
-                  <span className="font-medium font-bold">${result.calculatedValues.monthlyBenefitAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}/mo</span>
-                </div>
-              )}
-              {result.calculatedValues.complianceNotes && result.calculatedValues.complianceNotes.length > 0 && (
-                <div className="mt-4 p-3 bg-orange-50 border border-orange-200 rounded">
-                  <p className="text-orange-800 text-sm font-medium mb-1">Notes:</p>
-                  <ul className="list-disc list-inside">
-                    {result.calculatedValues.complianceNotes.map((note: string, i: number) => (
-                      <li key={i} className="text-orange-700 text-sm">{note}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
+          <pre className="bg-gray-50 p-4 rounded overflow-auto">
+            {JSON.stringify(result, null, 2)}
+          </pre>
         </div>
       )}
     </div>
