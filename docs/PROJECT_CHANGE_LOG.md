@@ -21,6 +21,47 @@ Related Documents: REALISTIC-WORK-PLAN
 
 ---
 
+## Phase 2 Integration: Forecasting Features and Package Fixes (2026-03-15)
+
+**Status:** COMPLETE  
+**Purpose:** Implement deferred Phase 2/3/4 work identified in the Phase 1 integration assessment
+
+### Phase 2: Dependency / Package Fixes
+
+**Finding:** `apps/arkiver/package.json` contained a duplicate `"dependencies"` key — the first entry was an empty object (`{}`), and the second contained the real dependencies. While most JSON parsers silently take the last value, the duplicate key is non-conformant JSON and confusing. Corrected by removing the empty duplicate.
+
+**Other dependency updates:** Individual review of all outstanding Dependabot PRs shows the most critical packages (`multer`, `express-rate-limit`, `undici`) are already at current versions in `Cyrano/package.json`. No additional bumps are needed at this time.
+
+### Phase 3: Tax Forecasting Features — QDRO and Child Support
+
+**Background:** The forecaster app already had complete UI pages for QDRO and Child Support forecasts, a shared API client library (`forecaster-api.ts`) with typed `generateQDROForecast()` and `generateChildSupportForecast()` functions, and Cyrano modules with fully implemented calculation formulas (`qdro-formulas.ts`, `child-support-formulas.ts`). The only missing piece was the backend API routes and the frontend connection.
+
+**Changes Made:**
+
+1. **`apps/forecaster/backend/src/qdro/qdro.ts`** (new file)  
+   Re-exports `calculateQDRO`, `calculateDefinedContributionQDRO`, `calculateDefinedBenefitQDRO` and related types from Cyrano's shared QDRO formula module — following the same pattern as `src/tax/federal.ts`.
+
+2. **`apps/forecaster/backend/src/support/child-support.ts`** (new file)  
+   Re-exports `calculateChildSupport`, `calculateMichiganChildSupport` and related types from Cyrano's shared child support formula module.
+
+3. **`apps/forecaster/backend/src/index.ts`** — added two new API routes:
+   - `POST /api/forecast/qdro` — Accepts QDRO inputs, runs ERISA-compliant division calculation via `calculateQDRO()`, returns results with branding metadata.
+   - `POST /api/forecast/support` — Accepts Michigan child support inputs, runs income-shares formula calculation via `calculateChildSupport()`, returns results with branding metadata.
+
+4. **`apps/forecaster/frontend/src/pages/QDROForecast.tsx`** — replaced `setTimeout` placeholder with a real call to `generateQDROForecast()` from `forecaster-api`. Added structured result display (marital service period, division amounts, compliance notes) and error handling.
+
+5. **`apps/forecaster/frontend/src/pages/ChildSupportForecast.tsx`** — replaced `setTimeout` placeholder with a real call to `generateChildSupportForecast()` from `forecaster-api`. Added structured result display (combined income, payer share, support obligation, parenting-time adjustment, final amount) and error handling.
+
+6. **`apps/forecaster/backend/tsconfig.json`** — fixed pre-existing cross-project `zod` module resolution error by adding `paths` to map `zod` to the backend's own `node_modules/zod/index.d.cts`; also added QDRO and child-support formula files to the `include` array so they are properly type-checked.
+
+### Phase 4: Agent Architecture Framework
+
+**Finding:** The MAE (Multi-Agent Engine) in `Cyrano/src/engines/mae/` is already fully implemented with multi-model orchestration, cross-engine workflow discovery, topological dependency resolution, and weighted confidence scoring. No structural additions are required at this time. The Phase 1 note of "large structural addition, needs dedicated review" appears to have been addressed by prior PRs. This phase is marked complete by evaluation.
+
+**Date:** 2026-03-15 (2026-W11)
+
+---
+
 ## Phase 1 Integration: cursor/general-codebase-debugging-18e6 (2026-03-15)
 
 **Status:** COMPLETE  
