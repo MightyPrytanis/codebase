@@ -12,7 +12,7 @@
     "types": ["node"],
     "baseUrl": ".",
     "paths": {
-      "zod": ["./node_modules/zod/index.d.cts"]
+      "zod": ["./node_modules/zod"]
     }
   },
   "include": [

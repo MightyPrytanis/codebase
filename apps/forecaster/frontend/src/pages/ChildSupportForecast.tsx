@@ -214,7 +214,7 @@ export default function ChildSupportForecast() {
               </div>
               <div className="flex justify-between py-2 border-b">
                 <span className="text-gray-600">Payer Income Share</span>
-                <span className="font-medium">{(result.calculatedValues.payerPercentage * 100)?.toFixed(1)}%</span>
+                <span className="font-medium">{(result.calculatedValues.payerPercentage != null ? result.calculatedValues.payerPercentage * 100 : 0).toFixed(1)}%</span>
               </div>
               <div className="flex justify-between py-2 border-b">
                 <span className="text-gray-600">Base Support Obligation</span>

@@ -217,13 +217,13 @@ export default function QDROForecast() {
                   <span className="font-medium">{result.calculatedValues.maritalServicePercentage}%</span>
                 </div>
               )}
-              {result.calculatedValues.accountBalanceAmount !== undefined && (
+              {result.calculatedValues.accountBalanceAmount != null && (
                 <div className="flex justify-between py-2 border-b">
                   <span className="text-gray-600">Alternate Payee Account Amount</span>
                   <span className="font-medium font-bold">${result.calculatedValues.accountBalanceAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}</span>
                 </div>
               )}
-              {result.calculatedValues.monthlyBenefitAmount !== undefined && (
+              {result.calculatedValues.monthlyBenefitAmount != null && (
                 <div className="flex justify-between py-2 border-b">
                   <span className="text-gray-600">Alternate Payee Monthly Benefit</span>
                   <span className="font-medium font-bold">${result.calculatedValues.monthlyBenefitAmount.toLocaleString('en-US', { minimumFractionDigits: 2 })}/mo</span>
