@@ -41,7 +41,7 @@
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "date-fns": "^4.1.0",
-    "docx": "^9.5.3",
+    "docx": "^9.6.1",
     "dompurify": "^3.3.2",
     "dotenv": "^17.3.1",
     "drizzle-orm": "^0.45.1",
