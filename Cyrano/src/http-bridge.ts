@@ -1550,6 +1550,17 @@ if (shouldStartServer) {
     }).catch((error) => {
       console.error('[HTTP Bridge] Failed to load engine registry:', error);
     });
+
+    // Start library ingest worker (non-blocking background service)
+    import('./modules/library/library-ingest-worker.js').then(({ libraryIngestWorker }) => {
+      libraryIngestWorker.on('error', (err) => {
+        console.error('[Library Worker] Unexpected error:', err);
+      });
+      libraryIngestWorker.start();
+      console.error('[HTTP Bridge] Library ingest worker started.');
+    }).catch((error) => {
+      console.error('[HTTP Bridge] Failed to start library ingest worker (non-blocking):', error);
+    });
     
     console.error('[HTTP Bridge] Startup sequence complete.');
   } catch (error) {
