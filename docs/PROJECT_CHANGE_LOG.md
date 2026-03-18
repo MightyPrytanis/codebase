@@ -5,8 +5,8 @@ Subject(s): Project | History | Development
 Project: Cyrano
 Version: v611
 Created: 2025-11-28 (2025-W48)
-Last Substantive Revision: 2026-03-15 (2026-W11)
-Last Format Update: 2026-03-15 (2026-W11)
+Last Substantive Revision: 2026-03-17 (2026-W12)
+Last Format Update: 2026-03-17 (2026-W12)
 Owner: David W Towne / Cognisint LLC
 Copyright: © 2025 Cognisint LLC
 Summary: Consolidated running log of all project changes, structured by work plan steps.
@@ -17,7 +17,68 @@ Related Documents: REALISTIC-WORK-PLAN
 # Cyrano Project Change Log
 
 **Project Start:** July 2025  
-**Last Updated:** 2026-03-15 (2026-W11)
+**Last Updated:** 2026-03-17 (2026-W12)
+
+---
+
+## MAE Thin Client + Forecaster Tool Registration (2026-03-17)
+
+**Status:** COMPLETE  
+**Branch:** `copilot/complete-lexfiat-forecaster`  
+**Purpose:** Create MAE thin client for multi-model document writing; register `pdf_form_filler` tool in MCP/HTTP bridge; add MAE document-writing HTTP endpoints
+
+### Changes
+
+#### 1. New: MAE Thin Client (`apps/mae-client/`)
+
+Created a new standalone thin client application for the MAE (Multi-Agent Engine) for multi-model document writing:
+
+- **`apps/mae-client/backend/`** — Express 5 + TypeScript backend (port 5003)
+  - `src/index.ts` — Server entry point with CORS and JSON middleware
+  - `src/version-control.ts` — In-memory document/version store with full CRUD
+  - `src/routes/documents.ts` — Document REST API (list, create, get, delete)
+  - `src/routes/generate.ts` — Multi-model generation route (proxies to Cyrano; parallel generation)
+- **`apps/mae-client/frontend/`** — React 19 + Vite + Tailwind CSS + Radix UI (port 5174)
+  - `src/lib/api.ts` — Typed fetch wrapper and all API functions
+  - `src/pages/DocumentList.tsx` — Document list with create dialog
+  - `src/components/DocumentEditor.tsx` — Two-panel editor (prompt + models / versions)
+  - `src/components/ModelSelector.tsx` — OpenAI + Anthropic model selection with checkboxes
+  - `src/components/VersionPanel.tsx` — Version cards, full-text dialog, side-by-side comparison
+- **`apps/mae-client/README.md`** — Setup and architecture documentation
+
+#### 2. Cyrano HTTP Bridge (`Cyrano/src/http-bridge.ts`)
+
+Added MAE document-writing endpoints for the thin client:
+
+| Endpoint | Description |
+|----------|-------------|
+| `POST /api/mae/write` | Single-model document generation |
+| `POST /api/mae/write/multi` | Parallel multi-model generation |
+| `GET /api/mae/models` | List available AI models |
+
+Also registered `pdf_form_filler` in the lazy-load tool cache.
+
+#### 3. Cyrano MCP Server (`Cyrano/src/mcp-server.ts`)
+
+- Imported `pdfFormFiller` from `./tools/pdf-form-filler.js`
+- Added `pdf_form_filler` to the `ListToolsRequestSchema` handler
+- Added `case 'pdf_form_filler'` to the `CallToolRequestSchema` switch
+
+### Existing Forecaster Status
+
+The LexFiat Forecaster™ (`apps/forecaster/`) was substantially complete prior to this branch:
+- ✅ PDF form filling (`Cyrano/src/tools/pdf-form-filler.ts`)
+- ✅ Forecast Engine with branding validation (`Cyrano/src/engines/forecast/forecast-engine.ts`)
+- ✅ Tax, child support, and QDRO forecast modules
+- ✅ IRS Form 1040 field mappings
+- ✅ Michigan FOC child support formula
+- ✅ ERISA QDRO calculation scenarios
+- ✅ Forecaster backend standalone API (`apps/forecaster/backend/`)
+- ✅ Forecaster frontend React UI (`apps/forecaster/frontend/`)
+- ✅ HTTP bridge tax forecast endpoints (`/api/forecast/tax`, `/api/forecast/tax/pdf`)
+- ✅ `pdf_form_filler` tool now registered in MCP server (was missing — fixed in this branch)
+
+**Date:** 2026-03-17 (2026-W12)
 
 ---
 

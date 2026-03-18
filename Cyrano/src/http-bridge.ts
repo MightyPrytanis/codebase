@@ -314,6 +314,10 @@ const toolImportMap: Record<string, { loader: ToolLoader; metadata: Partial<Tool
     loader: () => import('./tools/forecast-engine.js').then(m => m.forecastEngineTool),
     metadata: { name: 'forecast_engine', dependencies: [] }
   },
+  pdf_form_filler: {
+    loader: () => import('./tools/pdf-form-filler.js').then(m => m.pdfFormFiller),
+    metadata: { name: 'pdf_form_filler', dependencies: [] }
+  },
   
   // Verification Tools
   claim_extractor: {
@@ -1184,6 +1188,148 @@ app.post('/api/forecast/tax/pdf', async (req, res) => {
 
 // Authentication routes
 app.use('/auth', authRoutes);
+
+// ============================================================================
+// MAE Document Writing API
+// Used by the MAE thin client (apps/mae-client) for multi-model document writing
+// ============================================================================
+
+const MaeWriteRequestSchema = z.object({
+  prompt: z.string().min(1, 'Prompt is required'),
+  context: z.string().optional(),
+  provider: z.enum(['openai', 'anthropic', 'auto']).default('auto'),
+  model: z.string().optional(),
+  taskType: z.enum(['writing', 'analysis', 'summarization', 'rewriting']).default('writing'),
+});
+
+const MaeMultiWriteRequestSchema = z.object({
+  prompt: z.string().min(1, 'Prompt is required'),
+  context: z.string().optional(),
+  models: z.array(z.object({
+    provider: z.enum(['openai', 'anthropic', 'auto']),
+    model: z.string(),
+  })).min(1, 'At least one model is required'),
+  taskType: z.enum(['writing', 'analysis', 'summarization', 'rewriting']).default('writing'),
+});
+
+// POST /api/mae/write - Generate a single document version
+app.post('/api/mae/write', async (req, res) => {
+  try {
+    const parsed = MaeWriteRequestSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ isError: true, content: [{ text: 'Invalid request body' }] });
+    }
+
+    const { prompt, context, provider, model, taskType } = parsed.data;
+
+    const { maeEngineTool } = await import('./tools/mae-engine.js');
+    const result = await maeEngineTool.execute({
+      action: 'execute_workflow',
+      workflow_id: 'document_writing',
+      input: {
+        prompt,
+        context,
+        provider,
+        model,
+        taskType,
+      },
+    });
+
+    // If the engine doesn't have a document_writing workflow registered, fall back to ai_orchestrator
+    const textContent = result?.content?.find?.((c: any) => c?.type === 'text' && 'text' in c);
+    if (result.isError || !textContent) {
+      const { aiOrchestrator } = await import('./engines/mae/services/ai-orchestrator.js');
+      const orchestratorResult = await aiOrchestrator.execute({
+        action: 'execute',
+        provider: provider === 'auto' ? undefined : provider,
+        model,
+        prompt: context ? `Context:\n${context}\n\nTask:\n${prompt}` : prompt,
+        taskType,
+      });
+      return res.json(orchestratorResult);
+    }
+
+    return res.json(result);
+  } catch (error) {
+    res.status(500).json({
+      isError: true,
+      content: [{ text: error instanceof Error ? error.message : 'Unknown error' }],
+    });
+  }
+});
+
+// POST /api/mae/write/multi - Generate multiple document versions in parallel
+app.post('/api/mae/write/multi', async (req, res) => {
+  try {
+    const parsed = MaeMultiWriteRequestSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ isError: true, content: [{ text: 'Invalid request body' }] });
+    }
+
+    const { prompt, context, models, taskType } = parsed.data;
+
+    const { aiOrchestrator } = await import('./engines/mae/services/ai-orchestrator.js');
+
+    // Generate versions in parallel
+    const fullPrompt = context ? `Context:\n${context}\n\nTask:\n${prompt}` : prompt;
+    const results = await Promise.allSettled(
+      models.map(({ provider, model }) =>
+        aiOrchestrator.execute({
+          action: 'execute',
+          provider: provider === 'auto' ? undefined : provider,
+          model,
+          prompt: fullPrompt,
+          taskType,
+        })
+      )
+    );
+
+    const versions = results.map((result, index) => {
+      const { provider, model } = models[index];
+      if (result.status === 'fulfilled') {
+        const textContent = result.value?.content?.find?.((c: any) => c?.type === 'text' && 'text' in c) as { text: string } | undefined;
+        return {
+          provider,
+          model,
+          content: textContent?.text ?? '',
+          isError: result.value?.isError ?? false,
+          timestamp: new Date().toISOString(),
+        };
+      } else {
+        return {
+          provider,
+          model,
+          content: '',
+          isError: true,
+          error: result.reason instanceof Error ? result.reason.message : String(result.reason),
+          timestamp: new Date().toISOString(),
+        };
+      }
+    });
+
+    return res.json({ versions });
+  } catch (error) {
+    res.status(500).json({
+      isError: true,
+      content: [{ text: error instanceof Error ? error.message : 'Unknown error' }],
+    });
+  }
+});
+
+// GET /api/mae/models - List available AI models for document writing
+app.get('/api/mae/models', (_req, res) => {
+  res.json({
+    models: [
+      { provider: 'openai', model: 'gpt-4o', label: 'GPT-4o', group: 'OpenAI' },
+      { provider: 'openai', model: 'gpt-4o-mini', label: 'GPT-4o Mini', group: 'OpenAI' },
+      { provider: 'openai', model: 'gpt-4-turbo', label: 'GPT-4 Turbo', group: 'OpenAI' },
+      { provider: 'openai', model: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo', group: 'OpenAI' },
+      { provider: 'anthropic', model: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet', group: 'Anthropic' },
+      { provider: 'anthropic', model: 'claude-3-opus-20240229', label: 'Claude 3 Opus', group: 'Anthropic' },
+      { provider: 'anthropic', model: 'claude-3-haiku-20240307', label: 'Claude 3 Haiku', group: 'Anthropic' },
+    ],
+  });
+});
 
 // Security endpoints
 app.get('/csrf-token', security.getCSRFToken);
