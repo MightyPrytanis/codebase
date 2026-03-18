@@ -7,7 +7,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Sparkles, AlertCircle } from 'lucide-react'
+import { ArrowLeft, Sparkles, AlertCircle, ShieldCheck } from 'lucide-react'
 import { getDocument, generateVersions } from '../lib/api'
 import ModelSelector, { type ModelSpec } from './ModelSelector'
 import VersionPanel from './VersionPanel'
@@ -20,6 +20,7 @@ export default function DocumentEditor() {
   const [prompt, setPrompt] = useState('')
   const [selectedModels, setSelectedModels] = useState<ModelSpec[]>([])
   const [genError, setGenError] = useState<string | null>(null)
+  const [anonymize, setAnonymize] = useState(false)
 
   const { data: doc, isLoading } = useQuery({
     queryKey: ['document', id],
@@ -33,6 +34,7 @@ export default function DocumentEditor() {
         documentId: id!,
         prompt,
         models: selectedModels.map(({ provider, model }) => ({ provider, model })),
+        anonymize,
       }),
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['document', id] })
@@ -96,6 +98,41 @@ export default function DocumentEditor() {
               placeholder="Describe what you want the AI to write…"
               className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm text-gray-100 placeholder-gray-600 resize-none focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500"
             />
+          </div>
+
+          {/* Anonymize toggle */}
+          <div className="space-y-1.5">
+            <button
+              type="button"
+              onClick={() => setAnonymize(!anonymize)}
+              className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm border transition-colors ${
+                anonymize
+                  ? 'bg-emerald-900/40 border-emerald-700 text-emerald-300'
+                  : 'bg-gray-800 border-gray-700 text-gray-400 hover:border-gray-600'
+              }`}
+            >
+              <ShieldCheck size={15} className={anonymize ? 'text-emerald-400' : 'text-gray-600'} />
+              <span className="flex-1 text-left font-medium">Anonymize for sensitive documents</span>
+              <span
+                className={`w-8 h-4 rounded-full relative transition-colors ${
+                  anonymize ? 'bg-emerald-600' : 'bg-gray-600'
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 w-3 h-3 rounded-full bg-white transition-all ${
+                    anonymize ? 'left-4' : 'left-0.5'
+                  }`}
+                />
+              </span>
+            </button>
+            {anonymize && (
+              <p className="text-xs text-emerald-400/80 leading-snug px-1">
+                Names, organizations, dates, amounts, and other PII will be replaced with tokens
+                before the prompt is sent to any AI provider. Tokens are reversed locally before
+                the response is returned. Content classified as Category 3 (SSN, account
+                numbers, date of birth) is blocked from leaving the device.
+              </p>
+            )}
           </div>
 
           <ModelSelector selected={selectedModels} onChange={setSelectedModels} />

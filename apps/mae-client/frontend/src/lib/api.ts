@@ -30,6 +30,7 @@ export interface GenerateRequest {
   prompt: string
   models: Array<{ provider: string; model: string }>
   context?: string
+  anonymize?: boolean
 }
 
 export interface GenerateResponse {

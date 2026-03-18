@@ -23,26 +23,33 @@ const GenerateSchema = z.object({
   prompt: z.string().min(1),
   models: z.array(ModelSpec).min(1),
   context: z.string().optional(),
+  anonymize: z.boolean().optional().describe('Anonymize prompt before sending to AI provider'),
 });
 
-async function callCyranoMAE(
+interface CyranoVersion {
+  provider: string;
+  model: string;
+  content: string;
+  isError: boolean;
+  error?: string;
+  timestamp: string;
+}
+
+async function callCyranoMulti(
   prompt: string,
-  provider: string,
-  model: string,
+  models: Array<{ provider: string; model: string }>,
   context?: string,
-): Promise<string> {
-  const response = await fetch(`${CYRANO_URL}/mcp/execute`, {
+  anonymize?: boolean,
+): Promise<CyranoVersion[]> {
+  const response = await fetch(`${CYRANO_URL}/api/mae/write/multi`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      tool: 'mae_engine',
-      input: {
-        action: 'execute_workflow',
-        prompt,
-        provider,
-        model,
-        context: context ?? '',
-      },
+      prompt,
+      models,
+      context,
+      anonymize: anonymize ?? false,
+      taskType: 'writing',
     }),
   });
 
@@ -51,15 +58,11 @@ async function callCyranoMAE(
     throw new Error(`Cyrano HTTP bridge error ${response.status}: ${text}`);
   }
 
-  const data = (await response.json()) as { content?: Array<{ text?: string }>; result?: string };
-  // Support both MCP content array format and plain result string
-  if (data.content && Array.isArray(data.content) && data.content.length > 0) {
-    return data.content[0]?.text ?? '';
+  const data = (await response.json()) as { versions?: CyranoVersion[] };
+  if (!data.versions || !Array.isArray(data.versions)) {
+    throw new Error('Unexpected response shape from Cyrano');
   }
-  if (typeof data.result === 'string') {
-    return data.result;
-  }
-  return JSON.stringify(data);
+  return data.versions;
 }
 
 generateRouter.post('/', async (req: Request, res: Response) => {
@@ -69,7 +72,7 @@ generateRouter.post('/', async (req: Request, res: Response) => {
     return;
   }
 
-  const { documentId, prompt, models, context } = parsed.data;
+  const { documentId, prompt, models, context, anonymize } = parsed.data;
 
   const doc = getDocument(documentId);
   if (!doc) {
@@ -77,33 +80,34 @@ generateRouter.post('/', async (req: Request, res: Response) => {
     return;
   }
 
+  let cyranoVersions: CyranoVersion[];
+  try {
+    cyranoVersions = await callCyranoMulti(prompt, models, context, anonymize);
+  } catch (err) {
+    res.status(502).json({ error: err instanceof Error ? err.message : String(err) });
+    return;
+  }
+
   const versions: DocumentVersion[] = [];
   const errors: { provider: string; model: string; error: string }[] = [];
 
-  await Promise.allSettled(
-    models.map(async ({ provider, model }) => {
-      try {
-        const content = await callCyranoMAE(prompt, provider, model, context);
-        const version = addVersion(documentId, {
-          id: uuidv4(),
-          documentId,
-          content,
-          model,
-          provider,
-          prompt,
-          timestamp: new Date().toISOString(),
-          metadata: {},
-        });
-        if (version) versions.push(version);
-      } catch (err) {
-        errors.push({
-          provider,
-          model,
-          error: err instanceof Error ? err.message : String(err),
-        });
-      }
-    }),
-  );
+  for (const cv of cyranoVersions) {
+    if (cv.isError || !cv.content) {
+      errors.push({ provider: cv.provider, model: cv.model, error: cv.error ?? 'No content returned' });
+    } else {
+      const version = addVersion(documentId, {
+        id: uuidv4(),
+        documentId,
+        content: cv.content,
+        model: cv.model,
+        provider: cv.provider,
+        prompt,
+        timestamp: cv.timestamp ?? new Date().toISOString(),
+        metadata: { anonymized: anonymize ?? false },
+      });
+      if (version) versions.push(version);
+    }
+  }
 
   res.json({ versions, errors: errors.length > 0 ? errors : undefined });
 });
@@ -115,7 +119,7 @@ generateRouter.post('/stream', async (req: Request, res: Response) => {
     return;
   }
 
-  const { documentId, prompt, models, context } = parsed.data;
+  const { documentId, prompt, models, context, anonymize } = parsed.data;
 
   const doc = getDocument(documentId);
   if (!doc) {
@@ -131,21 +135,27 @@ generateRouter.post('/stream', async (req: Request, res: Response) => {
     res.write(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
   };
 
+  // Stream: fan out one model at a time (sequential SSE)
   for (const { provider, model } of models) {
     sendEvent('start', { provider, model });
     try {
-      const content = await callCyranoMAE(prompt, provider, model, context);
-      const version = addVersion(documentId, {
-        id: uuidv4(),
-        documentId,
-        content,
-        model,
-        provider,
-        prompt,
-        timestamp: new Date().toISOString(),
-        metadata: {},
-      });
-      if (version) sendEvent('version', version);
+      const cyranoVersions = await callCyranoMulti(prompt, [{ provider, model }], context, anonymize);
+      const cv = cyranoVersions[0];
+      if (cv && !cv.isError && cv.content) {
+        const version = addVersion(documentId, {
+          id: uuidv4(),
+          documentId,
+          content: cv.content,
+          model,
+          provider,
+          prompt,
+          timestamp: cv.timestamp ?? new Date().toISOString(),
+          metadata: { anonymized: anonymize ?? false },
+        });
+        if (version) sendEvent('version', version);
+      } else {
+        sendEvent('error', { provider, model, error: cv?.error ?? 'No content returned' });
+      }
     } catch (err) {
       sendEvent('error', {
         provider,
@@ -158,3 +168,4 @@ generateRouter.post('/stream', async (req: Request, res: Response) => {
   sendEvent('done', {});
   res.end();
 });
+
