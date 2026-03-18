@@ -1,8 +1,8 @@
 {
-  "name": "@cyrano/mae-client-frontend",
+  "name": "@cyrano/swim-meet-frontend",
   "version": "0.1.0",
   "type": "module",
-  "description": "MAE Thin Client - Multi-model document writing interface",
+  "description": "SwimMeet — multi-stage competitive AI document drafting",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

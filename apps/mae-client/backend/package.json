@@ -1,9 +1,9 @@
 {
-  "name": "@cyrano/mae-client-backend",
+  "name": "@cyrano/swim-meet-backend",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "MAE Thin Client backend - local API for multi-model document writing",
+  "description": "SwimMeet backend — multi-stage workflow orchestration for competitive AI document drafting",
   "scripts": {
     "dev": "tsx src/index.ts",
     "build": "tsc",

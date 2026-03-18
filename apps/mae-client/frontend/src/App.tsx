@@ -15,9 +15,9 @@ function App() {
       <header className="border-b border-gray-800 bg-gray-900 px-6 py-3 flex items-center gap-3">
         <FileText className="text-indigo-400" size={22} />
         <Link to="/" className="text-lg font-semibold tracking-tight hover:text-indigo-300 transition-colors">
-          MAE Document Writer
+          SwimMeet
         </Link>
-        <span className="ml-2 text-xs text-gray-500 font-mono">multi-model AI drafts</span>
+        <span className="ml-2 text-xs text-gray-500 font-mono">competitive AI drafting</span>
       </header>
       <main className="flex-1">
         <Routes>

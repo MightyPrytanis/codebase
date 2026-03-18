@@ -1,18 +1,19 @@
-# MAE Document Writer — Thin Client
+# SwimMeet — Competitive AI Document Drafting
 
-A lightweight standalone web application for writing documents using multiple AI models simultaneously. Connected to Cyrano's MAE (Multi-Agent Engine).
+A standalone multi-model AI document writing app with multi-stage workflow orchestration. Connected to Cyrano's MAE (Multi-Agent Engine).
 
 ## Overview
 
-The MAE Document Writer lets you:
+SwimMeet lets you pit multiple AI models against each other using six distinct workflow types:
 
-- Write documents iteratively using different AI models (OpenAI GPT-4o, Claude 3.5 Sonnet, etc.)
-- Generate multiple versions of the same content in parallel
-- Compare different versions side by side
-- Maintain document history and version control
-- Export content for further use
-
-This is modeled after the multi-model document drafting process used to create technical specifications (like the EBOM spec) — where you send the same prompt to several models and compare/merge the results.
+| Workflow | Description |
+|---|---|
+| **Head-to-Head (Parallel)** | All models run the same prompt simultaneously — maximum diversity |
+| **Relay** | Sequential chain: M1 drafts → M2 refines → M3 polishes, etc. |
+| **Committee** | Parallel drafts → synthesizer combines the best elements |
+| **Critique Round** | Parallel draft → rotating cross-critique → synthesizer revises |
+| **EBOM Pipeline** | Synthesizer creates brief → models draft → synthesizer combines → models critique → final revision |
+| **Expert Panel** | Each model gets an expert persona → synthesizer combines all perspectives |
 
 ## Architecture
 
@@ -20,21 +21,25 @@ This is modeled after the multi-model document drafting process used to create t
 apps/mae-client/
 ├── backend/        # Express API (port 5003)
 │   └── src/
-│       ├── index.ts            # Server entry point
-│       ├── version-control.ts  # In-memory document store
+│       ├── index.ts              # Server entry point
+│       ├── version-control.ts    # In-memory document store
+│       ├── workflow-engine.ts    # Multi-stage workflow orchestration
 │       └── routes/
-│           ├── documents.ts    # Document CRUD
-│           └── generate.ts     # Multi-model generation (proxies to Cyrano)
+│           ├── documents.ts      # Document CRUD
+│           ├── generate.ts       # Simple multi-model generation (proxies to Cyrano)
+│           └── workflow.ts       # Workflow run endpoint
 └── frontend/       # React 19 + Vite SPA (port 5174)
     └── src/
         ├── App.tsx
-        ├── lib/api.ts              # Typed API client
+        ├── lib/api.ts                    # Typed API client
         ├── pages/
-        │   └── DocumentList.tsx    # Document list page
+        │   └── DocumentList.tsx          # Document list page
         └── components/
-            ├── DocumentEditor.tsx  # Main editing interface
-            ├── ModelSelector.tsx   # AI model selector
-            └── VersionPanel.tsx    # Version history and comparison
+            ├── DocumentEditor.tsx        # Main editing interface
+            ├── ModelSelector.tsx         # AI model selector
+            ├── VersionPanel.tsx          # Version history and comparison
+            ├── WorkflowSelector.tsx      # Workflow type picker
+            └── WorkflowStagePanel.tsx    # Workflow stage timeline display
 ```
 
 ## Quick Start
@@ -54,7 +59,7 @@ npm run dev     # starts on port 5003
 
 Environment variables (optional):
 ```
-MAE_CLIENT_PORT=5003
+SWIM_MEET_PORT=5003          # or MAE_CLIENT_PORT for backward compat
 CYRANO_URL=http://localhost:5002
 ```
 
@@ -68,15 +73,29 @@ npm run dev     # starts on port 5174
 
 Then open http://localhost:5174
 
+## Workflow API
+
+`POST /api/workflow/run`
+
+```json
+{
+  "documentId": "...",
+  "prompt": "Draft a settlement agreement...",
+  "models": [{ "provider": "openai", "model": "gpt-4o" }, { "provider": "anthropic", "model": "claude-3-5-sonnet-20241022" }],
+  "synthesizer": { "provider": "openai", "model": "gpt-4o" },
+  "workflowType": "committee",
+  "anonymize": false
+}
+```
+
+Returns `{ stages: WorkflowStage[] }` where each stage contains outputs from all models at that step.
+
 ## Cyrano Integration
 
-The backend proxies document generation requests to Cyrano's HTTP bridge:
+The backend proxies to Cyrano's HTTP bridge:
 
 - `POST /api/mae/write` — Single model generation
 - `POST /api/mae/write/multi` — Parallel multi-model generation
-- `GET /api/mae/models` — Available models list
-
-These endpoints are registered on the Cyrano HTTP bridge (`Cyrano/src/http-bridge.ts`).
 
 ## Technology Stack
 

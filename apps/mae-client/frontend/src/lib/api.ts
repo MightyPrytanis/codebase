@@ -83,3 +83,39 @@ export const generateVersions = (data: GenerateRequest): Promise<GenerateRespons
     method: 'POST',
     body: JSON.stringify(data),
   })
+
+export interface WorkflowStageOutput {
+  provider: string
+  model: string
+  content: string
+  isError: boolean
+  error?: string
+  persona?: string
+}
+
+export interface WorkflowStageResult {
+  index: number
+  name: string
+  description: string
+  outputs: WorkflowStageOutput[]
+  startedAt: string
+  completedAt: string
+}
+
+export interface WorkflowRunRequest {
+  documentId: string
+  prompt: string
+  context?: string
+  models: Array<{ provider: string; model: string }>
+  synthesizer?: { provider: string; model: string }
+  workflowType: string
+  anonymize?: boolean
+  expertPersonas?: string[]
+}
+
+export interface WorkflowRunResponse {
+  stages: WorkflowStageResult[]
+}
+
+export const runWorkflow = (data: WorkflowRunRequest): Promise<WorkflowRunResponse> =>
+  request<WorkflowRunResponse>('/workflow/run', { method: 'POST', body: JSON.stringify(data) })

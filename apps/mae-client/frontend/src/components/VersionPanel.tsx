@@ -42,6 +42,16 @@ function VersionCard({ version, isSelected, onSelect, onView }: VersionCardProps
           {version.provider}
         </span>
         <span className="text-sm font-mono text-gray-300">{version.model}</span>
+        {typeof version.metadata?.stageName === 'string' && (
+          <>
+            <span className="text-xs px-1.5 py-0.5 rounded bg-gray-800 text-gray-400 border border-gray-700">
+              Stage {(version.metadata.stageIndex as number) + 1}
+            </span>
+            <span className="text-xs px-1.5 py-0.5 rounded bg-indigo-900/40 text-indigo-400 border border-indigo-800">
+              {version.metadata.stageName as string}
+            </span>
+          </>
+        )}
         <span className="ml-auto flex items-center gap-1 text-xs text-gray-500">
           <Clock size={11} />
           {formatTime(version.timestamp)}

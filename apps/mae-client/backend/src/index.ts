@@ -8,6 +8,7 @@ import express from 'express';
 import cors from 'cors';
 import { documentsRouter } from './routes/documents.js';
 import { generateRouter } from './routes/generate.js';
+import { workflowRouter } from './routes/workflow.js';
 
 const app = express();
 app.disable('x-powered-by');
@@ -16,12 +17,13 @@ app.use(express.json());
 
 app.use('/api/documents', documentsRouter);
 app.use('/api/generate', generateRouter);
+app.use('/api/workflow', workflowRouter);
 
 app.get('/health', (_req, res) => {
-  res.json({ status: 'ok', service: 'mae-client-backend' });
+  res.json({ status: 'ok', service: 'swimMeet' });
 });
 
-const port = parseInt(process.env.MAE_CLIENT_PORT ?? '5003', 10);
+const port = parseInt(process.env.SWIM_MEET_PORT ?? process.env.MAE_CLIENT_PORT ?? '5003', 10);
 app.listen(port, () => {
-  console.log(`MAE client backend listening on port ${port}`);
+  console.log(`SwimMeet backend listening on port ${port}`);
 });

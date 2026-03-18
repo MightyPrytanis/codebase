@@ -8,9 +8,21 @@ import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { ArrowLeft, Sparkles, AlertCircle, ShieldCheck } from 'lucide-react'
-import { getDocument, generateVersions } from '../lib/api'
+import { getDocument, generateVersions, runWorkflow } from '../lib/api'
 import ModelSelector, { type ModelSpec } from './ModelSelector'
 import VersionPanel from './VersionPanel'
+import WorkflowSelector, { type WorkflowType } from './WorkflowSelector'
+import WorkflowStagePanel from './WorkflowStagePanel'
+import type { WorkflowStageResult } from '../lib/api'
+
+const DEFAULT_EXPERT_PERSONAS = [
+  'Tax Attorney',
+  'Financial Advisor',
+  'Family Law Mediator',
+  'Business Valuator',
+  'Estate Planner',
+  'Forensic Accountant',
+]
 
 export default function DocumentEditor() {
   const { id } = useParams<{ id: string }>()
@@ -21,6 +33,10 @@ export default function DocumentEditor() {
   const [selectedModels, setSelectedModels] = useState<ModelSpec[]>([])
   const [genError, setGenError] = useState<string | null>(null)
   const [anonymize, setAnonymize] = useState(false)
+  const [workflow, setWorkflow] = useState<WorkflowType>('parallel')
+  const [synthesizer, setSynthesizer] = useState<ModelSpec | null>(null)
+  const [expertPersonas, setExpertPersonas] = useState<string[]>(DEFAULT_EXPERT_PERSONAS)
+  const [workflowStages, setWorkflowStages] = useState<WorkflowStageResult[]>([])
 
   const { data: doc, isLoading } = useQuery({
     queryKey: ['document', id],
@@ -28,14 +44,38 @@ export default function DocumentEditor() {
     enabled: !!id,
   })
 
+  const WORKFLOWS_NEEDING_SYNTH: WorkflowType[] = ['committee', 'critique', 'ebom', 'panel']
+  const needsSynthesizer = WORKFLOWS_NEEDING_SYNTH.includes(workflow)
+  const synthesizerMissing = needsSynthesizer && !synthesizer
+
   const generateMutation = useMutation({
-    mutationFn: () =>
-      generateVersions({
+    mutationFn: () => {
+      if (workflow === 'parallel') {
+        return generateVersions({
+          documentId: id!,
+          prompt,
+          models: selectedModels.map(({ provider, model }) => ({ provider, model })),
+          anonymize,
+        }).then((result) => {
+          setWorkflowStages([])
+          return result
+        })
+      }
+      return runWorkflow({
         documentId: id!,
         prompt,
         models: selectedModels.map(({ provider, model }) => ({ provider, model })),
+        synthesizer: synthesizer
+          ? { provider: synthesizer.provider, model: synthesizer.model }
+          : undefined,
+        workflowType: workflow,
         anonymize,
-      }),
+        expertPersonas: workflow === 'panel' ? expertPersonas : undefined,
+      }).then((result) => {
+        setWorkflowStages(result.stages)
+        return { versions: [], errors: undefined }
+      })
+    },
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['document', id] })
       if (result.errors && result.errors.length > 0) {
@@ -47,7 +87,11 @@ export default function DocumentEditor() {
     onError: (err: Error) => setGenError(err.message),
   })
 
-  const canGenerate = prompt.trim().length > 0 && selectedModels.length > 0 && !generateMutation.isPending
+  const canGenerate =
+    prompt.trim().length > 0 &&
+    selectedModels.length > 0 &&
+    !generateMutation.isPending &&
+    !synthesizerMissing
 
   if (isLoading) {
     return (
@@ -137,6 +181,25 @@ export default function DocumentEditor() {
 
           <ModelSelector selected={selectedModels} onChange={setSelectedModels} />
 
+          <WorkflowSelector
+            selectedWorkflow={workflow}
+            onWorkflowChange={(w) => {
+              setWorkflow(w)
+              setWorkflowStages([])
+            }}
+            models={selectedModels}
+            synthesizer={synthesizer}
+            onSynthesizerChange={setSynthesizer}
+            expertPersonas={expertPersonas}
+            onPersonasChange={setExpertPersonas}
+          />
+
+          {synthesizerMissing && (
+            <p className="text-xs text-amber-400 bg-amber-950/30 border border-amber-800 rounded-lg px-3 py-2">
+              This workflow requires a synthesizer model. Select one above.
+            </p>
+          )}
+
           <button
             type="button"
             disabled={!canGenerate}
@@ -168,7 +231,10 @@ export default function DocumentEditor() {
         </aside>
 
         {/* Right panel */}
-        <div className="flex-1 overflow-y-auto p-5">
+        <div className="flex-1 overflow-y-auto p-5 space-y-6">
+          {workflowStages.length > 0 && (
+            <WorkflowStagePanel stages={workflowStages} />
+          )}
           <VersionPanel versions={doc.versions} />
         </div>
       </div>
