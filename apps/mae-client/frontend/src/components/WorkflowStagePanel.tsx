@@ -75,7 +75,7 @@ export default function WorkflowStagePanel({ stages, onViewVersion }: WorkflowSt
     if (stages.length > 0) {
       setExpandedStages(new Set([stages.length - 1]))
     }
-  }, [stages.length])
+  }, [stages])
 
   if (stages.length === 0) return null
 

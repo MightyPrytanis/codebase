@@ -425,13 +425,15 @@ async function runCritique(
   });
   saveStageVersions(documentId, 0, 'Parallel Draft', 'critique', s0Outputs, prompt);
 
-  // Stage 1: rotating critique (model[i] critiques model[(i+1)%n]'s draft)
+  // Stage 1: rotating critique — each valid draft's author critiques the next draft in the ring
+  // We work entirely off validDrafts to avoid index mismatch when some models failed
   const validDrafts = s0Outputs.filter((o) => !o.isError && o.content);
   const s1Start = new Date().toISOString();
-  const critiquePromises = validDrafts.map(async (_, i) => {
-    const critiqueModel = models[i % models.length];
-    const nextDraft = validDrafts[(i + 1) % validDrafts.length];
-    const critiquePrompt = `Please critique the following draft and identify its strengths and weaknesses:\n\n${nextDraft.content}`;
+  const critiquePromises = validDrafts.map(async (critiquer, i) => {
+    // critiquer is the model that produced validDrafts[i]; they critique the next draft
+    const targetDraft = validDrafts[(i + 1) % validDrafts.length];
+    const critiqueModel: WorkflowModelSpec = { provider: critiquer.provider, model: critiquer.model };
+    const critiquePrompt = `Please critique the following draft and identify its strengths and weaknesses:\n\n${targetDraft.content}`;
     try {
       const cv = await callSingle(cyranoUrl, critiquePrompt, critiqueModel, context, anonymize, taskType);
       return {
@@ -552,7 +554,13 @@ async function runEbom(
   });
   saveStageVersions(documentId, 0, 'Brief Creation', 'ebom', [briefOutput], briefPrompt);
 
-  const brief = briefOutput.isError ? prompt : briefOutput.content;
+  if (briefOutput.isError || !briefOutput.content) {
+    // Brief creation failed — return early so stages are not silently degraded
+    throw new Error(
+      `EBOM pipeline aborted: brief creation failed (${briefOutput.error ?? 'no content returned'}).`,
+    );
+  }
+  const brief = briefOutput.content;
 
   // Stage 1: parallel draft based on brief
   const draftPrompt = `Using the following brief, create a high-quality draft:\n\n${brief}`;
@@ -613,8 +621,14 @@ async function runEbom(
   });
   saveStageVersions(documentId, 2, 'Composite Draft', 'ebom', [combinedOutput], combinePrompt);
 
+  if (combinedOutput.isError || !combinedOutput.content) {
+    throw new Error(
+      `EBOM pipeline aborted: synthesis (Stage 2) failed (${combinedOutput.error ?? 'no content returned'}).`,
+    );
+  }
+
   // Stage 3: parallel critique of composite
-  const compositeDraft = combinedOutput.isError ? combined : combinedOutput.content;
+  const compositeDraft = combinedOutput.content;
   const critiquePrompt = `Please critique the following composite draft. Identify what works well, what needs improvement, and what is missing:\n\n${compositeDraft}`;
   const s3Start = new Date().toISOString();
   const critiqueVersions = await callMulti(cyranoUrl, critiquePrompt, models, context, anonymize, taskType);
