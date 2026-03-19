@@ -208,6 +208,9 @@ export class LibraryIngestWorker extends EventEmitter {
    * @returns The number of items attempted.
    */
   async processBatch(): Promise<number> {
+    // First, reset any items that were left in "processing" (e.g. after a crash)
+    await this.resetStuckProcessingItems();
+
     const pendingItems = await getIngestQueue(undefined, 'pending');
     if (pendingItems.length === 0) return 0;
 
@@ -215,6 +218,25 @@ export class LibraryIngestWorker extends EventEmitter {
     const batch = pendingItems.slice(0, 5);
     await Promise.all(batch.map(item => this.processItem(item)));
     return batch.length;
+  }
+
+  /**
+   * Reset any queue items stuck in "processing" state back to "pending" so they
+   * can be retried on subsequent polls.
+   */
+  private async resetStuckProcessingItems(): Promise<void> {
+    const processingItems = await getIngestQueue(undefined, 'processing');
+    if (!processingItems || processingItems.length === 0) {
+      return;
+    }
+
+    await Promise.all(
+      processingItems.map(item =>
+        updateIngestQueueItem(item.id, {
+          status: 'pending',
+        }),
+      ),
+    );
   }
 
   // -------------------------------------------------------------------------
