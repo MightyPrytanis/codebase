@@ -44,6 +44,20 @@ const MAX_TEXT_LENGTH = 500_000;
 // Text extraction helpers
 // ---------------------------------------------------------------------------
 
+function isModuleNotFoundError(error: unknown, moduleName: string): boolean {
+  const err = error as { code?: string; message?: unknown } | null | undefined;
+  if (!err) return false;
+
+  const code = err.code;
+  if (code === 'MODULE_NOT_FOUND' || code === 'ERR_MODULE_NOT_FOUND') {
+    const msg = typeof err.message === 'string' ? err.message : '';
+    // Be conservative: ensure the message references the moduleName when available
+    return msg ? msg.includes(moduleName) : true;
+  }
+
+  return false;
+}
+
 /**
  * Extract text from a file buffer based on MIME type / filename extension.
  *
@@ -63,8 +77,12 @@ async function extractText(filename: string, buffer: Buffer, mimeType?: string):
       const pdfParse = require('pdf-parse');
       const parsed = await (typeof pdfParse === 'function' ? pdfParse(buffer) : pdfParse.default(buffer));
       return (parsed.text || '').trim();
-    } catch {
-      throw new Error('pdf-parse is required for PDF extraction. Install with: npm install pdf-parse');
+    } catch (error: unknown) {
+      if (isModuleNotFoundError(error, 'pdf-parse')) {
+        throw new Error('pdf-parse is required for PDF extraction. Install with: npm install pdf-parse', { cause: error as Error });
+      }
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to extract text from PDF: ${message}`, { cause: error as Error });
     }
   }
 
@@ -74,8 +92,12 @@ async function extractText(filename: string, buffer: Buffer, mimeType?: string):
       const mammoth = (await import('mammoth')).default;
       const result = await mammoth.extractRawText({ buffer });
       return (result.value || '').trim();
-    } catch {
-      throw new Error('mammoth is required for DOCX extraction. Install with: npm install mammoth');
+    } catch (error: unknown) {
+      if (isModuleNotFoundError(error, 'mammoth')) {
+        throw new Error('mammoth is required for DOCX extraction. Install with: npm install mammoth', { cause: error as Error });
+      }
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to extract text from DOCX: ${message}`, { cause: error as Error });
     }
   }
 
