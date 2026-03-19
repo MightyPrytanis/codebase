@@ -312,7 +312,7 @@ export class LibraryIngestWorker extends EventEmitter {
       id: libraryItemId,
       text,
       type: inferredSourceType,
-      source: `library:${location.type}`,
+      source: `library:${item.locationId}`,
       sourceType: 'user-upload',
       metadata: {
         documentType: inferredSourceType,
