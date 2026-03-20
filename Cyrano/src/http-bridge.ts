@@ -1200,7 +1200,7 @@ app.use('/auth', authRoutes);
  *  (e.g. "groq/llama-3.3-70b-versatile", "cohere/command-r-plus").
  */
 const MAE_PROVIDER_VALUES = [
-  'openai', 'anthropic', 'perplexity', 'google', 'deepseek', 'openrouter',
+  'openai', 'anthropic', 'perplexity', 'google', 'xai', 'deepseek', 'openrouter',
   'groq', 'cohere', 'auto',
 ] as const;
 type MaeProvider = typeof MAE_PROVIDER_VALUES[number];
@@ -1348,10 +1348,14 @@ app.get('/api/mae/models', (_req, res) => {
       { provider: 'google', model: 'gemini-2.0-flash-exp', label: 'Gemini 2.0 Flash', group: 'Gemini' },
       { provider: 'google', model: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro', group: 'Gemini' },
       { provider: 'google', model: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash', group: 'Gemini' },
-      // Groq (via OpenRouter)
-      { provider: 'groq', model: 'groq/llama-3.3-70b-versatile', label: 'Llama 3.3 70B', group: 'Groq' },
-      { provider: 'groq', model: 'groq/llama-3.1-8b-instant', label: 'Llama 3.1 8B (fast)', group: 'Groq' },
-      { provider: 'groq', model: 'groq/mixtral-8x7b-32768', label: 'Mixtral 8×7B', group: 'Groq' },
+      // Grok (xAI)
+      { provider: 'xai', model: 'grok-2', label: 'Grok 2', group: 'Grok (xAI)' },
+      { provider: 'xai', model: 'grok-2-mini', label: 'Grok 2 Mini', group: 'Grok (xAI)' },
+      { provider: 'xai', model: 'grok-beta', label: 'Grok Beta', group: 'Grok (xAI)' },
+      // Groq (fast inference via OpenRouter)
+      { provider: 'groq', model: 'groq/llama-3.3-70b-versatile', label: 'Llama 3.3 70B', group: 'Groq (Fast Inference)' },
+      { provider: 'groq', model: 'groq/llama-3.1-8b-instant', label: 'Llama 3.1 8B (fast)', group: 'Groq (Fast Inference)' },
+      { provider: 'groq', model: 'groq/mixtral-8x7b-32768', label: 'Mixtral 8×7B', group: 'Groq (Fast Inference)' },
       // Cohere (via OpenRouter)
       { provider: 'cohere', model: 'cohere/command-r-plus', label: 'Command R+', group: 'Cohere' },
       { provider: 'cohere', model: 'cohere/command-r', label: 'Command R', group: 'Cohere' },

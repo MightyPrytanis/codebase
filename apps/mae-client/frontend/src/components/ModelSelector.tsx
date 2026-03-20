@@ -53,7 +53,15 @@ const MODEL_GROUPS: ModelGroupDef[] = [
     ],
   },
   {
-    group: 'Groq',
+    group: 'Grok (xAI)',
+    models: [
+      { provider: 'xai', model: 'grok-2', label: 'Grok 2' },
+      { provider: 'xai', model: 'grok-2-mini', label: 'Grok 2 Mini' },
+      { provider: 'xai', model: 'grok-beta', label: 'Grok Beta' },
+    ],
+  },
+  {
+    group: 'Groq (Fast Inference)',
     models: [
       { provider: 'groq', model: 'groq/llama-3.3-70b-versatile', label: 'Llama 3.3 70B' },
       { provider: 'groq', model: 'groq/llama-3.1-8b-instant', label: 'Llama 3.1 8B (fast)' },
