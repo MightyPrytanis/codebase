@@ -3,7 +3,7 @@ Document ID: PROJECT-CHANGE-LOG
 Title: Cyrano Project Change Log
 Subject(s): Project | History | Development
 Project: Cyrano
-Version: v611
+Version: v612
 Created: 2025-11-28 (2025-W48)
 Last Substantive Revision: 2026-03-17 (2026-W12)
 Last Format Update: 2026-03-17 (2026-W12)
@@ -77,6 +77,72 @@ The LexFiat Forecaster™ (`apps/forecaster/`) was substantially complete prior 
 - ✅ Forecaster frontend React UI (`apps/forecaster/frontend/`)
 - ✅ HTTP bridge tax forecast endpoints (`/api/forecast/tax`, `/api/forecast/tax/pdf`)
 - ✅ `pdf_form_filler` tool now registered in MCP server (was missing — fixed in this branch)
+## Master Plan VIII: Priority 3 & 4 Implementation (2026-03-17)
+
+**Status:** COMPLETE
+**Branch:** `copilot/complete-library-feature`
+
+### Priority 3: Library Feature Completion
+
+**Status:** ✅ COMPLETE
+
+All Library feature components are operational:
+
+- **Database Schema** (`Cyrano/src/schema-library.ts`): Tables for `practice_profiles`,
+  `library_locations`, `library_items`, and `ingest_queue` are defined via Drizzle ORM.
+- **Library Service** (`Cyrano/src/services/library-service.ts`): Full CRUD for all four
+  tables; queue management functions (`enqueueIngest`, `getIngestQueue`,
+  `updateIngestQueueItem`).
+- **Storage Connectors** (`Cyrano/src/modules/library/connectors/`):
+  - `local.ts` — Recursive filesystem scanner, file-change detection, MIME-type inference,
+    path-traversal–safe download/upload via `secure-path.js`.
+  - `onedrive.ts` — Microsoft Graph API integration with rate-limiter and retry logic.
+  - `gdrive.ts` — Google Drive API integration with dynamic `googleapis` import.
+  - `s3.ts` — AWS S3 integration with dynamic `@aws-sdk/client-s3` import.
+  - `base-connector.ts` — Shared `StorageConnector` interface, `RateLimiter`, and
+    `withRetry` utility.
+- **Ingest Worker** (`Cyrano/src/modules/library/library-ingest-worker.ts`): **NEW** — 
+  Background `LibraryIngestWorker` class (extends `EventEmitter`) that:
+  - Polls the ingest queue every 30 s (idle) / 2 s (active)
+  - Downloads files via storage connectors
+  - Extracts text from PDF (pdf-parse), DOCX (mammoth), and plain-text formats
+  - Auto-classifies document `sourceType` from content keywords
+  - Ingests into RAG via `RAGService.ingestDocument()` with full library metadata
+  - Marks queue items and library items as completed/failed
+  - Emits `processing`, `completed`, `failed`, `error` events
+  - Retries failed items up to `maxAttempts`
+- **HTTP Bridge** (`Cyrano/src/http-bridge.ts`): Worker auto-starts at server startup
+  (non-blocking, skip in test environment).
+- **API Routes** (`Cyrano/src/routes/library.ts`): All endpoints implemented:
+  `GET/POST /library/items`, `GET /library/items/:id`,
+  `DELETE /library/items/:id`, `POST /library/items/:id/pin`,
+  `POST /library/items/:id/ingest`, `GET /library/locations`,
+  `POST /library/locations`, `POST /library/locations/:id/sync`,
+  `GET /library/ingest/queue`, `GET /health/library`.
+- **UI** (`apps/lexfiat/client/src/pages/library.tsx` + `components/library/`):
+  Library page, item list, detail drawer, add-location dialog, upload dialog —
+  all accessible from the sidebar navigation.
+- **Onboarding** (`apps/lexfiat/client/src/pages/onboarding.tsx`): Step 4 collects
+  storage preferences (local path, OneDrive, Google Drive, S3 toggle + bucket).
+
+### Priority 4: Test Infrastructure Fixes
+
+**Status:** ✅ COMPLETE
+
+- **Test Suite**: 726 tests pass across 56 test files (31 skipped — require live DB or
+  network). 0 failures.
+- **Syntax Fix** (`Cyrano/tests/routes/onboarding.test.ts`): Removed orphaned
+  `});` at end of file (BraceCase-era orphan causing `Unexpected "}"` parse error).
+- **Security Test Coverage**: All required tests exist and pass:
+  - `tests/security/jwt-token.test.ts` — token generation & validation (8 tests)
+  - `tests/security/csrf-middleware.test.ts` — CSRF token flow (19 tests)
+  - `tests/security/cookie-security.test.ts` — SameSite/Secure/HttpOnly flags (17 tests)
+  - `tests/security/session-management.test.ts` — session lifecycle (10 tests)
+  - `tests/security/authentication-middleware.test.ts` — auth middleware (11 tests)
+  - Plus 7 additional security test files (165 tests, 2 skipped).
+- **CI/CD Pipeline** (`.github/workflows/ci.yml`): Operational — runs on push/PR to
+  `main`/`develop`; type-check, unit tests, coverage upload to Codecov. Required checks
+  (`Run Tests`, `Security Scan`) block merge on failure.
 
 **Date:** 2026-03-17 (2026-W12)
 

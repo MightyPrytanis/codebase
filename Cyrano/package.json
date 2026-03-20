@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.78.0",
-    "@aws-sdk/client-s3": "^3.995.0",
+    "@aws-sdk/client-s3": "^3.1011.0",
     "@iconify-icons/mingcute": "^1.2.9",
     "@iconify/react": "^6.0.2",
     "@microsoft/microsoft-graph-client": "^3.0.7",
@@ -53,7 +53,7 @@
     "jsdom": "^28.1.0",
     "json-rules-engine": "^7.3.1",
     "jsonwebtoken": "^9.0.3",
-    "lucide-react": "^0.575.0",
+    "lucide-react": "^0.577.0",
     "mammoth": "^1.11.0",
     "marked": "^17.0.4",
     "multer": "^2.1.1",
@@ -65,7 +65,7 @@
     "playwright": "^1.58.2",
     "postgres": "^3.4.8",
     "puppeteer": "^24.37.5",
-    "react-icons": "^5.5.0",
+    "react-icons": "^5.6.0",
     "tesseract.js": "^7.0.0",
     "uuid": "^13.0.0",
     "zod": "^4.3.6"
@@ -83,12 +83,12 @@
     "@vitest/ui": "^4.0.17",
     "csv-parse": "^6.1.0",
     "drizzle-kit": "^0.31.9",
-    "eslint": "^10.0.1",
+    "eslint": "^10.0.3",
     "globals": "^17.3.0",
     "imapflow": "^1.2.10",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.0",
-    "vitest": "^4.0.17"
+    "vitest": "^4.1.0"
   }
 }
