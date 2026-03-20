@@ -11,8 +11,6 @@ import { runWorkflow, WORKFLOW_PRESETS, type WorkflowType } from '../workflow-en
 
 export const workflowRouter = Router();
 
-const CYRANO_URL = process.env.CYRANO_URL ?? 'http://localhost:5002';
-
 const ModelSpec = z.object({
   provider: z.string(),
   model: z.string(),
@@ -77,7 +75,6 @@ workflowRouter.post('/run', async (req: Request, res: Response) => {
 
   try {
     const stages = await runWorkflow({
-      cyranoUrl: CYRANO_URL,
       documentId,
       prompt,
       context,

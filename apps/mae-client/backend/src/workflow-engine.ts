@@ -7,6 +7,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import { addVersion } from './version-control.js';
 
+/** Internal base URL for the Cyrano HTTP bridge.  Read once at module load from
+ *  the environment — never supplied via user-controlled input — to prevent SSRF. */
+const CYRANO_BASE_URL: string = process.env.CYRANO_URL ?? 'http://localhost:5002';
+
 export type WorkflowType = 'parallel' | 'relay' | 'committee' | 'critique' | 'ebom' | 'panel';
 
 export const WORKFLOW_PRESETS: Record<
@@ -88,7 +92,6 @@ export interface WorkflowStage {
 }
 
 export interface WorkflowRunOptions {
-  cyranoUrl: string;
   documentId: string;
   prompt: string;
   context?: string;
@@ -110,14 +113,13 @@ interface CyranoVersion {
 }
 
 async function callMulti(
-  cyranoUrl: string,
   prompt: string,
   models: WorkflowModelSpec[],
   context?: string,
   anonymize?: boolean,
   taskType?: string,
 ): Promise<CyranoVersion[]> {
-  const response = await fetch(`${cyranoUrl}/api/mae/write/multi`, {
+  const response = await fetch(`${CYRANO_BASE_URL}/api/mae/write/multi`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -140,14 +142,13 @@ async function callMulti(
 }
 
 async function callSingle(
-  cyranoUrl: string,
   prompt: string,
   model: WorkflowModelSpec,
   context?: string,
   anonymize?: boolean,
   taskType?: string,
 ): Promise<CyranoVersion> {
-  const response = await fetch(`${cyranoUrl}/api/mae/write`, {
+  const response = await fetch(`${CYRANO_BASE_URL}/api/mae/write`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -197,7 +198,6 @@ function saveStageVersions(
 
 export async function runWorkflow(options: WorkflowRunOptions): Promise<WorkflowStage[]> {
   const {
-    cyranoUrl,
     documentId,
     prompt,
     context,
@@ -211,28 +211,27 @@ export async function runWorkflow(options: WorkflowRunOptions): Promise<Workflow
 
   switch (workflowType) {
     case 'parallel':
-      return runParallel(cyranoUrl, documentId, prompt, context, models, anonymize, taskType);
+      return runParallel(documentId, prompt, context, models, anonymize, taskType);
     case 'relay':
-      return runRelay(cyranoUrl, documentId, prompt, context, models, anonymize, taskType);
+      return runRelay(documentId, prompt, context, models, anonymize, taskType);
     case 'committee':
       if (!synthesizer) throw new Error("Workflow type 'committee' requires a synthesizer model.");
-      return runCommittee(cyranoUrl, documentId, prompt, context, models, synthesizer, anonymize, taskType);
+      return runCommittee(documentId, prompt, context, models, synthesizer, anonymize, taskType);
     case 'critique':
       if (!synthesizer) throw new Error("Workflow type 'critique' requires a synthesizer model.");
-      return runCritique(cyranoUrl, documentId, prompt, context, models, synthesizer, anonymize, taskType);
+      return runCritique(documentId, prompt, context, models, synthesizer, anonymize, taskType);
     case 'ebom':
       if (!synthesizer) throw new Error("Workflow type 'ebom' requires a synthesizer model.");
-      return runEbom(cyranoUrl, documentId, prompt, context, models, synthesizer, anonymize, taskType);
+      return runEbom(documentId, prompt, context, models, synthesizer, anonymize, taskType);
     case 'panel':
       if (!synthesizer) throw new Error("Workflow type 'panel' requires a synthesizer model.");
-      return runPanel(cyranoUrl, documentId, prompt, context, models, synthesizer, anonymize, expertPersonas, taskType);
+      return runPanel(documentId, prompt, context, models, synthesizer, anonymize, expertPersonas, taskType);
     default:
       throw new Error(`Unknown workflow type: ${workflowType}`);
   }
 }
 
 async function runParallel(
-  cyranoUrl: string,
   documentId: string,
   prompt: string,
   context: string | undefined,
@@ -241,7 +240,7 @@ async function runParallel(
   taskType?: string,
 ): Promise<WorkflowStage[]> {
   const startedAt = new Date().toISOString();
-  const cyranoVersions = await callMulti(cyranoUrl, prompt, models, context, anonymize, taskType);
+  const cyranoVersions = await callMulti(prompt, models, context, anonymize, taskType);
   const completedAt = new Date().toISOString();
 
   const outputs: WorkflowStageOutput[] = cyranoVersions.map((cv) => ({
@@ -266,7 +265,6 @@ async function runParallel(
 }
 
 async function runRelay(
-  cyranoUrl: string,
   documentId: string,
   prompt: string,
   context: string | undefined,
@@ -288,7 +286,7 @@ async function runRelay(
     const startedAt = new Date().toISOString();
     let output: WorkflowStageOutput;
     try {
-      const cv = await callSingle(cyranoUrl, currentPrompt, model, context, anonymize, taskType);
+      const cv = await callSingle(currentPrompt, model, context, anonymize, taskType);
       output = {
         provider: cv.provider,
         model: cv.model,
@@ -319,7 +317,6 @@ async function runRelay(
 }
 
 async function runCommittee(
-  cyranoUrl: string,
   documentId: string,
   prompt: string,
   context: string | undefined,
@@ -332,7 +329,7 @@ async function runCommittee(
 
   // Stage 0: parallel draft
   const s0Start = new Date().toISOString();
-  const cyranoVersions = await callMulti(cyranoUrl, prompt, models, context, anonymize, taskType);
+  const cyranoVersions = await callMulti(prompt, models, context, anonymize, taskType);
   const s0End = new Date().toISOString();
   const s0Outputs: WorkflowStageOutput[] = cyranoVersions.map((cv) => ({
     provider: cv.provider,
@@ -361,7 +358,7 @@ async function runCommittee(
   const s1Start = new Date().toISOString();
   let synthOutput: WorkflowStageOutput;
   try {
-    const cv = await callSingle(cyranoUrl, synthPrompt, synthesizer, context, anonymize, taskType);
+    const cv = await callSingle(synthPrompt, synthesizer, context, anonymize, taskType);
     synthOutput = {
       provider: cv.provider,
       model: cv.model,
@@ -393,7 +390,6 @@ async function runCommittee(
 }
 
 async function runCritique(
-  cyranoUrl: string,
   documentId: string,
   prompt: string,
   context: string | undefined,
@@ -406,7 +402,7 @@ async function runCritique(
 
   // Stage 0: parallel draft
   const s0Start = new Date().toISOString();
-  const cyranoVersions = await callMulti(cyranoUrl, prompt, models, context, anonymize, taskType);
+  const cyranoVersions = await callMulti(prompt, models, context, anonymize, taskType);
   const s0End = new Date().toISOString();
   const s0Outputs: WorkflowStageOutput[] = cyranoVersions.map((cv) => ({
     provider: cv.provider,
@@ -435,7 +431,7 @@ async function runCritique(
     const critiqueModel: WorkflowModelSpec = { provider: critiquer.provider, model: critiquer.model };
     const critiquePrompt = `Please critique the following draft and identify its strengths and weaknesses:\n\n${targetDraft.content}`;
     try {
-      const cv = await callSingle(cyranoUrl, critiquePrompt, critiqueModel, context, anonymize, taskType);
+      const cv = await callSingle(critiquePrompt, critiqueModel, context, anonymize, taskType);
       return {
         provider: cv.provider,
         model: cv.model,
@@ -478,7 +474,7 @@ async function runCritique(
   const s2Start = new Date().toISOString();
   let finalOutput: WorkflowStageOutput;
   try {
-    const cv = await callSingle(cyranoUrl, revisePrompt, synthesizer, context, anonymize, taskType);
+    const cv = await callSingle(revisePrompt, synthesizer, context, anonymize, taskType);
     finalOutput = {
       provider: cv.provider,
       model: cv.model,
@@ -510,7 +506,6 @@ async function runCritique(
 }
 
 async function runEbom(
-  cyranoUrl: string,
   documentId: string,
   prompt: string,
   context: string | undefined,
@@ -526,7 +521,7 @@ async function runEbom(
   const s0Start = new Date().toISOString();
   let briefOutput: WorkflowStageOutput;
   try {
-    const cv = await callSingle(cyranoUrl, briefPrompt, synthesizer, context, anonymize, taskType);
+    const cv = await callSingle(briefPrompt, synthesizer, context, anonymize, taskType);
     briefOutput = {
       provider: cv.provider,
       model: cv.model,
@@ -565,7 +560,7 @@ async function runEbom(
   // Stage 1: parallel draft based on brief
   const draftPrompt = `Using the following brief, create a high-quality draft:\n\n${brief}`;
   const s1Start = new Date().toISOString();
-  const draftVersions = await callMulti(cyranoUrl, draftPrompt, models, context, anonymize, taskType);
+  const draftVersions = await callMulti(draftPrompt, models, context, anonymize, taskType);
   const s1End = new Date().toISOString();
   const draftOutputs: WorkflowStageOutput[] = draftVersions.map((cv) => ({
     provider: cv.provider,
@@ -593,7 +588,7 @@ async function runEbom(
   const s2Start = new Date().toISOString();
   let combinedOutput: WorkflowStageOutput;
   try {
-    const cv = await callSingle(cyranoUrl, combinePrompt, synthesizer, context, anonymize, taskType);
+    const cv = await callSingle(combinePrompt, synthesizer, context, anonymize, taskType);
     combinedOutput = {
       provider: cv.provider,
       model: cv.model,
@@ -631,7 +626,7 @@ async function runEbom(
   const compositeDraft = combinedOutput.content;
   const critiquePrompt = `Please critique the following composite draft. Identify what works well, what needs improvement, and what is missing:\n\n${compositeDraft}`;
   const s3Start = new Date().toISOString();
-  const critiqueVersions = await callMulti(cyranoUrl, critiquePrompt, models, context, anonymize, taskType);
+  const critiqueVersions = await callMulti(critiquePrompt, models, context, anonymize, taskType);
   const s3End = new Date().toISOString();
   const critiqueOutputs: WorkflowStageOutput[] = critiqueVersions.map((cv) => ({
     provider: cv.provider,
@@ -659,7 +654,7 @@ async function runEbom(
   const s4Start = new Date().toISOString();
   let finalOutput: WorkflowStageOutput;
   try {
-    const cv = await callSingle(cyranoUrl, finalPrompt, synthesizer, context, anonymize, taskType);
+    const cv = await callSingle(finalPrompt, synthesizer, context, anonymize, taskType);
     finalOutput = {
       provider: cv.provider,
       model: cv.model,
@@ -691,7 +686,6 @@ async function runEbom(
 }
 
 async function runPanel(
-  cyranoUrl: string,
   documentId: string,
   prompt: string,
   context: string | undefined,
@@ -711,7 +705,7 @@ async function runPanel(
     const persona = personas[i % personas.length];
     const personaPrompt = `You are a ${persona}. From your professional perspective as a ${persona}, respond to the following:\n\n${prompt}`;
     try {
-      const cv = await callSingle(cyranoUrl, personaPrompt, model, context, anonymize, taskType);
+      const cv = await callSingle(personaPrompt, model, context, anonymize, taskType);
       return {
         provider: cv.provider,
         model: cv.model,
@@ -752,7 +746,7 @@ async function runPanel(
   const s1Start = new Date().toISOString();
   let synthOutput: WorkflowStageOutput;
   try {
-    const cv = await callSingle(cyranoUrl, synthPrompt, synthesizer, context, anonymize, taskType);
+    const cv = await callSingle(synthPrompt, synthesizer, context, anonymize, taskType);
     synthOutput = {
       provider: cv.provider,
       model: cv.model,
