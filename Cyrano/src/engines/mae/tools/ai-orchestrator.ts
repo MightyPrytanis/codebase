@@ -423,6 +423,9 @@ export const aiOrchestrator = new (class extends BaseTool {
       'grok': 'xai',
       'xai': 'xai',
       'deepseek': 'deepseek',
+      'openrouter': 'openrouter',
+      'groq': 'openrouter',
+      'cohere': 'openrouter',
     };
     
     const normalized = mapping[provider.toLowerCase()];

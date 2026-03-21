@@ -43,6 +43,7 @@ import { ethicsPolicyExplainer } from './tools/ethics-policy-explainer.js';
 import { getEthicsAuditTool, getEthicsStatsTool } from './tools/ethics-audit-tools.js';
 import { potemkinEngineTool } from './tools/potemkin-engine.js';
 import { forecastEngineTool } from './tools/forecast-engine.js';
+import { pdfFormFiller } from './tools/pdf-form-filler.js';
 // Import shared verification tools
 import { claimExtractor } from './tools/verification/claim-extractor.js';
 import { citationChecker } from './tools/verification/citation-checker.js';
@@ -213,6 +214,8 @@ class CyranoMCPServer {
           getEthicsStatsTool.getToolDefinition(),
           potemkinEngineTool.getToolDefinition(),
           forecastEngineTool.getToolDefinition(),
+          // PDF Form Filler (used by Forecast modules and standalone)
+          pdfFormFiller.getToolDefinition(),
           // Shared verification tools (used by Potemkin and Arkiver)
           claimExtractor.getToolDefinition(),
           citationChecker.getToolDefinition(),
@@ -421,8 +424,7 @@ class CyranoMCPServer {
           case 'potemkin_engine':
             result = await potemkinEngineTool.execute(args);
             break;
-          case 'forecast_engine': {
-            const forecastResult = await forecastEngineTool.execute(args);
+          case 'forecast_engine': {            const forecastResult = await forecastEngineTool.execute(args);
             // Normalize result to match CallToolResult type
             if (forecastResult && typeof forecastResult === 'object' && 'content' in forecastResult && Array.isArray(forecastResult.content)) {
               result = {
@@ -444,6 +446,9 @@ class CyranoMCPServer {
             }
             break;
           }
+          case 'pdf_form_filler':
+            result = await pdfFormFiller.execute(args);
+            break;
           // Shared verification tools
           case 'claim_extractor':
             result = await claimExtractor.execute(args);
