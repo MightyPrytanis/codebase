@@ -48,6 +48,7 @@ import {
   Tool,
   CallToolResult,
 } from '@modelcontextprotocol/sdk/types.js';
+import type { AIProvider } from './services/ai-service.js';
 
 // Import security middleware (essential for server security)
 console.error('[HTTP Bridge] Importing security middleware...');
@@ -313,6 +314,10 @@ const toolImportMap: Record<string, { loader: ToolLoader; metadata: Partial<Tool
   forecast_engine: {
     loader: () => import('./tools/forecast-engine.js').then(m => m.forecastEngineTool),
     metadata: { name: 'forecast_engine', dependencies: [] }
+  },
+  pdf_form_filler: {
+    loader: () => import('./tools/pdf-form-filler.js').then(m => m.pdfFormFiller),
+    metadata: { name: 'pdf_form_filler', dependencies: [] }
   },
   
   // Verification Tools
@@ -1184,6 +1189,185 @@ app.post('/api/forecast/tax/pdf', async (req, res) => {
 
 // Authentication routes
 app.use('/auth', authRoutes);
+
+// ============================================================================
+// MAE Document Writing API
+// Used by the MAE thin client (apps/mae-client) for multi-model document writing
+// ============================================================================
+
+/** All provider strings accepted by the MAE write endpoints.
+ *  'groq' and 'cohere' are OpenRouter-routed — the model string carries the prefix
+ *  (e.g. "groq/llama-3.3-70b-versatile", "cohere/command-r-plus").
+ */
+const MAE_PROVIDER_VALUES = [
+  'openai', 'anthropic', 'perplexity', 'google', 'xai', 'deepseek', 'openrouter',
+  'groq', 'cohere', 'auto',
+] as const;
+type MaeProvider = typeof MAE_PROVIDER_VALUES[number];
+
+/** Resolve the Cyrano AIProvider from the thin-client provider string.
+ *  'groq' and 'cohere' are accessed through OpenRouter. */
+function resolveMaeProvider(provider: MaeProvider): AIProvider {
+  if (provider === 'auto') return 'openai'; // sensible default; overrideable
+  if (provider === 'groq' || provider === 'cohere') return 'openrouter';
+  return provider as AIProvider;
+}
+
+const MaeWriteRequestSchema = z.object({
+  prompt: z.string().min(1, 'Prompt is required'),
+  context: z.string().optional(),
+  provider: z.enum(MAE_PROVIDER_VALUES).default('auto'),
+  model: z.string().optional(),
+  taskType: z.enum(['writing', 'analysis', 'summarization', 'rewriting']).default('writing'),
+  anonymize: z.boolean().optional().describe('Anonymize prompt before sending to AI provider'),
+});
+
+const MaeMultiWriteRequestSchema = z.object({
+  prompt: z.string().min(1, 'Prompt is required'),
+  context: z.string().optional(),
+  models: z.array(z.object({
+    provider: z.enum(MAE_PROVIDER_VALUES),
+    model: z.string(),
+  })).min(1, 'At least one model is required'),
+  taskType: z.enum(['writing', 'analysis', 'summarization', 'rewriting']).default('writing'),
+  anonymize: z.boolean().optional().describe('Anonymize prompt before sending to AI provider'),
+});
+
+// POST /api/mae/write - Generate a single document version
+app.post('/api/mae/write', async (req, res) => {
+  try {
+    const parsed = MaeWriteRequestSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ isError: true, content: [{ text: 'Invalid request body' }] });
+    }
+
+    const { prompt, context, provider, model, taskType, anonymize } = parsed.data;
+    const resolvedProvider = resolveMaeProvider(provider);
+    const fullPrompt = context ? `Context:\n${context}\n\nTask:\n${prompt}` : prompt;
+
+    const { aiService: maeAIService } = await import('./services/ai-service.js');
+    const result = await maeAIService.call(
+      resolvedProvider,
+      fullPrompt,
+      {
+        model,
+        systemPrompt: `You are an expert writing assistant. Task type: ${taskType}.`,
+        anonymize: anonymize ?? false,
+      }
+    );
+
+    return res.json({
+      content: [{ type: 'text', text: result }],
+      isError: false,
+    });
+  } catch (error) {
+    res.status(500).json({
+      isError: true,
+      content: [{ text: error instanceof Error ? error.message : 'Unknown error' }],
+    });
+  }
+});
+
+// POST /api/mae/write/multi - Generate multiple document versions in parallel
+app.post('/api/mae/write/multi', async (req, res) => {
+  try {
+    const parsed = MaeMultiWriteRequestSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ isError: true, content: [{ text: 'Invalid request body' }] });
+    }
+
+    const { prompt, context, models, taskType, anonymize } = parsed.data;
+
+    const { aiService: maeAIService } = await import('./services/ai-service.js');
+    const fullPrompt = context ? `Context:\n${context}\n\nTask:\n${prompt}` : prompt;
+
+    // Generate versions in parallel — each call handles its own anonymization session
+    const results = await Promise.allSettled(
+      models.map(({ provider, model }) => {
+        const resolvedProvider = resolveMaeProvider(provider);
+        return maeAIService.call(
+          resolvedProvider,
+          fullPrompt,
+          {
+            model,
+            systemPrompt: `You are an expert writing assistant. Task type: ${taskType}.`,
+            anonymize: anonymize ?? false,
+          }
+        );
+      })
+    );
+
+    const versions = results.map((result, index) => {
+      const { provider, model } = models[index];
+      if (result.status === 'fulfilled') {
+        return {
+          provider,
+          model,
+          content: result.value,
+          isError: false,
+          timestamp: new Date().toISOString(),
+        };
+      } else {
+        return {
+          provider,
+          model,
+          content: '',
+          isError: true,
+          error: result.reason instanceof Error ? result.reason.message : String(result.reason),
+          timestamp: new Date().toISOString(),
+        };
+      }
+    });
+
+    return res.json({ versions });
+  } catch (error) {
+    res.status(500).json({
+      isError: true,
+      content: [{ text: error instanceof Error ? error.message : 'Unknown error' }],
+    });
+  }
+});
+
+// GET /api/mae/models - List available AI models for document writing
+app.get('/api/mae/models', (_req, res) => {
+  res.json({
+    models: [
+      // OpenAI
+      { provider: 'openai', model: 'gpt-4o', label: 'GPT-4o', group: 'OpenAI' },
+      { provider: 'openai', model: 'gpt-4o-mini', label: 'GPT-4o Mini', group: 'OpenAI' },
+      { provider: 'openai', model: 'gpt-4-turbo', label: 'GPT-4 Turbo', group: 'OpenAI' },
+      { provider: 'openai', model: 'gpt-3.5-turbo', label: 'GPT-3.5 Turbo', group: 'OpenAI' },
+      // Anthropic
+      { provider: 'anthropic', model: 'claude-3-5-sonnet-20241022', label: 'Claude 3.5 Sonnet', group: 'Anthropic' },
+      { provider: 'anthropic', model: 'claude-3-opus-20240229', label: 'Claude 3 Opus', group: 'Anthropic' },
+      { provider: 'anthropic', model: 'claude-3-haiku-20240307', label: 'Claude 3 Haiku', group: 'Anthropic' },
+      // Perplexity Sonar
+      { provider: 'perplexity', model: 'sonar', label: 'Sonar', group: 'Perplexity' },
+      { provider: 'perplexity', model: 'sonar-pro', label: 'Sonar Pro', group: 'Perplexity' },
+      // Google Gemini
+      { provider: 'google', model: 'gemini-2.0-flash-exp', label: 'Gemini 2.0 Flash', group: 'Gemini' },
+      { provider: 'google', model: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro', group: 'Gemini' },
+      { provider: 'google', model: 'gemini-1.5-flash', label: 'Gemini 1.5 Flash', group: 'Gemini' },
+      // Grok (xAI)
+      { provider: 'xai', model: 'grok-2', label: 'Grok 2', group: 'Grok (xAI)' },
+      { provider: 'xai', model: 'grok-2-mini', label: 'Grok 2 Mini', group: 'Grok (xAI)' },
+      { provider: 'xai', model: 'grok-beta', label: 'Grok Beta', group: 'Grok (xAI)' },
+      // Groq (fast inference via OpenRouter)
+      { provider: 'groq', model: 'groq/llama-3.3-70b-versatile', label: 'Llama 3.3 70B', group: 'Groq (Fast Inference)' },
+      { provider: 'groq', model: 'groq/llama-3.1-8b-instant', label: 'Llama 3.1 8B (fast)', group: 'Groq (Fast Inference)' },
+      { provider: 'groq', model: 'groq/mixtral-8x7b-32768', label: 'Mixtral 8×7B', group: 'Groq (Fast Inference)' },
+      // Cohere (via OpenRouter)
+      { provider: 'cohere', model: 'cohere/command-r-plus', label: 'Command R+', group: 'Cohere' },
+      { provider: 'cohere', model: 'cohere/command-r', label: 'Command R', group: 'Cohere' },
+      // DeepSeek (with data-sovereignty caution)
+      { provider: 'deepseek', model: 'deepseek-chat', label: 'DeepSeek Chat', group: 'DeepSeek', caution: 'Data routed to DeepSeek servers (CN). Do not use with client-identifiable information.' },
+      { provider: 'deepseek', model: 'deepseek-reasoner', label: 'DeepSeek Reasoner', group: 'DeepSeek', caution: 'Data routed to DeepSeek servers (CN). Do not use with client-identifiable information.' },
+      // Local / self-hosted (via OpenRouter local relay or Ollama-compatible endpoint)
+      { provider: 'openrouter', model: 'mistralai/mistral-7b-instruct:free', label: 'Mistral 7B (free)', group: 'Local / Open' },
+      { provider: 'openrouter', model: 'google/gemma-2-9b-it:free', label: 'Gemma 2 9B (free)', group: 'Local / Open' },
+    ],
+  });
+});
 
 // Security endpoints
 app.get('/csrf-token', security.getCSRFToken);
