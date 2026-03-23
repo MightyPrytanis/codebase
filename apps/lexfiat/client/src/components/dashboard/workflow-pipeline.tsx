@@ -4,9 +4,9 @@ import DraftApproval from "./draft-approval";
 import WorkflowCustomizer from "./workflow-customizer";
 
 interface WorkflowPipelineProps {
-  cases: any[];
-  redFlags: any[];
-  dashboardStats: any;
+  cases: unknown[];
+  redFlags: unknown[];
+  dashboardStats: Record<string, unknown> | null | undefined;
   intakeMetrics?: { today: number; pending: number };
   isLoading: boolean;
 }
@@ -24,7 +24,7 @@ interface WorkflowStage {
 }
 
 export default function WorkflowPipeline({ 
-  cases, 
+  cases: _cases, 
   redFlags, 
   dashboardStats, 
   intakeMetrics,
@@ -56,8 +56,8 @@ export default function WorkflowPipeline({
       icon: Mail,
       type: 'intake',
       metrics: [
-        { label: 'Today', value: intakeMetrics?.today || dashboardStats?.intake_today || 24 },
-        { label: 'Pending', value: intakeMetrics?.pending || dashboardStats?.intake_pending || 3 }
+        { label: 'Today', value: intakeMetrics?.today || (dashboardStats?.intake_today as number) || 24 },
+        { label: 'Pending', value: intakeMetrics?.pending || (dashboardStats?.intake_pending as number) || 3 }
       ]
     },
     {
@@ -67,8 +67,8 @@ export default function WorkflowPipeline({
       icon: Brain,
       type: 'analysis',
       metrics: [
-        { label: 'Processing', value: dashboardStats?.analysis_processing || redFlags.length || 5 },
-        { label: 'Red Flags', value: redFlags.length || dashboardStats?.red_flags_count || 2 }
+        { label: 'Processing', value: (dashboardStats?.analysis_processing as number) || redFlags.length || 5 },
+        { label: 'Red Flags', value: redFlags.length || (dashboardStats?.red_flags_count as number) || 2 }
       ]
     },
     {
@@ -78,8 +78,8 @@ export default function WorkflowPipeline({
       icon: FileText,
       type: 'review',
       metrics: [
-        { label: 'Drafts Ready', value: dashboardStats?.drafts_ready || 6 },
-        { label: 'In Progress', value: dashboardStats?.drafts_in_progress || 3 }
+        { label: 'Drafts Ready', value: (dashboardStats?.drafts_ready as number) || 6 },
+        { label: 'In Progress', value: (dashboardStats?.drafts_in_progress as number) || 3 }
       ]
     },
     {
@@ -89,8 +89,8 @@ export default function WorkflowPipeline({
       icon: CheckCircle,
       type: 'output',
       metrics: [
-        { label: 'Awaiting', value: dashboardStats?.awaiting_review || 8 },
-        { label: 'Urgent', value: dashboardStats?.urgent_review || redFlags.filter((f: any) => f.priority === 'critical').length || 1 }
+        { label: 'Awaiting', value: (dashboardStats?.awaiting_review as number) || 8 },
+        { label: 'Urgent', value: (dashboardStats?.urgent_review as number) || (redFlags as Array<{priority: string}>).filter((f) => f.priority === 'critical').length || 1 }
       ]
     }
   ];

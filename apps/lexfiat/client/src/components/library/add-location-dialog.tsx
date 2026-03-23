@@ -5,7 +5,7 @@
  */
 
 import { useState } from 'react';
-import { X, FolderOpen, Cloud, HardDrive, Database } from 'lucide-react';
+import { X, Cloud, HardDrive, Database } from 'lucide-react';
 import { createLibraryLocation, LibraryLocation } from '@/lib/library-api';
 
 interface AddLocationDialogProps {
@@ -22,7 +22,7 @@ export function AddLocationDialog({ isOpen, onClose, onSuccess }: AddLocationDia
   const [error, setError] = useState<string | null>(null);
 
   // OAuth/credentials fields (conditional based on type)
-  const [credentials, setCredentials] = useState<Record<string, any>>({});
+  const [credentials, setCredentials] = useState<Record<string, unknown>>({});
 
   if (!isOpen) return null;
 
@@ -57,7 +57,10 @@ export function AddLocationDialog({ isOpen, onClose, onSuccess }: AddLocationDia
       {/* Overlay */}
       <div
         className="fixed inset-0 bg-black/50 z-50"
+        role="button"
+        tabIndex={0}
         onClick={onClose}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClose(); }}
       />
       
       {/* Dialog */}
@@ -78,9 +81,9 @@ export function AddLocationDialog({ isOpen, onClose, onSuccess }: AddLocationDia
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
             {/* Location Type */}
             <div>
-              <label className="block text-sm font-medium text-warm-white mb-2">
+              <p id="location-type" className="block text-sm font-medium text-warm-white mb-2">
                 Storage Type
-              </label>
+              </p>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
@@ -135,10 +138,11 @@ export function AddLocationDialog({ isOpen, onClose, onSuccess }: AddLocationDia
 
             {/* Name */}
             <div>
-              <label className="block text-sm font-medium text-warm-white mb-1">
+              <label htmlFor="location-name" className="block text-sm font-medium text-warm-white mb-1">
                 Location Name
               </label>
               <input
+                id="location-name"
                 type="text"
                 required
                 value={name}
@@ -150,10 +154,11 @@ export function AddLocationDialog({ isOpen, onClose, onSuccess }: AddLocationDia
 
             {/* Path */}
             <div>
-              <label className="block text-sm font-medium text-warm-white mb-1">
+              <label htmlFor="location-path" className="block text-sm font-medium text-warm-white mb-1">
                 {locationType === 'local' ? 'Directory Path' : locationType === 's3' ? 'Bucket/Prefix' : 'Folder Path'}
               </label>
               <input
+                id="location-path"
                 type="text"
                 required
                 value={path}
@@ -184,21 +189,21 @@ export function AddLocationDialog({ isOpen, onClose, onSuccess }: AddLocationDia
                     <input
                       type="text"
                       placeholder="Access Key ID"
-                      value={credentials.accessKeyId || ''}
+                      value={(credentials.accessKeyId as string) || ''}
                       onChange={(e) => setCredentials({ ...credentials, accessKeyId: e.target.value })}
                       className="w-full bg-charcoal border border-gray-600 rounded px-3 py-2 text-sm text-warm-white"
                     />
                     <input
                       type="password"
                       placeholder="Secret Access Key"
-                      value={credentials.secretAccessKey || ''}
+                      value={(credentials.secretAccessKey as string) || ''}
                       onChange={(e) => setCredentials({ ...credentials, secretAccessKey: e.target.value })}
                       className="w-full bg-charcoal border border-gray-600 rounded px-3 py-2 text-sm text-warm-white"
                     />
                     <input
                       type="text"
                       placeholder="Region (e.g., us-east-1)"
-                      value={credentials.region || ''}
+                      value={(credentials.region as string) || ''}
                       onChange={(e) => setCredentials({ ...credentials, region: e.target.value })}
                       className="w-full bg-charcoal border border-gray-600 rounded px-3 py-2 text-sm text-warm-white"
                     />

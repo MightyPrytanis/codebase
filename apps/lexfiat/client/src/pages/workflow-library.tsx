@@ -5,7 +5,7 @@
  */
 
 import { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import Header from "@/components/layout/header";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,9 +16,7 @@ import {
   Search, 
   Play, 
   Edit, 
-  Copy, 
   Settings, 
-  TrendingUp,
   FileText,
   Gavel,
   Briefcase,
@@ -27,7 +25,6 @@ import {
   BookOpen,
   PenTool,
   Crown,
-  Filter
 } from "lucide-react";
 import { 
   workflowTemplates, 
@@ -66,7 +63,6 @@ const CATEGORY_COLORS: Record<WorkflowCategory, string> = {
 export default function WorkflowLibraryPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<WorkflowCategory | 'all'>('all');
-  const [selectedWorkflow, setSelectedWorkflow] = useState<WorkflowTemplate | null>(null);
   const [isBuilderOpen, setIsBuilderOpen] = useState(false);
   const [editingWorkflow, setEditingWorkflow] = useState<WorkflowTemplate | null>(null);
   const queryClient = useQueryClient();
@@ -217,7 +213,7 @@ export default function WorkflowLibraryPage() {
         ) : null}
 
         {/* Category Tabs */}
-        <Tabs value={selectedCategory} onValueChange={(v) => setSelectedCategory(v as any)} className="space-y-6">
+        <Tabs value={selectedCategory} onValueChange={(v) => setSelectedCategory(v as WorkflowCategory | 'all')} className="space-y-6">
           <TabsList className="bg-slate-800 border-slate-700 grid grid-cols-4 lg:grid-cols-8 w-full">
             <TabsTrigger value="all" className="data-[state=active]:bg-slate-700">
               All

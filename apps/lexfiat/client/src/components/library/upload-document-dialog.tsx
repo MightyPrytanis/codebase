@@ -92,7 +92,10 @@ export function UploadDocumentDialog({
       {/* Overlay */}
       <div
         className="fixed inset-0 bg-black/50 z-50"
+        role="button"
+        tabIndex={0}
         onClick={onClose}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClose(); }}
       />
       
       {/* Dialog */}
@@ -113,10 +116,11 @@ export function UploadDocumentDialog({
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
             {/* Storage Location */}
             <div>
-              <label className="block text-sm font-medium text-warm-white mb-1">
+              <label htmlFor="upload-location" className="block text-sm font-medium text-warm-white mb-1">
                 Storage Location
               </label>
               <select
+                id="upload-location"
                 required
                 value={selectedLocation}
                 onChange={(e) => setSelectedLocation(e.target.value)}
@@ -133,14 +137,18 @@ export function UploadDocumentDialog({
 
             {/* File Upload */}
             <div>
-              <label className="block text-sm font-medium text-warm-white mb-1">
+              <label htmlFor="upload-file" className="block text-sm font-medium text-warm-white mb-1">
                 Document File
               </label>
               <div
+                role="button"
+                tabIndex={0}
                 onClick={() => fileInputRef.current?.click()}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') fileInputRef.current?.click(); }}
                 className="border-2 border-dashed border-gray-600 rounded-lg p-6 text-center cursor-pointer hover:border-aqua transition-colors"
               >
                 <input
+                  id="upload-file"
                   ref={fileInputRef}
                   type="file"
                   accept=".pdf,.docx,.doc,.txt,.rtf,.xlsx,.xls,.csv,.html,.htm,.json,.xml"
@@ -167,10 +175,11 @@ export function UploadDocumentDialog({
 
             {/* Title */}
             <div>
-              <label className="block text-sm font-medium text-warm-white mb-1">
+              <label htmlFor="upload-title" className="block text-sm font-medium text-warm-white mb-1">
                 Title
               </label>
               <input
+                id="upload-title"
                 type="text"
                 required
                 value={title}
@@ -182,10 +191,11 @@ export function UploadDocumentDialog({
 
             {/* Description */}
             <div>
-              <label className="block text-sm font-medium text-warm-white mb-1">
+              <label htmlFor="upload-description" className="block text-sm font-medium text-warm-white mb-1">
                 Description (optional)
               </label>
               <textarea
+                id="upload-description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
@@ -196,12 +206,13 @@ export function UploadDocumentDialog({
 
             {/* Source Type */}
             <div>
-              <label className="block text-sm font-medium text-warm-white mb-1">
+              <label htmlFor="upload-source-type" className="block text-sm font-medium text-warm-white mb-1">
                 Document Type
               </label>
               <select
+                id="upload-source-type"
                 value={sourceType}
-                onChange={(e) => setSourceType(e.target.value as any)}
+                onChange={(e) => setSourceType(e.target.value as 'rule' | 'standing-order' | 'template' | 'playbook' | 'case-law' | 'statute' | 'other')}
                 className="w-full bg-navy border border-gray-600 rounded px-3 py-2 text-sm text-warm-white"
               >
                 <option value="rule">Rule</option>
