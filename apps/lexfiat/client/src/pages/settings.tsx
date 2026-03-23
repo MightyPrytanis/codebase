@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Settings, User, Link, Bot, MessageSquare, Shield, Bell, ArrowLeft, Scale } from "lucide-react";
+import { Settings, User, LinkIcon, Bot, MessageSquare, Shield, Bell, ArrowLeft, Scale } from "lucide-react";
 import { EthicsDashboard } from "@/components/ethics/ethics-dashboard";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -116,7 +116,7 @@ export default function SettingsPage() {
               <span className="sm:hidden">Pro</span>
             </TabsTrigger>
             <TabsTrigger value="integrations" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm px-2 sm:px-3">
-              <Link className="w-3 h-3 sm:w-4 sm:h-4" />
+              <LinkIcon className="w-3 h-3 sm:w-4 sm:h-4" />
               <span className="hidden sm:inline">Integrations</span>
               <span className="sm:hidden">Int</span>
             </TabsTrigger>
