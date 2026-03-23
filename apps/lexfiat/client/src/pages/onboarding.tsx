@@ -861,6 +861,8 @@ export default function Onboarding() {
                 <input
                   id="min-hours-per-week"
                   type="number"
+                  min="0"
+                  max="168"
                   value={formData.chronometricBaseline.minimumHoursPerWeek}
                   onChange={(e) => updateFormData('chronometricBaseline', {
                     ...formData.chronometricBaseline,
@@ -880,6 +882,8 @@ export default function Onboarding() {
                 <input
                   id="min-hours-per-day"
                   type="number"
+                  min="0"
+                  max="24"
                   value={formData.chronometricBaseline.minimumHoursPerDay || Math.round(formData.chronometricBaseline.minimumHoursPerWeek / 5)}
                   onChange={(e) => updateFormData('chronometricBaseline', {
                     ...formData.chronometricBaseline,
