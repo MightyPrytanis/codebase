@@ -275,17 +275,26 @@ export abstract class BaseEngine {
 
     // Ethics check: Ensure workflow results comply with Ten Rules
     const workflowResult = context.stepResults;
+    return await this.applyEthicsCheck(workflowResult, `${this.config.name}_workflow`);
+  }
+
+  /**
+   * Apply ethics check to workflow results.
+   * Returns a CallToolResult with ethics metadata if checks are needed,
+   * or a plain result if no ethics-sensitive content is detected.
+   */
+  protected async applyEthicsCheck(workflowResult: unknown, toolName: string): Promise<CallToolResult> {
     const resultText = JSON.stringify(workflowResult, null, 2);
-    
+
     // Check if this workflow generates recommendations or content that needs ethics review
-    const hasRecommendations = resultText.toLowerCase().includes('recommendation') || 
+    const hasRecommendations = resultText.toLowerCase().includes('recommendation') ||
                               resultText.toLowerCase().includes('suggestion') ||
                               resultText.toLowerCase().includes('guidance');
-    
+
     if (hasRecommendations) {
       const { checkGeneratedContent } = await import('../services/ethics-check-helper.js');
       const ethicsCheck = await checkGeneratedContent(resultText, {
-        toolName: `${this.config.name}_workflow`,
+        toolName,
         contentType: 'report',
         strictMode: true,
       });
@@ -306,7 +315,7 @@ export abstract class BaseEngine {
 
       // Add ethics metadata if warnings
       const finalResult = {
-        ...workflowResult,
+        ...(workflowResult as object),
         ...(ethicsCheck.ethicsCheck.warnings.length > 0 && {
           _ethicsMetadata: {
             reviewed: true,
@@ -335,7 +344,7 @@ export abstract class BaseEngine {
       content: [
         {
           type: 'text',
-          text: JSON.stringify(workflowResult, null, 2),
+          text: resultText,
         },
       ],
     };

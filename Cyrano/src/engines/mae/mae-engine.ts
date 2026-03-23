@@ -6,7 +6,7 @@
 
 import { BaseEngine } from '../base-engine.js';
 import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
-import { Workflow, WorkflowStep } from '../base-engine.js';
+import { Workflow } from '../base-engine.js';
 import { z } from 'zod';
 import {
   buildExecutionPlan,
@@ -101,7 +101,7 @@ export class MaeEngine extends BaseEngine {
   /**
    * Execute engine functionality
    */
-  async execute(input: any): Promise<CallToolResult> {
+  async execute(input: unknown): Promise<CallToolResult> {
     try {
       const parsed = MaeInputSchema.parse(input);
       
@@ -283,7 +283,7 @@ export class MaeEngine extends BaseEngine {
    */
   async executeWorkflowWithTopologicalSort(
     workflowId: string,
-    input: any,
+    input: Record<string, unknown>,
     useTopologicalSort: boolean = true
   ): Promise<CallToolResult> {
     const workflow = this.workflows.get(workflowId);
@@ -327,23 +327,49 @@ export class MaeEngine extends BaseEngine {
       : workflow.steps.map((step, index) => ({
           step: index,
           nodeId: step.id,
-          dependencies: [],
+          dependencies: [] as string[],
         }));
 
     // Group steps by level for potential parallel execution
     const levelMap = groupStepsByLevel(executionPlan);
 
     // Initialize context
-    const context = {
-      ...workflow.initialState,
+    const context: Record<string, unknown> & { stepResults: Record<string, CallToolResult> } = {
+      ...(workflow.initialState as Record<string, unknown>),
       ...input,
-      stepResults: {} as Record<string, any>,
+      stepResults: {},
     };
 
+    const executionResults = await this.executePlanLevels(workflow, executionPlan, levelMap, context);
+
+    const workflowResult = {
+      success: true,
+      workflowId,
+      executionPlan: executionPlan.map(p => ({
+        step: p.step,
+        nodeId: p.nodeId,
+        dependencies: p.dependencies,
+      })),
+      results: executionResults,
+      finalContext: context.stepResults,
+    };
+
+    return await this.applyEthicsCheck(workflowResult, `mae_${workflowId}`);
+  }
+
+  /**
+   * Execute all levels of a topological execution plan
+   */
+  private async executePlanLevels(
+    workflow: Workflow,
+    executionPlan: ExecutionPlan[],
+    levelMap: Map<number, string[]>,
+    context: Record<string, unknown> & { stepResults: Record<string, CallToolResult> }
+  ): Promise<Array<{ stepId: string; status: 'completed' | 'failed'; result?: CallToolResult; error?: string }>> {
     const executionResults: Array<{
       stepId: string;
       status: 'completed' | 'failed';
-      result?: any;
+      result?: CallToolResult;
       error?: string;
     }> = [];
 
@@ -352,7 +378,7 @@ export class MaeEngine extends BaseEngine {
 
     for (const level of levels) {
       const stepIds = levelMap.get(level) || [];
-      
+
       // For now, execute sequentially (parallel execution can be added later)
       for (const stepId of stepIds) {
         const step = workflow.steps.find(s => s.id === stepId);
@@ -385,20 +411,10 @@ export class MaeEngine extends BaseEngine {
             stepId,
             status: result.isError ? 'failed' : 'completed',
             result: result.isError ? undefined : result,
-            error: result.isError ? ((result.content[0] && result.content[0].type === 'text' && 'text' in result.content[0]) ? result.content[0].text : 'Unknown error') : undefined,
+            error: result.isError
+              ? ((result.content[0] && result.content[0].type === 'text' && 'text' in result.content[0]) ? result.content[0].text : 'Unknown error')
+              : undefined,
           });
-
-          // If step failed and has onFailure, continue to failure path
-          if (result.isError && step.onFailure) {
-            // Failure path will be handled in next level
-            continue;
-          }
-
-          // If step succeeded and has onSuccess, continue to success path
-          if (!result.isError && step.onSuccess) {
-            // Success path will be handled in next level
-            continue;
-          }
         } catch (error) {
           executionResults.push({
             stepId,
@@ -409,87 +425,13 @@ export class MaeEngine extends BaseEngine {
       }
     }
 
-    // Ethics check: Ensure workflow results comply with Ten Rules
-    const workflowResult = {
-      success: true,
-      workflowId,
-      executionPlan: executionPlan.map(p => ({
-        step: p.step,
-        nodeId: p.nodeId,
-        dependencies: p.dependencies,
-      })),
-      results: executionResults,
-      finalContext: context.stepResults,
-    };
-    
-    const resultText = JSON.stringify(workflowResult, null, 2);
-    const hasRecommendations = resultText.toLowerCase().includes('recommendation') || 
-                              resultText.toLowerCase().includes('suggestion') ||
-                              resultText.toLowerCase().includes('guidance');
-    
-    if (hasRecommendations) {
-      const { checkGeneratedContent } = await import('../../services/ethics-check-helper.js');
-      const ethicsCheck = await checkGeneratedContent(resultText, {
-        toolName: `mae_${workflowId}`,
-        contentType: 'report',
-        strictMode: true,
-      });
-
-      // If blocked, return error
-      if (ethicsCheck.ethicsCheck.blocked) {
-        return {
-          content: [
-            {
-              type: 'text',
-              text: 'Workflow result blocked by ethics check. Does not meet Ten Rules compliance standards.',
-            },
-          ],
-          isError: true,
-          metadata: { ethicsCheck: ethicsCheck.ethicsCheck },
-        };
-      }
-
-      // Add ethics metadata if warnings
-      const finalResult = {
-        ...workflowResult,
-        ...(ethicsCheck.ethicsCheck.warnings.length > 0 && {
-          _ethicsMetadata: {
-            reviewed: true,
-            warnings: ethicsCheck.ethicsCheck.warnings,
-            complianceScore: ethicsCheck.ethicsCheck.complianceScore,
-            auditId: ethicsCheck.ethicsCheck.auditId,
-          },
-        }),
-      };
-
-      return {
-        content: [
-          {
-            type: 'text',
-            text: JSON.stringify(finalResult, null, 2),
-          },
-        ],
-        metadata: {
-          ethicsReviewed: true,
-          ethicsComplianceScore: ethicsCheck.ethicsCheck.complianceScore,
-        },
-      };
-    }
-
-    return {
-      content: [
-        {
-          type: 'text',
-          text: JSON.stringify(workflowResult, null, 2),
-        },
-      ],
-    };
+    return executionResults;
   }
 
   /**
    * Override executeWorkflow to use topological sort for complex workflows
    */
-  async executeWorkflow(workflowId: string, input: any): Promise<CallToolResult> {
+  async executeWorkflow(workflowId: string, input: Record<string, unknown>): Promise<CallToolResult> {
     const workflow = this.workflows.get(workflowId);
     if (!workflow) {
       return {
