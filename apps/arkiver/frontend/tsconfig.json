@@ -20,8 +20,8 @@
     "paths": {
       "@/*": ["./src/*"],
       "@cyrano/*": ["../../../Cyrano/*"],
-      "react": ["./node_modules/@types/react/index.d.ts"],
-      "react/jsx-runtime": ["./node_modules/@types/react/jsx-runtime.d.ts"]
+      "react": ["./node_modules/@types/react"],
+      "react/jsx-runtime": ["./node_modules/@types/react/jsx-runtime"]
     }
   },
   "include": ["src"],
