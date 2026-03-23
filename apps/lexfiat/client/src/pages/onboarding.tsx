@@ -19,12 +19,12 @@ import {
   Scale,
   Link as LinkIcon,
   Edit,
-  X
 } from 'lucide-react';
 import Header from '@/components/layout/header';
 import { savePracticeProfile, PracticeProfile } from '@/lib/library-api';
 import { LEXFIAT_ONBOARDING_CONFIG } from '@/lib/onboarding-config';
 import { useAmbientAudio, playFanfare } from '@/hooks/use-ambient-audio';
+import { useTestLLM } from '@/hooks/use-test-llm';
 
 const ONBOARDING_CONFIG = LEXFIAT_ONBOARDING_CONFIG;
 const { steps: STEPS, references } = ONBOARDING_CONFIG;
@@ -113,9 +113,13 @@ export default function Onboarding() {
   const [customCounty, setCustomCounty] = useState('');
   const [customCourt, setCustomCourt] = useState('');
   const [customIssueTag, setCustomIssueTag] = useState('');
-  const [testingLLM, setTestingLLM] = useState(false);
-  const [llmTestResult, setLLMTestResult] = useState<'success' | 'error' | null>(null);
-  const [llmTestError, setLLMTestError] = useState<string | null>(null);
+  const {
+    testing: testingLLM,
+    result: llmTestResult,
+    error: llmTestError,
+    handleTest: runTestLLM,
+    clearResult: clearLLMTestResult,
+  } = useTestLLM();
   const [saving, setSaving] = useState(false);
   
   // Ambient audio for space-y, science-y atmosphere
@@ -136,11 +140,10 @@ export default function Onboarding() {
   
   // Clear LLM test result when provider changes
   useEffect(() => {
-    setLLMTestResult(null);
-    setLLMTestError(null);
-  }, [formData.llmProvider]);
+    clearLLMTestResult();
+  }, [formData.llmProvider, clearLLMTestResult]);
 
-  const updateFormData = (field: string, value: any) => {
+  const updateFormData = (field: keyof OnboardingFormData, value: OnboardingFormData[keyof OnboardingFormData]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
@@ -163,57 +166,6 @@ export default function Onboarding() {
     }
   };
 
-  const handleTestLLM = async () => {
-    if (!formData.llmProvider) {
-      setLLMTestResult('error');
-      setLLMTestError('Please select a provider first.');
-      return;
-    }
-
-    setTestingLLM(true);
-    setLLMTestResult(null);
-    setLLMTestError(null);
-
-    try {
-      const API_URL = import.meta.env.VITE_CYRANO_API_URL || 'http://localhost:5002';
-      const response = await fetch(`${API_URL}/api/onboarding/test-llm-provider`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          provider: formData.llmProvider,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        setLLMTestResult('error');
-        setLLMTestError(errorData.error || 'Connection failed. Please check server configuration.');
-        return;
-      }
-
-      const data = await response.json();
-      if (data.success) {
-        setLLMTestResult('success');
-        setLLMTestError(null);
-      } else {
-        setLLMTestResult('error');
-        setLLMTestError(data.error || 'Connection test failed.');
-      }
-    } catch (error) {
-      console.error('Failed to test LLM provider:', error);
-      setLLMTestResult('error');
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        setLLMTestError('Unable to reach server. Please ensure Cyrano is running.');
-      } else {
-        setLLMTestError('Network error. Please check your connection and try again.');
-      }
-    } finally {
-      setTestingLLM(false);
-    }
-  };
-
   const handleSubmit = async () => {
     setSaving(true);
     try {
@@ -230,8 +182,8 @@ export default function Onboarding() {
         courts: formData.courts,
         issueTags: formData.issueTags,
         storagePreferences: formData.storagePreferences,
-        researchProvider: formData.researchProvider as any,
-        llmProvider: formData.llmProvider as any,
+        researchProvider: formData.researchProvider || undefined,
+        llmProvider: formData.llmProvider || undefined,
         llmProviderTested: llmTestResult === 'success',
       } as Partial<PracticeProfile>);
       
@@ -439,9 +391,9 @@ export default function Onboarding() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-warm-white mb-2">
+                <p className="block text-sm font-semibold text-warm-white mb-2">
                   Additional Jurisdictions (Optional)
-                </label>
+                </p>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-48 overflow-y-auto p-2 bg-navy rounded">
                   {US_STATES.map(state => (
                     <label key={state} className="flex items-center gap-2 text-sm text-warm-white cursor-pointer hover:bg-charcoal p-1 rounded">
@@ -458,9 +410,9 @@ export default function Onboarding() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-warm-white mb-2">
+                <p className="block text-sm font-semibold text-warm-white mb-2">
                   Practice Areas *
-                </label>
+                </p>
                 <div className="grid grid-cols-2 gap-2">
                   {PRACTICE_AREAS.map(area => (
                     <label key={area} className="flex items-center gap-2 text-sm text-warm-white cursor-pointer hover:bg-navy p-2 rounded">
@@ -603,9 +555,9 @@ export default function Onboarding() {
               </p>
 
               <div>
-                <label className="block text-sm font-semibold text-warm-white mb-2">
+                <p className="block text-sm font-semibold text-warm-white mb-2">
                   Common Issues *
-                </label>
+                </p>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mb-4">
                   {COMMON_ISSUE_TAGS.map(tag => (
                     <label key={tag} className="flex items-center gap-2 text-sm text-warm-white cursor-pointer hover:bg-navy p-2 rounded">
@@ -669,10 +621,11 @@ export default function Onboarding() {
               </p>
 
               <div>
-                <label className="block text-sm font-semibold text-warm-white mb-2">
+                <label htmlFor="local-storage-path" className="block text-sm font-semibold text-warm-white mb-2">
                   Local Storage Path
                 </label>
                 <input
+                  id="local-storage-path"
                   type="text"
                   value={formData.storagePreferences.localPath}
                   onChange={(e) => updateFormData('storagePreferences', {
@@ -685,8 +638,9 @@ export default function Onboarding() {
               </div>
 
               <div className="space-y-3">
-                <label className="flex items-center gap-3 text-warm-white cursor-pointer hover:bg-navy p-3 rounded">
+                <label htmlFor="onedrive-enabled" className="flex items-center gap-3 text-warm-white cursor-pointer hover:bg-navy p-3 rounded">
                   <input
+                    id="onedrive-enabled"
                     type="checkbox"
                     checked={formData.storagePreferences.oneDriveEnabled}
                     onChange={(e) => updateFormData('storagePreferences', {
@@ -701,8 +655,9 @@ export default function Onboarding() {
                   </div>
                 </label>
 
-                <label className="flex items-center gap-3 text-warm-white cursor-pointer hover:bg-navy p-3 rounded">
+                <label htmlFor="gdrive-enabled" className="flex items-center gap-3 text-warm-white cursor-pointer hover:bg-navy p-3 rounded">
                   <input
+                    id="gdrive-enabled"
                     type="checkbox"
                     checked={formData.storagePreferences.gDriveEnabled}
                     onChange={(e) => updateFormData('storagePreferences', {
@@ -717,8 +672,9 @@ export default function Onboarding() {
                   </div>
                 </label>
 
-                <label className="flex items-center gap-3 text-warm-white cursor-pointer hover:bg-navy p-3 rounded">
+                <label htmlFor="s3-enabled" className="flex items-center gap-3 text-warm-white cursor-pointer hover:bg-navy p-3 rounded">
                   <input
+                    id="s3-enabled"
                     type="checkbox"
                     checked={formData.storagePreferences.s3Enabled}
                     onChange={(e) => updateFormData('storagePreferences', {
@@ -748,10 +704,11 @@ export default function Onboarding() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-warm-white mb-2">
+                <label htmlFor="cache-size" className="block text-sm font-semibold text-warm-white mb-2">
                   Cache Size (MB)
                 </label>
                 <input
+                  id="cache-size"
                   type="number"
                   value={formData.storagePreferences.cacheSize}
                   onChange={(e) => updateFormData('storagePreferences', {
@@ -776,9 +733,9 @@ export default function Onboarding() {
               </p>
 
               <div>
-                <label className="block text-sm font-semibold text-warm-white mb-2">
+                <p className="block text-sm font-semibold text-warm-white mb-2">
                   LLM Provider *
-                </label>
+                </p>
                 <div className="space-y-2">
                   {(['openai', 'anthropic', 'perplexity'] as const).map(provider => (
                     <label 
@@ -811,12 +768,12 @@ export default function Onboarding() {
                 <div>
                   <div className="mb-4 p-3 bg-navy/50 border border-aqua/30 rounded">
                     <p className="text-xs text-warm-white/70">
-                      <strong className="text-aqua">Note:</strong> API keys are configured server-side. Click "Test Connection" to verify your provider is set up correctly.
+                      <strong className="text-aqua">Note:</strong> API keys are configured server-side. Click &ldquo;Test Connection&rdquo; to verify your provider is set up correctly.
                     </p>
                   </div>
                   
                   <button
-                    onClick={handleTestLLM}
+                    onClick={() => runTestLLM(formData.llmProvider)}
                     disabled={testingLLM}
                     aria-label={`Test ${formData.llmProvider} API connection`}
                     className="w-full px-4 py-2 bg-navy text-warm-white rounded border border-gray-600 hover:border-aqua hover:bg-navy/80 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-aqua focus:ring-offset-2 focus:ring-offset-charcoal"
@@ -868,10 +825,11 @@ export default function Onboarding() {
               )}
 
               <div>
-                <label className="block text-sm font-semibold text-warm-white mb-2">
+                <label htmlFor="research-provider" className="block text-sm font-semibold text-warm-white mb-2">
                   Research Provider (Optional)
                 </label>
                 <select
+                  id="research-provider"
                   value={formData.researchProvider}
                   onChange={(e) => updateFormData('researchProvider', e.target.value)}
                   className="w-full bg-navy border border-gray-600 rounded px-3 py-2 text-warm-white"
@@ -897,13 +855,12 @@ export default function Onboarding() {
               </p>
 
               <div>
-                <label className="block text-sm font-semibold text-warm-white mb-2">
+                <label htmlFor="min-hours-per-week" className="block text-sm font-semibold text-warm-white mb-2">
                   Minimum Hours Per Week *
                 </label>
                 <input
+                  id="min-hours-per-week"
                   type="number"
-                  min="0"
-                  max="168"
                   value={formData.chronometricBaseline.minimumHoursPerWeek}
                   onChange={(e) => updateFormData('chronometricBaseline', {
                     ...formData.chronometricBaseline,
@@ -917,13 +874,12 @@ export default function Onboarding() {
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-warm-white mb-2">
+                <label htmlFor="min-hours-per-day" className="block text-sm font-semibold text-warm-white mb-2">
                   Minimum Hours Per Day (Optional)
                 </label>
                 <input
+                  id="min-hours-per-day"
                   type="number"
-                  min="0"
-                  max="24"
                   value={formData.chronometricBaseline.minimumHoursPerDay || Math.round(formData.chronometricBaseline.minimumHoursPerWeek / 5)}
                   onChange={(e) => updateFormData('chronometricBaseline', {
                     ...formData.chronometricBaseline,
@@ -937,8 +893,9 @@ export default function Onboarding() {
               </div>
 
               <div>
-                <label className="flex items-center gap-3 text-warm-white cursor-pointer hover:bg-navy p-3 rounded border border-gray-600">
+                <label htmlFor="use-baseline-until-data" className="flex items-center gap-3 text-warm-white cursor-pointer hover:bg-navy p-3 rounded border border-gray-600">
                   <input
+                    id="use-baseline-until-data"
                     type="checkbox"
                     checked={formData.chronometricBaseline.useBaselineUntilDataAvailable}
                     onChange={(e) => updateFormData('chronometricBaseline', {
@@ -1574,7 +1531,7 @@ export default function Onboarding() {
                   {formData.storagePreferences.localPath && (
                     <li>Initial library scan will begin (if enabled)</li>
                   )}
-                  <li>You'll be redirected to your dashboard</li>
+                  <li>You&apos;ll be redirected to your dashboard</li>
                   <li>You can configure integrations later in Settings</li>
                 </ul>
               </div>

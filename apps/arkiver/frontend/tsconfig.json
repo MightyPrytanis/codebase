@@ -19,7 +19,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@cyrano/*": ["../../../Cyrano/*"]
+      "@cyrano/*": ["../../../Cyrano/*"],
+      "@monorepo-shared/*": ["../../../packages/shared/*"]
     }
   },
   "include": ["src"],

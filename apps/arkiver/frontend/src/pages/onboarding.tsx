@@ -14,6 +14,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { ARKIVER_ONBOARDING_CONFIG } from '../lib/onboarding-config';
+import { useTestLLM } from '../hooks/use-test-llm';
 
 const ONBOARDING_CONFIG = ARKIVER_ONBOARDING_CONFIG;
 const { steps: STEPS, references } = ONBOARDING_CONFIG;
@@ -73,70 +74,22 @@ export default function Onboarding() {
       notifications: true,
     },
   });
-  const [testingLLM, setTestingLLM] = useState(false);
-  const [llmTestResult, setLLMTestResult] = useState<'success' | 'error' | null>(null);
-  const [llmTestError, setLLMTestError] = useState<string | null>(null);
+  const {
+    testing: testingLLM,
+    result: llmTestResult,
+    error: llmTestError,
+    handleTest: runTestLLM,
+    clearResult: clearLLMTestResult,
+  } = useTestLLM();
   const [saving, setSaving] = useState(false);
   
   // Clear LLM test result when provider changes
   useEffect(() => {
-    setLLMTestResult(null);
-    setLLMTestError(null);
-  }, [formData.llmProvider]);
+    clearLLMTestResult();
+  }, [formData.llmProvider, clearLLMTestResult]);
 
-  const updateFormData = (field: string, value: any) => {
+  const updateFormData = (field: string, value: unknown) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleTestLLM = async () => {
-    if (!formData.llmProvider) {
-      setLLMTestResult('error');
-      setLLMTestError('Please select a provider first.');
-      return;
-    }
-
-    setTestingLLM(true);
-    setLLMTestResult(null);
-    setLLMTestError(null);
-
-    try {
-      const API_URL = import.meta.env.VITE_CYRANO_API_URL || 'http://localhost:5002';
-      const response = await fetch(`${API_URL}/api/onboarding/test-llm-provider`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          provider: formData.llmProvider,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        setLLMTestResult('error');
-        setLLMTestError(errorData.error || 'Connection failed. Please check server configuration.');
-        return;
-      }
-
-      const data = await response.json();
-      if (data.success) {
-        setLLMTestResult('success');
-        setLLMTestError(null);
-      } else {
-        setLLMTestResult('error');
-        setLLMTestError(data.error || 'Connection test failed.');
-      }
-    } catch (error) {
-      console.error('Failed to test LLM provider:', error);
-      setLLMTestResult('error');
-      if (error instanceof TypeError && error.message.includes('fetch')) {
-        setLLMTestError('Unable to reach server. Please ensure Cyrano is running.');
-      } else {
-        setLLMTestError('Network error. Please check your connection and try again.');
-      }
-    } finally {
-      setTestingLLM(false);
-    }
   };
 
   const handleSubmit = async () => {
@@ -359,7 +312,7 @@ export default function Onboarding() {
                   </div>
                   
                   <button
-                    onClick={handleTestLLM}
+                    onClick={() => runTestLLM(formData.llmProvider)}
                     disabled={testingLLM}
                     aria-label={`Test ${formData.llmProvider} API connection`}
                     className="w-full px-4 py-2 bg-white text-gray-900 rounded border border-gray-300 hover:border-blue-500 hover:bg-gray-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-blue-500"

@@ -13,6 +13,7 @@ export default defineConfig({
       "@assets": path.resolve(import.meta.dirname, "attached_assets"),
       "@cyrano": path.resolve(import.meta.dirname, "..", "..", "Cyrano"),
       "@cyrano/shared-assets": path.resolve(import.meta.dirname, "..", "..", "Cyrano", "shared-assets"),
+      "@monorepo-shared": path.resolve(import.meta.dirname, "..", "..", "packages", "shared"),
     },
     dedupe: ["lucide-react", "react", "react-dom"],
     extensions: [".ts", ".tsx", ".js", ".jsx", ".json"],

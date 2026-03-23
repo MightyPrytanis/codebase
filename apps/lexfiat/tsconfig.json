@@ -19,7 +19,8 @@
       "@/*": ["./client/src/*"],
       "@shared/*": ["./shared/*"],
       "@cyrano/*": ["../Cyrano/*"],
-      "@cyrano/shared-assets/*": ["../Cyrano/shared-assets/*"]
+      "@cyrano/shared-assets/*": ["../Cyrano/shared-assets/*"],
+      "@monorepo-shared/*": ["../../packages/shared/*"]
     }
   }
 }

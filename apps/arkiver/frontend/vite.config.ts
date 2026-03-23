@@ -11,6 +11,7 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
       '@cyrano': path.resolve(__dirname, '../../../Cyrano'),
+      '@monorepo-shared': path.resolve(__dirname, '../../../packages/shared'),
     },
     dedupe: ['lucide-react', 'react', 'react-dom'],
   },
