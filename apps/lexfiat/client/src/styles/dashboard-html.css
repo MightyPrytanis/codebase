@@ -85,7 +85,6 @@ body::after {
     border-bottom: 2px solid var(--panel-border);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
     padding: 0.75rem 1rem;
-    position: sticky;
     top: 0;
     z-index: 1000;
     position: relative;
@@ -845,7 +844,7 @@ body::after {
 }
 
 .tracking-section h4 {
-    margin: 0 0 0.75rem 0;
+    margin: 0 0 0.75rem;
     color: var(--chrome);
     font-size: 0.9rem;
     text-transform: uppercase;
@@ -1147,7 +1146,7 @@ body::after {
 
 .available-widgets h4,
 .current-widgets h4 {
-    margin: 0 0 1rem 0;
+    margin: 0 0 1rem;
     font-size: 0.9rem;
     color: var(--steel-gray);
     text-transform: uppercase;
@@ -1325,14 +1324,14 @@ body::after {
 .stage-title {
     font-size: 1.1rem;
     font-weight: 600;
-    margin: 0 0 0.5rem 0;
+    margin: 0 0 0.5rem;
     color: var(--white);
 }
 
 .stage-description {
     font-size: 0.9rem;
     color: var(--steel-gray);
-    margin: 0 0 1rem 0;
+    margin: 0 0 1rem;
 }
 
 .stage-metrics {
@@ -3279,7 +3278,7 @@ body::after {
     color: var(--white);
     font-size: 0.95rem;
     font-weight: 600;
-    margin: 0 0 0.5rem 0;
+    margin: 0 0 0.5rem;
 }
 
 .ai-diagnosis-box p {
@@ -3375,7 +3374,7 @@ body::after {
 }
 
 .footer-banner-text p {
-    margin: 0 0 0.75rem 0;
+    margin: 0 0 0.75rem;
 }
 
 .footer-banner-text a {
@@ -3443,7 +3442,7 @@ body::after {
     font-size: 1.875rem;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.95);
-    margin: 0 0 0.5rem 0;
+    margin: 0 0 0.5rem;
     letter-spacing: -0.02em;
 }
 
@@ -3506,7 +3505,7 @@ body::after {
     font-size: 1.5rem;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.95);
-    margin: 0 0 1.5rem 0;
+    margin: 0 0 1.5rem;
     letter-spacing: -0.01em;
 }
 
@@ -3527,13 +3526,13 @@ body::after {
     font-size: 1.125rem;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.95);
-    margin: 0 0 0.75rem 0;
+    margin: 0 0 0.75rem;
 }
 
 .gc-text {
     font-size: 0.9375rem;
     color: rgba(255, 255, 255, 0.8);
-    margin: 0 0 1rem 0;
+    margin: 0 0 1rem;
     line-height: 1.7;
 }
 
@@ -3717,7 +3716,7 @@ body::after {
     font-size: 1rem;
     font-weight: 600;
     color: rgba(255, 255, 255, 0.95);
-    margin: 0 0 1rem 0;
+    margin: 0 0 1rem;
 }
 
 .gc-response-content {
