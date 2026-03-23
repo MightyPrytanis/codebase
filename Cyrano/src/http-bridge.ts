@@ -40,7 +40,6 @@ dotenv.config();
 console.error('[HTTP Bridge] Environment loaded');
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import {
   CallToolRequestSchema,
@@ -49,10 +48,11 @@ import {
   CallToolResult,
 } from '@modelcontextprotocol/sdk/types.js';
 import type { AIProvider } from './services/ai-service.js';
+import type { FederalTaxResult } from './modules/forecast/formulas/tax-formulas.js';
 
 // Import security middleware (essential for server security)
 console.error('[HTTP Bridge] Importing security middleware...');
-import security from './middleware/security.js';
+import security, { type JWTPayload } from './middleware/security.js';
 console.error('[HTTP Bridge] Security middleware imported');
 
 // Import routes (these may import db, but server can start even if db fails)
@@ -85,6 +85,16 @@ interface ToolMetadata {
 }
 
 type ToolLoader = () => Promise<ToolInstance<unknown> | { default: ToolInstance<unknown> }>;
+
+// Typed content item used by extractTextPayload
+interface TextContentItem { type: string; text?: string; }
+interface ToolResultWithContent { content?: TextContentItem[]; }
+
+// Typed request interface for authenticated file upload endpoints
+interface AuthenticatedUploadRequest extends Request {
+  file?: Express.Multer.File;
+  user?: JWTPayload;
+}
 
 // Tool import map with metadata
 const toolImportMap: Record<string, { loader: ToolLoader; metadata: Partial<ToolMetadata> }> = {
@@ -552,7 +562,7 @@ async function loadTool(toolName: string, loadDependencies: boolean = true): Pro
       const loadTime = Date.now() - startTime;
       
       // Handle both default export and named export
-      const toolInstance = (tool as any).default || tool;
+      const toolInstance: ToolInstance = 'default' in tool ? tool.default : tool;
       
       // Cache it
       toolCache.set(toolName, toolInstance);
@@ -1036,9 +1046,50 @@ const ForecastHttpRequestSchema = z.object({
   }).optional(),
 });
 
-function extractTextPayload(result: any): string {
-  const item = result?.content?.find?.((c: any) => c?.type === 'text' && 'text' in c);
-  return item?.text || '';
+function extractTextPayload(result: ToolResultWithContent): string {
+  const item = result?.content?.find((c) => c?.type === 'text' && 'text' in c);
+  return item?.text ?? '';
+}
+
+/** Maps calculated federal tax values and raw forecast input to IRS Form 1040 fill fields. */
+function buildTax1040FormData(
+  forecast_input: Record<string, unknown>,
+  calculated: FederalTaxResult,
+  year: number
+): Record<string, unknown> {
+  const filingStatusIndex: Record<string, number> = {
+    single: 0,
+    married_joint: 1,
+    married_separate: 2,
+    head_of_household: 3,
+    qualifying_widow: 4,
+  };
+
+  const withholding = Number(forecast_input?.estimatedWithholding || 0);
+  const refundOrBalance = Number(calculated.refundOrBalance || 0);
+
+  return {
+    year,
+    // checkbox array index on IRS PDFs (c1_3[0..4])
+    filingStatus: filingStatusIndex[String(forecast_input?.filingStatus || 'single')] ?? 0,
+    wages: Number(forecast_input?.wages || 0),
+    taxableInterest: Number(forecast_input?.interestIncome || 0),
+    ordinaryDividends: Number(forecast_input?.dividendIncome || 0),
+    capitalGain: Number(forecast_input?.capitalGains || 0),
+    otherIncome: Number(forecast_input?.otherIncome || 0),
+    totalIncome: Number(calculated.grossIncome || 0),
+    adjustedGrossIncome: Number(calculated.adjustedGrossIncome || 0),
+    standardDeductionAmount: Number(calculated.deductionUsed || forecast_input?.standardDeduction || 0),
+    taxableIncome: Number(calculated.taxableIncome || 0),
+    taxOwed: Number(calculated.totalTax || 0),
+    federalTaxWithheld: withholding,
+    earnedIncomeCredit: Number(calculated.creditsBreakdown?.earnedIncomeCreditRefundable || 0),
+    additionalChildTaxCredit: Number(calculated.creditsBreakdown?.additionalChildTaxCreditRefundable || 0),
+    totalPayments: Number(calculated.totalPayments || withholding),
+    // Basic refund/balance presentation
+    overpayment: refundOrBalance > 0 ? refundOrBalance : 0,
+    amountOwed: refundOrBalance < 0 ? Math.abs(refundOrBalance) : 0,
+  };
 }
 
 app.post('/api/forecast/tax', async (req, res) => {
@@ -1117,39 +1168,11 @@ app.post('/api/forecast/tax/pdf', async (req, res) => {
     const calculated = calculateFederal(validationResult.data);
 
     // 2) Map to 1040 fill keys (minimal set; expands as module evolves)
-    const filingStatusIndex: Record<string, number> = {
-      single: 0,
-      married_joint: 1,
-      married_separate: 2,
-      head_of_household: 3,
-      qualifying_widow: 4,
-    };
-
-    const withholding = Number(forecast_input?.estimatedWithholding || 0);
-    const refundOrBalance = Number(calculated?.refundOrBalance || 0);
-
-    const formData = {
-      year,
-      // checkbox array index on IRS PDFs (c1_3[0..4])
-      filingStatus: filingStatusIndex[String(forecast_input?.filingStatus || 'single')] ?? 0,
-      wages: Number(forecast_input?.wages || 0),
-      taxableInterest: Number(forecast_input?.interestIncome || 0),
-      ordinaryDividends: Number(forecast_input?.dividendIncome || 0),
-      capitalGain: Number(forecast_input?.capitalGains || 0),
-      otherIncome: Number(forecast_input?.otherIncome || 0),
-      totalIncome: Number(calculated?.grossIncome || 0),
-      adjustedGrossIncome: Number(calculated?.adjustedGrossIncome || 0),
-      standardDeductionAmount: Number(calculated?.deductionUsed || forecast_input?.standardDeduction || 0),
-      taxableIncome: Number(calculated?.taxableIncome || 0),
-      taxOwed: Number(calculated?.totalTax || 0),
-      federalTaxWithheld: withholding,
-      earnedIncomeCredit: Number(calculated?.creditsBreakdown?.earnedIncomeCreditRefundable || 0),
-      additionalChildTaxCredit: Number(calculated?.creditsBreakdown?.additionalChildTaxCreditRefundable || 0),
-      totalPayments: Number(calculated?.totalPayments || withholding),
-      // Basic refund/balance presentation
-      overpayment: refundOrBalance > 0 ? refundOrBalance : 0,
-      amountOwed: refundOrBalance < 0 ? Math.abs(refundOrBalance) : 0,
-    };
+    const formData = buildTax1040FormData(
+      forecast_input as Record<string, unknown>,
+      calculated,
+      year
+    );
 
     // 3) Fill Form 1040
     const { taxForecastModule } = await import('./modules/forecast/tax-forecast-module.js');
@@ -1382,7 +1405,6 @@ import { zapierWebhookHandler } from './integrations/zapier-webhooks.js';
 app.post('/webhooks/zapier', zapierWebhookHandler);
 
 // Apply prompt injection defense to all tool executions
-import { sanitizePromptInput, filterSensitiveData, detectPromptInjection } from './middleware/prompt-injection-defense.js';
 
 app.get('/health', (req, res) => {
   const health = getToolHealth();
@@ -1425,6 +1447,36 @@ app.get('/mcp/tools/info', async (req, res) => {
   }
 });
 
+/** Validate that an uploaded file exists and is within the size limit. */
+function validateUploadedFile(file: Express.Multer.File | undefined):
+  | { success: true; file: Express.Multer.File }
+  | { success: false; code: string; message: string } {
+  if (!file) {
+    return { success: false, code: 'NO_FILE', message: 'No file provided in request' };
+  }
+  const maxFileSize = 100 * 1024 * 1024;
+  if (file.size > maxFileSize) {
+    return {
+      success: false,
+      code: 'FILE_TOO_LARGE',
+      message: `File size ${file.size} exceeds maximum allowed size of ${maxFileSize} bytes`,
+    };
+  }
+  return { success: true, file };
+}
+
+/** Parse and return upload metadata from request body (ignores invalid JSON). */
+function parseUploadMetadata(bodyMetadata: unknown): { sourceType?: string; [key: string]: unknown } {
+  if (!bodyMetadata) return {};
+  try {
+    return typeof bodyMetadata === 'string'
+      ? (JSON.parse(bodyMetadata) as { sourceType?: string; [key: string]: unknown })
+      : (bodyMetadata as { sourceType?: string; [key: string]: unknown });
+  } catch {
+    return {};
+  }
+}
+
 // Catch-all for unknown /mcp routes - always return JSON
 // Using '/mcp/*path' (named wildcard) for compatibility with path-to-regexp v8+
 app.all('/mcp/*path', (req, res) => {
@@ -1434,29 +1486,20 @@ app.all('/mcp/*path', (req, res) => {
 // Arkiver File Upload Endpoint
 app.post('/api/arkiver/upload', security.authenticateJWT, upload.single('file'), async (req, res) => {
   try {
-    const file = (req as any).file;
-    
-    if (!file) {
+    const typedReq = req as AuthenticatedUploadRequest;
+    const fileValidation = validateUploadedFile(typedReq.file);
+
+    if (!fileValidation.success) {
       return res.status(400).json({
         success: false,
         error: {
-          code: 'NO_FILE',
-          message: 'No file provided in request',
+          code: fileValidation.code,
+          message: fileValidation.message,
         },
       });
     }
-    
-    const maxFileSize = 100 * 1024 * 1024;
-    if (file.size > maxFileSize) {
-      return res.status(400).json({
-        success: false,
-        error: {
-          code: 'FILE_TOO_LARGE',
-          message: `File size ${file.size} exceeds maximum allowed size of ${maxFileSize} bytes`,
-        },
-      });
-    }
-    
+
+    const file = fileValidation.file;
     if (req.body.metadata) {
       const MetadataSchema = z.object({
         sourceType: z.enum(['user-upload', 'email', 'clio', 'courtlistener', 'westlaw', 'manual']).optional(),
@@ -1482,18 +1525,8 @@ app.post('/api/arkiver/upload', security.authenticateJWT, upload.single('file'),
     const { db } = await import('./db.js');
     const { arkiverFiles } = await import('./modules/arkiver/schema.js');
     const path = await import('path');
-    const { eq } = await import('drizzle-orm');
-    
-    let metadata: any = {};
-    if (req.body.metadata) {
-      try {
-        metadata = typeof req.body.metadata === 'string' 
-          ? JSON.parse(req.body.metadata) 
-          : req.body.metadata;
-      } catch {
-        // Ignore invalid JSON
-      }
-    }
+
+    const metadata = parseUploadMetadata(req.body.metadata);
 
     const ext = path.extname(file.originalname).toLowerCase();
     const fileType = ext.replace('.', '') || 'unknown';
@@ -1515,7 +1548,7 @@ app.post('/api/arkiver/upload', security.authenticateJWT, upload.single('file'),
       });
     }
 
-    const user = (req as any).user;
+    const user = typedReq.user;
     const userId = user?.userId;
     
     if (!userId) {
