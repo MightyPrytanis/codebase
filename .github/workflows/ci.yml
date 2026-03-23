@@ -57,6 +57,26 @@ jobs:
           cache: 'npm'
           cache-dependency-path: Cyrano/package-lock.json
 
+      - name: Validate lockfile platform compatibility
+        run: |
+          python3 - <<'PYEOF'
+          import json, sys
+          with open("package-lock.json") as f:
+              lock = json.load(f)
+          bad = [
+              k for k, v in lock.get("packages", {}).items()
+              if (v.get("os") or v.get("cpu")) and not v.get("optional")
+          ]
+          if bad:
+              print("::error::package-lock.json has platform-constrained entries missing 'optional: true':")
+              for k in bad:
+                  print(f"  {k}")
+              print("Fix: cd Cyrano && rm -rf node_modules package-lock.json && npm install")
+              print("Then verify: cd Cyrano && npm ci --dry-run")
+              sys.exit(1)
+          print(f"Lockfile platform check passed ({len(lock.get('packages', {}))} packages, none mis-constrained)")
+          PYEOF
+
       - name: Install dependencies
         run: npm ci
 
@@ -130,6 +150,26 @@ jobs:
           node-version: '20'
           cache: 'npm'
           cache-dependency-path: Cyrano/package-lock.json
+
+      - name: Validate lockfile platform compatibility
+        run: |
+          python3 - <<'PYEOF'
+          import json, sys
+          with open("package-lock.json") as f:
+              lock = json.load(f)
+          bad = [
+              k for k, v in lock.get("packages", {}).items()
+              if (v.get("os") or v.get("cpu")) and not v.get("optional")
+          ]
+          if bad:
+              print("::error::package-lock.json has platform-constrained entries missing 'optional: true':")
+              for k in bad:
+                  print(f"  {k}")
+              print("Fix: cd Cyrano && rm -rf node_modules package-lock.json && npm install")
+              print("Then verify: cd Cyrano && npm ci --dry-run")
+              sys.exit(1)
+          print(f"Lockfile platform check passed ({len(lock.get('packages', {}))} packages, none mis-constrained)")
+          PYEOF
 
       - name: Install dependencies
         run: npm ci
