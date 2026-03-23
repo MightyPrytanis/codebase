@@ -18,6 +18,216 @@ function escapeRegExp(string: string): string {
   return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
+// ===== TYPE DEFINITIONS =====
+
+interface SectionDifferences {
+  doc1_unique_sections: string[];
+  doc2_unique_sections: string[];
+  common_sections: string[];
+}
+
+interface StructureComparison {
+  doc1_sections: number;
+  doc2_sections: number;
+  section_differences: SectionDifferences;
+  structural_similarity: number;
+}
+
+interface ContentComparison {
+  common_terms: string[];
+  unique_to_doc1: string[];
+  unique_to_doc2: string[];
+  term_frequency_differences: Record<string, { doc1: number; doc2: number }>;
+}
+
+interface ContractElements {
+  doc1_contract_indicators: number;
+  doc2_contract_indicators: number;
+  parties_doc1: string[];
+  parties_doc2: string[];
+}
+
+interface LiabilityComparison {
+  doc1_liability_mentions: number;
+  doc2_liability_mentions: number;
+  liability_differences: string[];
+}
+
+interface ComplianceComparison {
+  doc1_compliance_mentions: number;
+  doc2_compliance_mentions: number;
+  compliance_differences: string[];
+}
+
+type FocusedAreaResult = ContractElements | LiabilityComparison | ComplianceComparison | {
+  area: string;
+  doc1_mentions: number;
+  doc2_mentions: number;
+  difference: number;
+  note?: string;
+};
+
+interface RiskComparisonResult {
+  doc1_risk_count: number;
+  doc2_risk_count: number;
+  riskier_document: string;
+  unique_risks_doc1: string[];
+  unique_risks_doc2: string[];
+}
+
+interface RiskAnalysis {
+  doc1_risks: string[];
+  doc2_risks: string[];
+  risk_comparison: RiskComparisonResult;
+  traps_for_unwary: string[];
+  overall_risk_assessment: string;
+}
+
+interface ObligationsComparison {
+  doc1_obligation_count: number;
+  doc2_obligation_count: number;
+  common_obligations: string[];
+  unique_to_doc1: string[];
+  unique_to_doc2: string[];
+}
+
+interface PartyObligationAnalysis {
+  parties_identified: string[];
+  total_obligations: number;
+  obligations_per_party: string;
+}
+
+interface PartyResponsibilitiesResult {
+  doc1_party_analysis: PartyObligationAnalysis;
+  doc2_party_analysis: PartyObligationAnalysis;
+  responsibility_comparison: string;
+}
+
+interface ObligationsAnalysis {
+  doc1_obligations: string[];
+  doc2_obligations: string[];
+  obligations_comparison: ObligationsComparison;
+  party_responsibilities: PartyResponsibilitiesResult;
+}
+
+interface JurisdictionComparison {
+  doc1_governing_law: string;
+  doc2_governing_law: string;
+  same_jurisdiction: boolean;
+  jurisdiction_notes: string[];
+}
+
+interface ChoiceOfLawAnalysis {
+  doc1_choice_of_law: string;
+  doc2_choice_of_law: string;
+  jurisdiction_comparison: JurisdictionComparison;
+  governing_law_implications: string[];
+}
+
+interface FinancialTerms {
+  payment_amounts: number[];
+  payment_schedule: string;
+  penalties: string[];
+  currency: string;
+}
+
+interface PaymentTermsComparison {
+  payment_comparison: string;
+  schedule_comparison: string;
+  penalty_comparison: string;
+}
+
+interface LiabilityLimitationsResult {
+  doc1_limitations: string;
+  doc2_limitations: string;
+  comparison: string;
+}
+
+interface PenaltiesAndLiabilitiesResult {
+  doc1_penalties: string[];
+  doc2_penalties: string[];
+  penalty_severity_comparison: string;
+  liability_limitations: LiabilityLimitationsResult;
+}
+
+interface FinancialAnalysis {
+  doc1_financial_terms: FinancialTerms;
+  doc2_financial_terms: FinancialTerms;
+  payment_terms_comparison: PaymentTermsComparison;
+  penalties_and_liabilities: PenaltiesAndLiabilitiesResult;
+}
+
+interface RightsAndRemedies {
+  termination_rights: string[];
+  remedies: string[];
+  dispute_resolution: string;
+}
+
+interface RemediesComparisonResult {
+  termination_rights_comparison: string;
+  remedies_comparison: string;
+  dispute_resolution_comparison: string;
+}
+
+interface DisputeResolutionAnalysis {
+  doc1_dispute_mechanism: string;
+  doc2_dispute_mechanism: string;
+  dispute_resolution_notes: string;
+}
+
+interface RightsAndRemediesAnalysis {
+  doc1_rights_and_remedies: RightsAndRemedies;
+  doc2_rights_and_remedies: RightsAndRemedies;
+  remedies_comparison: RemediesComparisonResult;
+  dispute_resolution: DisputeResolutionAnalysis;
+}
+
+interface TermAndTermination {
+  duration: string;
+  termination_conditions: string[];
+  renewal_terms: string;
+}
+
+interface DurationComparisonResult {
+  doc1_duration: string;
+  doc2_duration: string;
+  duration_comparison: string;
+}
+
+interface TerminationConditionsResult {
+  doc1_termination: string[];
+  doc2_termination: string[];
+  termination_analysis: string;
+}
+
+interface TermAndTerminationAnalysis {
+  doc1_term_and_termination: TermAndTermination;
+  doc2_term_and_termination: TermAndTermination;
+  duration_comparison: DurationComparisonResult;
+  termination_conditions: TerminationConditionsResult;
+}
+
+interface ComparisonResult {
+  metadata: {
+    comparison_type: string;
+    timestamp: string;
+    document1_length: number;
+    document2_length: number;
+  };
+  structural_differences: StructureComparison;
+  content_differences: ContentComparison;
+  similarity_score: number;
+  key_differences: string[];
+  recommendations: string[];
+  focused_comparison?: Record<string, FocusedAreaResult>;
+  risk_analysis?: RiskAnalysis;
+  obligations_analysis?: ObligationsAnalysis;
+  choice_of_law_analysis?: ChoiceOfLawAnalysis;
+  financial_analysis?: FinancialAnalysis;
+  rights_and_remedies?: RightsAndRemediesAnalysis;
+  term_and_termination?: TermAndTerminationAnalysis;
+}
+
 const ContractComparatorSchema = z.object({
   document1_text: z.string().describe('First contract/agreement to compare'),
   document2_text: z.string().describe('Second contract/agreement to compare'),
@@ -65,7 +275,7 @@ export const contractComparator = new (class extends BaseTool {
     };
   }
 
-  async execute(args: any) {
+  async execute(args: unknown) {
     try {
       const { document1_text, document2_text, comparison_type, focus_areas, ai_provider } = ContractComparatorSchema.parse(args);
 
@@ -188,8 +398,8 @@ export const contractComparator = new (class extends BaseTool {
     return prompt;
   }
 
-  public performComparison(doc1: string, doc2: string, comparisonType: string, focusAreas?: string[]) {
-    const comparison: any = {
+  public performComparison(doc1: string, doc2: string, comparisonType: string, focusAreas?: string[]): ComparisonResult {
+    const comparison: ComparisonResult = {
       metadata: {
         comparison_type: comparisonType,
         timestamp: new Date().toISOString(),
@@ -201,7 +411,6 @@ export const contractComparator = new (class extends BaseTool {
       similarity_score: this.calculateSimilarity(doc1, doc2),
       key_differences: this.identifyKeyDifferences(doc1, doc2),
       recommendations: this.generateComparisonRecommendations(doc1, doc2),
-      focused_comparison: undefined as any,
     };
 
     // Add specialized analysis based on comparison type
@@ -236,7 +445,7 @@ export const contractComparator = new (class extends BaseTool {
     return comparison;
   }
 
-  public formatEnhancedAnalysis(results: any): string {
+  public formatEnhancedAnalysis(results: ComparisonResult): string {
     let output = '';
 
     // Basic comparison info
@@ -253,58 +462,12 @@ export const contractComparator = new (class extends BaseTool {
     }
 
     // Enhanced analysis sections
-    if (results.risk_analysis) {
-      output += `🛡️ RISK ANALYSIS:\n`;
-      output += `  Document 1 Risks: ${results.risk_analysis.doc1_risks?.join(', ') || 'None identified'}\n`;
-      output += `  Document 2 Risks: ${results.risk_analysis.doc2_risks?.join(', ') || 'None identified'}\n`;
-      output += `  Overall Assessment: ${results.risk_analysis.overall_risk_assessment || 'Not assessed'}\n`;
-      if (results.risk_analysis.traps_for_unwary?.length > 0) {
-        output += `  ⚠️  Traps for Unwary: ${results.risk_analysis.traps_for_unwary.join('; ')}\n`;
-      }
-      output += '\n';
-    }
-
-    if (results.obligations_analysis) {
-      output += `📋 OBLIGATIONS ANALYSIS:\n`;
-      output += `  Document 1 Obligations: ${results.obligations_analysis.doc1_obligations?.length || 0} identified\n`;
-      output += `  Document 2 Obligations: ${results.obligations_analysis.doc2_obligations?.length || 0} identified\n`;
-      output += `  Common Obligations: ${results.obligations_analysis.obligations_comparison?.common_obligations?.length || 0}\n`;
-      output += `  Party Analysis: ${results.obligations_analysis.party_responsibilities || 'Not analyzed'}\n\n`;
-    }
-
-    if (results.choice_of_law_analysis) {
-      output += `⚖️ CHOICE OF LAW ANALYSIS:\n`;
-      output += `  Document 1 Governing Law: ${results.choice_of_law_analysis.doc1_choice_of_law || 'Not specified'}\n`;
-      output += `  Document 2 Governing Law: ${results.choice_of_law_analysis.doc2_choice_of_law || 'Not specified'}\n`;
-      output += `  Same Jurisdiction: ${results.choice_of_law_analysis.jurisdiction_comparison?.same_jurisdiction || false}\n`;
-      if (results.choice_of_law_analysis.governing_law_implications?.length > 0) {
-        output += `  Legal Implications: ${results.choice_of_law_analysis.governing_law_implications.join('; ')}\n`;
-      }
-      output += '\n';
-    }
-
-    if (results.financial_analysis) {
-      output += `💰 FINANCIAL ANALYSIS:\n`;
-      output += `  Document 1 Amounts: ${results.financial_analysis.doc1_financial_terms?.payment_amounts?.length || 0} monetary terms\n`;
-      output += `  Document 2 Amounts: ${results.financial_analysis.doc2_financial_terms?.payment_amounts?.length || 0} monetary terms\n`;
-      output += `  Payment Comparison: ${results.financial_analysis.payment_terms_comparison?.payment_comparison || 'Not compared'}\n`;
-      output += `  Penalty Comparison: ${results.financial_analysis.payment_terms_comparison?.penalty_comparison || 'Not compared'}\n\n`;
-    }
-
-    if (results.rights_and_remedies) {
-      output += `🏛️ RIGHTS & REMEDIES ANALYSIS:\n`;
-      output += `  Document 1 Termination Rights: ${results.rights_and_remedies.doc1_rights_and_remedies?.termination_rights?.length || 0}\n`;
-      output += `  Document 2 Termination Rights: ${results.rights_and_remedies.doc2_rights_and_remedies?.termination_rights?.length || 0}\n`;
-      output += `  Remedies Comparison: ${results.rights_and_remedies.remedies_comparison?.remedies_comparison || 'Not compared'}\n`;
-      output += `  Dispute Resolution: ${results.rights_and_remedies.dispute_resolution?.doc1_dispute_mechanism || 'Not specified'} vs ${results.rights_and_remedies.dispute_resolution?.doc2_dispute_mechanism || 'Not specified'}\n\n`;
-    }
-
-    if (results.term_and_termination) {
-      output += `⏰ TERM & TERMINATION ANALYSIS:\n`;
-      output += `  Document 1 Duration: ${results.term_and_termination.doc1_term_and_termination?.duration || 'Not specified'}\n`;
-      output += `  Document 2 Duration: ${results.term_and_termination.doc2_term_and_termination?.duration || 'Not specified'}\n`;
-      output += `  Duration Comparison: ${results.term_and_termination.duration_comparison?.duration_comparison || 'Not compared'}\n\n`;
-    }
+    if (results.risk_analysis) output += this.formatRiskSection(results.risk_analysis);
+    if (results.obligations_analysis) output += this.formatObligationsSection(results.obligations_analysis);
+    if (results.choice_of_law_analysis) output += this.formatChoiceOfLawSection(results.choice_of_law_analysis);
+    if (results.financial_analysis) output += this.formatFinancialSection(results.financial_analysis);
+    if (results.rights_and_remedies) output += this.formatRightsAndRemediesSection(results.rights_and_remedies);
+    if (results.term_and_termination) output += this.formatTermAndTerminationSection(results.term_and_termination);
 
     // Recommendations
     if (results.recommendations && results.recommendations.length > 0) {
@@ -314,21 +477,83 @@ export const contractComparator = new (class extends BaseTool {
     }
 
     // Content analysis
-    if (results.content_differences) {
-      output += `📊 Content Analysis:\n`;
-      output += `  Common legal terms: ${results.content_differences.common_terms?.join(', ') || 'None'}\n`;
-      if (results.content_differences.unique_to_doc1?.length > 0) {
-        output += `  Unique to Document 1: ${results.content_differences.unique_to_doc1.join(', ')}\n`;
-      }
-      if (results.content_differences.unique_to_doc2?.length > 0) {
-        output += `  Unique to Document 2: ${results.content_differences.unique_to_doc2.join(', ')}\n`;
-      }
-    }
+    if (results.content_differences) output += this.formatContentSection(results.content_differences);
 
     return output;
   }
 
-  public compareStructure(doc1: string, doc2: string): any {
+  public formatRiskSection(risk_analysis: RiskAnalysis): string {
+    let output = `🛡️ RISK ANALYSIS:\n`;
+    output += `  Document 1 Risks: ${risk_analysis.doc1_risks?.join(', ') || 'None identified'}\n`;
+    output += `  Document 2 Risks: ${risk_analysis.doc2_risks?.join(', ') || 'None identified'}\n`;
+    output += `  Overall Assessment: ${risk_analysis.overall_risk_assessment || 'Not assessed'}\n`;
+    if (risk_analysis.traps_for_unwary?.length > 0) {
+      output += `  ⚠️  Traps for Unwary: ${risk_analysis.traps_for_unwary.join('; ')}\n`;
+    }
+    output += '\n';
+    return output;
+  }
+
+  public formatObligationsSection(obligations_analysis: ObligationsAnalysis): string {
+    let output = `📋 OBLIGATIONS ANALYSIS:\n`;
+    output += `  Document 1 Obligations: ${obligations_analysis.doc1_obligations?.length || 0} identified\n`;
+    output += `  Document 2 Obligations: ${obligations_analysis.doc2_obligations?.length || 0} identified\n`;
+    output += `  Common Obligations: ${obligations_analysis.obligations_comparison?.common_obligations?.length || 0}\n`;
+    output += `  Party Analysis: ${obligations_analysis.party_responsibilities?.responsibility_comparison || 'Not analyzed'}\n\n`;
+    return output;
+  }
+
+  public formatChoiceOfLawSection(choice_of_law_analysis: ChoiceOfLawAnalysis): string {
+    let output = `⚖️ CHOICE OF LAW ANALYSIS:\n`;
+    output += `  Document 1 Governing Law: ${choice_of_law_analysis.doc1_choice_of_law || 'Not specified'}\n`;
+    output += `  Document 2 Governing Law: ${choice_of_law_analysis.doc2_choice_of_law || 'Not specified'}\n`;
+    output += `  Same Jurisdiction: ${choice_of_law_analysis.jurisdiction_comparison?.same_jurisdiction || false}\n`;
+    if (choice_of_law_analysis.governing_law_implications?.length > 0) {
+      output += `  Legal Implications: ${choice_of_law_analysis.governing_law_implications.join('; ')}\n`;
+    }
+    output += '\n';
+    return output;
+  }
+
+  public formatFinancialSection(financial_analysis: FinancialAnalysis): string {
+    let output = `💰 FINANCIAL ANALYSIS:\n`;
+    output += `  Document 1 Amounts: ${financial_analysis.doc1_financial_terms?.payment_amounts?.length || 0} monetary terms\n`;
+    output += `  Document 2 Amounts: ${financial_analysis.doc2_financial_terms?.payment_amounts?.length || 0} monetary terms\n`;
+    output += `  Payment Comparison: ${financial_analysis.payment_terms_comparison?.payment_comparison || 'Not compared'}\n`;
+    output += `  Penalty Comparison: ${financial_analysis.payment_terms_comparison?.penalty_comparison || 'Not compared'}\n\n`;
+    return output;
+  }
+
+  public formatRightsAndRemediesSection(rights_and_remedies: RightsAndRemediesAnalysis): string {
+    let output = `🏛️ RIGHTS & REMEDIES ANALYSIS:\n`;
+    output += `  Document 1 Termination Rights: ${rights_and_remedies.doc1_rights_and_remedies?.termination_rights?.length || 0}\n`;
+    output += `  Document 2 Termination Rights: ${rights_and_remedies.doc2_rights_and_remedies?.termination_rights?.length || 0}\n`;
+    output += `  Remedies Comparison: ${rights_and_remedies.remedies_comparison?.remedies_comparison || 'Not compared'}\n`;
+    output += `  Dispute Resolution: ${rights_and_remedies.dispute_resolution?.doc1_dispute_mechanism || 'Not specified'} vs ${rights_and_remedies.dispute_resolution?.doc2_dispute_mechanism || 'Not specified'}\n\n`;
+    return output;
+  }
+
+  public formatTermAndTerminationSection(term_and_termination: TermAndTerminationAnalysis): string {
+    let output = `⏰ TERM & TERMINATION ANALYSIS:\n`;
+    output += `  Document 1 Duration: ${term_and_termination.doc1_term_and_termination?.duration || 'Not specified'}\n`;
+    output += `  Document 2 Duration: ${term_and_termination.doc2_term_and_termination?.duration || 'Not specified'}\n`;
+    output += `  Duration Comparison: ${term_and_termination.duration_comparison?.duration_comparison || 'Not compared'}\n\n`;
+    return output;
+  }
+
+  public formatContentSection(content_differences: ContentComparison): string {
+    let output = `📊 Content Analysis:\n`;
+    output += `  Common legal terms: ${content_differences.common_terms?.join(', ') || 'None'}\n`;
+    if (content_differences.unique_to_doc1?.length > 0) {
+      output += `  Unique to Document 1: ${content_differences.unique_to_doc1.join(', ')}\n`;
+    }
+    if (content_differences.unique_to_doc2?.length > 0) {
+      output += `  Unique to Document 2: ${content_differences.unique_to_doc2.join(', ')}\n`;
+    }
+    return output;
+  }
+
+  public compareStructure(doc1: string, doc2: string): StructureComparison {
     const sections1 = this.extractSections(doc1);
     const sections2 = this.extractSections(doc2);
     
@@ -340,7 +565,7 @@ export const contractComparator = new (class extends BaseTool {
     };
   }
 
-  public compareContent(doc1: string, doc2: string): any {
+  public compareContent(doc1: string, doc2: string): ContentComparison {
     const terms1 = this.extractLegalTerms(doc1);
     const terms2 = this.extractLegalTerms(doc2);
     
@@ -466,7 +691,7 @@ export const contractComparator = new (class extends BaseTool {
     return frequencies;
   }
 
-  public findSectionDifferences(sections1: string[], sections2: string[]): any {
+  public findSectionDifferences(sections1: string[], sections2: string[]): SectionDifferences {
     return {
       doc1_unique_sections: sections1.filter(s => !sections2.includes(s)),
       doc2_unique_sections: sections2.filter(s => !sections1.includes(s)),
@@ -501,8 +726,8 @@ export const contractComparator = new (class extends BaseTool {
     ];
   }
 
-  public performFocusedComparison(doc1: string, doc2: string, focusAreas: string[]): Record<string, any> {
-    const result: Record<string, any> = {};
+  public performFocusedComparison(doc1: string, doc2: string, focusAreas: string[]): Record<string, FocusedAreaResult> {
+    const result: Record<string, FocusedAreaResult> = {};
     
     focusAreas.forEach(area => {
       switch (area.toLowerCase()) {
@@ -523,7 +748,7 @@ export const contractComparator = new (class extends BaseTool {
     return result;
   }
 
-  public compareContractElements(doc1: string, doc2: string): any {
+  public compareContractElements(doc1: string, doc2: string): ContractElements {
     return {
       doc1_contract_indicators: (doc1.match(/contract|agreement/gi) || []).length,
       doc2_contract_indicators: (doc2.match(/contract|agreement/gi) || []).length,
@@ -532,7 +757,7 @@ export const contractComparator = new (class extends BaseTool {
     };
   }
 
-  public compareLiabilityClauses(doc1: string, doc2: string): any {
+  public compareLiabilityClauses(doc1: string, doc2: string): LiabilityComparison {
     return {
       doc1_liability_mentions: (doc1.match(/liability|damages/gi) || []).length,
       doc2_liability_mentions: (doc2.match(/liability|damages/gi) || []).length,
@@ -540,7 +765,7 @@ export const contractComparator = new (class extends BaseTool {
     };
   }
 
-  public compareComplianceElements(doc1: string, doc2: string): any {
+  public compareComplianceElements(doc1: string, doc2: string): ComplianceComparison {
     return {
       doc1_compliance_mentions: (doc1.match(/compliance|regulation/gi) || []).length,
       doc2_compliance_mentions: (doc2.match(/compliance|regulation/gi) || []).length,
@@ -609,7 +834,7 @@ export const contractComparator = new (class extends BaseTool {
 
   // ===== NEW ADVANCED LEGAL ANALYSIS METHODS =====
 
-  public performRiskAnalysis(doc1: string, doc2: string): any {
+  public performRiskAnalysis(doc1: string, doc2: string): RiskAnalysis {
     return {
       doc1_risks: this.identifyRisks(doc1),
       doc2_risks: this.identifyRisks(doc2),
@@ -619,7 +844,7 @@ export const contractComparator = new (class extends BaseTool {
     };
   }
 
-  public performObligationsAnalysis(doc1: string, doc2: string): any {
+  public performObligationsAnalysis(doc1: string, doc2: string): ObligationsAnalysis {
     return {
       doc1_obligations: this.extractObligations(doc1),
       doc2_obligations: this.extractObligations(doc2),
@@ -628,7 +853,7 @@ export const contractComparator = new (class extends BaseTool {
     };
   }
 
-  public performChoiceOfLawAnalysis(doc1: string, doc2: string): any {
+  public performChoiceOfLawAnalysis(doc1: string, doc2: string): ChoiceOfLawAnalysis {
     return {
       doc1_choice_of_law: this.extractChoiceOfLaw(doc1),
       doc2_choice_of_law: this.extractChoiceOfLaw(doc2),
@@ -637,7 +862,7 @@ export const contractComparator = new (class extends BaseTool {
     };
   }
 
-  public performFinancialAnalysis(doc1: string, doc2: string): any {
+  public performFinancialAnalysis(doc1: string, doc2: string): FinancialAnalysis {
     return {
       doc1_financial_terms: this.extractFinancialTerms(doc1),
       doc2_financial_terms: this.extractFinancialTerms(doc2),
@@ -646,7 +871,7 @@ export const contractComparator = new (class extends BaseTool {
     };
   }
 
-  public performRightsAndRemediesAnalysis(doc1: string, doc2: string): any {
+  public performRightsAndRemediesAnalysis(doc1: string, doc2: string): RightsAndRemediesAnalysis {
     return {
       doc1_rights_and_remedies: this.extractRightsAndRemedies(doc1),
       doc2_rights_and_remedies: this.extractRightsAndRemedies(doc2),
@@ -655,7 +880,7 @@ export const contractComparator = new (class extends BaseTool {
     };
   }
 
-  public performTermAndTerminationAnalysis(doc1: string, doc2: string): any {
+  public performTermAndTerminationAnalysis(doc1: string, doc2: string): TermAndTerminationAnalysis {
     return {
       doc1_term_and_termination: this.extractTermAndTermination(doc1),
       doc2_term_and_termination: this.extractTermAndTermination(doc2),
@@ -702,7 +927,7 @@ export const contractComparator = new (class extends BaseTool {
     return risks;
   }
 
-  public compareRisks(doc1: string, doc2: string): any {
+  public compareRisks(doc1: string, doc2: string): RiskComparisonResult {
     const risks1 = this.identifyRisks(doc1);
     const risks2 = this.identifyRisks(doc2);
 
@@ -783,7 +1008,7 @@ export const contractComparator = new (class extends BaseTool {
     return [...new Set(obligations)]; // Remove duplicates
   }
 
-  public compareObligations(doc1: string, doc2: string): any {
+  public compareObligations(doc1: string, doc2: string): ObligationsComparison {
     const obl1 = this.extractObligations(doc1);
     const obl2 = this.extractObligations(doc2);
 
@@ -796,7 +1021,7 @@ export const contractComparator = new (class extends BaseTool {
     };
   }
 
-  public analyzePartyResponsibilities(doc1: string, doc2: string): any {
+  public analyzePartyResponsibilities(doc1: string, doc2: string): PartyResponsibilitiesResult {
     const parties1 = this.extractParties(doc1);
     const parties2 = this.extractParties(doc2);
     const obl1 = this.extractObligations(doc1);
@@ -829,7 +1054,7 @@ export const contractComparator = new (class extends BaseTool {
     return 'Not specified';
   }
 
-  public compareJurisdiction(doc1: string, doc2: string): any {
+  public compareJurisdiction(doc1: string, doc2: string): JurisdictionComparison {
     const law1 = this.extractChoiceOfLaw(doc1);
     const law2 = this.extractChoiceOfLaw(doc2);
 
@@ -868,7 +1093,7 @@ export const contractComparator = new (class extends BaseTool {
 
   // ===== FINANCIAL ANALYSIS METHODS =====
 
-  public extractFinancialTerms(text: string): any {
+  public extractFinancialTerms(text: string): FinancialTerms {
     return {
       payment_amounts: this.extractMonetaryAmounts(text),
       payment_schedule: this.extractPaymentSchedule(text),
@@ -877,7 +1102,7 @@ export const contractComparator = new (class extends BaseTool {
     };
   }
 
-  public comparePaymentTerms(doc1: string, doc2: string): any {
+  public comparePaymentTerms(doc1: string, doc2: string): PaymentTermsComparison {
     const fin1 = this.extractFinancialTerms(doc1);
     const fin2 = this.extractFinancialTerms(doc2);
 
@@ -888,7 +1113,7 @@ export const contractComparator = new (class extends BaseTool {
     };
   }
 
-  public analyzePenaltiesAndLiabilities(doc1: string, doc2: string): any {
+  public analyzePenaltiesAndLiabilities(doc1: string, doc2: string): PenaltiesAndLiabilitiesResult {
     const penalties1 = this.extractPenalties(doc1);
     const penalties2 = this.extractPenalties(doc2);
 
@@ -902,7 +1127,7 @@ export const contractComparator = new (class extends BaseTool {
 
   // ===== RIGHTS AND REMEDIES ANALYSIS METHODS =====
 
-  public extractRightsAndRemedies(text: string): any {
+  public extractRightsAndRemedies(text: string): RightsAndRemedies {
     return {
       termination_rights: this.extractTerminationRights(text),
       remedies: this.extractRemedies(text),
@@ -910,7 +1135,7 @@ export const contractComparator = new (class extends BaseTool {
     };
   }
 
-  public compareRemedies(doc1: string, doc2: string): any {
+  public compareRemedies(doc1: string, doc2: string): RemediesComparisonResult {
     const rem1 = this.extractRightsAndRemedies(doc1);
     const rem2 = this.extractRightsAndRemedies(doc2);
 
@@ -921,7 +1146,7 @@ export const contractComparator = new (class extends BaseTool {
     };
   }
 
-  public analyzeDisputeResolution(doc1: string, doc2: string): any {
+  public analyzeDisputeResolution(doc1: string, doc2: string): DisputeResolutionAnalysis {
     const disp1 = this.extractDisputeResolution(doc1);
     const disp2 = this.extractDisputeResolution(doc2);
 
@@ -934,7 +1159,7 @@ export const contractComparator = new (class extends BaseTool {
 
   // ===== TERM AND TERMINATION ANALYSIS METHODS =====
 
-  public extractTermAndTermination(text: string): any {
+  public extractTermAndTermination(text: string): TermAndTermination {
     return {
       duration: this.extractContractDuration(text),
       termination_conditions: this.extractTerminationConditions(text),
@@ -942,7 +1167,7 @@ export const contractComparator = new (class extends BaseTool {
     };
   }
 
-  public compareContractDuration(doc1: string, doc2: string): any {
+  public compareContractDuration(doc1: string, doc2: string): DurationComparisonResult {
     const term1 = this.extractTermAndTermination(doc1);
     const term2 = this.extractTermAndTermination(doc2);
 
@@ -953,7 +1178,7 @@ export const contractComparator = new (class extends BaseTool {
     };
   }
 
-  public analyzeTerminationConditions(doc1: string, doc2: string): any {
+  public analyzeTerminationConditions(doc1: string, doc2: string): TerminationConditionsResult {
     const term1 = this.extractTermAndTermination(doc1);
     const term2 = this.extractTermAndTermination(doc2);
 
@@ -1024,7 +1249,7 @@ export const contractComparator = new (class extends BaseTool {
     return commonWords.length >= 3; // At least 3 common words
   }
 
-  public analyzePartyObligations(parties: string[], obligations: string[], text: string): any {
+  public analyzePartyObligations(parties: string[], obligations: string[], _text: string): PartyObligationAnalysis {
     // This would analyze which obligations belong to which parties
     return {
       parties_identified: parties,
@@ -1150,7 +1375,7 @@ export const contractComparator = new (class extends BaseTool {
     }
   }
 
-  public compareLiabilityLimitations(doc1: string, doc2: string): any {
+  public compareLiabilityLimitations(doc1: string, doc2: string): LiabilityLimitationsResult {
     const limit1 = this.extractLiabilityLimitations(doc1);
     const limit2 = this.extractLiabilityLimitations(doc2);
 
