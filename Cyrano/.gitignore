@@ -65,6 +65,7 @@ Thumbs.db
 # Uploads directory (keep structure but ignore content)
 uploads/*
 !uploads/.gitkeep
+.anonymization-sessions.enc
 
 # Docker
 .dockerignore

@@ -31,7 +31,7 @@ export interface AICallOptions {
   /**
    * Client confidentiality anonymization options.
    *
-   * When `anonymize` is true the prompt is passed through the
+   * When `anonymize` is true (default) the prompt is passed through the
    * ClientAnonymizationService before being sent to the provider; all
    * sensitive entities (names, dates, amounts, emails, phones, etc.) are
    * replaced with deterministic session-scoped tokens.  The AI response is
@@ -42,6 +42,9 @@ export interface AICallOptions {
    *
    * ⚠️  Category 3 content (identifiable PII – SSNs, account numbers, etc.)
    * will never be sent regardless of this flag; the call will throw instead.
+   *
+   * To intentionally opt-out (e.g., already-sanitized synthetic data), set
+   * `metadata.skipAnonymization = true`. Otherwise anonymization is enforced.
    */
   anonymize?: boolean;
   /** Session ID returned by a previous anonymized call (multi-turn support). */
@@ -55,6 +58,8 @@ export interface AICallOptions {
     app?: string;
     actionType?: 'recommendation' | 'suggestion' | 'content_generation' | 'data_processing';
     skipEthicsCheck?: boolean; // Only for internal/system calls that already have checks
+    /** Explicitly allow plaintext prompts (use ONLY for pre-sanitized synthetic data). */
+    skipAnonymization?: boolean;
   };
 }
 
@@ -95,22 +100,32 @@ export class AIService {
     // CONFIDENTIALITY ENFORCEMENT: Anonymize prompt before sending to provider
     let activePrompt = prompt;
     let activeAnonymizationSessionId: string | undefined;
-    if (options.anonymize) {
+    const anonymizationRequired = options.anonymize ?? true;
+    const skipAnonymization = options.metadata?.skipAnonymization === true;
+    const riskCategory = clientAnonymizationService.assessRiskCategory(prompt);
+
+    // Category 3 content must never be sent to a cloud provider
+    if (riskCategory === 3) {
+      throw new Error(
+        'Prompt contains identifiable PII (Category 3 content: SSN, account numbers, or ' +
+          'date-of-birth references). This content cannot be sent to a cloud AI provider. ' +
+          'Use a self-hosted model or remove the sensitive information before proceeding.'
+      );
+    }
+
+    if (!skipAnonymization) {
+      if (!anonymizationRequired) {
+        throw new Error(
+          'Anonymization is mandatory for external AI calls. ' +
+            'Set metadata.skipAnonymization=true only for pre-sanitized synthetic prompts.'
+        );
+      }
+
       const anonResult = clientAnonymizationService.anonymize(
         prompt,
         options.anonymizationSessionId
       );
       activeAnonymizationSessionId = anonResult.sessionId;
-
-      // Category 3 content must never be sent to a cloud provider
-      if (anonResult.riskCategory === 3) {
-        throw new Error(
-          'Prompt contains identifiable PII (Category 3 content: SSN, account numbers, or ' +
-          'date-of-birth references). This content cannot be sent to a cloud AI provider. ' +
-          'Use a self-hosted model or remove the sensitive information before proceeding.'
-        );
-      }
-
       activePrompt = anonResult.anonymizedText;
     }
 
@@ -580,4 +595,3 @@ export class AIService {
 
 // Export singleton instance
 export const aiService = new AIService();
-

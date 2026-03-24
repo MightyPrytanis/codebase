@@ -1241,7 +1241,7 @@ app.post('/api/mae/write', async (req, res) => {
       return res.status(400).json({ isError: true, content: [{ text: 'Invalid request body' }] });
     }
 
-    const { prompt, context, provider, model, taskType, anonymize } = parsed.data;
+  const { prompt, context, provider, model, taskType, anonymize } = parsed.data;
     const resolvedProvider = resolveMaeProvider(provider);
     const fullPrompt = context ? `Context:\n${context}\n\nTask:\n${prompt}` : prompt;
 
@@ -1252,7 +1252,7 @@ app.post('/api/mae/write', async (req, res) => {
       {
         model,
         systemPrompt: `You are an expert writing assistant. Task type: ${taskType}.`,
-        anonymize: anonymize ?? false,
+        anonymize: anonymize ?? true,
       }
     );
 
@@ -1276,7 +1276,7 @@ app.post('/api/mae/write/multi', async (req, res) => {
       return res.status(400).json({ isError: true, content: [{ text: 'Invalid request body' }] });
     }
 
-    const { prompt, context, models, taskType, anonymize } = parsed.data;
+  const { prompt, context, models, taskType, anonymize } = parsed.data;
 
     const { aiService: maeAIService } = await import('./services/ai-service.js');
     const fullPrompt = context ? `Context:\n${context}\n\nTask:\n${prompt}` : prompt;
@@ -1291,7 +1291,7 @@ app.post('/api/mae/write/multi', async (req, res) => {
           {
             model,
             systemPrompt: `You are an expert writing assistant. Task type: ${taskType}.`,
-            anonymize: anonymize ?? false,
+            anonymize: anonymize ?? true,
           }
         );
       })
@@ -1754,4 +1754,3 @@ if (shouldStartServer) {
 } else {
   console.error('[HTTP Bridge] Not starting server (test environment detected)');
 }
-

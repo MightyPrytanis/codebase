@@ -23,7 +23,10 @@
  * @see Issue: Client Confidentiality, Strategy, and Anonymization
  */
 
-import { randomUUID } from 'crypto';
+import fs from 'fs';
+import path from 'path';
+import { createCipheriv, createDecipheriv, createHash, randomBytes, randomUUID } from 'crypto';
+import nlp from 'compromise';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -72,12 +75,24 @@ export interface AnonymizationResult {
   anonymizedText: string;
   /** Session ID needed to reverse the transformation */
   sessionId: string;
+  /** Optional sealed session state for persistence across restarts */
+  sessionState?: string;
   /** Number of unique entity occurrences replaced */
   entitiesReplaced: number;
   /** Assessed risk category of the ORIGINAL text */
   riskCategory: RiskCategory;
   /** Summary of what was found */
   summary: Record<AnonymizableEntityType, number>;
+}
+
+/** Persisted session representation used for secure serialization */
+interface PersistedSession {
+  id: string;
+  tokenToOriginal: Array<[string, string]>;
+  originalToToken: Array<[string, string]>;
+  counters: Record<string, number>;
+  createdAt: string;
+  lastUsedAt: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -120,6 +135,13 @@ const STRATEGY_KEYWORDS = [
   'arbitration',
   'counteroffer',
   'counter-offer',
+  'theory of the case',
+  'weakness',
+  'weaknesses',
+  'exposure',
+  'liability',
+  'plea',
+  'indictment',
 ];
 
 // Regex patterns for PII that is NOT reliably caught by the entity processor
@@ -132,8 +154,37 @@ const DOB_PATTERN =
 // Session management
 // ---------------------------------------------------------------------------
 
-/** Default session expiry: 4 hours */
-const DEFAULT_SESSION_TTL_MS = 4 * 60 * 60 * 1000;
+/** Default session expiry: 60 minutes (reduced from prior 4 hours) */
+const DEFAULT_SESSION_TTL_MS = 60 * 60 * 1000;
+
+/** Default encrypted persistence file (disabled unless key provided) */
+const DEFAULT_SESSION_STORE_PATH = path.join(process.cwd(), '.anonymization-sessions.enc');
+
+/** Role-based references that imply a person even without capitalization */
+const ROLE_BASED_PERSON_TERMS = [
+  'my client',
+  'the client',
+  'our client',
+  'plaintiff',
+  'defendant',
+  'respondent',
+  'petitioner',
+  'claimant',
+  'accused',
+  'suspect',
+  'witness',
+  'victim',
+  'minor child',
+  'minor',
+  'child',
+  'son',
+  'daughter',
+  'spouse',
+  'husband',
+  'wife',
+  'partner',
+  'theory of the case',
+];
 
 /**
  * Client Anonymization Service
@@ -149,9 +200,19 @@ const DEFAULT_SESSION_TTL_MS = 4 * 60 * 60 * 1000;
 export class ClientAnonymizationService {
   private readonly sessions = new Map<string, AnonymizationSession>();
   private readonly sessionTtlMs: number;
+  private readonly sessionStorePath: string;
+  private readonly encryptionKey?: Buffer;
 
   constructor(sessionTtlMs: number = DEFAULT_SESSION_TTL_MS) {
     this.sessionTtlMs = sessionTtlMs;
+    this.sessionStorePath =
+      process.env.CLIENT_ANON_SESSION_PATH || DEFAULT_SESSION_STORE_PATH;
+
+    const secret = process.env.CLIENT_ANON_SECRET;
+    if (secret) {
+      this.encryptionKey = this.deriveKey(secret);
+      this.loadPersistedSessions();
+    }
   }
 
   // -------------------------------------------------------------------------
@@ -213,13 +274,18 @@ export class ClientAnonymizationService {
 
     const entitiesReplaced = spans.length;
 
-    return {
+    const result: AnonymizationResult = {
       anonymizedText: anonymized,
       sessionId: session.id,
+      sessionState: this.encryptionKey ? this.sealSession(session) : undefined,
       entitiesReplaced,
       riskCategory,
       summary,
     };
+
+    this.persistSessions();
+
+    return result;
   }
 
   /**
@@ -235,7 +301,11 @@ export class ClientAnonymizationService {
    * @throws   If the session does not exist or has expired.
    */
   deanonymize(text: string, sessionId: string): string {
-    const session = this.sessions.get(sessionId);
+    let session = this.sessions.get(sessionId);
+    if (!session) {
+      this.loadPersistedSessions();
+      session = this.sessions.get(sessionId);
+    }
     if (!session) {
       throw new Error(
         `Anonymization session '${sessionId}' not found or has expired. ` +
@@ -259,6 +329,8 @@ export class ClientAnonymizationService {
       const escaped = token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       result = result.replace(new RegExp(escaped, 'g'), original);
     }
+
+    this.persistSessions();
 
     return result;
   }
@@ -308,6 +380,7 @@ export class ClientAnonymizationService {
    */
   destroySession(sessionId: string): void {
     this.sessions.delete(sessionId);
+    this.persistSessions();
   }
 
   /** Return the number of currently-active sessions. */
@@ -402,6 +475,16 @@ export class ClientAnonymizationService {
     } catch {
       // Entity extraction failure is non-fatal; SSN/account pass will still run
     }
+
+    // --- Local NER model (compromise) to catch lower-case / nickname references ---
+    try {
+      this.addCompromiseSpans(text, spans);
+    } catch {
+      // Compromise failures should not break anonymization
+    }
+
+    // --- Role-based person references (plaintiff, my client, etc.) ---
+    this.addRoleBasedPersonSpans(text, spans);
 
     // --- Supplemental regex patterns ---
     // SSN
@@ -539,6 +622,170 @@ export class ClientAnonymizationService {
     return result;
   }
 
+  /**
+   * Derive a 32-byte key from a secret.
+   */
+  private deriveKey(secret: string): Buffer {
+    return createHash('sha256').update(secret).digest();
+  }
+
+  /**
+   * Persist sessions to encrypted storage (best-effort).
+   */
+  private persistSessions(): void {
+    if (!this.encryptionKey) {
+      return;
+    }
+
+    const payload: PersistedSession[] = [];
+    for (const session of this.sessions.values()) {
+      payload.push({
+        id: session.id,
+        tokenToOriginal: Array.from(session.tokenToOriginal.entries()),
+        originalToToken: Array.from(session.originalToToken.entries()),
+        counters: session.counters,
+        createdAt: session.createdAt.toISOString(),
+        lastUsedAt: session.lastUsedAt.toISOString(),
+      });
+    }
+
+    const plaintext = JSON.stringify(payload);
+    const iv = randomBytes(12);
+    const cipher = createCipheriv('aes-256-gcm', this.encryptionKey, iv);
+    const ciphertext = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()]);
+    const tag = cipher.getAuthTag();
+    const sealed = Buffer.concat([iv, tag, ciphertext]).toString('base64');
+
+    try {
+      fs.mkdirSync(path.dirname(this.sessionStorePath), { recursive: true });
+      fs.writeFileSync(this.sessionStorePath, sealed, { encoding: 'utf8' });
+    } catch {
+      // Persistence failures should not block anonymization; fail closed
+    }
+  }
+
+  /**
+   * Load sessions from encrypted storage if available.
+   */
+  private loadPersistedSessions(): void {
+    if (!this.encryptionKey) {
+      return;
+    }
+
+    if (!fs.existsSync(this.sessionStorePath)) {
+      return;
+    }
+
+    try {
+      const sealed = fs.readFileSync(this.sessionStorePath, 'utf8');
+      const buffer = Buffer.from(sealed, 'base64');
+      const iv = buffer.subarray(0, 12);
+      const tag = buffer.subarray(12, 28);
+      const ciphertext = buffer.subarray(28);
+
+      const decipher = createDecipheriv('aes-256-gcm', this.encryptionKey, iv);
+      decipher.setAuthTag(tag);
+      const plaintext = Buffer.concat([decipher.update(ciphertext), decipher.final()]).toString('utf8');
+      const payload = JSON.parse(plaintext) as PersistedSession[];
+
+      this.sessions.clear();
+      for (const entry of payload) {
+        const session: AnonymizationSession = {
+          id: entry.id,
+          tokenToOriginal: new Map(entry.tokenToOriginal),
+          originalToToken: new Map(entry.originalToToken),
+          counters: entry.counters,
+          createdAt: new Date(entry.createdAt),
+          lastUsedAt: new Date(entry.lastUsedAt),
+        };
+        // Enforce TTL on load
+        if (Date.now() - session.lastUsedAt.getTime() < this.sessionTtlMs) {
+          this.sessions.set(session.id, session);
+        }
+      }
+    } catch {
+      // Corrupt or unreadable store; ignore and continue with empty map
+      this.sessions.clear();
+    }
+  }
+
+  /**
+   * Seal a single session into a portable encrypted string.
+   */
+  private sealSession(session: AnonymizationSession): string {
+    if (!this.encryptionKey) {
+      return '';
+    }
+    const payload: PersistedSession = {
+      id: session.id,
+      tokenToOriginal: Array.from(session.tokenToOriginal.entries()),
+      originalToToken: Array.from(session.originalToToken.entries()),
+      counters: session.counters,
+      createdAt: session.createdAt.toISOString(),
+      lastUsedAt: session.lastUsedAt.toISOString(),
+    };
+
+    const plaintext = JSON.stringify(payload);
+    const iv = randomBytes(12);
+    const cipher = createCipheriv('aes-256-gcm', this.encryptionKey, iv);
+    const ciphertext = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()]);
+    const tag = cipher.getAuthTag();
+    return Buffer.concat([iv, tag, ciphertext]).toString('base64');
+  }
+
+  /**
+   * Add spans detected by the compromise NER model (persons, organizations, locations).
+   */
+  private addCompromiseSpans(
+    text: string,
+    spans: Array<{ start: number; end: number; text: string; type: AnonymizableEntityType }>
+  ): void {
+    const doc = nlp(text);
+
+    const addFrom = (
+      items: Array<{ text: string; offset?: { start: number; length: number } }>,
+      type: AnonymizableEntityType
+    ) => {
+      for (const item of items) {
+        if (!item.offset) continue;
+        spans.push({
+          start: item.offset.start,
+          end: item.offset.start + item.offset.length,
+          text: item.text,
+          type,
+        });
+      }
+    };
+
+    addFrom(doc.people().json({ offset: true }) as any, 'person');
+    addFrom(doc.organizations().json({ offset: true }) as any, 'organization');
+    addFrom(doc.places().json({ offset: true }) as any, 'location');
+  }
+
+  /**
+   * Add heuristic spans for role-based person references (e.g., "my client").
+   */
+  private addRoleBasedPersonSpans(
+    text: string,
+    spans: Array<{ start: number; end: number; text: string; type: AnonymizableEntityType }>
+  ): void {
+    const lower = text.toLowerCase();
+    for (const term of ROLE_BASED_PERSON_TERMS) {
+      let startIndex = 0;
+      while (true) {
+        const idx = lower.indexOf(term, startIndex);
+        if (idx === -1) break;
+        spans.push({
+          start: idx,
+          end: idx + term.length,
+          text: text.slice(idx, idx + term.length),
+          type: 'person',
+        });
+        startIndex = idx + term.length;
+      }
+    }
+  }
+
   /** Remove sessions that have exceeded the TTL */
   private evictExpiredSessions(): void {
     const cutoff = Date.now() - this.sessionTtlMs;
@@ -547,6 +794,7 @@ export class ClientAnonymizationService {
         this.sessions.delete(id);
       }
     }
+    this.persistSessions();
   }
 }
 

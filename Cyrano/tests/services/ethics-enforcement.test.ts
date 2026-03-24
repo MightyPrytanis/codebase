@@ -19,6 +19,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 process.env.NODE_ENV = 'test';
 
 import { AIService } from '../../src/services/ai-service.js';
+import { clientAnonymizationService } from '../../src/services/client-anonymization.js';
 import { injectTenRulesIntoSystemPrompt } from '../../src/services/ethics-prompt-injector.js';
 import { systemicEthicsService } from '../../src/services/systemic-ethics-service.js';
 import { ethicsAuditService } from '../../src/services/ethics-audit-service.js';
@@ -303,6 +304,44 @@ describe('Ethics Enforcement - AI Service Layer', () => {
       expect(checkSpy).toHaveBeenCalled();
       
       vi.restoreAllMocks();
+    });
+  });
+
+  describe('Confidentiality enforcement', () => {
+    it('anonymizes prompts by default', async () => {
+      const validatorSpy = vi.spyOn(aiService['apiValidator'], 'validateProvider').mockReturnValue({
+        valid: true,
+        error: undefined,
+      });
+      const anonymizeSpy = vi.spyOn(clientAnonymizationService, 'anonymize');
+      const callOpenAISpy = vi
+        .spyOn(aiService as any, 'callOpenAI')
+        .mockResolvedValue('sanitized response');
+
+      await aiService.call('openai', 'John Doe should review this filing.');
+
+      expect(anonymizeSpy).toHaveBeenCalled();
+
+      callOpenAISpy.mockRestore();
+      anonymizeSpy.mockRestore();
+      validatorSpy.mockRestore();
+    });
+
+    it('rejects disabling anonymization without explicit override', async () => {
+      const validatorSpy = vi.spyOn(aiService['apiValidator'], 'validateProvider').mockReturnValue({
+        valid: true,
+        error: undefined,
+      });
+      const callOpenAISpy = vi
+        .spyOn(aiService as any, 'callOpenAI')
+        .mockResolvedValue('sanitized response');
+
+      await expect(
+        aiService.call('openai', 'Jane Doe draft.', { anonymize: false })
+      ).rejects.toThrow(/Anonymization is mandatory/);
+
+      callOpenAISpy.mockRestore();
+      validatorSpy.mockRestore();
     });
   });
 });

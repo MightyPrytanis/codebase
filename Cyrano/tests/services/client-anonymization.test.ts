@@ -11,6 +11,8 @@
  * See LICENSE.md for full license text
  */
 
+import fs from 'fs';
+import path from 'path';
 import { describe, it, expect, beforeEach } from 'vitest';
 import {
   ClientAnonymizationService,
@@ -118,6 +120,27 @@ describe('ClientAnonymizationService', () => {
   });
 
   // -------------------------------------------------------------------------
+  // Expanded detection (NER + role-based heuristics)
+  // -------------------------------------------------------------------------
+
+  describe('expanded entity detection', () => {
+    it('captures role-based person references', () => {
+      const text = 'The plaintiff met with the defendant and my client yesterday.';
+      const result = svc.anonymize(text);
+      expect(result.anonymizedText).not.toContain('plaintiff');
+      expect(result.anonymizedText).toMatch(/PERSON_\d+/);
+      expect(result.summary.person).toBeGreaterThan(0);
+    });
+
+    it('uses local NER to detect locations beyond capitalization regex', () => {
+      const text = 'the team met in detroit to plan next steps.';
+      const result = svc.anonymize(text);
+      expect(result.anonymizedText.toLowerCase()).not.toContain('detroit');
+      expect(result.summary.location).toBeGreaterThan(0);
+    });
+  });
+
+  // -------------------------------------------------------------------------
   // De-anonymization round-trip
   // -------------------------------------------------------------------------
 
@@ -169,6 +192,12 @@ describe('ClientAnonymizationService', () => {
 
     it('returns Category 2 for litigation-related content', () => {
       expect(svc.assessRiskCategory('Deposition scheduled for next week.')).toBe(2);
+    });
+
+    it('returns Category 2 for theory-of-the-case language', () => {
+      expect(
+        svc.assessRiskCategory('We need to revisit our theory of the case and liability exposure.')
+      ).toBe(2);
     });
 
     it('returns Category 1 for generic legal research questions', () => {
@@ -227,6 +256,35 @@ describe('ClientAnonymizationService', () => {
       expect(svc.activeSessionCount).toBe(1);
       svc.anonymize('Second text.'); // new session
       expect(svc.activeSessionCount).toBe(2);
+    });
+
+    it('persists and restores sessions when a secret is configured', () => {
+      const tmpPath = path.join('/tmp', `anon-session-${Date.now()}.enc`);
+      const prevSecret = process.env.CLIENT_ANON_SECRET;
+      const prevPath = process.env.CLIENT_ANON_SESSION_PATH;
+      process.env.CLIENT_ANON_SECRET = 'test-secret';
+      process.env.CLIENT_ANON_SESSION_PATH = tmpPath;
+
+      try {
+        const firstSvc = new ClientAnonymizationService();
+        const { anonymizedText, sessionId } = firstSvc.anonymize(
+          'Jane Doe will attend the hearing.'
+        );
+        const token = anonymizedText.match(/PERSON_\d+/)?.[0] ?? '';
+        expect(token).toBeTruthy();
+        expect(fs.existsSync(tmpPath)).toBe(true);
+
+        // Simulate restart by creating a fresh service that should reload the session
+        const secondSvc = new ClientAnonymizationService();
+        const restored = secondSvc.deanonymize(`Hello ${token}`, sessionId);
+        expect(restored).toContain('Jane Doe');
+      } finally {
+        if (fs.existsSync(tmpPath)) {
+          fs.unlinkSync(tmpPath);
+        }
+        process.env.CLIENT_ANON_SECRET = prevSecret;
+        process.env.CLIENT_ANON_SESSION_PATH = prevPath;
+      }
     });
   });
 
