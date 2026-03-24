@@ -491,4 +491,99 @@ describe('ClientAnonymizationService', () => {
       expect(result.anonymizedText).not.toMatch(/VEHICLE_\d+/);
     });
   });
+
+  // -------------------------------------------------------------------------
+  // US state name detection
+  // -------------------------------------------------------------------------
+
+  describe('anonymize() – US state name detection', () => {
+    it('tokenizes a single-word state name ("Michigan")', () => {
+      // Single-word state names were previously invisible to the person heuristic
+      const result = svc.anonymize('Client resides in Michigan and files in Wayne County.');
+      expect(result.anonymizedText).not.toContain('Michigan');
+      expect(result.anonymizedText).toMatch(/LOCATION_\d+/);
+    });
+
+    it('tokenizes a single-word state name ("Arizona")', () => {
+      const result = svc.anonymize('The non-custodial parent wishes to travel to Arizona.');
+      expect(result.anonymizedText).not.toContain('Arizona');
+      expect(result.anonymizedText).toMatch(/LOCATION_\d+/);
+    });
+
+    it('tokenizes a multi-word state name ("North Carolina")', () => {
+      const result = svc.anonymize('Relatives reside in North Carolina.');
+      expect(result.anonymizedText).not.toContain('North Carolina');
+      expect(result.anonymizedText).toMatch(/LOCATION_\d+/);
+    });
+
+    it('tokenizes a multi-word state name ("West Virginia")', () => {
+      const result = svc.anonymize('The accident occurred in West Virginia.');
+      expect(result.anonymizedText).not.toContain('West Virginia');
+      expect(result.anonymizedText).toMatch(/LOCATION_\d+/);
+    });
+
+    it('assigns consistent LOCATION tokens across repeated state mentions', () => {
+      const result = svc.anonymize(
+        'Client lived in Michigan. The other party moved to Michigan last year.'
+      );
+      const tokens = result.anonymizedText.match(/LOCATION_\d+/g) ?? [];
+      expect(tokens.length).toBeGreaterThanOrEqual(2);
+      // Both "Michigan" references must map to the same token
+      expect(new Set(tokens).size).toBe(1);
+    });
+
+    it('correctly types state names as LOCATION (not PERSON)', () => {
+      // Multi-word state names previously matched the two-capitalised-words
+      // person heuristic; with location processed first they must be LOCATION.
+      const result = svc.anonymize('Petition filed in New York.');
+      expect(result.anonymizedText).not.toContain('New York');
+      expect(result.anonymizedText).toMatch(/LOCATION_\d+/);
+      expect(result.anonymizedText).not.toMatch(/PERSON_\d+/);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Proper-noun allow-list (whitelist)
+  // -------------------------------------------------------------------------
+
+  describe('anonymize() – proper-noun allow-list', () => {
+    it('does NOT tokenize "Supreme Court"', () => {
+      const result = svc.anonymize(
+        'The Supreme Court held in a landmark ruling that the statute was unconstitutional.'
+      );
+      expect(result.anonymizedText).toContain('Supreme Court');
+      expect(result.anonymizedText).not.toMatch(/PERSON_\d+/);
+    });
+
+    it('does NOT tokenize "United States" as a location', () => {
+      const result = svc.anonymize('Plaintiff is a citizen of the United States.');
+      expect(result.anonymizedText).toContain('United States');
+      // USA/UK abbreviations also present on the pattern; verify no LOCATION token
+      expect(result.anonymizedText).not.toMatch(/LOCATION_\d+/);
+    });
+
+    it('does NOT tokenize "Department of Justice"', () => {
+      const result = svc.anonymize('The referral was sent to the Department of Justice.');
+      expect(result.anonymizedText).toContain('Department of Justice');
+    });
+
+    it('does NOT tokenize "Court of Appeals"', () => {
+      const result = svc.anonymize('The Court of Appeals reversed the lower court decision.');
+      expect(result.anonymizedText).toContain('Court of Appeals');
+    });
+
+    it('DOES tokenize state names even though they are proper nouns', () => {
+      // State names are NOT on the allow-list; specific state combos can identify a matter.
+      const result = svc.anonymize('The child lives in Michigan but the father is in Florida.');
+      expect(result.anonymizedText).not.toContain('Michigan');
+      expect(result.anonymizedText).not.toContain('Florida');
+    });
+
+    it('DOES tokenize a person name that is not on the allow-list', () => {
+      // Regression: allow-list must not swallow legitimate person names
+      const result = svc.anonymize('Dr. John Smith testified at the hearing.');
+      expect(result.anonymizedText).not.toContain('John Smith');
+      expect(result.anonymizedText).toMatch(/PERSON_\d+/);
+    });
+  });
 });

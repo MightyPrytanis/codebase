@@ -410,6 +410,138 @@ const DOB_PATTERN =
   /\b(?:date\s+of\s+birth|dob|born(?:\s+on)?)\s*:?\s*\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}\b/gi;
 
 // ---------------------------------------------------------------------------
+// US state / territory names
+// ---------------------------------------------------------------------------
+
+/**
+ * All 50 US states plus DC and the populated territories.  Used to extend the
+ * `location` NER pattern so that single-word state names ("Michigan", "Arizona")
+ * are caught even though they contain only one capitalised word and would
+ * otherwise slip past the person-name pattern.
+ *
+ * State names are intentionally NOT placed on the `PROPER_NOUN_ALLOWLIST`:
+ * while a single state mention is harmless, a specific *combination* of states
+ * in a brief (e.g., Michigan + North Carolina + Arizona in a custody matter)
+ * can fingerprint a matter and re-identify the parties.  Masking every state
+ * reference and restoring them locally is the conservative, privacy-first choice.
+ *
+ * Each entry is a plain string; spaces are replaced with `\\s+` when the regex
+ * is constructed so that "New York" matches across any whitespace.
+ */
+const US_STATE_NAMES: readonly string[] = [
+  'Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado',
+  'Connecticut', 'Delaware', 'Florida', 'Georgia', 'Hawaii', 'Idaho',
+  'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana',
+  'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi',
+  'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey',
+  'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Ohio', 'Oklahoma',
+  'Oregon', 'Pennsylvania', 'Rhode Island', 'South Carolina', 'South Dakota',
+  'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virginia', 'Washington',
+  'West Virginia', 'Wisconsin', 'Wyoming',
+  // Federal district & territories
+  'District of Columbia', 'Puerto Rico', 'Guam', 'American Samoa',
+  'United States Virgin Islands',
+];
+
+// ---------------------------------------------------------------------------
+// Proper-noun allow-list (whitelist)
+// ---------------------------------------------------------------------------
+
+/**
+ * Well-known, entirely-public proper nouns that carry NO re-identification risk
+ * and do NOT need to be anonymized.
+ *
+ * Any span whose normalised (lowercase + trimmed) text appears here is silently
+ * dropped from the token-substitution pipeline even if it matched a broad NER
+ * pattern such as the two-capitalised-words person heuristic.
+ *
+ * Inclusion criteria:
+ *   - The phrase refers to a publicly known institutional entity (court, agency,
+ *     legislative body) that appears routinely in legal writing.
+ *   - Knowing that a brief mentions "Supreme Court" or "Department of Labor"
+ *     reveals nothing about the identity of the client or the specific matter.
+ *
+ * Exclusion criteria:
+ *   - State and city names are NOT listed here; see `US_STATE_NAMES` comment.
+ *   - Acronyms are handled via `STRATEGY_KEYWORDS` / direct regex patterns
+ *     and are not duplicated here.
+ */
+const PROPER_NOUN_ALLOWLIST: ReadonlySet<string> = new Set([
+  // ── US federal courts ───────────────────────────────────────────────────────
+  'supreme court', 'united states supreme court',
+  'court of appeals', 'united states court of appeals',
+  'district court', 'united states district court',
+  'circuit court', 'circuit court of appeals',
+  'bankruptcy court', 'tax court', 'united states tax court',
+  'court of federal claims', 'united states court of federal claims',
+  'court of international trade', 'court of claims',
+  'immigration court',
+  // Numbered circuits
+  'first circuit', 'second circuit', 'third circuit', 'fourth circuit',
+  'fifth circuit', 'sixth circuit', 'seventh circuit', 'eighth circuit',
+  'ninth circuit', 'tenth circuit', 'eleventh circuit', 'dc circuit',
+  'federal circuit',
+  // ── US government bodies ────────────────────────────────────────────────────
+  'united states', 'united states of america',
+  'congress', 'united states congress',
+  'senate', 'united states senate',
+  'house of representatives', 'united states house of representatives',
+  'federal government', 'white house',
+  'executive branch', 'legislative branch', 'judicial branch',
+  // ── Federal departments ─────────────────────────────────────────────────────
+  'department of justice', 'department of labor',
+  'department of education', 'department of health and human services',
+  'department of homeland security', 'department of the treasury',
+  'department of defense', 'department of commerce',
+  'department of housing and urban development',
+  'department of veterans affairs',
+  // ── Federal agencies (full names) ───────────────────────────────────────────
+  'federal bureau of investigation', 'internal revenue service',
+  'social security administration', 'national labor relations board',
+  'equal employment opportunity commission',
+  'occupational safety and health administration',
+  'securities and exchange commission', 'federal trade commission',
+  'consumer financial protection bureau', 'drug enforcement administration',
+  'bureau of prisons', 'immigration and customs enforcement',
+  'customs and border protection',
+  'bureau of alcohol tobacco firearms and explosives',
+  'centers for disease control and prevention',
+  'food and drug administration',
+  // ── International courts / bodies ───────────────────────────────────────────
+  'international court of justice', 'european court of human rights',
+  'international criminal court', 'united nations',
+  // ── Non-US countries & common geographic groupings ─────────────────────────
+  // (Only the handful that appear most often in US legal writing without
+  // carrying case-specific identifying information.)
+  'united kingdom', 'european union', 'canada', 'mexico',
+  // ── Common legal document labels ────────────────────────────────────────────
+  'exhibit a', 'exhibit b', 'exhibit c', 'exhibit d', 'exhibit e',
+  'exhibit f', 'exhibit g', 'exhibit h',
+]);
+
+// Common English function words that should never be the first word of a
+// person-name span.  The general two-capitalised-words heuristic can produce
+// false positives like "The Supreme" or "The Court" when an article precedes a
+// proper noun.  Filtering on the first token of every person-type span prevents
+// those false matches without needing a negative lookahead in the regex itself.
+const PERSON_NAME_FUNCTION_WORDS: ReadonlySet<string> = new Set([
+  // Articles / determiners
+  'the', 'a', 'an', 'this', 'that', 'these', 'those', 'all', 'any', 'each',
+  // Prepositions
+  'in', 'on', 'at', 'by', 'of', 'to', 'for', 'as', 'with', 'from',
+  'into', 'over', 'under', 'above', 'below', 'between',
+  // Conjunctions
+  'or', 'and', 'but', 'nor', 'so', 'yet',
+  // Auxiliary verbs
+  'is', 'was', 'are', 'were', 'has', 'have', 'had', 'be', 'been', 'being',
+  // Pronouns
+  'it', 'its', 'my', 'our', 'your', 'his', 'her', 'we', 'i', 'you', 'he',
+  'she', 'they',
+  // Other high-frequency non-name starters
+  'not', 'no', 'if', 'such', 'both',
+]);
+
+// ---------------------------------------------------------------------------
 // Vehicle make list
 // ---------------------------------------------------------------------------
 
@@ -698,9 +830,13 @@ export class ClientAnonymizationService {
     // We capture the promise result inline using a synchronous workaround
     // (awaited outside in the async-safe wrapper below).
     const entityTypes: AnonymizableEntityType[] = [
+      // Location runs BEFORE person so that multi-word geographic proper nouns
+      // (e.g. "North Carolina", "New York") are typed as LOCATION rather than
+      // being misclassified as person names by the two-capitalised-words heuristic.
+      // Single-word state names ("Michigan", "Arizona") are only caught here.
+      'location',
       'person',
       'organization',
-      'location',
       'date',
       'money',
       'email',
@@ -731,7 +867,23 @@ export class ClientAnonymizationService {
     ACCOUNT_PATTERN.lastIndex = 0;
 
     // Remove overlapping spans (keep highest-confidence / longest)
-    return this.removeOverlaps(spans);
+    const deduped = this.removeOverlaps(spans);
+
+    // Apply the proper-noun allow-list: drop any span whose normalised text is
+    // a well-known, entirely-public proper noun that carries no re-identification
+    // risk (e.g. "Supreme Court", "United States", "Department of Justice").
+    // Also drop person-type spans whose first word is a common English function
+    // word (e.g. "The Supreme", "The Court") — those are false positives from
+    // the two-capitalised-words heuristic.
+    return deduped.filter(s => {
+      const lower = s.text.toLowerCase().trim();
+      if (PROPER_NOUN_ALLOWLIST.has(lower)) return false;
+      if (s.type === 'person') {
+        const firstWord = lower.split(/\s+/)[0];
+        if (PERSON_NAME_FUNCTION_WORDS.has(firstWord)) return false;
+      }
+      return true;
+    });
   }
 
   /** Add spans from a regex to the spans array */
@@ -779,8 +931,12 @@ export class ClientAnonymizationService {
           /\b(?:Mr|Ms|Mrs|Dr|Prof|Judge|Attorney|Esq)\.?\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)/g,
           /\b([A-Z][a-z]+(?:\s+[A-Z]\.?)?\s+[A-Z][a-z]+)\b/g,
           /\b([A-Z]{2,},\s+[A-Z][a-z]+(?:\s+[A-Z]\.?)?)\b/g,
-          // Role-prefixed name references (e.g., "plaintiff John Smith", "Defendant Jane Doe")
-          /\b(?:plaintiff|defendant|respondent|petitioner|claimant|appellant|appellee|client)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\b/gi,
+          // Role-prefixed name references — role word can be lower, Title, or ALL-CAPS.
+          // NOTE: The /i flag is intentionally absent; using it would make [A-Z]
+          // match lowercase letters and cause the capture group to consume non-name
+          // words like "resides" or "filed".  Role-word casings are enumerated
+          // explicitly so only the captured name stays case-sensitive.
+          /\b(?:plaintiff|Plaintiff|PLAINTIFF|defendant|Defendant|DEFENDANT|respondent|Respondent|RESPONDENT|petitioner|Petitioner|PETITIONER|claimant|Claimant|CLAIMANT|appellant|Appellant|APPELLANT|appellee|Appellee|APPELLEE|client|Client|CLIENT)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\b/g,
         ];
       case 'organization':
         return [
@@ -790,9 +946,19 @@ export class ClientAnonymizationService {
         ];
       case 'location':
         return [
+          // City, State (e.g. "Detroit, Michigan" or "Detroit, MI")
           /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)*,\s+(?:[A-Z]{2}|[A-Z][a-z]+))\b/g,
+          // Street addresses
           /\b(\d+\s+[A-Z][A-Za-z\s]+(?:Street|St|Avenue|Ave|Road|Rd|Drive|Dr|Boulevard|Blvd|Lane|Ln))\b/g,
+          // Common country names (also on PROPER_NOUN_ALLOWLIST, so filtered after matching)
           /\b(United States|USA|Canada|Mexico|United Kingdom|UK)\b/g,
+          // All 50 US states + DC + territories — single and multi-word.
+          // These are deliberately NOT on PROPER_NOUN_ALLOWLIST: the specific
+          // combination of states in a brief can fingerprint a matter.
+          new RegExp(
+            `\\b(${US_STATE_NAMES.map(s => s.replace(/ /g, '\\s+')).join('|')})\\b`,
+            'g'
+          ),
         ];
       case 'date':
         return [
