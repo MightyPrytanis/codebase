@@ -586,4 +586,143 @@ describe('ClientAnonymizationService', () => {
       expect(result.anonymizedText).toMatch(/PERSON_\d+/);
     });
   });
+
+  // -------------------------------------------------------------------------
+  // Broader proper-noun net – regex-based exemptions (comment 3995750646)
+  // -------------------------------------------------------------------------
+
+  describe('anonymize() – court / act / amendment exemptions', () => {
+    it('does NOT tokenize a named county circuit court', () => {
+      // "Wayne County Circuit Court" is 4 Title Case words → person pattern
+      // matches → but "/\bcourt\b/" exempt pattern drops it.
+      const result = svc.anonymize(
+        'The matter was filed in Wayne County Circuit Court.'
+      );
+      expect(result.anonymizedText).toContain('Wayne County Circuit Court');
+      expect(result.anonymizedText).not.toMatch(/PERSON_\d+/);
+    });
+
+    it('does NOT tokenize a generic court reference ("Probate Court")', () => {
+      const result = svc.anonymize('The petition was filed in Probate Court.');
+      expect(result.anonymizedText).toContain('Probate Court');
+      expect(result.anonymizedText).not.toMatch(/PERSON_\d+/);
+    });
+
+    it('does NOT tokenize a legislative act ("Clean Air Act")', () => {
+      const result = svc.anonymize(
+        'The agency promulgated rules under the Clean Air Act.'
+      );
+      expect(result.anonymizedText).toContain('Clean Air Act');
+      expect(result.anonymizedText).not.toMatch(/PERSON_\d+/);
+    });
+
+    it('does NOT tokenize a legislative act with year ("Privacy Act of 1974")', () => {
+      // "Privacy Act" is the 3-word Title Case span; "of 1974" follows with
+      // a lowercase "of" so it breaks the span. The span "Privacy Act" → exempt.
+      const result = svc.anonymize(
+        'Records are protected by the Privacy Act of 1974.'
+      );
+      expect(result.anonymizedText).toContain('Privacy Act');
+      expect(result.anonymizedText).not.toMatch(/PERSON_\d+/);
+    });
+
+    it('does NOT tokenize a constitutional amendment ("First Amendment")', () => {
+      const result = svc.anonymize(
+        'The injunction implicates First Amendment rights.'
+      );
+      expect(result.anonymizedText).toContain('First Amendment');
+      expect(result.anonymizedText).not.toMatch(/PERSON_\d+/);
+    });
+
+    it('does NOT tokenize a numbered amendment ("Fourteenth Amendment")', () => {
+      const result = svc.anonymize(
+        'Plaintiff invokes Fourteenth Amendment equal protection.'
+      );
+      expect(result.anonymizedText).toContain('Fourteenth Amendment');
+      expect(result.anonymizedText).not.toMatch(/PERSON_\d+/);
+    });
+
+    it('DOES tokenize a 3-word person name ("Mary Jane Watson")', () => {
+      // Extended pattern now catches 3+ consecutive Title Case words.
+      const result = svc.anonymize('Plaintiff Mary Jane Watson filed the complaint.');
+      expect(result.anonymizedText).not.toContain('Mary Jane Watson');
+      expect(result.anonymizedText).toMatch(/PERSON_\d+/);
+    });
+
+    it('DOES tokenize a private multi-word entity ("Green Valley Properties")', () => {
+      // Not a court, not an act, not an amendment → should be tokenized.
+      const result = svc.anonymize(
+        'The dispute involves the property owned by Green Valley Properties.'
+      );
+      expect(result.anonymizedText).not.toContain('Green Valley Properties');
+      expect(result.anonymizedText).toMatch(/PERSON_\d+/);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Legal boilerplate allowlist + all-caps safety filter (comment 4114827487)
+  // -------------------------------------------------------------------------
+
+  describe('anonymize() – legal boilerplate and all-caps handling', () => {
+    it('does NOT tokenize "Now Comes"', () => {
+      const result = svc.anonymize('Now Comes Plaintiff, Jane Doe, and states:');
+      expect(result.anonymizedText).toContain('Now Comes');
+    });
+
+    it('does NOT tokenize "Now Come"', () => {
+      const result = svc.anonymize('Now Come the Plaintiffs and state as follows:');
+      expect(result.anonymizedText).toContain('Now Come');
+    });
+
+    it('does NOT tokenize "Comes Now"', () => {
+      const result = svc.anonymize('Comes Now the Plaintiff, and for his complaint states:');
+      expect(result.anonymizedText).toContain('Comes Now');
+    });
+
+    it('does NOT tokenize "Respectfully Submitted"', () => {
+      const result = svc.anonymize('Respectfully Submitted, Counsel for Appellant.');
+      expect(result.anonymizedText).toContain('Respectfully Submitted');
+    });
+
+    it('does NOT tokenize "Further Affiant Sayeth Naught"', () => {
+      const result = svc.anonymize('Further Affiant Sayeth Naught.');
+      expect(result.anonymizedText).toContain('Further Affiant Sayeth Naught');
+    });
+
+    it('does NOT tokenize "Further Affiant Sayeth Not"', () => {
+      const result = svc.anonymize('Further Affiant Sayeth Not.');
+      expect(result.anonymizedText).toContain('Further Affiant Sayeth Not');
+    });
+
+    it('does NOT tokenize "Pro Se"', () => {
+      const result = svc.anonymize('Defendant proceeds Pro Se in this matter.');
+      expect(result.anonymizedText).toContain('Pro Se');
+    });
+
+    it('does NOT tokenize "Ex Parte"', () => {
+      const result = svc.anonymize('The motion was heard Ex Parte on Monday.');
+      expect(result.anonymizedText).toContain('Ex Parte');
+    });
+
+    it('does NOT tokenize "Due Process Clause"', () => {
+      const result = svc.anonymize('The statute violates the Due Process Clause.');
+      expect(result.anonymizedText).toContain('Due Process Clause');
+    });
+
+    it('does NOT tokenize "Commerce Clause"', () => {
+      const result = svc.anonymize('Jurisdiction arises under the Commerce Clause.');
+      expect(result.anonymizedText).toContain('Commerce Clause');
+    });
+
+    it('DOES still tokenize a person name separated from boilerplate by a comma', () => {
+      // With a comma between the boilerplate phrase and the party name, the
+      // 2+ Title Case pattern produces two separate spans: "Now Comes Plaintiff"
+      // (starts with allowlisted "Now Comes" → dropped/preserved) and "Jane Doe"
+      // (separate span → tokenized). This is the standard formal-filing style.
+      const result = svc.anonymize('Now Comes Plaintiff, Jane Doe, and states:');
+      expect(result.anonymizedText).toContain('Now Comes');
+      expect(result.anonymizedText).not.toContain('Jane Doe');
+      expect(result.anonymizedText).toMatch(/PERSON_\d+/);
+    });
+  });
 });

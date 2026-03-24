@@ -517,6 +517,30 @@ const PROPER_NOUN_ALLOWLIST: ReadonlySet<string> = new Set([
   // ── Common legal document labels ────────────────────────────────────────────
   'exhibit a', 'exhibit b', 'exhibit c', 'exhibit d', 'exhibit e',
   'exhibit f', 'exhibit g', 'exhibit h',
+  // ── Traditional legal style / boilerplate phrases ────────────────────────────
+  // Attorneys may capitalise these in headings, signatures, or following
+  // traditional practice.  They carry no re-identification risk.
+  'now comes', 'now come', 'comes now', 'come now',
+  'respectfully submitted', 'most respectfully submitted',
+  'further affiant sayeth naught', 'further affiant sayeth not',
+  'further affiant saith naught', 'further affiant saith not',
+  'affiant sayeth naught', 'affiant sayeth not',
+  'affiant saith naught', 'affiant saith not',
+  'to wit', 'pro se', 'pro per', 'pro hac vice', 'ex parte',
+  'in witness whereof', 'upon information and belief',
+  'without prejudice', 'with prejudice',
+  'comes before the court', 'now therefore',
+  // ── Constitutional clauses ────────────────────────────────────────────────────
+  // Individual amendment names are handled by the PROPER_NOUN_EXEMPT_PATTERNS
+  // regex (any span containing "amendment" is exempt).  The clause names below
+  // fill in phrases that don't contain the word "amendment" and are entirely
+  // public law references.
+  'due process clause', 'equal protection clause',
+  'commerce clause', 'supremacy clause',
+  'establishment clause', 'free exercise clause',
+  'takings clause', 'confrontation clause',
+  'bill of rights', 'declaration of independence',
+  'articles of confederation',
 ]);
 
 // Common English function words that should never be the first word of a
@@ -527,9 +551,10 @@ const PROPER_NOUN_ALLOWLIST: ReadonlySet<string> = new Set([
 const PERSON_NAME_FUNCTION_WORDS: ReadonlySet<string> = new Set([
   // Articles / determiners
   'the', 'a', 'an', 'this', 'that', 'these', 'those', 'all', 'any', 'each',
-  // Prepositions
+  // Prepositions (English + common Latin prepositions used in legal writing)
   'in', 'on', 'at', 'by', 'of', 'to', 'for', 'as', 'with', 'from',
   'into', 'over', 'under', 'above', 'below', 'between',
+  'upon', 'per', 'via', 'ex', 're',   // Latin / quasi-Latin prepositions
   // Conjunctions
   'or', 'and', 'but', 'nor', 'so', 'yet',
   // Auxiliary verbs
@@ -538,8 +563,49 @@ const PERSON_NAME_FUNCTION_WORDS: ReadonlySet<string> = new Set([
   'it', 'its', 'my', 'our', 'your', 'his', 'her', 'we', 'i', 'you', 'he',
   'she', 'they',
   // Other high-frequency non-name starters
-  'not', 'no', 'if', 'such', 'both',
+  'not', 'no', 'if', 'such', 'both', 'pursuant', 'herein', 'wherein',
 ]);
+
+// ---------------------------------------------------------------------------
+// Regex-based proper-noun exemptions
+// ---------------------------------------------------------------------------
+
+/**
+ * Patterns applied to the normalised (lowercase, trimmed) text of person-type
+ * spans.  Any span whose text matches one of these patterns is dropped from
+ * the token-substitution pipeline even if it isn't in PROPER_NOUN_ALLOWLIST.
+ *
+ * These cover entire *classes* of institutional names that cannot be
+ * enumerated in advance:
+ *
+ *  • Court names  — "Wayne County Circuit Court", "Probate Court",
+ *                   "Court of Claims", "Chancery Court"
+ *  • Legislative / regulatory acts — "Clean Air Act", "Privacy Act of 1974",
+ *                   "Fair Housing Act of 1968", "Civil Rights Act"
+ *  • Constitutional amendments — "First Amendment", "Fourteenth Amendment",
+ *                   "Fourteenth Amendment Due Process Clause"
+ *
+ * Rationale: institutional names are public record.  Mentioning "Wayne County
+ * Circuit Court" in a brief reveals the jurisdiction, not the client's
+ * identity.  The client's name, address, and other direct identifiers are
+ * still tokenized by other patterns.
+ *
+ * Patterns are word-boundary anchored and applied without the `i` flag (spans
+ * are already lowercased before testing).
+ */
+const PROPER_NOUN_EXEMPT_PATTERNS: readonly RegExp[] = [
+  // Any court reference: the word "court" as a whole word in the span.
+  // Covers "Wayne County Circuit Court", "Probate Court", "Court of Claims",
+  // "Municipal Court", "Superior Court", etc.
+  /\bcourt\b/,
+  // Legislative / regulatory acts: the word "act" as a standalone token.
+  // Covers "Clean Air Act", "Privacy Act of 1974", "Civil Rights Act of 1964".
+  // Word-boundary anchoring prevents matching "impact", "exact", "contact".
+  /\bact\b/,
+  // Constitutional amendments: the word "amendment" as a standalone token.
+  // Covers "First Amendment", "Fourteenth Amendment", etc.
+  /\bamendment\b/,
+];
 
 // ---------------------------------------------------------------------------
 // Vehicle make list
@@ -866,22 +932,61 @@ export class ClientAnonymizationService {
     this.addRegexSpans(text, ACCOUNT_PATTERN, 'account', spans);
     ACCOUNT_PATTERN.lastIndex = 0;
 
-    // Remove overlapping spans (keep highest-confidence / longest)
-    const deduped = this.removeOverlaps(spans);
+    // ── Pre-filter: remove obviously false-positive spans BEFORE overlap removal
+    // This prevents a false location span (e.g. "Now Comes Plaintiff, Jane"
+    // matched by the multi-word city-state pattern) from consuming the
+    // co-located person span ("Jane Doe") during overlap deduplication.
+    const preFiltered = spans.filter(s => {
+      const lower = s.text.toLowerCase().trim();
+      // Exact allowlist match — always safe to drop before overlap removal
+      if (PROPER_NOUN_ALLOWLIST.has(lower)) return false;
+      // Location false-positive: boilerplate phrase before comma
+      if (s.type === 'location' && this.isLocationBoilerplaceFalsePositive(lower)) return false;
+      return true;
+    });
 
+    // Remove overlapping spans (keep longest / highest-priority match)
+    const deduped = this.removeOverlaps(preFiltered);
+
+    // ── Post-filter: entity-type-specific checks after overlap removal ──────────
     // Apply the proper-noun allow-list: drop any span whose normalised text is
     // a well-known, entirely-public proper noun that carries no re-identification
     // risk (e.g. "Supreme Court", "United States", "Department of Justice").
-    // Also drop person-type spans whose first word is a common English function
-    // word (e.g. "The Supreme", "The Court") — those are false positives from
-    // the two-capitalised-words heuristic.
+    // Also apply person-specific post-filters for false positives from the
+    // broad two+-capitalised-words heuristic.
     return deduped.filter(s => {
       const lower = s.text.toLowerCase().trim();
+
+      // Exact-match allow-list (all entity types) — second opportunity in case
+      // a span survived the pre-filter (e.g. produced by a non-location pattern)
       if (PROPER_NOUN_ALLOWLIST.has(lower)) return false;
+
+      // ── Person-specific filters ─────────────────────────────────────────────
       if (s.type === 'person') {
-        const firstWord = lower.split(/\s+/)[0];
+        // Drop spans whose first word is a common English/Latin function word
+        // (e.g. "The Supreme", "Per Curiam", "Via Smith").
+        const words = lower.split(/\s+/);
+        const firstWord = words[0];
         if (PERSON_NAME_FUNCTION_WORDS.has(firstWord)) return false;
+
+        // Drop person spans that START with an allowlisted phrase (handles
+        // greedy 2+ extension: "Now Comes Plaintiff" starts with allowlisted
+        // "Now Comes" → drop so the boilerplate is preserved in the text).
+        if (this.startsWithAllowlistedPhrase(words)) return false;
+
+        // Drop spans that are class-based public institutional names:
+        // courts ("Wayne County Circuit Court"), legislative acts
+        // ("Clean Air Act"), constitutional amendments ("First Amendment").
+        if (PROPER_NOUN_EXEMPT_PATTERNS.some(p => p.test(lower))) return false;
+
+        // Drop spans where every word consists only of uppercase letters —
+        // these are structural legal document words (WHEREFORE, COUNT ONE,
+        // ARTICLE I) not identifying proper names.  Safety net for future
+        // pattern changes.
+        const allCaps = s.text.split(/\s+/).every(w => /^[A-Z]+$/.test(w) && w.length > 0);
+        if (allCaps) return false;
       }
+
       return true;
     });
   }
@@ -929,7 +1034,13 @@ export class ClientAnonymizationService {
       case 'person':
         return [
           /\b(?:Mr|Ms|Mrs|Dr|Prof|Judge|Attorney|Esq)\.?\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)/g,
-          /\b([A-Z][a-z]+(?:\s+[A-Z]\.?)?\s+[A-Z][a-z]+)\b/g,
+          // Two or more consecutive Title Case words — the primary catch-all for
+          // all proper names (people, private orgs, geographic features, etc.).
+          // Allowlist + PROPER_NOUN_EXEMPT_PATTERNS handle false positives such
+          // as courts, legislative acts, and constitutional amendments.
+          /\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\b/g,
+          // "First M. Last" – middle-initial variant not caught by the above.
+          /\b([A-Z][a-z]+\s+[A-Z]\.\s+[A-Z][a-z]+)\b/g,
           /\b([A-Z]{2,},\s+[A-Z][a-z]+(?:\s+[A-Z]\.?)?)\b/g,
           // Role-prefixed name references — role word can be lower, Title, or ALL-CAPS.
           // NOTE: The /i flag is intentionally absent; using it would make [A-Z]
@@ -1053,6 +1164,41 @@ export class ClientAnonymizationService {
     }
 
     return result;
+  }
+
+  /**
+   * Return true if `words` (the whitespace-split tokens of a span's lower-cased
+   * text) start with a phrase that is in the PROPER_NOUN_ALLOWLIST.
+   *
+   * A length-2 check handles "Now Comes …" (where "now comes" is allowlisted).
+   * Lengths up to `words.length - 1` are checked so that an exact match of the
+   * full phrase is not duplicated here (the caller checks exact match separately).
+   */
+  private startsWithAllowlistedPhrase(words: string[]): boolean {
+    if (words.length < 2) return false;
+    for (let len = 2; len < words.length; len++) {
+      if (PROPER_NOUN_ALLOWLIST.has(words.slice(0, len).join(' '))) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Return true if a LOCATION span produced by the multi-word city-state
+   * pattern is actually a false positive caused by legal boilerplate.
+   *
+   * Pattern: `[Title Case words]+, [Title Case word]` fires on text like
+   * "Now Comes Plaintiff, Jane" and "Respectfully Submitted, Counsel".
+   * We detect this by checking whether the text before the comma starts with
+   * (or equals) an allowlisted phrase.
+   */
+  private isLocationBoilerplaceFalsePositive(lower: string): boolean {
+    const commaIdx = lower.indexOf(',');
+    if (commaIdx < 0) return false;
+    const beforeComma = lower.slice(0, commaIdx).trim();
+    if (PROPER_NOUN_ALLOWLIST.has(beforeComma)) return true;
+    return this.startsWithAllowlistedPhrase(beforeComma.split(/\s+/));
   }
 
   /** Remove sessions that have exceeded the TTL */
