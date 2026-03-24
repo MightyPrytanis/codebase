@@ -429,4 +429,66 @@ describe('ClientAnonymizationService', () => {
       expect(result.anonymizedText).toMatch(/PERSON_\d+/);
     });
   });
+
+  // -------------------------------------------------------------------------
+  // Vehicle / conveyance entity detection
+  // -------------------------------------------------------------------------
+
+  describe('anonymize() – vehicle entity detection', () => {
+    it('tokenizes a complete year-make-model vehicle reference', () => {
+      // "1978 Ford Granada" is the canonical example: neither the year nor
+      // the make+model should survive in the anonymized output.
+      const result = svc.anonymize(
+        'The dispute centers on a 1978 Ford Granada that both parties claim to own.'
+      );
+      // The entire year+make+model unit must be replaced; neither "Ford Granada"
+      // nor the year "1978" should survive in the anonymized text.
+      expect(result.anonymizedText).not.toContain('Ford Granada');
+      expect(result.anonymizedText).not.toContain('1978');
+      expect(result.anonymizedText).toMatch(/VEHICLE_\d+/);
+    });
+
+    it('tokenizes year + make with no explicit model ("2019 Toyota")', () => {
+      const result = svc.anonymize('Client leased a 2019 Toyota from the dealer.');
+      expect(result.anonymizedText).not.toContain('Toyota');
+      expect(result.anonymizedText).not.toContain('2019');
+      expect(result.anonymizedText).toMatch(/VEHICLE_\d+/);
+    });
+
+    it('tokenizes a multi-word model ("2019 Toyota Camry XLE")', () => {
+      const result = svc.anonymize('The insured vehicle was a 2019 Toyota Camry XLE.');
+      expect(result.anonymizedText).not.toContain('Toyota Camry');
+      expect(result.anonymizedText).not.toContain('2019');
+      expect(result.anonymizedText).toMatch(/VEHICLE_\d+/);
+    });
+
+    it('tokenizes a motorcycle reference ("2003 Harley-Davidson Softail")', () => {
+      const result = svc.anonymize('Plaintiff was riding a 2003 Harley-Davidson Softail at the time of the accident.');
+      expect(result.anonymizedText).not.toContain('Harley');
+      expect(result.anonymizedText).not.toContain('2003');
+      expect(result.anonymizedText).toMatch(/VEHICLE_\d+/);
+    });
+
+    it('tokenizes a VIN', () => {
+      const result = svc.anonymize('The vehicle, VIN 1HGBH41JXMN109186, was inspected.');
+      expect(result.anonymizedText).not.toContain('1HGBH41JXMN109186');
+      expect(result.anonymizedText).toMatch(/VEHICLE_\d+/);
+    });
+
+    it('assigns consistent VEHICLE tokens for repeated references', () => {
+      const result = svc.anonymize(
+        'The 1978 Ford Granada was towed. The 1978 Ford Granada sustained damage.'
+      );
+      const tokens = result.anonymizedText.match(/VEHICLE_\d+/g) ?? [];
+      // Both references to the same vehicle should use the same token
+      expect(tokens.length).toBeGreaterThanOrEqual(2);
+      expect(new Set(tokens).size).toBe(1);
+    });
+
+    it('does NOT tokenize a generic year+noun phrase that is not a vehicle make', () => {
+      // "2024 Supreme Court" should NOT be masked as a vehicle
+      const result = svc.anonymize('The 2024 Supreme Court term begins in October.');
+      expect(result.anonymizedText).not.toMatch(/VEHICLE_\d+/);
+    });
+  });
 });

@@ -41,7 +41,8 @@ export type AnonymizableEntityType =
   | 'ssn'
   | 'account'
   | 'statute'
-  | 'case';
+  | 'case'
+  | 'vehicle';
 
 /** Risk category classification per MRPC 1.6 / SBM AI guidance */
 export type RiskCategory = 1 | 2 | 3;
@@ -96,6 +97,7 @@ const TOKEN_PREFIX: Record<AnonymizableEntityType, string> = {
   account: 'ACCOUNT',
   statute: 'STATUTE',
   case: 'CASE_REF',
+  vehicle: 'VEHICLE',
 };
 
 // ---------------------------------------------------------------------------
@@ -408,6 +410,34 @@ const DOB_PATTERN =
   /\b(?:date\s+of\s+birth|dob|born(?:\s+on)?)\s*:?\s*\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4}\b/gi;
 
 // ---------------------------------------------------------------------------
+// Vehicle make list
+// ---------------------------------------------------------------------------
+
+/**
+ * Curated list of vehicle manufacturer names used to anchor the vehicle NER
+ * pattern.  A fully generic "model-year + two capitalised words" pattern
+ * produces too many false positives in legal text (e.g. "2024 Supreme Court").
+ * Anchoring on known makes keeps precision high while covering the vehicles
+ * that realistically appear in legal disputes.
+ *
+ * Each entry is a regex fragment (special chars already escaped); entries are
+ * joined with `|` inside a non-capturing group at match time.
+ */
+const VEHICLE_MAKES: string[] = [
+  'Acura', 'Alfa\\s*Romeo', 'Aston\\s*Martin', 'Audi', 'Bentley', 'BMW', 'Bugatti',
+  'Buick', 'Cadillac', 'Can-Am', 'Chevrolet', 'Chevy', 'Chrysler', 'Daewoo', 'Dodge',
+  'Ducati', 'Ferrari', 'Fiat', 'Ford', 'Freightliner', 'Geo', 'GMC',
+  'Harley(?:-Davidson)?', 'Honda', 'Hummer', 'Hyundai', 'Indian', 'Infiniti',
+  'International', 'Isuzu', 'Jaguar', 'Jeep', 'Kawasaki', 'Kenworth', 'Kia',
+  'Lamborghini', 'Land\\s*Rover', 'Lexus', 'Lincoln', 'Lucid', 'Mack', 'Maserati',
+  'Mazda', 'McLaren', 'Mercedes(?:-Benz)?', 'Mercury', 'Mitsubishi', 'Nissan',
+  'Oldsmobile', 'Pagani', 'Peterbilt', 'Plymouth', 'Polaris', 'Pontiac', 'Porsche',
+  'Ram', 'Range\\s*Rover', 'Renault', 'Rivian', 'Rolls-Royce', 'Saturn', 'Saab',
+  'Scion', 'Sea-Doo', 'Shelby', 'Subaru', 'Suzuki', 'Tesla', 'Toyota', 'Triumph',
+  'Volkswagen', 'Volvo', 'VW', 'Yamaha',
+];
+
+// ---------------------------------------------------------------------------
 // Session management
 // ---------------------------------------------------------------------------
 
@@ -488,6 +518,7 @@ export class ClientAnonymizationService {
       account: 0,
       statute: 0,
       case: 0,
+      vehicle: 0,
     };
 
     for (const span of spans) {
@@ -676,6 +707,7 @@ export class ClientAnonymizationService {
       'phone',
       'statute',
       'case',
+      'vehicle',
     ];
 
     // Call entity processor synchronously (it's pure regex, no I/O)
@@ -793,6 +825,36 @@ export class ClientAnonymizationService {
         return [
           /\b([A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+)*\s+v\.?\s+[A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+)*,\s+\d+\s+[A-Za-z]+(?:\s+\d[a-z]*)?\s+\d+)\b/g,
           /\b([A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+)*\s+v\.?\s+[A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+)*,\s+\d{4}\s+MI(?:\s+App)?\s+\d+)\b/g,
+        ];
+      case 'vehicle':
+        // ── Vehicle / conveyance identifiers ─────────────────────────────────
+        //
+        // Catches two distinct patterns:
+        //
+        // 1. Model-year + make (+ optional model / trim words)
+        //    e.g. "1978 Ford Granada", "2019 Toyota Camry XLE",
+        //         "2003 Harley-Davidson Softail", "1965 Shelby GT350"
+        //
+        //    The make list is intentional: a fully generic "year + two
+        //    capitalised words" pattern produces too many false positives
+        //    in legal text ("2024 Supreme Court", "1994 Amendment Act").
+        //    Using known makes keeps precision high while covering the
+        //    vehicles that realistically appear in legal disputes.
+        //
+        // 2. 17-character VINs (North-American standard; I, O, Q excluded
+        //    per FMVSS 115 / ISO 3779).
+        return [
+          // Year + make + optional model/trim — captured as a unit.
+          // Model/trim words must start uppercase or be a digit/code (e.g.
+          // "Granada", "Camry XLE", "GT350", "F-150") so that lowercase
+          // sentence words ("was", "towed") are never absorbed.
+          new RegExp(
+            `\\b((?:19|20)\\d{2}\\s+(?:${VEHICLE_MAKES.join('|')})` +
+              '(?:\\s+[A-Z0-9][A-Za-z0-9\\-]*){0,4})\\b',
+            'g'
+          ),
+          // VIN – 17 chars, chars I/O/Q excluded (per ISO 3779)
+          /\b([A-HJ-NPR-Z0-9]{17})\b/g,
         ];
       default:
         return [];
