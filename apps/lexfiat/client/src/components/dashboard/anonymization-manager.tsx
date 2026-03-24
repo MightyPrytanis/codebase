@@ -416,8 +416,8 @@ export function AnonymizationManager() {
           <p className="text-sm text-slate-400">
             Paste a sample of text to see how your current anonymization rules
             (including any custom terms and exceptions above) will transform it.
-            No session is created and no data leaves this device during the
-            preview.
+            Text is sent to the Cyrano server for processing — no session is
+            created and no data is forwarded to an external AI provider.
           </p>
         </CardHeader>
         <CardContent className="space-y-4">

@@ -86,7 +86,7 @@ async function tryPersistException(term: string, id: string): Promise<void> {
   }
 }
 
-async function tryDeletePersistedExceptoin(id: string): Promise<void> {
+async function tryDeletePersistedException(id: string): Promise<void> {
   try {
     if (!db) return;
     await db.delete(exclusions).where(eq(exclusions.id, id));
@@ -206,7 +206,7 @@ router.delete('/anonymization/exceptions/:id', async (req: Request, res: Respons
     if (!removed) {
       return res.status(404).json({ success: false, error: 'Exception not found' });
     }
-    await tryDeletePersistedExceptoin(id);
+    await tryDeletePersistedException(id);
     res.json({ success: true });
   } catch (err) {
     res.status(500).json({ success: false, error: 'Failed to remove exception' });
