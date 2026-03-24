@@ -61,6 +61,7 @@ import authRoutes from './routes/auth.js';
 import libraryRoutes from './routes/library.js';
 import onboardingRoutes from './routes/onboarding.js';
 import betaRoutes from './routes/beta.js';
+import anonymizationRoutes from './routes/anonymization.js';
 console.error('[HTTP Bridge] Routes imported');
 
 // ============================================================================
@@ -1644,6 +1645,9 @@ app.use('/api', onboardingRoutes);
 
 // Mount beta portal routes
 app.use('/api/beta', betaRoutes);
+
+// Mount anonymization management routes
+app.use('/api', anonymizationRoutes);
 
 // ============================================================================
 // GLOBAL ERROR HANDLER
