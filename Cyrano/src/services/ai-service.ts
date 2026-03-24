@@ -31,11 +31,16 @@ export interface AICallOptions {
   /**
    * Client confidentiality anonymization options.
    *
-   * When `anonymize` is true the prompt is passed through the
-   * ClientAnonymizationService before being sent to the provider; all
+   * Anonymization is **ON by default** for every outbound AI call.  All
    * sensitive entities (names, dates, amounts, emails, phones, etc.) are
-   * replaced with deterministic session-scoped tokens.  The AI response is
-   * then de-anonymized locally before being returned to the caller.
+   * replaced with deterministic session-scoped tokens before the prompt is
+   * transmitted, and the AI response is de-anonymized locally before being
+   * returned to the caller — the external provider never sees the underlying
+   * identities.
+   *
+   * Set `anonymize: false` only for purely internal / system-level prompts
+   * that contain no client data (e.g., ethics rule checks, generic legal
+   * research with no identifying information).
    *
    * Provide `anonymizationSessionId` to continue an existing session (for
    * multi-turn conversations so the same token map is reused).
@@ -75,7 +80,7 @@ export class AIService {
    * - Logs all ethics checks to audit trail
    * - Blocks non-compliant outputs
    *
-   * CONFIDENTIALITY (when options.anonymize is true):
+   * CONFIDENTIALITY (default ON; set options.anonymize = false to bypass):
    * - Assesses the risk category of the prompt (MRPC 1.6 / SBM AI guidance)
    * - Blocks Category 3 content (identifiable PII) from ever reaching the provider
    * - Tokenizes all sensitive entities before transmission
@@ -92,10 +97,12 @@ export class AIService {
       throw new Error(`AI provider ${provider} not configured: ${validation.error}`);
     }
 
-    // CONFIDENTIALITY ENFORCEMENT: Anonymize prompt before sending to provider
+    // CONFIDENTIALITY ENFORCEMENT: Anonymize prompt before sending to provider.
+    // Anonymization is ON by default; pass anonymize: false only for internal
+    // system-level prompts that contain no client data.
     let activePrompt = prompt;
     let activeAnonymizationSessionId: string | undefined;
-    if (options.anonymize) {
+    if (options.anonymize !== false) {
       const anonResult = clientAnonymizationService.anonymize(
         prompt,
         options.anonymizationSessionId
@@ -204,7 +211,7 @@ export class AIService {
       }
 
       // CONFIDENTIALITY: De-anonymize the AI response locally before returning
-      if (options.anonymize && activeAnonymizationSessionId) {
+      if (options.anonymize !== false && activeAnonymizationSessionId) {
         result = clientAnonymizationService.deanonymize(result, activeAnonymizationSessionId);
       }
 

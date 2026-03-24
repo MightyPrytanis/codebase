@@ -120,6 +120,26 @@ const STRATEGY_KEYWORDS = [
   'arbitration',
   'counteroffer',
   'counter-offer',
+  // Additional legal strategy and risk terms
+  'liability',
+  'exposure',
+  'weakness',
+  'theory of the case',
+  'plea',
+  'plea agreement',
+  'plea bargain',
+  'indictment',
+  'nolo contendere',
+  'no contest',
+  'admission',
+  'suppression',
+  'subpoena',
+  'injunction',
+  'restraining order',
+  'sanctions',
+  'discovery',
+  'mental state',
+  'motive',
 ];
 
 // Regex patterns for PII that is NOT reliably caught by the entity processor
@@ -132,8 +152,15 @@ const DOB_PATTERN =
 // Session management
 // ---------------------------------------------------------------------------
 
-/** Default session expiry: 4 hours */
-const DEFAULT_SESSION_TTL_MS = 4 * 60 * 60 * 1000;
+/**
+ * Default session expiry: 45 minutes of inactivity.
+ *
+ * A shorter TTL (compared to the previous 4-hour window) reduces the in-memory
+ * exposure window for privileged token maps while still accommodating
+ * typical multi-turn consultation sessions. Callers that need a longer window
+ * can pass a custom `sessionTtlMs` to the constructor.
+ */
+export const DEFAULT_SESSION_TTL_MS = 45 * 60 * 1000;
 
 /**
  * Client Anonymization Service
@@ -461,6 +488,8 @@ export class ClientAnonymizationService {
           /\b(?:Mr|Ms|Mrs|Dr|Prof|Judge|Attorney|Esq)\.?\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)/g,
           /\b([A-Z][a-z]+(?:\s+[A-Z]\.?)?\s+[A-Z][a-z]+)\b/g,
           /\b([A-Z]{2,},\s+[A-Z][a-z]+(?:\s+[A-Z]\.?)?)\b/g,
+          // Role-prefixed name references (e.g., "plaintiff John Smith", "Defendant Jane Doe")
+          /\b(?:plaintiff|defendant|respondent|petitioner|claimant|appellant|appellee|client)\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\b/gi,
         ];
       case 'organization':
         return [

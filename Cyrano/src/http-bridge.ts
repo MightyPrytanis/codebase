@@ -1252,7 +1252,7 @@ app.post('/api/mae/write', async (req, res) => {
       {
         model,
         systemPrompt: `You are an expert writing assistant. Task type: ${taskType}.`,
-        anonymize: anonymize ?? false,
+        anonymize: anonymize ?? true,
       }
     );
 
@@ -1291,7 +1291,7 @@ app.post('/api/mae/write/multi', async (req, res) => {
           {
             model,
             systemPrompt: `You are an expert writing assistant. Task type: ${taskType}.`,
-            anonymize: anonymize ?? false,
+            anonymize: anonymize ?? true,
           }
         );
       })

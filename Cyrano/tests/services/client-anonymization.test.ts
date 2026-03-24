@@ -15,6 +15,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import {
   ClientAnonymizationService,
   clientAnonymizationService,
+  DEFAULT_SESSION_TTL_MS,
 } from '../../src/services/client-anonymization.js';
 
 // ---------------------------------------------------------------------------
@@ -237,6 +238,92 @@ describe('ClientAnonymizationService', () => {
   describe('singleton export', () => {
     it('clientAnonymizationService is an instance of ClientAnonymizationService', () => {
       expect(clientAnonymizationService).toBeInstanceOf(ClientAnonymizationService);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Session TTL
+  // -------------------------------------------------------------------------
+
+  describe('session TTL', () => {
+    it('DEFAULT_SESSION_TTL_MS is 45 minutes', () => {
+      expect(DEFAULT_SESSION_TTL_MS).toBe(45 * 60 * 1000);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Expanded strategy keywords
+  // -------------------------------------------------------------------------
+
+  describe('assessRiskCategory() – expanded strategy keywords', () => {
+    const category2Cases: [string, string][] = [
+      ['liability', 'The defendant has significant liability exposure.'],
+      ['exposure', 'The client faces substantial exposure in this matter.'],
+      ['plea', 'We are evaluating a plea agreement.'],
+      ['indictment', 'The grand jury returned an indictment yesterday.'],
+      ['theory of the case', 'Our theory of the case centers on negligence.'],
+      ['plea agreement', 'The prosecutor offered a plea agreement.'],
+      ['plea bargain', 'Counsel discussed a plea bargain with the DA.'],
+      ['nolo contendere', 'Client may enter nolo contendere.'],
+      ['no contest', 'A no contest plea was entered.'],
+      ['suppression', 'We filed a motion for suppression of evidence.'],
+      ['subpoena', 'A subpoena was issued for the financial records.'],
+      ['injunction', 'We sought a preliminary injunction.'],
+      ['restraining order', 'A restraining order was denied.'],
+      ['sanctions', 'Opposing counsel is seeking sanctions.'],
+      ['discovery', 'Discovery closes next month.'],
+      ['weakness', 'A weakness in the opposing argument was identified.'],
+      ['admission', 'The client made an admission during questioning.'],
+      ['mental state', 'The mental state of the accused is at issue.'],
+      ['motive', 'Prosecution must establish motive beyond a reasonable doubt.'],
+    ];
+
+    for (const [keyword, text] of category2Cases) {
+      it(`returns Category 2 when "${keyword}" is present`, () => {
+        expect(svc.assessRiskCategory(text)).toBe(2);
+      });
+    }
+  });
+
+  // -------------------------------------------------------------------------
+  // Role-prefixed NER patterns
+  // -------------------------------------------------------------------------
+
+  describe('anonymize() – role-prefixed person detection', () => {
+    it('tokenizes a person name preceded by "plaintiff"', () => {
+      const result = svc.anonymize('plaintiff John Smith filed the complaint.');
+      expect(result.anonymizedText).not.toContain('John Smith');
+      expect(result.anonymizedText).toMatch(/PERSON_\d+/);
+    });
+
+    it('tokenizes a person name preceded by "defendant"', () => {
+      const result = svc.anonymize('defendant Jane Doe responded to interrogatories.');
+      expect(result.anonymizedText).not.toContain('Jane Doe');
+      expect(result.anonymizedText).toMatch(/PERSON_\d+/);
+    });
+
+    it('tokenizes a person name preceded by "client"', () => {
+      const result = svc.anonymize('client Robert Brown seeks damages.');
+      expect(result.anonymizedText).not.toContain('Robert Brown');
+      expect(result.anonymizedText).toMatch(/PERSON_\d+/);
+    });
+
+    it('tokenizes a person name preceded by "petitioner"', () => {
+      const result = svc.anonymize('petitioner Mary Williams filed for divorce.');
+      expect(result.anonymizedText).not.toContain('Mary Williams');
+      expect(result.anonymizedText).toMatch(/PERSON_\d+/);
+    });
+
+    it('tokenizes a name with capitalized role prefix "Plaintiff"', () => {
+      const result = svc.anonymize('Plaintiff John Smith moved for summary judgment.');
+      expect(result.anonymizedText).not.toContain('John Smith');
+      expect(result.anonymizedText).toMatch(/PERSON_\d+/);
+    });
+
+    it('tokenizes a name with uppercase role prefix "DEFENDANT"', () => {
+      const result = svc.anonymize('DEFENDANT Jane Doe filed her answer.');
+      expect(result.anonymizedText).not.toContain('Jane Doe');
+      expect(result.anonymizedText).toMatch(/PERSON_\d+/);
     });
   });
 });
