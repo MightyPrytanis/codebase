@@ -174,7 +174,7 @@ describe('ClientAnonymizationService', () => {
 
     it('returns Category 1 for generic legal research questions', () => {
       expect(
-        svc.assessRiskCategory('What is the statute of limitations for breach of contract in Michigan?')
+        svc.assessRiskCategory('What are the elements of a valid offer and acceptance under Michigan contract law?')
       ).toBe(1);
     });
 
@@ -257,6 +257,7 @@ describe('ClientAnonymizationService', () => {
 
   describe('assessRiskCategory() – expanded strategy keywords', () => {
     const category2Cases: [string, string][] = [
+      // ── Previously added terms ────────────────────────────────────────────
       ['liability', 'The defendant has significant liability exposure.'],
       ['exposure', 'The client faces substantial exposure in this matter.'],
       ['plea', 'We are evaluating a plea agreement.'],
@@ -276,6 +277,108 @@ describe('ClientAnonymizationService', () => {
       ['admission', 'The client made an admission during questioning.'],
       ['mental state', 'The mental state of the accused is at issue.'],
       ['motive', 'Prosecution must establish motive beyond a reasonable doubt.'],
+      // ── Criminal law ─────────────────────────────────────────────────────
+      ['arraignment', 'The arraignment is scheduled for Monday.'],
+      ['bail', 'Counsel will argue for bail reduction.'],
+      ['sentencing', 'Sentencing guidelines favor leniency here.'],
+      ['felony', 'The charge has been upgraded to a felony.'],
+      ['probation', 'The client is currently on probation.'],
+      ['prior conviction', 'A prior conviction may enhance the sentence.'],
+      // ── Civil litigation / torts ─────────────────────────────────────────
+      ['negligence', 'The complaint alleges negligence on all counts.'],
+      ['gross negligence', 'Gross negligence may support punitive damages.'],
+      ['proximate cause', 'Proximate cause is disputed by the defense.'],
+      ['punitive damages', 'We are seeking punitive damages for the conduct.'],
+      ['comparative fault', 'Comparative fault will be argued at trial.'],
+      ['wrongful death', 'The family filed a wrongful death action.'],
+      ['medical malpractice', 'Medical malpractice is alleged in the complaint.'],
+      ['personal injury', 'This is a personal injury matter.'],
+      ['class action', 'A class action was certified last month.'],
+      // ── Contract disputes ─────────────────────────────────────────────────
+      ['breach of contract', 'The complaint alleges breach of contract.'],
+      ['material breach', 'A material breach of the agreement occurred.'],
+      ['specific performance', 'We will demand specific performance.'],
+      ['indemnification', 'The indemnification clause is being disputed.'],
+      ['force majeure', 'Force majeure was invoked by the counterparty.'],
+      ['unjust enrichment', 'An unjust enrichment claim has been filed.'],
+      ['trade secret', 'The trade secret misappropriation claim is strong.'],
+      ['non-disclosure agreement', 'A non-disclosure agreement was breached.'],
+      // ── Intellectual property ─────────────────────────────────────────────
+      ['infringement', 'Patent infringement is alleged.'],
+      ['patent', 'The patent covers the core technology.'],
+      ['trademark', 'Trademark dilution is part of the claim.'],
+      ['copyright', 'Copyright infringement is clear.'],
+      ['misappropriation', 'Trade secret misappropriation was confirmed.'],
+      ['cease and desist', 'A cease and desist letter was sent.'],
+      ['willful infringement', 'Willful infringement may triple damages.'],
+      // ── Family law ───────────────────────────────────────────────────────
+      ['divorce', 'The client has filed for divorce.'],
+      ['child custody', 'Child custody is the primary issue.'],
+      ['child support', 'Child support arrears have accumulated.'],
+      ['spousal support', 'Spousal support will be contested.'],
+      ['equitable distribution', 'Equitable distribution of assets is needed.'],
+      ['domestic violence', 'Domestic violence allegations are part of the case.'],
+      ['prenuptial agreement', 'The prenuptial agreement is being challenged.'],
+      ['parental rights', 'Parental rights termination is sought.'],
+      ['best interests of the child', 'Best interests of the child must guide the ruling.'],
+      ['paternity', 'Paternity has not been established.'],
+      // ── Real property ─────────────────────────────────────────────────────
+      ['foreclosure', 'Foreclosure proceedings have been initiated.'],
+      ['easement', 'An easement dispute is at the center of this case.'],
+      ['adverse possession', 'Adverse possession is claimed by the neighbor.'],
+      ['eviction', 'The landlord filed for eviction.'],
+      ['eminent domain', 'Eminent domain proceedings have been filed.'],
+      ['lien', 'A mechanic lien was filed on the property.'],
+      ['quiet title', 'A quiet title action is pending.'],
+      ['boundary dispute', 'The boundary dispute dates back ten years.'],
+      // ── Bankruptcy ────────────────────────────────────────────────────────
+      ['bankruptcy', 'The client is considering filing for bankruptcy.'],
+      ['chapter 7', 'A chapter 7 petition was filed yesterday.'],
+      ['chapter 11', 'The company seeks chapter 11 reorganization.'],
+      ['automatic stay', 'The automatic stay halted all collection actions.'],
+      ['fraudulent transfer', 'A fraudulent transfer occurred before filing.'],
+      ['discharge of debt', 'Discharge of debt was denied for that creditor.'],
+      ['insolvency', 'The company faces insolvency and cannot pay its creditors.'],
+      // ── Employment / labor ────────────────────────────────────────────────
+      ['wrongful termination', 'The client claims wrongful termination.'],
+      ['retaliation', 'Retaliation followed the whistleblower complaint.'],
+      ['hostile work environment', 'A hostile work environment was documented.'],
+      ['harassment', 'Sexual harassment allegations are central.'],
+      ['wage theft', 'Wage theft amounting to thousands is alleged.'],
+      ['non-compete', 'The non-compete clause is overly broad.'],
+      ['whistleblower', 'The whistleblower was terminated the next day.'],
+      ['workers compensation', 'A workers compensation claim was denied.'],
+      // ── Civil rights / discrimination ─────────────────────────────────────
+      ['discrimination', 'The complaint alleges racial discrimination.'],
+      ['disability discrimination', 'Disability discrimination is the basis of the claim.'],
+      ['reasonable accommodation', 'Reasonable accommodation was refused.'],
+      ['disparate impact', 'Statistical evidence supports a disparate impact claim.'],
+      ['civil rights violation', 'A civil rights violation under § 1983 is alleged.'],
+      ['excessive force', 'Excessive force was used during the arrest.'],
+      ['ada', 'The employer violated the ADA.'],
+      ['title vii', 'Title VII protects against this form of discrimination.'],
+      // ── Product liability ─────────────────────────────────────────────────
+      ['product defect', 'A product defect caused the injury.'],
+      ['design defect', 'The design defect was known to the manufacturer.'],
+      ['failure to warn', 'Failure to warn is the primary theory.'],
+      ['strict liability', 'Strict liability applies to this product.'],
+      ['recall', 'The product recall was issued after the injury.'],
+      // ── Estate / probate ─────────────────────────────────────────────────
+      ['will contest', 'A will contest was filed by the disinherited heir.'],
+      ['undue influence', 'Undue influence over the testator is alleged.'],
+      ['elder abuse', 'Elder abuse and financial exploitation are alleged.'],
+      ['conservatorship', 'Conservatorship proceedings are underway.'],
+      ['testamentary capacity', 'Testamentary capacity is being challenged.'],
+      // ── Immigration ───────────────────────────────────────────────────────
+      ['deportation', 'Deportation proceedings have been initiated.'],
+      ['asylum', 'The client is seeking asylum.'],
+      ['removal', 'Removal has been ordered by the immigration court.'],
+      ['detention', 'Immigration detention began last week.'],
+      // ── Data privacy / cybersecurity ─────────────────────────────────────
+      ['data breach', 'A data breach exposed client records.'],
+      ['hipaa', 'The hospital violated HIPAA.'],
+      ['gdpr', 'The company failed to comply with GDPR.'],
+      ['biometric data', 'Biometric data was collected without consent.'],
     ];
 
     for (const [keyword, text] of category2Cases) {
