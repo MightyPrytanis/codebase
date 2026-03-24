@@ -244,7 +244,7 @@ export function AnonymizationManager() {
           </CardTitle>
           <p className="text-sm text-slate-400">
             Add practice-specific terms that should always be anonymized before
-            text is sent to an AI provider (e.g., a client's company name,
+            text is sent to an AI provider (e.g., a client&apos;s company name,
             local landmark, or opposing party). These supplement the default
             regex and NLP patterns.
           </p>
@@ -343,8 +343,8 @@ export function AnonymizationManager() {
           <p className="text-sm text-slate-400">
             Specify terms that should <em>not</em> be anonymized even if they
             would otherwise match a built-in pattern. Common examples include
-            well-known institutions like "Supreme Court" or legal boilerplate
-            like "Now Comes".
+            well-known institutions like &quot;Supreme Court&quot; or legal boilerplate
+            like &quot;Now Comes&quot;.
           </p>
         </CardHeader>
         <CardContent className="space-y-4">

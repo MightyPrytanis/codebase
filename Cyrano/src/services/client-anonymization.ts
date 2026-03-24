@@ -362,8 +362,12 @@ export class ClientAnonymizationService {
     for (const t of this.customTerms.values()) tmpSvc.customTerms.set(t.id, t);
     for (const e of this.allowedExceptions.values()) tmpSvc.allowedExceptions.set(e.id, e);
     const result = tmpSvc.anonymize(text);
-    const { sessionId: _dropped, ...rest } = result;
-    return rest;
+    return {
+      anonymizedText: result.anonymizedText,
+      entitiesReplaced: result.entitiesReplaced,
+      riskCategory: result.riskCategory,
+      summary: result.summary,
+    };
   }
 
   /**
