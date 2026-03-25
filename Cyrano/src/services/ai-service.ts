@@ -97,28 +97,33 @@ export class AIService {
       throw new Error(`AI provider ${provider} not configured: ${validation.error}`);
     }
 
-    // CONFIDENTIALITY ENFORCEMENT: Anonymize prompt before sending to provider.
-    // Anonymization is ON by default; pass anonymize: false only for internal
-    // system-level prompts that contain no client data.
+    // CONFIDENTIALITY ENFORCEMENT
+    //
+    // Category 3 block (SSN, account numbers, DOB) runs unconditionally —
+    // even when options.anonymize === false — because the documentation
+    // promises that Category 3 content "will never be sent regardless of
+    // this flag".  Tokenisation/de-tokenisation is skipped only when the
+    // caller has explicitly opted out of anonymization.
     let activePrompt = prompt;
     let activeAnonymizationSessionId: string | undefined;
-    if (options.anonymize !== false) {
-      const anonResult = clientAnonymizationService.anonymize(
-        prompt,
-        options.anonymizationSessionId
+
+    // Always assess risk so we can enforce the Category 3 block.
+    const riskCheck = clientAnonymizationService.anonymize(
+      prompt,
+      options.anonymizationSessionId
+    );
+    if (riskCheck.riskCategory === 3) {
+      throw new Error(
+        'Prompt contains identifiable PII (Category 3 content: SSN, account numbers, or ' +
+        'date-of-birth references). This content cannot be sent to a cloud AI provider. ' +
+        'Use a self-hosted model or remove the sensitive information before proceeding.'
       );
-      activeAnonymizationSessionId = anonResult.sessionId;
+    }
 
-      // Category 3 content must never be sent to a cloud provider
-      if (anonResult.riskCategory === 3) {
-        throw new Error(
-          'Prompt contains identifiable PII (Category 3 content: SSN, account numbers, or ' +
-          'date-of-birth references). This content cannot be sent to a cloud AI provider. ' +
-          'Use a self-hosted model or remove the sensitive information before proceeding.'
-        );
-      }
-
-      activePrompt = anonResult.anonymizedText;
+    if (options.anonymize !== false) {
+      // Anonymization is ON by default; use the already-computed result.
+      activeAnonymizationSessionId = riskCheck.sessionId;
+      activePrompt = riskCheck.anonymizedText;
     }
 
     // ETHICS ENFORCEMENT: Inject Ten Rules into system prompt if not already injected

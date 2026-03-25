@@ -226,7 +226,7 @@ const STRATEGY_KEYWORDS = [
   'invalidity',
   'willful infringement',
   'cease and desist',
-  'DMCA',
+  'dmca',
   'fair use',
   'licensing',
   'royalty',
@@ -443,6 +443,30 @@ const US_STATE_NAMES: readonly string[] = [
   'United States Virgin Islands',
 ];
 
+/**
+ * Pre-compiled regex for US state / territory names.  The alternation is
+ * built once here rather than rebuilt on every `anonymize()` call to avoid
+ * repeated (and expensive) regex compilation on the hot path.
+ *
+ * Note: `lastIndex` is 0 on a freshly-cloned flag-`g` regex. Because each
+ * call to `addRegexSpans` resets `lastIndex` after use, sharing a single
+ * pre-compiled instance is safe.
+ */
+const US_STATE_PATTERN: RegExp = new RegExp(
+  `\\b(${US_STATE_NAMES.map(s => s.replace(/ /g, '\\s+')).join('|')})\\b`,
+  'g'
+);
+
+/**
+ * Pre-compiled regex for vehicle year+make+model detection.  Built once at
+ * module scope so the `VEHICLE_MAKES` join and `new RegExp` compilation are
+ * not repeated on every `anonymize()` call.
+ *
+ * Must be defined AFTER `VEHICLE_MAKES`.  See the getter in
+ * `getPatternsForType('vehicle')` for usage.
+ */
+// (Populated below, after VEHICLE_MAKES is declared.)
+
 // ---------------------------------------------------------------------------
 // Proper-noun allow-list (whitelist)
 // ---------------------------------------------------------------------------
@@ -526,7 +550,8 @@ const PROPER_NOUN_ALLOWLIST: ReadonlySet<string> = new Set([
   'further affiant saith naught', 'further affiant saith not',
   'affiant sayeth naught', 'affiant sayeth not',
   'affiant saith naught', 'affiant saith not',
-  'to wit', 'pro se', 'pro per', 'pro hac vice', 'ex parte',
+  'to wit', 'pro se', 'pro per', 'in pro per', 'in propria persona',
+  'pro hac vice', 'ex parte',
   'in witness whereof', 'upon information and belief',
   'without prejudice', 'with prejudice',
   'comes before the court', 'now therefore',
@@ -634,6 +659,17 @@ const VEHICLE_MAKES: string[] = [
   'Scion', 'Sea-Doo', 'Shelby', 'Subaru', 'Suzuki', 'Tesla', 'Toyota', 'Triumph',
   'Volkswagen', 'Volvo', 'VW', 'Yamaha',
 ];
+
+/**
+ * Pre-compiled year+make+model vehicle detection regex.  Constructed once
+ * here from `VEHICLE_MAKES` so the join + `new RegExp` call does not happen
+ * on every anonymize() invocation (which would be a per-request allocation).
+ */
+const VEHICLE_YEAR_MAKE_PATTERN: RegExp = new RegExp(
+  `\\b((?:19|20)\\d{2}\\s+(?:${VEHICLE_MAKES.join('|')})` +
+    '(?:\\s+[A-Z0-9][A-Za-z0-9\\-]*){0,4})\\b',
+  'g'
+);
 
 // ---------------------------------------------------------------------------
 // Session management
@@ -901,14 +937,18 @@ export class ClientAnonymizationService {
       // being misclassified as person names by the two-capitalised-words heuristic.
       // Single-word state names ("Michigan", "Arizona") are only caught here.
       'location',
+      // Case citations and statutes run BEFORE person so that patterns like
+      // "Smith v Jones, 123 F.3d 456" or "42 USC 1983" are captured as a single
+      // CASE_REF / STATUTE span before the person heuristic can consume
+      // the capitalised names at the start of the citation.
+      'case',
+      'statute',
       'person',
       'organization',
       'date',
       'money',
       'email',
       'phone',
-      'statute',
-      'case',
       'vehicle',
     ];
 
@@ -941,7 +981,7 @@ export class ClientAnonymizationService {
       // Exact allowlist match — always safe to drop before overlap removal
       if (PROPER_NOUN_ALLOWLIST.has(lower)) return false;
       // Location false-positive: boilerplate phrase before comma
-      if (s.type === 'location' && this.isLocationBoilerplaceFalsePositive(lower)) return false;
+      if (s.type === 'location' && this.isLocationBoilerplateFalsePositive(lower)) return false;
       return true;
     });
 
@@ -1066,10 +1106,8 @@ export class ClientAnonymizationService {
           // All 50 US states + DC + territories — single and multi-word.
           // These are deliberately NOT on PROPER_NOUN_ALLOWLIST: the specific
           // combination of states in a brief can fingerprint a matter.
-          new RegExp(
-            `\\b(${US_STATE_NAMES.map(s => s.replace(/ /g, '\\s+')).join('|')})\\b`,
-            'g'
-          ),
+          // Pre-compiled at module scope as US_STATE_PATTERN.
+          US_STATE_PATTERN,
         ];
       case 'date':
         return [
@@ -1095,13 +1133,24 @@ export class ClientAnonymizationService {
         return [
           /\b(MCL\s+\d+\.\d+(?:\([a-z0-9]+\))?)\b/g,
           /\b(MCR\s+\d+\.\d+(?:\([A-Z0-9]+\))?)\b/g,
-          /\b(\d+\s+U\.?S\.?C\.?\s+§?\s*\d+[a-z]?)\b/gi,
-          /\b(\d+\s+C\.?F\.?R\.?\s+§?\s*\d+\.\d+)\b/gi,
+          // Federal statutes: matches with or without periods in "U.S.C." / "USC"
+          // and with or without the section sign.  Handles both standard form
+          // ("26 U.S.C. § 501") and Michigan/informal form ("26 USC 501").
+          /\b(\d+\s+U\.?S\.?C\.?\s+§?\s*\d+[a-z]?(?:\([a-zA-Z0-9]+\))*)\b/gi,
+          // CFR with or without periods
+          /\b(\d+\s+C\.?F\.?R\.?\s+§?\s*\d+(?:\.\d+)?)\b/gi,
         ];
       case 'case':
         return [
-          /\b([A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+)*\s+v\.?\s+[A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+)*,\s+\d+\s+[A-Za-z]+(?:\s+\d[a-z]*)?\s+\d+)\b/g,
-          /\b([A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+)*\s+v\.?\s+[A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+)*,\s+\d{4}\s+MI(?:\s+App)?\s+\d+)\b/g,
+          // Standard reporter-citation form: "Smith v Jones, 123 F.3d 456"
+          // Handles both "v." (with period) and "v" (without), and the
+          // Michigan caption style "Smith -v- Jones" (hyphen-v-hyphen).
+          // Reporter codes may contain dots and digits (e.g. "F.3d", "F.2d",
+          // "S.W.2d") so the reporter segment uses [A-Za-z0-9.]+.
+          /\b([A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+)*\s+(?:v\.?|-v-)\s+[A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+)*,\s+\d+\s+[A-Za-z0-9.]+(?:\s+\d+[a-z]*)?\s+\d+)\b/g,
+          // Michigan-specific citation: "Smith v Jones, 2022 MI App 44"
+          // or "Smith -v- Jones, 2022 MI 5"
+          /\b([A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+)*\s+(?:v\.?|-v-)\s+[A-Z][A-Za-z]+(?:\s+[A-Z][A-Za-z]+)*,\s+\d{4}\s+MI(?:\s+App)?\s+\d+)\b/g,
         ];
       case 'vehicle':
         // ── Vehicle / conveyance identifiers ─────────────────────────────────
@@ -1121,15 +1170,9 @@ export class ClientAnonymizationService {
         // 2. 17-character VINs (North-American standard; I, O, Q excluded
         //    per FMVSS 115 / ISO 3779).
         return [
-          // Year + make + optional model/trim — captured as a unit.
-          // Model/trim words must start uppercase or be a digit/code (e.g.
-          // "Granada", "Camry XLE", "GT350", "F-150") so that lowercase
-          // sentence words ("was", "towed") are never absorbed.
-          new RegExp(
-            `\\b((?:19|20)\\d{2}\\s+(?:${VEHICLE_MAKES.join('|')})` +
-              '(?:\\s+[A-Z0-9][A-Za-z0-9\\-]*){0,4})\\b',
-            'g'
-          ),
+          // Year + make + optional model/trim — pre-compiled at module scope
+          // as VEHICLE_YEAR_MAKE_PATTERN to avoid recompiling on every call.
+          VEHICLE_YEAR_MAKE_PATTERN,
           // VIN – 17 chars, chars I/O/Q excluded (per ISO 3779)
           /\b([A-HJ-NPR-Z0-9]{17})\b/g,
         ];
@@ -1193,7 +1236,7 @@ export class ClientAnonymizationService {
    * We detect this by checking whether the text before the comma starts with
    * (or equals) an allowlisted phrase.
    */
-  private isLocationBoilerplaceFalsePositive(lower: string): boolean {
+  private isLocationBoilerplateFalsePositive(lower: string): boolean {
     const commaIdx = lower.indexOf(',');
     if (commaIdx < 0) return false;
     const beforeComma = lower.slice(0, commaIdx).trim();

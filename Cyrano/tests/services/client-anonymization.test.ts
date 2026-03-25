@@ -715,14 +715,61 @@ describe('ClientAnonymizationService', () => {
     });
 
     it('DOES still tokenize a person name separated from boilerplate by a comma', () => {
-      // With a comma between the boilerplate phrase and the party name, the
-      // 2+ Title Case pattern produces two separate spans: "Now Comes Plaintiff"
-      // (starts with allowlisted "Now Comes" → dropped/preserved) and "Jane Doe"
-      // (separate span → tokenized). This is the standard formal-filing style.
+      // "Now Comes Plaintiff, Jane Doe" — the location pattern sees
+      // "Now Comes Plaintiff, Jane" as a City, State false-positive, but the
+      // pre-filter recognises the before-comma text starts with the allowlisted
+      // "Now Comes" and drops the location span.  "Jane Doe" then survives as a
+      // separate person span and is correctly tokenized.
       const result = svc.anonymize('Now Comes Plaintiff, Jane Doe, and states:');
       expect(result.anonymizedText).toContain('Now Comes');
       expect(result.anonymizedText).not.toContain('Jane Doe');
       expect(result.anonymizedText).toMatch(/PERSON_\d+/);
+    });
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // Michigan citation styles
+  // ─────────────────────────────────────────────────────────────────────────
+  describe('anonymize() – Michigan citation style handling', () => {
+    it('tokenizes a case citation with "v" (no period) separator', () => {
+      const result = svc.anonymize('See Smith v Jones, 123 F.3d 456 (6th Cir. 2001).');
+      expect(result.anonymizedText).not.toContain('Smith v Jones');
+      expect(result.anonymizedText).toMatch(/CASE_REF_\d+/);
+    });
+
+    it('tokenizes a Michigan caption with "-v-" separator', () => {
+      const result = svc.anonymize('The caption reads: Smith -v- Jones, 2022 MI App 44.');
+      expect(result.anonymizedText).not.toContain('Smith -v- Jones');
+      expect(result.anonymizedText).toMatch(/CASE_REF_\d+/);
+    });
+
+    it('tokenizes a federal statute in "USC" (no periods) form', () => {
+      const result = svc.anonymize('Plaintiff claims damages under 42 USC 1983.');
+      expect(result.anonymizedText).not.toContain('42 USC 1983');
+      expect(result.anonymizedText).toMatch(/STATUTE_\d+/);
+    });
+
+    it('tokenizes a federal statute in "U.S.C." (with periods) form', () => {
+      const result = svc.anonymize('Pursuant to 26 U.S.C. § 501(c)(3), the organization is exempt.');
+      expect(result.anonymizedText).not.toContain('26 U.S.C.');
+      expect(result.anonymizedText).toMatch(/STATUTE_\d+/);
+    });
+  });
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // "In Pro Per" / "In Propria Persona" allowlist additions
+  // ─────────────────────────────────────────────────────────────────────────
+  describe('anonymize() – In Pro Per / In Propria Persona allowlist', () => {
+    it('does NOT tokenize "In Pro Per"', () => {
+      const result = svc.anonymize('Defendant appears In Pro Per for this hearing.');
+      expect(result.anonymizedText).toContain('In Pro Per');
+      expect(result.anonymizedText).not.toMatch(/PERSON_\d+/);
+    });
+
+    it('does NOT tokenize "In Propria Persona"', () => {
+      const result = svc.anonymize('Petitioner proceeds In Propria Persona.');
+      expect(result.anonymizedText).toContain('In Propria Persona');
+      expect(result.anonymizedText).not.toMatch(/PERSON_\d+/);
     });
   });
 });
