@@ -43,10 +43,12 @@ jobs:
   merge-codefactor-pr:
     name: Auto-approve & merge CodeFactor PR
     runs-on: ubuntu-latest
-    # Only when the actor is the CodeFactor bot
+    # Only when the actor and PR author are the CodeFactor bot and the PR is from this repo (not a fork)
     if: >
       github.event_name == 'pull_request' &&
-      github.actor == 'codefactor-io[bot]'
+      github.actor == 'codefactor-io[bot]' &&
+      github.event.pull_request.user.login == 'codefactor-io[bot]' &&
+      github.event.pull_request.head.repo.full_name == github.repository
 
     steps:
       - name: Auto-approve
