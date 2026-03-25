@@ -1,16 +1,24 @@
 name: Persistent CodeFactor Auto-Fix Agent
 
 # This workflow is the persistent CodeFactor quality agent.
-# It runs continuously (scheduled + event-driven), identifies every
-# CodeFactor-reportable issue across all PRs and the entire codebase,
-# and automatically applies fixes without human intervention.
+# It runs continuously (scheduled + event-driven) and keeps the codebase
+# aligned with CodeFactor's quality expectations.
+#
+# Scope: currently configured for the MightyPrytanis/codebase monorepo.
+# Portability: this workflow is designed to be copy-portable to any repository
+# where CodeFactor is active — update the workspace install/lint steps in the
+# proactive job to match the target repo's directory structure.
 #
 # Two modes of operation:
 #   1. Reactive  – when codefactor-io[bot] opens/updates a PR, auto-approve
 #                  and enable auto-merge so it lands on main as soon as CI passes.
+#                  (Fully automated — CodeFactor only proposes conservative fixes
+#                  and CI is the safety gate.)
 #   2. Proactive – on a schedule, run ESLint --fix across every workspace,
-#                  commit any changes to a dedicated branch, and open (or update)
-#                  a self-approving PR that auto-merges once CI is green.
+#                  commit any changes to a dedicated branch, and open a
+#                  labelled PR for human review and merge.
+#                  (Semi-automated — the agent does the discovery and staging;
+#                  the maintainer performs the final merge click.)
 
 on:
   # Reactive: fire immediately when CodeFactor creates or updates a PR
@@ -73,10 +81,10 @@ jobs:
   # needed.  If CI checks on the auto-fix PRs need to trigger downstream
   # workflows, replace GITHUB_TOKEN with a PAT stored in secrets.
   #
-  # Self-approval: this repository is a solo-maintainer project; auto-approval
-  # of automation PRs is intentional and documented here.  If the repository
-  # ever transitions to team collaboration, review the approval step and the
-  # branch-protection rules accordingly.
+  # Semi-automated by design: the proactive job creates and labels a PR but
+  # does NOT auto-merge it.  The maintainer reviews the diff and clicks Merge.
+  # The reactive job (CodeFactor's own PRs) remains fully automated because
+  # CodeFactor is conservative and CI is the safety gate.
   eslint-autofix:
     name: Scheduled ESLint auto-fix sweep
     runs-on: ubuntu-latest
@@ -198,15 +206,11 @@ jobs:
 
           **Triggered by:** scheduled run at $(date -u +%Y-%m-%dT%H:%MZ)
 
-          This PR will auto-merge once all CI checks pass." \
+          Please review the diff and merge when satisfied." \
               --base main \
               --head "$BRANCH"
-            # Approve the PR we just created so it can auto-merge
+            # Label the PR so it is easy to find; no auto-merge — maintainer merges manually.
             NEW_PR_URL=$(gh pr list --head "$BRANCH" --json url --jq '.[0].url')
-            gh pr review "$NEW_PR_URL" \
-              --approve \
-              --body "✓ Auto-approved by the persistent CodeFactor agent." || true
-            gh pr merge --auto --squash "$NEW_PR_URL" || true
             gh pr edit "$NEW_PR_URL" \
               --add-label "codefactor-autofix" || true
           else
