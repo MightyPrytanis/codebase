@@ -2,7 +2,7 @@ name: Dependabot Auto-Merge
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
   contents: write
@@ -19,28 +19,79 @@ jobs:
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
 
-      - name: Auto-approve PR
-        run: gh pr review --approve "$PR_URL"
+      - name: Check for breaking changes
+        id: breaking
+        env:
+          UPDATE_TYPE: ${{ steps.metadata.outputs.update-type }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          IS_BREAKING="false"
+          REASON=""
+
+          # Major version bump is always treated as a potential breaking change
+          if [[ "$UPDATE_TYPE" == "version-update:semver-major" ]]; then
+            IS_BREAKING="true"
+            REASON="major version bump"
+          fi
+
+          # Check PR title and body for breaking change keywords
+          if echo "$PR_TITLE $PR_BODY" | grep -qiE "breaking[[:space:]_-]?changes?|BREAKING[[:space:]_-]?CHANGE:?|incompatible change|breaking update"; then
+            IS_BREAKING="true"
+            if [[ -n "$REASON" ]]; then
+              REASON="${REASON}, breaking change keyword detected in PR text"
+            else
+              REASON="breaking change keyword detected in PR text"
+            fi
+          fi
+
+          echo "is_breaking=${IS_BREAKING}" >> $GITHUB_OUTPUT
+          echo "reason=${REASON}" >> $GITHUB_OUTPUT
+          echo "update_type=${UPDATE_TYPE}" >> $GITHUB_OUTPUT
+
+      - name: Auto-approve non-breaking update
+        if: steps.breaking.outputs.is_breaking == 'false'
+        run: |
+          gh pr review --approve "$PR_URL" \
+            --body "✅ Auto-approved: non-breaking \`${{ steps.breaking.outputs.update_type }}\` dependency update."
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Enable auto-merge for patch and minor updates
-        if: |
-          steps.metadata.outputs.update-type == 'version-update:semver-patch' ||
-          steps.metadata.outputs.update-type == 'version-update:semver-minor'
+      - name: Enable auto-merge for non-breaking update
+        if: steps.breaking.outputs.is_breaking == 'false'
         run: gh pr merge --auto --squash "$PR_URL"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Auto-merge security patches (any severity)
-        if: steps.metadata.outputs.package-ecosystem != ''
-        run: |
-          if [[ "${{ steps.metadata.outputs.severity }}" != "" ]]; then
-            echo "Security patch detected - enabling auto-merge"
-            gh pr merge --auto --squash "$PR_URL"
-          fi
+      - name: Notify maintainer of blocked breaking-change PR
+        if: steps.breaking.outputs.is_breaking == 'true'
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BLOCK_REASON: ${{ steps.breaking.outputs.reason }}
+        run: |
+          cat <<'COMMENT_EOF' > /tmp/block-comment.md
+          ⚠️ **Auto-merge blocked** — potential breaking change detected.
+
+          **Reason:** BLOCK_REASON_PLACEHOLDER
+
+          This PR requires manual review and approval before merging. Please:
+          1. Review the upstream changelog for breaking changes
+          2. Update any affected code in the repository to accommodate the new version
+          3. Merge manually once compatibility is verified
+
+          ---
+          *Automated check by the Dependabot Auto-Merge workflow.*
+          COMMENT_EOF
+          sed -i "s|BLOCK_REASON_PLACEHOLDER|${BLOCK_REASON}|g" /tmp/block-comment.md
+          gh pr comment "$PR_URL" --body-file /tmp/block-comment.md
+
+      - name: Label breaking-change PR for manual review
+        if: steps.breaking.outputs.is_breaking == 'true'
+        run: gh pr edit "$PR_URL" --add-label "breaking-change"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
