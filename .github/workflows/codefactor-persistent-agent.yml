@@ -196,14 +196,26 @@ jobs:
 
           # Re-use an existing branch for today's run so we don't spam PRs
           if git ls-remote --exit-code origin "refs/heads/$BRANCH" > /dev/null 2>&1; then
+            # If there are local changes from fixers, stash them before switching branches
+            STASH_CREATED=0
+            if ! git diff --quiet || ! git diff --cached --quiet; then
+              git stash push -u -m "codefactor-autofix-$(date -u +%Y-%m-%dT%H:%M)Z"
+              STASH_CREATED=1
+            fi
+
             git fetch origin "$BRANCH:$BRANCH"
             git checkout "$BRANCH"
             # Merge main changes; abort on conflict rather than silently producing broken state
             if ! git merge --no-edit origin/main; then
               echo "::warning::Merge conflict detected when rebasing $BRANCH onto main. Aborting merge."
-              git merge --abort
-              # Fall back to a reset to origin/main + re-apply staged changes
+              git merge --abort || true
+              # Fall back to a reset to origin/main; stashed changes (if any) will be re-applied below
               git reset --hard origin/main
+            fi
+
+            # Re-apply any stashed autofix changes onto the updated branch
+            if [ "$STASH_CREATED" -eq 1 ]; then
+              git stash pop || true
             fi
           else
             git checkout -b "$BRANCH"
