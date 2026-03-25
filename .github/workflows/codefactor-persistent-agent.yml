@@ -108,34 +108,51 @@ jobs:
 
       # ── Cyrano ──────────────────────────────────────────────────────────────
       - name: Install Cyrano dependencies
+        id: install_cyrano
         run: npm ci
         working-directory: ./Cyrano
         continue-on-error: true
 
       - name: ESLint --fix Cyrano
-        run: npm run lint:fix || true
+        if: steps.install_cyrano.outcome == 'success'
+        run: npm run lint:fix
         working-directory: ./Cyrano
+
+      - name: Skipped Cyrano lint (install failed)
+        if: steps.install_cyrano.outcome != 'success'
+        run: echo "Skipping Cyrano ESLint --fix because npm ci failed for ./Cyrano"
 
       # ── LexFiat client ──────────────────────────────────────────────────────
       - name: Install LexFiat client dependencies
+        id: install_lexfiat_client
         run: npm ci
         working-directory: ./apps/lexfiat/client
         continue-on-error: true
 
       - name: ESLint --fix LexFiat client
-        run: npx eslint --fix "src/**/*.{ts,tsx,js,jsx}" || true
+        if: steps.install_lexfiat_client.outcome == 'success'
+        run: npx eslint --fix "src/**/*.{ts,tsx,js,jsx}"
         working-directory: ./apps/lexfiat/client
+
+      - name: Skipped LexFiat client lint (install failed)
+        if: steps.install_lexfiat_client.outcome != 'success'
+        run: echo "Skipping LexFiat client ESLint --fix because npm ci failed for ./apps/lexfiat/client"
 
       # ── Arkiver frontend ────────────────────────────────────────────────────
       - name: Install Arkiver frontend dependencies
+        id: install_arkiver_frontend
         run: npm ci
         working-directory: ./apps/arkiver/frontend
         continue-on-error: true
 
       - name: ESLint --fix Arkiver frontend
-        run: npx eslint --fix "src/**/*.{ts,tsx,js,jsx}" || true
+        if: steps.install_arkiver_frontend.outcome == 'success'
+        run: npx eslint --fix "src/**/*.{ts,tsx,js,jsx}"
         working-directory: ./apps/arkiver/frontend
 
+      - name: Skipped Arkiver frontend lint (install failed)
+        if: steps.install_arkiver_frontend.outcome != 'success'
+        run: echo "Skipping Arkiver frontend ESLint --fix because npm ci failed for ./apps/arkiver/frontend"
       # ── SwimMeet (mae-client) frontend ──────────────────────────────────────
       - name: Install SwimMeet frontend dependencies
         run: npm ci
