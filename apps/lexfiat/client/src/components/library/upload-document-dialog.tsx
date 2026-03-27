@@ -92,10 +92,7 @@ export function UploadDocumentDialog({
       {/* Overlay */}
       <div
         className="fixed inset-0 bg-black/50 z-50"
-        role="button"
-        tabIndex={0}
         onClick={onClose}
-        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClose(); }}
       />
       
       {/* Dialog */}
