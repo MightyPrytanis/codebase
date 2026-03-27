@@ -1,0 +1,336 @@
+name: CI Failure Monitor & Auto-Remediation
+
+# Persistent agent that watches the CI/CD Pipeline for failures and:
+#   - Lockfile / platform issues  -> regenerates Cyrano/package-lock.json with
+#                                    npm 10.8.2 (the CI version) and opens a fix-PR
+#   - All other failures          -> opens a labeled diagnostic GitHub Issue with
+#                                    log excerpts and a direct link to the failed run
+#
+# The agent never silently ignores a failure: every CI failure results in either
+# an automated fix-PR (lockfile) or a tracked diagnostic issue.
+#
+# Scope: MightyPrytanis/codebase monorepo.
+# Portability: copy-portable to any repo -- update the monitored workflow name in
+# the `workflow_run` trigger and the lockfile remediation paths/npm version to
+# match the target repo's structure.
+#
+# Modes of operation:
+#   1. Reactive  (workflow_run)      -- fires immediately when CI/CD Pipeline fails.
+#   2. Proactive (schedule, hourly)  -- sweeps for recent failures missed by the
+#                                       reactive trigger (e.g., after a runner restart).
+#   3. Manual    (workflow_dispatch) -- analyze a specific run ID on demand.
+
+on:
+  # React immediately when CI/CD Pipeline concludes as a failure
+  workflow_run:
+    workflows: ["CI/CD Pipeline"]
+    types: [completed]
+
+  # Hourly sweep: catch any failures missed by the reactive trigger
+  schedule:
+    - cron: '30 * * * *'
+
+  # Manual trigger for ad-hoc analysis or re-processing a specific run
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: 'CI run ID to analyze (leave blank to auto-detect recent failures)'
+        required: false
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: read
+  issues: write
+
+# Serialize all instances so concurrent runs don't race on branch creation or
+# issue deduplication.  cancel-in-progress: false ensures in-flight remediation
+# is never silently abandoned.
+concurrency:
+  group: ci-failure-monitor
+  cancel-in-progress: false
+
+jobs:
+  monitor:
+    name: Monitor CI & remediate failures
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Ensure the tracking labels exist (idempotent -- safe to re-run)
+      - name: Ensure CI tracking labels exist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh label create "ci-failure"   --color "b60205" --description "Automated CI failure tracking"  --force || true
+          gh label create "ci-fix"       --color "0075ca" --description "Automated CI fix PR"            --force || true
+          gh label create "needs-triage" --color "e4e669" --description "Needs human triage"             --force || true
+
+      # ── Step 1: Identify which failed CI run to analyze ──────────────────────
+      - name: Find failed CI run to analyze
+        id: find
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          RUN_ID=""
+
+          if [ "${{ github.event_name }}" = "workflow_run" ]; then
+            CONCLUSION="${{ github.event.workflow_run.conclusion }}"
+            if [ "$CONCLUSION" = "failure" ]; then
+              RUN_ID="${{ github.event.workflow_run.id }}"
+              echo "Reactive trigger: CI run #$RUN_ID failed."
+            else
+              echo "CI run concluded '$CONCLUSION' -- nothing to do."
+            fi
+
+          elif [ -n "${{ inputs.run_id }}" ]; then
+            RUN_ID="${{ inputs.run_id }}"
+            echo "Manual trigger: analyzing run #$RUN_ID."
+
+          else
+            # Hourly sweep: find the most recent failure not yet tracked.
+            # --workflow accepts file names; ci.yml == the "CI/CD Pipeline" workflow
+            # referenced in the workflow_run trigger above.
+            echo "Hourly sweep: scanning recent CI failures..."
+            for id in $(gh run list \
+                --workflow ci.yml \
+                --status failure \
+                --limit 10 \
+                --json databaseId \
+                --jq '.[].databaseId'); do
+
+              # Skip if we already opened a fix-PR for this run
+              EXISTING_PR=$(gh pr list \
+                --search "run #${id} in:title" \
+                --state open \
+                --json number \
+                --jq '.[0].number' 2>/dev/null || echo "")
+
+              # Skip if we already opened a diagnostic issue for this run
+              EXISTING_ISSUE=$(gh issue list \
+                --label "ci-failure" \
+                --state open \
+                --search "run #${id} in:title" \
+                --json number \
+                --jq '.[0].number' 2>/dev/null || echo "")
+
+              if [ -z "$EXISTING_PR" ] && [ -z "$EXISTING_ISSUE" ]; then
+                RUN_ID="$id"
+                echo "Found untracked failure: run #$RUN_ID"
+                break
+              else
+                echo "Run #$id already tracked (PR: ${EXISTING_PR:-none}, Issue: ${EXISTING_ISSUE:-none}) -- skipping."
+              fi
+            done
+
+            if [ -z "$RUN_ID" ]; then
+              echo "All recent CI failures are already tracked."
+            fi
+          fi
+
+          RUN_URL=""
+          if [ -n "$RUN_ID" ]; then
+            RUN_URL="https://github.com/${{ github.repository }}/actions/runs/$RUN_ID"
+          fi
+
+          echo "run_id=$RUN_ID"   >> "$GITHUB_OUTPUT"
+          echo "run_url=$RUN_URL" >> "$GITHUB_OUTPUT"
+
+      # ── Step 2: Fetch logs and classify the failure type ─────────────────────
+      - name: Fetch and classify failure logs
+        id: classify
+        if: steps.find.outputs.run_id != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          RUN_ID="${{ steps.find.outputs.run_id }}"
+          echo "Fetching logs for CI run #$RUN_ID..."
+
+          # Fetch the logs of all failed steps (cap at 500 lines for pattern matching)
+          gh run view --log-failed "$RUN_ID" 2>&1 | head -500 > /tmp/ci-failure-logs.txt || {
+            echo "::warning::Could not fetch logs for run #$RUN_ID -- will open a generic diagnostic issue."
+            echo "Log fetch failed for run #$RUN_ID at $(date -u)" > /tmp/ci-failure-logs.txt
+            # Explicitly set type=unknown so classification skips pattern matching below
+            echo "type=unknown" >> "$GITHUB_OUTPUT"
+          }
+
+          echo "--- Log sample (first 30 lines) ---"
+          head -30 /tmp/ci-failure-logs.txt
+          echo "---"
+
+          # Skip classification if type was already set by the log-fetch fallback
+          if grep -q "^type=" "$GITHUB_OUTPUT" 2>/dev/null; then
+            echo "Log fetch failed -- using type=unknown (already written to GITHUB_OUTPUT)."
+          else
+            # Classify by pattern precedence (most specific first)
+            if grep -qE "Missing:.*from lock file|npm ERR! code EUSAGE|EBADPLATFORM|notsup.*Unsupported platform" \
+                /tmp/ci-failure-logs.txt; then
+              echo "type=lockfile" >> "$GITHUB_OUTPUT"
+              echo "Classified: lockfile / platform-constraint issue"
+
+            elif grep -qE "error TS[0-9]+|SyntaxError:|Cannot find module|ReferenceError:" \
+                /tmp/ci-failure-logs.txt; then
+              echo "type=typescript" >> "$GITHUB_OUTPUT"
+              echo "Classified: TypeScript / module resolution error"
+
+            elif grep -qE "Quality gate failed|Pass rate.*below|[0-9]+ failed \(" \
+                /tmp/ci-failure-logs.txt; then
+              echo "type=test_failure" >> "$GITHUB_OUTPUT"
+              echo "Classified: test / quality gate failure"
+
+            else
+              echo "type=unknown" >> "$GITHUB_OUTPUT"
+              echo "Classified: unknown failure (will open diagnostic issue)"
+            fi
+          fi
+
+      # ── Step 3a: Lockfile auto-fix ────────────────────────────────────────────
+      - name: Pin npm to 10.8.2 (matches CI)
+        if: >
+          steps.find.outputs.run_id != '' &&
+          steps.classify.outputs.type == 'lockfile'
+        run: npm install -g npm@10.8.2
+
+      - name: Regenerate Cyrano/package-lock.json
+        if: >
+          steps.find.outputs.run_id != '' &&
+          steps.classify.outputs.type == 'lockfile'
+        working-directory: ./Cyrano
+        run: npm install --package-lock-only
+
+      - name: Validate regenerated lockfile
+        if: >
+          steps.find.outputs.run_id != '' &&
+          steps.classify.outputs.type == 'lockfile'
+        run: python3 .github/scripts/validate-lockfile.py Cyrano/package-lock.json
+
+      - name: Commit and open lockfile fix PR
+        if: >
+          steps.find.outputs.run_id != '' &&
+          steps.classify.outputs.type == 'lockfile'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID:  ${{ steps.find.outputs.run_id }}
+          RUN_URL: ${{ steps.find.outputs.run_url }}
+        run: |
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name  "github-actions[bot]"
+
+          BRANCH="ci-fix/lockfile-run-${RUN_ID}"
+
+          # Dedup: skip if a PR for this fix branch already exists
+          EXISTING=$(gh pr list \
+            --head "$BRANCH" \
+            --json number \
+            --jq '.[0].number' 2>/dev/null || echo "")
+          if [ -n "$EXISTING" ]; then
+            echo "PR #$EXISTING already covers run #${RUN_ID} fix -- nothing to do."
+            exit 0
+          fi
+
+          git checkout -b "$BRANCH"
+          git add Cyrano/package-lock.json
+
+          if git diff --cached --quiet; then
+            echo "Lockfile already correct after regeneration -- no changes to commit."
+            exit 0
+          fi
+
+          git commit \
+            -m "fix(ci): regenerate Cyrano lockfile with npm 10.8.2 -- run #${RUN_ID}" \
+            --author "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+          git push origin "$BRANCH"
+
+          # Write PR body to a temp file to avoid YAML indentation issues
+          {
+            echo "## CI Auto-Remediation: Lockfile Regeneration"
+            echo ""
+            echo "CI run [#${RUN_ID}](${RUN_URL}) failed with a lockfile compatibility error."
+            echo ""
+            echo "**Root cause:** \`Cyrano/package-lock.json\` was generated with an npm version"
+            echo "that omits optional platform-specific entries required by npm 10.8.2 (used in CI)."
+            echo "Typical error: \`npm ERR! code EUSAGE\` / \`Missing: ... from lock file\` / \`EBADPLATFORM\`."
+            echo ""
+            echo "**Fix applied:**"
+            echo "- \`npm install --package-lock-only\` run under npm 10.8.2"
+            echo "- Validated with \`.github/scripts/validate-lockfile.py\`"
+            echo ""
+            echo "Please review and merge to unblock CI."
+            echo ""
+            echo "*Opened automatically by the CI Failure Monitor.*"
+          } > /tmp/pr-body.txt
+
+          gh pr create \
+            --title "fix(ci): regenerate Cyrano lockfile -- unblocks CI run #${RUN_ID}" \
+            --body-file /tmp/pr-body.txt \
+            --base main \
+            --head "$BRANCH" \
+            --label "ci-fix,ci-failure" || true
+
+      # ── Step 3b: Diagnostic issue for non-auto-fixable failures ─────────────
+      - name: Open diagnostic issue
+        if: >
+          steps.find.outputs.run_id != '' &&
+          steps.classify.outputs.type != 'lockfile'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID:       ${{ steps.find.outputs.run_id }}
+          RUN_URL:      ${{ steps.find.outputs.run_url }}
+          FAILURE_TYPE: ${{ steps.classify.outputs.type }}
+        run: |
+          # Dedup: skip if an open issue already tracks this run.
+          # Use the same in:title pattern as the PR deduplication check in Step 1.
+          EXISTING=$(gh issue list \
+            --label "ci-failure" \
+            --state open \
+            --search "run #${RUN_ID} in:title" \
+            --json number \
+            --jq '.[0].number' 2>/dev/null || echo "")
+          if [ -n "$EXISTING" ]; then
+            echo "Issue #$EXISTING already tracks run #${RUN_ID} -- skipping."
+            exit 0
+          fi
+
+          # First 80 lines for the issue excerpt (500 lines were fetched above for pattern matching)
+          LOG_EXCERPT=$(head -80 /tmp/ci-failure-logs.txt 2>/dev/null || echo "(log unavailable)")
+
+          # Write issue body to a temp file to avoid YAML indentation issues
+          {
+            echo "## CI/CD Pipeline Failure Detected"
+            echo ""
+            echo "**Run:** [#${RUN_ID}](${RUN_URL})"
+            echo "**Type:** \`${FAILURE_TYPE}\`"
+            echo "**Detected:** $(date -u +%Y-%m-%dT%H:%MZ)"
+            echo ""
+            echo "> Opened automatically by the CI Failure Monitor."
+            echo "> The failure type \`${FAILURE_TYPE}\` is not yet auto-remediable -- human review needed."
+            echo ""
+            echo "### Log excerpt"
+            echo "\`\`\`"
+            echo "${LOG_EXCERPT}"
+            echo "\`\`\`"
+            echo ""
+            echo "### Next steps"
+            echo "1. Open the [full run logs](${RUN_URL}) and identify the root cause"
+            echo "2. Apply a fix and push -- the CI green run will confirm resolution"
+            echo "3. Close this issue once CI is green"
+            echo ""
+            echo "*Auto-opened by the CI Failure Monitor workflow.*"
+          } > /tmp/issue-body.txt
+
+          gh issue create \
+            --title "CI failure -- run #${RUN_ID} [${FAILURE_TYPE}]" \
+            --label "ci-failure,needs-triage" \
+            --body-file /tmp/issue-body.txt || true

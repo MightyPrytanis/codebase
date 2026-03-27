@@ -82,7 +82,7 @@
 [data-theme="ad-astra"] .bg-panel-glass {
   background: rgba(255, 153, 0, 0.1);
   border: 2px solid var(--lcars-orange);
-  border-radius: 1rem 0 1rem 0; /* Distinctive LCARS corner style */
+  border-radius: 1rem 0; /* Distinctive LCARS corner style */
   box-shadow: 0 0 10px rgba(255, 153, 0, 0.3);
 }
 
@@ -92,7 +92,7 @@
 
 /* LCARS Button Styling */
 [data-theme="ad-astra"] button {
-  border-radius: 0.5rem 0 0.5rem 0; /* LCARS button style */
+  border-radius: 0.5rem 0; /* LCARS button style */
   border: 2px solid var(--lcars-orange);
   background: rgba(255, 153, 0, 0.1);
   color: var(--lcars-yellow);
@@ -111,7 +111,7 @@
 
 /* LCARS Badge Styling */
 [data-theme="ad-astra"] .badge {
-  border-radius: 0.5rem 0 0.5rem 0;
+  border-radius: 0.5rem 0;
   border: 1px solid var(--lcars-orange);
   background: rgba(255, 153, 0, 0.15);
   color: var(--lcars-yellow);
@@ -122,7 +122,7 @@
 [data-theme="ad-astra"] .card {
   background: rgba(255, 153, 0, 0.1);
   border: 2px solid var(--lcars-orange);
-  border-radius: 1rem 0 1rem 0;
+  border-radius: 1rem 0;
   color: var(--lcars-yellow);
 }
 
@@ -132,7 +132,7 @@
 [data-theme="ad-astra"] select {
   background: rgba(255, 153, 0, 0.1);
   border: 2px solid var(--lcars-orange);
-  border-radius: 0.5rem 0 0.5rem 0;
+  border-radius: 0.5rem 0;
   color: var(--lcars-yellow);
 }
 
@@ -148,7 +148,7 @@
 [data-theme="ad-astra"] .workflow-status-panel {
   background: rgba(255, 153, 0, 0.1);
   border: 3px solid var(--lcars-orange);
-  border-radius: 1.5rem 0 1.5rem 0;
+  border-radius: 1.5rem 0;
   box-shadow: 0 0 20px rgba(255, 153, 0, 0.4);
 }
 
@@ -187,7 +187,7 @@
 [data-theme="ad-astra"] .widget {
   background: rgba(255, 153, 0, 0.1);
   border: 2px solid var(--lcars-orange);
-  border-radius: 1rem 0 1rem 0;
+  border-radius: 1rem 0;
   box-shadow: 0 0 15px rgba(255, 153, 0, 0.3);
 }
 
@@ -223,7 +223,7 @@
 
 [data-theme="ad-astra"] ::-webkit-scrollbar-thumb {
   background: var(--lcars-orange);
-  border-radius: 0.5rem 0 0.5rem 0;
+  border-radius: 0.5rem 0;
 }
 
 [data-theme="ad-astra"] ::-webkit-scrollbar-thumb:hover {
