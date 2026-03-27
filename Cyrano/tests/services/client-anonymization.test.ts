@@ -239,4 +239,140 @@ describe('ClientAnonymizationService', () => {
       expect(clientAnonymizationService).toBeInstanceOf(ClientAnonymizationService);
     });
   });
+
+  // -------------------------------------------------------------------------
+  // Custom sensitive terms
+  // -------------------------------------------------------------------------
+
+  describe('custom sensitive terms', () => {
+    it('addCustomTerm() returns an entry with a generated id', () => {
+      const entry = svc.addCustomTerm('SpecialCorp', 'organization');
+      expect(entry.id).toBeTruthy();
+      expect(entry.term).toBe('SpecialCorp');
+      expect(entry.entityType).toBe('organization');
+    });
+
+    it('listCustomTerms() returns added terms in insertion order', () => {
+      svc.addCustomTerm('Alpha LLC', 'organization');
+      svc.addCustomTerm('Beta Road', 'location');
+      const terms = svc.listCustomTerms();
+      expect(terms).toHaveLength(2);
+      expect(terms[0].term).toBe('Alpha LLC');
+      expect(terms[1].term).toBe('Beta Road');
+    });
+
+    it('removeCustomTerm() removes the entry and returns true', () => {
+      const entry = svc.addCustomTerm('ToRemove Corp', 'organization');
+      expect(svc.removeCustomTerm(entry.id)).toBe(true);
+      expect(svc.listCustomTerms()).toHaveLength(0);
+    });
+
+    it('removeCustomTerm() returns false for an unknown id', () => {
+      expect(svc.removeCustomTerm('does-not-exist')).toBe(false);
+    });
+
+    it('anonymize() replaces a user-defined custom term with the correct token', () => {
+      svc.addCustomTerm('SpecialCorp', 'organization');
+      const result = svc.anonymize('The client works for SpecialCorp in Detroit.');
+      expect(result.anonymizedText).not.toContain('SpecialCorp');
+      expect(result.anonymizedText).toMatch(/COMPANY_\d+/);
+    });
+
+    it('anonymize() replaces custom term case-insensitively', () => {
+      svc.addCustomTerm('SpecialCorp', 'organization');
+      const result = svc.anonymize('specialcorp and SPECIALCORP are both here.');
+      expect(result.anonymizedText).not.toContain('specialcorp');
+      expect(result.anonymizedText).not.toContain('SPECIALCORP');
+    });
+
+    it('anonymize() uses the entity type specified by the user', () => {
+      svc.addCustomTerm('MDOT', 'organization');
+      const result = svc.anonymize('She struck an MDOT signal cabinet.');
+      expect(result.anonymizedText).not.toContain('MDOT');
+      expect(result.anonymizedText).toMatch(/COMPANY_\d+/);
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Allowed exceptions
+  // -------------------------------------------------------------------------
+
+  describe('allowed exceptions', () => {
+    it('addException() returns an entry with a generated id', () => {
+      const entry = svc.addException('Supreme Court');
+      expect(entry.id).toBeTruthy();
+      expect(entry.term).toBe('Supreme Court');
+    });
+
+    it('listExceptions() returns added entries in insertion order', () => {
+      svc.addException('Supreme Court');
+      svc.addException('United States');
+      const exceptions = svc.listExceptions();
+      expect(exceptions).toHaveLength(2);
+      expect(exceptions[0].term).toBe('Supreme Court');
+      expect(exceptions[1].term).toBe('United States');
+    });
+
+    it('removeException() removes the entry and returns true', () => {
+      const entry = svc.addException('Now Comes');
+      expect(svc.removeException(entry.id)).toBe(true);
+      expect(svc.listExceptions()).toHaveLength(0);
+    });
+
+    it('removeException() returns false for an unknown id', () => {
+      expect(svc.removeException('does-not-exist')).toBe(false);
+    });
+
+    it('anonymize() does NOT anonymize a term on the exceptions list', () => {
+      svc.addException('Supreme Court');
+      const result = svc.anonymize(
+        'The matter was appealed to the Supreme Court for review.'
+      );
+      expect(result.anonymizedText).toContain('Supreme Court');
+    });
+
+    it('exceptions are matched case-insensitively', () => {
+      svc.addException('Supreme Court');
+      const result = svc.anonymize('The supreme court issued its ruling.');
+      expect(result.anonymizedText).toContain('supreme court');
+    });
+  });
+
+  // -------------------------------------------------------------------------
+  // Preview
+  // -------------------------------------------------------------------------
+
+  describe('preview()', () => {
+    it('returns anonymized text without a sessionId', () => {
+      const result = svc.preview('John Smith filed a complaint.');
+      expect(result).not.toHaveProperty('sessionId');
+      expect(result.anonymizedText).not.toContain('John Smith');
+    });
+
+    it('includes entitiesReplaced, riskCategory, and summary', () => {
+      const result = svc.preview('Call john@example.com.');
+      expect(typeof result.entitiesReplaced).toBe('number');
+      expect([1, 2, 3]).toContain(result.riskCategory);
+      expect(result.summary).toBeDefined();
+    });
+
+    it('applies custom terms in preview', () => {
+      svc.addCustomTerm('AcmeLaw LLC', 'organization');
+      const result = svc.preview('The firm AcmeLaw LLC represents the plaintiff.');
+      expect(result.anonymizedText).not.toContain('AcmeLaw LLC');
+      expect(result.anonymizedText).toMatch(/COMPANY_\d+/);
+    });
+
+    it('respects exceptions in preview', () => {
+      svc.addException('United States');
+      const result = svc.preview('Filed in the United States District Court.');
+      expect(result.anonymizedText).toContain('United States');
+    });
+
+    it('does not persist a session on the main service', () => {
+      const before = svc.activeSessionCount;
+      svc.preview('Some preview text with John Doe.');
+      expect(svc.activeSessionCount).toBe(before);
+    });
+  });
 });

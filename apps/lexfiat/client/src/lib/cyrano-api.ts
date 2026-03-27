@@ -253,3 +253,151 @@ export async function checkApiHealth(): Promise<boolean> {
 
 }
 }
+
+// ---------------------------------------------------------------------------
+// Anonymization management API
+// ---------------------------------------------------------------------------
+
+export type AnonymizableEntityType =
+  | 'person'
+  | 'organization'
+  | 'location'
+  | 'date'
+  | 'money'
+  | 'email'
+  | 'phone'
+  | 'ssn'
+  | 'account'
+  | 'statute'
+  | 'case';
+
+export interface CustomTerm {
+  id: string;
+  term: string;
+  entityType: AnonymizableEntityType;
+  createdAt: string;
+}
+
+export interface AllowedExceptionEntry {
+  id: string;
+  term: string;
+  createdAt: string;
+}
+
+interface AnonymizationListResponse<T> {
+  success: boolean;
+  data?: T[];
+  error?: string;
+}
+
+interface AnonymizationSingleResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
+}
+
+interface PreviewResponse {
+  success: boolean;
+  data?: {
+    anonymizedText: string;
+    entitiesReplaced: number;
+    riskCategory: 1 | 2 | 3;
+    summary: Record<string, number>;
+  };
+  error?: string;
+}
+
+/** Fetch all user-defined custom sensitive terms. */
+export async function getAnonymizationTerms(): Promise<AnonymizationListResponse<CustomTerm>> {
+  try {
+    const res = await fetch(`${API_URL}/api/anonymization/terms`);
+    return res.ok ? res.json() : { success: false, error: `HTTP ${res.status}` };
+  } catch {
+    return { success: false, error: 'Network error' };
+  }
+}
+
+/** Add a custom sensitive term. */
+export async function addAnonymizationTerm(
+  term: string,
+  entityType: AnonymizableEntityType
+): Promise<AnonymizationSingleResponse<CustomTerm>> {
+  try {
+    const res = await fetch(`${API_URL}/api/anonymization/terms`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ term, entityType }),
+    });
+    return res.json();
+  } catch {
+    return { success: false, error: 'Network error' };
+  }
+}
+
+/** Remove a custom sensitive term by ID. */
+export async function removeAnonymizationTerm(id: string): Promise<{ success: boolean }> {
+  try {
+    const res = await fetch(`${API_URL}/api/anonymization/terms/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    });
+    return res.json();
+  } catch {
+    return { success: false };
+  }
+}
+
+/** Fetch all user-defined allowed exceptions. */
+export async function getAnonymizationExceptions(): Promise<AnonymizationListResponse<AllowedExceptionEntry>> {
+  try {
+    const res = await fetch(`${API_URL}/api/anonymization/exceptions`);
+    return res.ok ? res.json() : { success: false, error: `HTTP ${res.status}` };
+  } catch {
+    return { success: false, error: 'Network error' };
+  }
+}
+
+/** Add an allowed exception. */
+export async function addAnonymizationException(
+  term: string
+): Promise<AnonymizationSingleResponse<AllowedExceptionEntry>> {
+  try {
+    const res = await fetch(`${API_URL}/api/anonymization/exceptions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ term }),
+    });
+    return res.json();
+  } catch {
+    return { success: false, error: 'Network error' };
+  }
+}
+
+/** Remove an allowed exception by ID. */
+export async function removeAnonymizationException(id: string): Promise<{ success: boolean }> {
+  try {
+    const res = await fetch(`${API_URL}/api/anonymization/exceptions/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    });
+    return res.json();
+  } catch {
+    return { success: false };
+  }
+}
+
+/**
+ * Preview anonymization of a text sample.
+ * Uses the currently active custom terms and exceptions rules.
+ * No session is persisted.
+ */
+export async function previewAnonymization(text: string): Promise<PreviewResponse> {
+  try {
+    const res = await fetch(`${API_URL}/api/anonymization/preview`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text }),
+    });
+    return res.json();
+  } catch {
+    return { success: false, error: 'Network error' };
+  }
+}
