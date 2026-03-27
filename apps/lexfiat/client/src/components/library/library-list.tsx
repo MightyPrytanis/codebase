@@ -58,7 +58,10 @@ export function LibraryList({
         <div
           key={item.id}
           className="bg-charcoal border border-gray-600 rounded-lg p-4 hover:border-aqua transition-colors cursor-pointer"
+          role="button"
+          tabIndex={0}
           onClick={() => onItemClick(item)}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onItemClick(item); }}
         >
           <div className="flex items-start justify-between mb-2">
             <div className="flex-1">
