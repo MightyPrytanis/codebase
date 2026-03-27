@@ -4,13 +4,14 @@ import { AvatarUpload } from "@/components/dashboard/avatar-upload";
 import { IntegrationSettings } from "@/components/dashboard/integration-settings";
 import { AiProviderSetup } from "@/components/dashboard/ai-provider-setup";
 import { FeedbackSystem } from "@/components/dashboard/feedback-system";
+import { AnonymizationManager } from "@/components/dashboard/anonymization-manager";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Settings, User, Link, Bot, MessageSquare, Shield, Bell, ArrowLeft, Scale } from "lucide-react";
+import { Settings, User, LinkIcon, Bot, MessageSquare, Shield, Bell, ArrowLeft, Scale, EyeOff } from "lucide-react";
 import { EthicsDashboard } from "@/components/ethics/ethics-dashboard";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -116,7 +117,7 @@ export default function SettingsPage() {
               <span className="sm:hidden">Pro</span>
             </TabsTrigger>
             <TabsTrigger value="integrations" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm px-2 sm:px-3">
-              <Link className="w-3 h-3 sm:w-4 sm:h-4" />
+              <LinkIcon className="w-3 h-3 sm:w-4 sm:h-4" />
               <span className="hidden sm:inline">Integrations</span>
               <span className="sm:hidden">Int</span>
             </TabsTrigger>
@@ -129,6 +130,11 @@ export default function SettingsPage() {
               <Shield className="w-3 h-3 sm:w-4 sm:h-4" />
               <span className="hidden sm:inline">Preferences</span>
               <span className="sm:hidden">Pref</span>
+            </TabsTrigger>
+            <TabsTrigger value="anonymization" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm px-2 sm:px-3">
+              <EyeOff className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">Anonymization</span>
+              <span className="sm:hidden">Anon</span>
             </TabsTrigger>
             <TabsTrigger value="ethics" className="flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm px-2 sm:px-3">
               <Scale className="w-3 h-3 sm:w-4 sm:h-4" />
@@ -339,6 +345,10 @@ export default function SettingsPage() {
 
           <TabsContent value="ethics" className="space-y-6">
             <EthicsDashboard userId={attorney?.id?.toString()} />
+          </TabsContent>
+
+          <TabsContent value="anonymization" className="space-y-6">
+            <AnonymizationManager />
           </TabsContent>
 
           <TabsContent value="feedback">

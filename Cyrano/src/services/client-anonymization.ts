@@ -80,6 +80,21 @@ export interface AnonymizationResult {
   summary: Record<AnonymizableEntityType, number>;
 }
 
+/** A user-defined custom sensitive term */
+export interface CustomTerm {
+  id: string;
+  term: string;
+  entityType: AnonymizableEntityType;
+  createdAt: Date;
+}
+
+/** A user-defined allowed exception (term that bypasses anonymization) */
+export interface AllowedExceptionEntry {
+  id: string;
+  term: string;
+  createdAt: Date;
+}
+
 // ---------------------------------------------------------------------------
 // Token prefix map
 // ---------------------------------------------------------------------------
@@ -149,6 +164,11 @@ const DEFAULT_SESSION_TTL_MS = 4 * 60 * 60 * 1000;
 export class ClientAnonymizationService {
   private readonly sessions = new Map<string, AnonymizationSession>();
   private readonly sessionTtlMs: number;
+
+  /** User-defined terms to always anonymize, keyed by ID */
+  private readonly customTerms = new Map<string, CustomTerm>();
+  /** User-defined allowed exceptions keyed by ID; normalized (lowercase) term → entry */
+  private readonly allowedExceptions = new Map<string, AllowedExceptionEntry>();
 
   constructor(sessionTtlMs: number = DEFAULT_SESSION_TTL_MS) {
     this.sessionTtlMs = sessionTtlMs;
@@ -261,6 +281,93 @@ export class ClientAnonymizationService {
     }
 
     return result;
+  }
+
+  // -------------------------------------------------------------------------
+  // Custom terms management
+  // -------------------------------------------------------------------------
+
+  /**
+   * Add a user-defined sensitive term that will always be anonymized.
+   * Returns the newly created entry (id assigned automatically).
+   */
+  addCustomTerm(term: string, entityType: AnonymizableEntityType): CustomTerm {
+    const entry: CustomTerm = {
+      id: randomUUID(),
+      term: term.trim(),
+      entityType,
+      createdAt: new Date(),
+    };
+    this.customTerms.set(entry.id, entry);
+    return entry;
+  }
+
+  /**
+   * Remove a custom sensitive term by its ID.
+   * Returns true if the term was found and removed, false otherwise.
+   */
+  removeCustomTerm(id: string): boolean {
+    return this.customTerms.delete(id);
+  }
+
+  /** Return all user-defined sensitive terms. */
+  listCustomTerms(): CustomTerm[] {
+    return Array.from(this.customTerms.values()).sort(
+      (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // Allowed exceptions management
+  // -------------------------------------------------------------------------
+
+  /**
+   * Add a term to the allowed exceptions list.  Terms on this list are never
+   * anonymized, even if they would otherwise match a built-in pattern.
+   * Returns the newly created entry.
+   */
+  addException(term: string): AllowedExceptionEntry {
+    const entry: AllowedExceptionEntry = {
+      id: randomUUID(),
+      term: term.trim(),
+      createdAt: new Date(),
+    };
+    this.allowedExceptions.set(entry.id, entry);
+    return entry;
+  }
+
+  /**
+   * Remove an allowed exception by its ID.
+   * Returns true if the entry was found and removed, false otherwise.
+   */
+  removeException(id: string): boolean {
+    return this.allowedExceptions.delete(id);
+  }
+
+  /** Return all user-defined allowed exceptions. */
+  listExceptions(): AllowedExceptionEntry[] {
+    return Array.from(this.allowedExceptions.values()).sort(
+      (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
+    );
+  }
+
+  /**
+   * Preview anonymization of a text without persisting a session.
+   * Useful for the UI preview box – returns both the anonymized text and a
+   * summary of what was replaced.
+   */
+  preview(text: string): Omit<AnonymizationResult, 'sessionId'> {
+    const tmpSvc = new ClientAnonymizationService(60_000);
+    // Copy custom rules into the temporary service
+    for (const t of this.customTerms.values()) tmpSvc.customTerms.set(t.id, t);
+    for (const e of this.allowedExceptions.values()) tmpSvc.allowedExceptions.set(e.id, e);
+    const result = tmpSvc.anonymize(text);
+    return {
+      anonymizedText: result.anonymizedText,
+      entitiesReplaced: result.entitiesReplaced,
+      riskCategory: result.riskCategory,
+      summary: result.summary,
+    };
   }
 
   /**
@@ -412,8 +519,26 @@ export class ClientAnonymizationService {
     this.addRegexSpans(text, ACCOUNT_PATTERN, 'account', spans);
     ACCOUNT_PATTERN.lastIndex = 0;
 
+    // --- User-defined custom sensitive terms ---
+    for (const ct of this.customTerms.values()) {
+      const escaped = ct.term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const pattern = new RegExp(escaped, 'gi');
+      this.addRegexSpans(text, pattern, ct.entityType, spans);
+    }
+
     // Remove overlapping spans (keep highest-confidence / longest)
-    return this.removeOverlaps(spans);
+    const merged = this.removeOverlaps(spans);
+
+    // --- Apply allowed exceptions ---
+    // Any span whose text exactly matches an allowed exception (case-insensitive)
+    // is removed so that the original text is preserved.
+    if (this.allowedExceptions.size === 0) {
+      return merged;
+    }
+    const exceptionSet = new Set(
+      Array.from(this.allowedExceptions.values()).map(e => e.term.toLowerCase())
+    );
+    return merged.filter(span => !exceptionSet.has(span.text.toLowerCase()));
   }
 
   /** Add spans from a regex to the spans array */
