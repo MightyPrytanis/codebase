@@ -103,7 +103,15 @@ export function WorkflowStatusPanels({
                 e.stopPropagation();
                 onActionClick?.("respond", "incoming");
               }}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onActionClick?.("respond", "incoming"); }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.stopPropagation();
+                  if (e.key === " ") {
+                    e.preventDefault();
+                  }
+                  onActionClick?.("respond", "incoming");
+                }
+              }}
             >
               <div className="flex items-center gap-2">
                 <MessageSquare className="h-4 w-4 text-primary" />
