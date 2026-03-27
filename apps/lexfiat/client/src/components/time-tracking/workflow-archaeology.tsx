@@ -28,7 +28,7 @@ export interface WorkflowArchaeologyResult {
         id: string;
         timestamp: string;
         content?: string;
-        metadata?: Record<string, any>;
+        metadata?: Record<string, unknown>;
       }>;
       confidence: 'low' | 'medium' | 'high';
       duration_minutes?: number;
@@ -40,7 +40,7 @@ export interface WorkflowArchaeologyResult {
     };
     confidence: 'low' | 'medium' | 'high';
     gaps: Array<{ start: string; end: string; reason: string }>;
-    metadata: Record<string, any>;
+    metadata: Record<string, unknown>;
   };
   usage_note: {
     lexfiat: string;
@@ -59,12 +59,12 @@ export function WorkflowArchaeology({ userId, onReconstruct }: WorkflowArchaeolo
   const [startTime, setStartTime] = useState('');
   const [endTime, setEndTime] = useState('');
   const [matterId, setMatterId] = useState('');
-  const [artifacts, setArtifacts] = useState<Array<{
+  const [artifacts] = useState<Array<{
     type: 'email' | 'calendar' | 'document' | 'call' | 'other';
     id: string;
     timestamp: string;
     content?: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   }>>([]);
 
   const reconstructionMutation = useMutation({
@@ -72,8 +72,8 @@ export function WorkflowArchaeology({ userId, onReconstruct }: WorkflowArchaeolo
       start_time: string;
       end_time: string;
       granularity?: 'hour' | 'day' | 'week';
-      context?: Record<string, any>;
-      artifacts: Array<any>;
+      context?: Record<string, unknown>;
+      artifacts: Array<unknown>;
     }) => {
       const result = await executeCyranoTool('workflow_archaeology', params);
       
@@ -93,7 +93,7 @@ export function WorkflowArchaeology({ userId, onReconstruct }: WorkflowArchaeolo
       }
     },
     onError: (error) => {
-      showAIOfflineError(error);
+      showAIOfflineError(error instanceof Error ? error.message : String(error));
     },
   });
 
@@ -108,7 +108,7 @@ export function WorkflowArchaeology({ userId, onReconstruct }: WorkflowArchaeolo
       return;
     }
 
-    const context: Record<string, any> = { user_id: userId };
+    const context: Record<string, unknown> = { user_id: userId };
     if (matterId) context.matter_id = matterId;
 
     reconstructionMutation.mutate({
@@ -159,7 +159,7 @@ export function WorkflowArchaeology({ userId, onReconstruct }: WorkflowArchaeolo
 
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-secondary mb-2">
+          <label htmlFor="archaeology-period" className="block text-sm font-medium text-secondary mb-2">
             Period Granularity
           </label>
           <Select value={selectedPeriod} onValueChange={(value: 'hour' | 'day' | 'week') => {
@@ -179,10 +179,11 @@ export function WorkflowArchaeology({ userId, onReconstruct }: WorkflowArchaeolo
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-secondary mb-2">
+            <label htmlFor="archaeology-start" className="block text-sm font-medium text-secondary mb-2">
               Start Time
             </label>
             <input
+              id="archaeology-start"
               type="datetime-local"
               value={startTime}
               onChange={(e) => setStartTime(e.target.value)}
@@ -190,10 +191,11 @@ export function WorkflowArchaeology({ userId, onReconstruct }: WorkflowArchaeolo
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-secondary mb-2">
+            <label htmlFor="archaeology-end" className="block text-sm font-medium text-secondary mb-2">
               End Time
             </label>
             <input
+              id="archaeology-end"
               type="datetime-local"
               value={endTime}
               onChange={(e) => setEndTime(e.target.value)}
@@ -203,10 +205,11 @@ export function WorkflowArchaeology({ userId, onReconstruct }: WorkflowArchaeolo
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-secondary mb-2">
+          <label htmlFor="archaeology-matter" className="block text-sm font-medium text-secondary mb-2">
             Matter ID (optional)
           </label>
           <input
+            id="archaeology-matter"
             type="text"
             value={matterId}
             onChange={(e) => setMatterId(e.target.value)}

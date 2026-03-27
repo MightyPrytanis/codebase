@@ -22,7 +22,7 @@ export default function NotificationToast({
 
   useEffect(() => {
     if (show) {
-      setIsVisible(true);
+      setTimeout(() => setIsVisible(true), 0);
       const timer = setTimeout(() => {
         setIsVisible(false);
         setTimeout(onClose, 300); // Wait for animation to complete

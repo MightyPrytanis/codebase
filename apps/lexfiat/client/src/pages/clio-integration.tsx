@@ -5,8 +5,8 @@
  */
 
 import React, { useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { Scale, Loader2, CheckCircle, AlertCircle, FileText, Users, Calendar, Search, Briefcase } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { Scale, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { executeCyranoTool } from "@/lib/cyrano-api";
 
 type ClioAction = 
@@ -31,7 +31,7 @@ export default function ClioIntegration() {
   const [searchQuery, setSearchQuery] = useState('');
 
   const clioMutation = useMutation({
-    mutationFn: async (params: any) => {
+    mutationFn: async (params: Record<string, unknown>) => {
       const result = await executeCyranoTool('clio_integration', params);
       
       if (result.isError) {
@@ -47,7 +47,7 @@ export default function ClioIntegration() {
   });
 
   const handleExecute = () => {
-    const params: any = { action };
+    const params: Record<string, unknown> = { action };
     
     if (matterId) params.matter_id = matterId;
     if (clientId) params.client_id = clientId;
@@ -77,10 +77,11 @@ export default function ClioIntegration() {
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-secondary mb-2">
+                  <label htmlFor="clio-action" className="block text-sm font-medium text-secondary mb-2">
                     Action
                   </label>
                   <select
+                    id="clio-action"
                     value={action}
                     onChange={(e) => setAction(e.target.value as ClioAction)}
                     className="w-full bg-primary-dark border border-border-gray rounded-lg px-4 py-2 text-primary focus:outline-none focus:ring-2 focus:ring-accent-gold"
@@ -112,10 +113,11 @@ export default function ClioIntegration() {
 
                 {(action === 'get_matter_info' || action === 'get_case_status' || action === 'get_workflow_status') && (
                   <div>
-                    <label className="block text-sm font-medium text-secondary mb-2">
+                    <label htmlFor="clio-matter-id" className="block text-sm font-medium text-secondary mb-2">
                       Matter ID
                     </label>
                     <input
+                      id="clio-matter-id"
                       type="text"
                       value={matterId}
                       onChange={(e) => setMatterId(e.target.value)}
@@ -127,10 +129,11 @@ export default function ClioIntegration() {
 
                 {action === 'get_client_info' && (
                   <div>
-                    <label className="block text-sm font-medium text-secondary mb-2">
+                    <label htmlFor="clio-client-id" className="block text-sm font-medium text-secondary mb-2">
                       Client ID
                     </label>
                     <input
+                      id="clio-client-id"
                       type="text"
                       value={clientId}
                       onChange={(e) => setClientId(e.target.value)}
@@ -142,10 +145,11 @@ export default function ClioIntegration() {
 
                 {action === 'get_document_info' && (
                   <div>
-                    <label className="block text-sm font-medium text-secondary mb-2">
+                    <label htmlFor="clio-document-id" className="block text-sm font-medium text-secondary mb-2">
                       Document ID
                     </label>
                     <input
+                      id="clio-document-id"
                       type="text"
                       value={documentId}
                       onChange={(e) => setDocumentId(e.target.value)}
@@ -157,10 +161,11 @@ export default function ClioIntegration() {
 
                 {(action === 'search_matters' || action === 'search_documents') && (
                   <div>
-                    <label className="block text-sm font-medium text-secondary mb-2">
+                    <label htmlFor="clio-search-query" className="block text-sm font-medium text-secondary mb-2">
                       Search Query
                     </label>
                     <input
+                      id="clio-search-query"
                       type="text"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}

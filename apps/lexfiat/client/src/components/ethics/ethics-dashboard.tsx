@@ -19,7 +19,6 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Shield, 
   CheckCircle, 
@@ -27,7 +26,6 @@ import {
   AlertTriangle, 
   TrendingUp,
   FileText,
-  Filter,
   Download,
   RefreshCw
 } from 'lucide-react';
@@ -43,7 +41,7 @@ interface EthicsCheck {
   blocked: boolean;
   complianceScore: number;
   warnings: string[];
-  checkDetails?: any;
+  checkDetails?: unknown;
 }
 
 interface EthicsDashboardProps {
