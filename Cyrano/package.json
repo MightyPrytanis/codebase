@@ -118,7 +118,7 @@
     "drizzle-kit": "^0.31.9",
     "eslint": "^10.1.0",
     "globals": "^17.4.0",
-    "imapflow": "^1.2.10",
+    "imapflow": "^1.2.18",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.0",
