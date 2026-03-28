@@ -13,7 +13,7 @@ import { users } from './schema.js';
  */
 export const practiceProfiles = pgTable('practice_profiles', {
   id: uuid('id').primaryKey().defaultRandom(),
-  userId: integer('user_id').references(() => users.id).notNull(),
+  userId: integer('user_id').notNull(),
   
   // Jurisdictions
   primaryJurisdiction: text('primary_jurisdiction').notNull(),
