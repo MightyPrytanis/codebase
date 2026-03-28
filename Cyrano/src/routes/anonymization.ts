@@ -124,7 +124,7 @@ router.post('/anonymization/terms', async (req: Request, res: Response) => {
     if (!parsed.success) {
       return res.status(400).json({
         success: false,
-        error: parsed.error.errors.map(e => e.message).join(', '),
+        error: parsed.error.issues.map(e => e.message).join(', '),
       });
     }
 
@@ -142,7 +142,7 @@ router.post('/anonymization/terms', async (req: Request, res: Response) => {
  */
 router.delete('/anonymization/terms/:id', async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params['id']);
     const removed = clientAnonymizationService.removeCustomTerm(id);
     if (!removed) {
       return res.status(404).json({ success: false, error: 'Custom term not found' });
@@ -183,7 +183,7 @@ router.post('/anonymization/exceptions', async (req: Request, res: Response) => 
     if (!parsed.success) {
       return res.status(400).json({
         success: false,
-        error: parsed.error.errors.map(e => e.message).join(', '),
+        error: parsed.error.issues.map(e => e.message).join(', '),
       });
     }
 
@@ -201,7 +201,7 @@ router.post('/anonymization/exceptions', async (req: Request, res: Response) => 
  */
 router.delete('/anonymization/exceptions/:id', async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params['id']);
     const removed = clientAnonymizationService.removeException(id);
     if (!removed) {
       return res.status(404).json({ success: false, error: 'Exception not found' });
@@ -231,7 +231,7 @@ router.post('/anonymization/preview', (req: Request, res: Response) => {
     if (!parsed.success) {
       return res.status(400).json({
         success: false,
-        error: parsed.error.errors.map(e => e.message).join(', '),
+        error: parsed.error.issues.map(e => e.message).join(', '),
       });
     }
 

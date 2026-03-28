@@ -103,9 +103,13 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
   }, 30000);
 
   afterAll(async () => {
-    if (stopServer) {
-      await stopServer();
-    }
+    await new Promise<void>((resolve) => {
+      if (server) {
+        server.close(() => resolve());
+      } else {
+        resolve();
+      }
+    });
   });
 
   describe('POST /api/onboarding/practice-profile', () => {
