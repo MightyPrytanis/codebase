@@ -1,0 +1,249 @@
+name: Persistent CodeFactor Auto-Fix Agent
+
+# This workflow is the persistent CodeFactor quality agent.
+# It runs continuously (scheduled + event-driven) and keeps the codebase
+# aligned with CodeFactor's quality expectations.
+#
+# Scope: currently configured for the MightyPrytanis/codebase monorepo.
+# Portability: this workflow is designed to be copy-portable to any repository
+# where CodeFactor is active — update the workspace install/lint steps in the
+# proactive job to match the target repo's directory structure.
+#
+# Two modes of operation:
+#   1. Reactive  – when codefactor-io[bot] opens/updates a PR, auto-approve
+#                  and enable auto-merge so it lands on main as soon as CI passes.
+#                  (Fully automated — CodeFactor only proposes conservative fixes
+#                  and CI is the safety gate.)
+#   2. Proactive – on a schedule, run ESLint --fix across every workspace,
+#                  commit any changes to a dedicated branch, and open a
+#                  labelled PR for human review and merge.
+#                  (Semi-automated — the agent does the discovery and staging;
+#                  the maintainer performs the final merge click.)
+
+on:
+  # Reactive: fire immediately when CodeFactor creates or updates a PR
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+  # Proactive: scan and fix the full codebase every 6 hours
+  schedule:
+    - cron: '0 */6 * * *'
+
+  # Allow manual trigger for ad-hoc runs
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+# ──────────────────────────────────────────────────────────────────────────────
+# JOB 1 – Reactive: auto-approve and auto-merge CodeFactor's own PRs
+# ──────────────────────────────────────────────────────────────────────────────
+jobs:
+  merge-codefactor-pr:
+    name: Auto-approve & merge CodeFactor PR
+    runs-on: ubuntu-latest
+    # Only when the actor and PR author are the CodeFactor bot and the PR is from this repo (not a fork)
+    if: >
+      github.event_name == 'pull_request' &&
+      github.actor == 'codefactor-io[bot]' &&
+      github.event.pull_request.user.login == 'codefactor-io[bot]' &&
+      github.event.pull_request.head.repo.full_name == github.repository
+
+    steps:
+      - name: Auto-approve
+        run: |
+          gh pr review "$PR_URL" \
+            --approve \
+            --body "✓ Auto-approved by the persistent CodeFactor agent."
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Enable auto-merge (squash)
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Label
+        run: |
+          gh pr edit "$PR_URL" \
+            --add-label "codefactor-autofix" \
+            --repo "$GITHUB_REPOSITORY" || true
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # JOB 2 – Proactive: scheduled ESLint --fix sweep across every workspace
+  # ──────────────────────────────────────────────────────────────────────────
+  # NOTE: This job uses GITHUB_TOKEN (not a PAT).  GITHUB_TOKEN is sufficient
+  # for a solo-maintainer repository where no cross-workflow triggers are
+  # needed.  If CI checks on the auto-fix PRs need to trigger downstream
+  # workflows, replace GITHUB_TOKEN with a PAT stored in secrets.
+  #
+  # Semi-automated by design: the proactive job creates and labels a PR but
+  # does NOT auto-merge it.  The maintainer reviews the diff and clicks Merge.
+  # The reactive job (CodeFactor's own PRs) remains fully automated because
+  # CodeFactor is conservative and CI is the safety gate.
+  eslint-autofix:
+    name: Scheduled ESLint auto-fix sweep
+    runs-on: ubuntu-latest
+    # Run on schedule and manual dispatch; skip pull_request events unless
+    # this is a workflow_dispatch that happened to coincide with a PR trigger.
+    if: >
+      github.event_name == 'schedule' ||
+      github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # ── Cyrano ──────────────────────────────────────────────────────────────
+      - name: Install Cyrano dependencies
+        id: install_cyrano
+        run: npm ci
+        working-directory: ./Cyrano
+        continue-on-error: true
+
+      - name: ESLint --fix Cyrano
+        if: steps.install_cyrano.outcome == 'success'
+        run: npm run lint:fix
+        working-directory: ./Cyrano
+
+      - name: Skipped Cyrano lint (install failed)
+        if: steps.install_cyrano.outcome != 'success'
+        run: echo "Skipping Cyrano ESLint --fix because npm ci failed for ./Cyrano"
+
+      # ── LexFiat client ──────────────────────────────────────────────────────
+      - name: Install LexFiat client dependencies
+        id: install_lexfiat_client
+        run: npm ci
+        working-directory: ./apps/lexfiat/client
+        continue-on-error: true
+
+      - name: ESLint --fix LexFiat client
+        if: steps.install_lexfiat_client.outcome == 'success'
+        run: npx eslint --fix "src/**/*.{ts,tsx,js,jsx}"
+        working-directory: ./apps/lexfiat/client
+
+      - name: Skipped LexFiat client lint (install failed)
+        if: steps.install_lexfiat_client.outcome != 'success'
+        run: echo "Skipping LexFiat client ESLint --fix because npm ci failed for ./apps/lexfiat/client"
+
+      # ── Arkiver frontend ────────────────────────────────────────────────────
+      - name: Install Arkiver frontend dependencies
+        id: install_arkiver_frontend
+        run: npm ci
+        working-directory: ./apps/arkiver/frontend
+        continue-on-error: true
+
+      - name: ESLint --fix Arkiver frontend
+        if: steps.install_arkiver_frontend.outcome == 'success'
+        run: npx eslint --fix "src/**/*.{ts,tsx,js,jsx}"
+        working-directory: ./apps/arkiver/frontend
+
+      - name: Skipped Arkiver frontend lint (install failed)
+        if: steps.install_arkiver_frontend.outcome != 'success'
+        run: echo "Skipping Arkiver frontend ESLint --fix because npm ci failed for ./apps/arkiver/frontend"
+      # ── SwimMeet (mae-client) frontend ──────────────────────────────────────
+      - name: Install SwimMeet frontend dependencies
+        run: npm ci
+        working-directory: ./apps/mae-client/frontend
+        continue-on-error: true
+
+      - name: ESLint --fix SwimMeet frontend
+        run: npx eslint --fix "src/**/*.{ts,tsx,js,jsx}" || true
+        working-directory: ./apps/mae-client/frontend
+
+      # ── SwimMeet backend ────────────────────────────────────────────────────
+      - name: Install SwimMeet backend dependencies
+        run: npm ci
+        working-directory: ./apps/mae-client/backend
+        continue-on-error: true
+
+      - name: ESLint --fix SwimMeet backend
+        run: npx eslint --fix "src/**/*.{ts,tsx,js,jsx}" || true
+        working-directory: ./apps/mae-client/backend
+
+      # ── Check for changes ───────────────────────────────────────────────────
+      - name: Detect changes
+        id: changes
+        run: |
+          git diff --quiet && echo "has_changes=false" >> "$GITHUB_OUTPUT" \
+                           || echo "has_changes=true"  >> "$GITHUB_OUTPUT"
+          git diff --stat
+
+      # ── Commit & PR ─────────────────────────────────────────────────────────
+      - name: Create branch, commit, and open/update PR
+        if: steps.changes.outputs.has_changes == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name  "github-actions[bot]"
+
+          BRANCH="codefactor-autofix/$(date -u +%Y-%m-%d)"
+
+          # Re-use an existing branch for today's run so we don't spam PRs
+          if git ls-remote --exit-code origin "refs/heads/$BRANCH" > /dev/null 2>&1; then
+            # If there are local changes from fixers, stash them before switching branches
+            STASH_CREATED=0
+            if ! git diff --quiet || ! git diff --cached --quiet; then
+              git stash push -u -m "codefactor-autofix-$(date -u +%Y-%m-%dT%H:%M)Z"
+              STASH_CREATED=1
+            fi
+
+            git fetch origin "$BRANCH:$BRANCH"
+            git checkout "$BRANCH"
+            # Merge main changes; abort on conflict rather than silently producing broken state
+            if ! git merge --no-edit origin/main; then
+              echo "::warning::Merge conflict detected when rebasing $BRANCH onto main. Aborting merge."
+              git merge --abort || true
+              # Fall back to a reset to origin/main; stashed changes (if any) will be re-applied below
+              git reset --hard origin/main
+            fi
+
+            # Re-apply any stashed autofix changes onto the updated branch
+            if [ "$STASH_CREATED" -eq 1 ]; then
+              git stash pop || true
+            fi
+          else
+            git checkout -b "$BRANCH"
+          fi
+
+          git add .
+          git commit -m "fix: persistent CodeFactor auto-fixes [$(date -u +%Y-%m-%dT%H:%M)Z]" \
+            --author "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+          git push origin "$BRANCH"
+
+          # Create PR only if one doesn't exist yet for today's branch
+          EXISTING_PR=$(gh pr list --head "$BRANCH" --json number --jq '.[0].number' || echo "")
+          if [ -z "$EXISTING_PR" ]; then
+            gh pr create \
+              --title "fix: persistent CodeFactor auto-fixes [$(date -u +%Y-%m-%d)]" \
+              --body "## Persistent CodeFactor Auto-Fix Agent
+
+          Automated ESLint \`--fix\` sweep applied by the persistent CodeFactor agent.
+
+          **Triggered by:** scheduled run at $(date -u +%Y-%m-%dT%H:%MZ)
+
+          Please review the diff and merge when satisfied." \
+              --base main \
+              --head "$BRANCH"
+            # Label the PR so it is easy to find; no auto-merge — maintainer merges manually.
+            NEW_PR_URL=$(gh pr list --head "$BRANCH" --json url --jq '.[0].url')
+            gh pr edit "$NEW_PR_URL" \
+              --add-label "codefactor-autofix" || true
+          else
+            echo "PR #$EXISTING_PR already exists for branch $BRANCH — updated with new commit."
+          fi

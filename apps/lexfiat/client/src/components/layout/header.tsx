@@ -5,7 +5,7 @@
  */
 
 import React, { useState, useEffect } from "react";
-import { Mail, Briefcase, Calendar, BookOpen, Settings, HelpCircle, User, CheckCircle2, AlertTriangle, X, Clock, Network, Menu } from "lucide-react";
+import { Mail, Briefcase, Calendar, BookOpen, Settings, HelpCircle, User, CheckCircle2, AlertTriangle, Menu } from "lucide-react";
 import { LiaSwimmerSolid } from "react-icons/lia";
 import { AIIcon } from "@/components/ui/ai-icon";
 import { isDemoMode } from "@/lib/demo-service";
@@ -23,18 +23,17 @@ interface HeaderProps {
   onProfileClick?: () => void;
 }
 
+const slogans = [
+  'The Power of Clarity',
+  'See the Things that Matter', 
+  'Intelligence + Insight = Illumination'
+];
+
 export default function Header({ attorney, onAdminClick, onSettingsClick, onProfileClick }: HeaderProps) {
   const [currentSlogan, setCurrentSlogan] = useState("The Power of Clarity");
   const [demoMode, setDemoMode] = useState(false);
-  const [statusMenuOpen, setStatusMenuOpen] = useState(false);
   const [menuPanelOpen, setMenuPanelOpen] = useState(false);
   const [showHelpMenu, setShowHelpMenu] = useState(false);
-  
-  const slogans = [
-    'The Power of Clarity',
-    'See the Things that Matter', 
-    'Intelligence + Insight = Illumination'
-  ];
 
   useEffect(() => {
     let sloganIndex = 0;
@@ -46,7 +45,7 @@ export default function Header({ attorney, onAdminClick, onSettingsClick, onProf
   }, []);
 
   useEffect(() => {
-    setDemoMode(isDemoMode());
+    setTimeout(() => setDemoMode(isDemoMode()), 0);
     const handleStorageChange = () => {
       setDemoMode(isDemoMode());
     };
@@ -89,7 +88,7 @@ export default function Header({ attorney, onAdminClick, onSettingsClick, onProf
         <div className="header-right">
           {/* Status Indicators - Always Visible */}
           <div className="status-indicators-bar">
-            <div className="status-indicator" onClick={() => expandPanel('gmail')}>
+            <div className="status-indicator" role="button" tabIndex={0} onClick={() => expandPanel('gmail')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') expandPanel('gmail'); }}>
               <Mail className="status-icon" style={{ width: '18px', height: '18px' }} />
               <div className="status-name">Gmail</div>
               {demoMode ? (
@@ -98,7 +97,7 @@ export default function Header({ attorney, onAdminClick, onSettingsClick, onProf
                 <CheckCircle2 className="status-indicator-icon" style={{ width: '12px', height: '12px', color: '#10B981' }} />
               )}
             </div>
-            <div className="status-indicator" onClick={() => expandPanel('ai-status')}>
+            <div className="status-indicator" role="button" tabIndex={0} onClick={() => expandPanel('ai-status')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') expandPanel('ai-status'); }}>
               <AIIcon size={18} className="status-icon" color="rgba(255, 255, 255, 0.9)" />
               <div className="status-name">AI</div>
               {demoMode ? (
@@ -107,7 +106,7 @@ export default function Header({ attorney, onAdminClick, onSettingsClick, onProf
                 <AlertTriangle className="status-indicator-icon" style={{ width: '12px', height: '12px', color: '#F59E0B' }} />
               )}
             </div>
-            <div className="status-indicator" onClick={() => expandPanel('multi-agent')}>
+            <div className="status-indicator" role="button" tabIndex={0} onClick={() => expandPanel('multi-agent')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') expandPanel('multi-agent'); }}>
               <div className="multi-agent-icon-group">
                 <LiaSwimmerSolid style={{ width: '14px', height: '14px', position: 'absolute', top: '0px', left: '0px', opacity: 0.5 }} />
                 <LiaSwimmerSolid style={{ width: '14px', height: '14px', position: 'absolute', top: '4px', left: '4px', opacity: 0.7 }} />
@@ -120,7 +119,7 @@ export default function Header({ attorney, onAdminClick, onSettingsClick, onProf
                 <CheckCircle2 className="status-indicator-icon" style={{ width: '12px', height: '12px', color: '#10B981' }} />
               )}
             </div>
-            <div className="status-indicator" onClick={() => expandPanel('clio')}>
+            <div className="status-indicator" role="button" tabIndex={0} onClick={() => expandPanel('clio')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') expandPanel('clio'); }}>
               <Briefcase className="status-icon" style={{ width: '18px', height: '18px' }} />
               <div className="status-name">Clio</div>
               {demoMode ? (
@@ -129,7 +128,7 @@ export default function Header({ attorney, onAdminClick, onSettingsClick, onProf
                 <AlertTriangle className="status-indicator-icon" style={{ width: '12px', height: '12px', color: '#F59E0B' }} />
               )}
             </div>
-            <div className="status-indicator" onClick={() => expandPanel('calendar')}>
+            <div className="status-indicator" role="button" tabIndex={0} onClick={() => expandPanel('calendar')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') expandPanel('calendar'); }}>
               <Calendar className="status-icon" style={{ width: '18px', height: '18px' }} />
               <div className="status-name">Calendar</div>
               {demoMode ? (
@@ -138,7 +137,7 @@ export default function Header({ attorney, onAdminClick, onSettingsClick, onProf
                 <CheckCircle2 className="status-indicator-icon" style={{ width: '12px', height: '12px', color: '#10B981' }} />
               )}
             </div>
-            <div className="status-indicator" onClick={() => expandPanel('research')}>
+            <div className="status-indicator" role="button" tabIndex={0} onClick={() => expandPanel('research')} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') expandPanel('research'); }}>
               <BookOpen className="status-icon" style={{ width: '18px', height: '18px' }} />
               <div className="status-name">Research</div>
               {demoMode ? (
@@ -147,7 +146,7 @@ export default function Header({ attorney, onAdminClick, onSettingsClick, onProf
                 <AlertTriangle className="status-indicator-icon" style={{ width: '12px', height: '12px', color: '#F59E0B' }} />
               )}
             </div>
-            <div className="status-indicator demo-status" onClick={toggleDemoMode}>
+            <div className="status-indicator demo-status" role="button" tabIndex={0} onClick={toggleDemoMode} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') toggleDemoMode(); }}>
               <span className="demo-label">{demoMode ? 'DEMO' : 'Demo'}</span>
               <div className="status-name">Mode</div>
               {demoMode ? (
@@ -173,21 +172,21 @@ export default function Header({ attorney, onAdminClick, onSettingsClick, onProf
               onMouseEnter={() => setMenuPanelOpen(true)}
               onMouseLeave={() => setMenuPanelOpen(false)}
             >
-              <div className="menu-panel-item" onClick={() => setShowHelpMenu(true)}>
+              <div className="menu-panel-item" role="button" tabIndex={0} onClick={() => setShowHelpMenu(true)} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setShowHelpMenu(true); }}>
                 <HelpCircle size={18} />
                 <span>Help</span>
               </div>
               {isAdminSync() && (
-                <div className="menu-panel-item admin" onClick={() => { if (onAdminClick) onAdminClick(); else expandPanel('admin'); }}>
+                <div className="menu-panel-item admin" role="button" tabIndex={0} onClick={() => { if (onAdminClick) onAdminClick(); else expandPanel('admin'); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { if (onAdminClick) onAdminClick(); else expandPanel('admin'); } }}>
                   <Settings size={18} />
                   <span>Admin</span>
                 </div>
               )}
-              <div className="menu-panel-item" onClick={() => { if (onSettingsClick) onSettingsClick(); else expandPanel('settings'); }}>
+              <div className="menu-panel-item" role="button" tabIndex={0} onClick={() => { if (onSettingsClick) onSettingsClick(); else expandPanel('settings'); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { if (onSettingsClick) onSettingsClick(); else expandPanel('settings'); } }}>
                 <Settings size={18} />
                 <span>Settings</span>
               </div>
-              <div className="menu-panel-item" onClick={() => { if (onProfileClick) onProfileClick(); else expandPanel('profile'); }}>
+              <div className="menu-panel-item" role="button" tabIndex={0} onClick={() => { if (onProfileClick) onProfileClick(); else expandPanel('profile'); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { if (onProfileClick) onProfileClick(); else expandPanel('profile'); } }}>
                 <User size={18} />
                 <span>Profile</span>
               </div>
@@ -199,7 +198,7 @@ export default function Header({ attorney, onAdminClick, onSettingsClick, onProf
           </div>
 
           <div className="avatar-section">
-            <div className="avatar" onClick={() => { if (onProfileClick) onProfileClick(); else expandPanel('profile'); }} title="Click to edit profile">
+            <div className="avatar" role="button" tabIndex={0} onClick={() => { if (onProfileClick) onProfileClick(); else expandPanel('profile'); }} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { if (onProfileClick) onProfileClick(); else expandPanel('profile'); } }} title="Click to edit profile">
               <img 
                 src="/assets/avatars/mekel-miller.jpg" 
                 alt={attorney?.name || "Mekel S. Miller"}

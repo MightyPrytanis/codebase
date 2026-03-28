@@ -9,8 +9,8 @@
  * Handles loading and managing demo data using mock pleadings
  */
 
-import { DEMO_CASES, MOCK_PLEADINGS, getAllDemoCases, getAllDemoDocuments } from './demo-data';
-import { safeSetJSON, safeGetJSON, safeRemoveItem, safeGetItem } from './secure-storage';
+import { getAllDemoCases, getAllDemoDocuments } from './demo-data';
+import { safeSetJSON, safeGetJSON, safeRemoveItem, safeGetItem, safeSetItem } from './secure-storage';
 
 export interface DemoLoadResult {
   casesLoaded: number;
@@ -76,17 +76,17 @@ export function isDemoMode(): boolean {
 /**
  * Get demo data from localStorage
  */
-export function getDemoData(): any {
+export function getDemoData(): unknown {
   return safeGetJSON('lexfiat_demo_data');
 }
 
 /**
  * Generate demo red flags based on cases
  */
-function generateDemoRedFlags(cases: any[]): any[] {
-  const flags: any[] = [];
+function generateDemoRedFlags(cases: unknown[]): unknown[] {
+  const flags: unknown[] = [];
 
-  cases.forEach((case_) => {
+  (cases as Array<{ priority: string; deadline?: string; id: string; case_name: string; documents?: unknown[] }>).forEach((case_) => {
     if (case_.priority === 'critical' && case_.deadline) {
       flags.push({
         id: `flag-${case_.id}-deadline`,
@@ -117,16 +117,16 @@ function generateDemoRedFlags(cases: any[]): any[] {
 /**
  * Get demo cases for display
  */
-export function getDemoCases(): any[] {
-  const demoData = getDemoData();
+export function getDemoCases(): unknown[] {
+  const demoData = getDemoData() as { cases?: unknown[] } | null;
   return demoData?.cases || getAllDemoCases();
 }
 
 /**
  * Get demo documents for display
  */
-export function getDemoDocuments(): any[] {
-  const demoData = getDemoData();
+export function getDemoDocuments(): unknown[] {
+  const demoData = getDemoData() as { documents?: unknown[] } | null;
   return demoData?.documents || getAllDemoDocuments();
 
 }

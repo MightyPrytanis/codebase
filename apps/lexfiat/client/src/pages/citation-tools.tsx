@@ -6,7 +6,7 @@
 
 import React, { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { FileText, Loader2, CheckCircle, AlertCircle, BookOpen, Search } from "lucide-react";
+import { FileText, Loader2, AlertCircle, BookOpen, Search } from "lucide-react";
 import { executeCyranoTool } from "@/lib/cyrano-api";
 import Header from "@/components/layout/header";
 
@@ -85,10 +85,11 @@ export default function CitationTools() {
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-primary mb-2">
+                  <label htmlFor="doc-text" className="block text-sm font-medium text-primary mb-2">
                     Document Text (optional context)
                   </label>
                   <textarea
+                    id="doc-text"
                     value={documentText}
                     onChange={(e) => setDocumentText(e.target.value)}
                     placeholder="Paste document text here for context checking..."
@@ -106,11 +107,12 @@ export default function CitationTools() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-primary mb-2">
+                  <label htmlFor="citation-input" className="block text-sm font-medium text-primary mb-2">
                     Citations to Check
                   </label>
                   <div className="flex gap-2 mb-2">
                     <input
+                      id="citation-input"
                       type="text"
                       value={citationInput}
                       onChange={(e) => setCitationInput(e.target.value)}
@@ -246,7 +248,7 @@ export default function CitationTools() {
                   {citationMutation.data.validations && citationMutation.data.validations.length > 0 && (
                     <div className="space-y-3">
                       <h3 className="text-sm font-semibold text-primary">Individual Validations</h3>
-                      {citationMutation.data.validations.map((validation: any, idx: number) => (
+                      {(citationMutation.data.validations as Array<{citation?: string; status?: string; errors?: string[]; warnings?: string[]; format?: string}>).map((validation, idx: number) => (
                         <div key={idx} className="bg-navy rounded-lg p-4 border border-border-gray">
                           <div className="flex items-start justify-between mb-2">
                             <span className="text-primary font-medium text-sm">{validation.citation}</span>
@@ -294,7 +296,7 @@ export default function CitationTools() {
               {!citationMutation.data && !citationMutation.isPending && !citationMutation.isError && (
                 <div className="text-center py-12 text-secondary">
                   <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                  <p>Add citations and click "Check Citations" to validate</p>
+                  <p>Add citations and click &quot;Check Citations&quot; to validate</p>
                 </div>
               )}
             </div>

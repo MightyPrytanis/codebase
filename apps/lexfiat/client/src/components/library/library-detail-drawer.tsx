@@ -4,7 +4,7 @@
  * See LICENSE.md for full license text
  */
 
-import { X, Pin, Download, FileText, Calendar, MapPin, Scale, Tag, CheckCircle } from 'lucide-react';
+import { X, Pin, Download, FileText, Calendar, Scale, Tag, CheckCircle } from 'lucide-react';
 import { LibraryItem } from '@/lib/library-api';
 
 interface LibraryDetailDrawerProps {
@@ -44,7 +44,10 @@ export function LibraryDetailDrawer({
       {/* Overlay */}
       <div
         className="fixed inset-0 bg-black/50 z-40"
+        role="button"
+        tabIndex={0}
         onClick={onClose}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClose(); }}
       />
       
       {/* Drawer */}

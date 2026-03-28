@@ -67,10 +67,13 @@ export default function WorkflowStageItem({
       className={`workflow-stage ${stageClass} ${isDragging ? 'dragging' : ''}`}
       draggable={true}
       data-stage={stageId}
+      role="button"
+      tabIndex={0}
       onDragStart={onDragStart}
       onDragOver={onDragOver}
       onDragEnd={onDragEnd}
       onClick={onClick}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick(); }}
     >
       <div className="track-connector"></div>
       <div className="track-shoe"></div>

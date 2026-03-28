@@ -26,3 +26,6 @@ export * from './schema-library.js';
 
 // Export custodian schema
 export * from './schema-custodian.js';
+
+// Export anonymization rules schema
+export * from './schema-anonymization.js';

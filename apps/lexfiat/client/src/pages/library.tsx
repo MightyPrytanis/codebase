@@ -54,7 +54,7 @@ export default function Library() {
   const loadLibrary = async () => {
     try {
       setLoading(true);
-      const filters: any = {};
+      const filters: Record<string, unknown> = {};
       if (sourceTypeFilter.length > 0) filters.sourceType = sourceTypeFilter;
       if (countyFilter) filters.county = countyFilter;
       if (courtFilter) filters.court = courtFilter;
@@ -79,7 +79,7 @@ export default function Library() {
       
       // Apply sorting
       data.sort((a, b) => {
-        let aVal: any, bVal: any;
+        let aVal: unknown, bVal: unknown;
         switch (sortBy) {
           case 'title':
             aVal = a.title.toLowerCase();
@@ -101,8 +101,8 @@ export default function Library() {
             return 0;
         }
         
-        if (aVal < bVal) return sortAsc ? -1 : 1;
-        if (aVal > bVal) return sortAsc ? 1 : -1;
+        if ((aVal as string | number) < (bVal as string | number)) return sortAsc ? -1 : 1;
+        if ((aVal as string | number) > (bVal as string | number)) return sortAsc ? 1 : -1;
         return 0;
       });
       
@@ -273,8 +273,9 @@ export default function Library() {
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs text-warm-white/70 mb-1">Source Type</label>
+              <label htmlFor="source-type-filter" className="block text-xs text-warm-white/70 mb-1">Source Type</label>
               <select
+                id="source-type-filter"
                 multiple
                 className="w-full bg-navy border border-gray-600 rounded px-3 py-2 text-sm text-warm-white"
                 value={sourceTypeFilter}
@@ -290,8 +291,9 @@ export default function Library() {
             </div>
             
             <div>
-              <label className="block text-xs text-warm-white/70 mb-1">County</label>
+              <label htmlFor="county-filter" className="block text-xs text-warm-white/70 mb-1">County</label>
               <input
+                id="county-filter"
                 type="text"
                 className="w-full bg-navy border border-gray-600 rounded px-3 py-2 text-sm text-warm-white"
                 placeholder="Filter by county..."
@@ -301,8 +303,9 @@ export default function Library() {
             </div>
             
             <div>
-              <label className="block text-xs text-warm-white/70 mb-1">Court</label>
+              <label htmlFor="court-filter" className="block text-xs text-warm-white/70 mb-1">Court</label>
               <input
+                id="court-filter"
                 type="text"
                 className="w-full bg-navy border border-gray-600 rounded px-3 py-2 text-sm text-warm-white"
                 placeholder="Filter by court..."

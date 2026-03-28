@@ -1,4 +1,4 @@
-import { Brain, AlertTriangle, FolderOpen, Handshake, Gavel, BarChart3, FileText, MessageSquareText, Users, Settings } from "lucide-react";
+import { Brain, AlertTriangle, FolderOpen, Handshake, Gavel, BarChart3, FileText, MessageSquareText, Users } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface WorkflowModulesProps {

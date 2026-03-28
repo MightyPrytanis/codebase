@@ -15,9 +15,7 @@ import {
   CheckCircle2,
   Clock,
   AlertCircle,
-  ArrowRight
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 
 interface WorkflowStatusPanelsProps {
@@ -79,7 +77,10 @@ export function WorkflowStatusPanels({
       {/* Panel 1: Incoming */}
       <div 
         className="bg-panel-glass rounded-lg p-6 border border-panel-border hover:border-primary/50 transition-colors cursor-pointer"
+        role="button"
+        tabIndex={0}
         onClick={() => onActionClick?.("view", "incoming")}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onActionClick?.("view", "incoming"); }}
       >
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
@@ -96,9 +97,20 @@ export function WorkflowStatusPanels({
           {status?.incomingRespond ? (
             <div 
               className="flex items-center justify-between p-3 bg-muted/20 rounded hover:bg-muted/30 transition-colors"
+              role="button"
+              tabIndex={0}
               onClick={(e) => {
                 e.stopPropagation();
                 onActionClick?.("respond", "incoming");
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.stopPropagation();
+                  if (e.key === " ") {
+                    e.preventDefault();
+                  }
+                  onActionClick?.("respond", "incoming");
+                }
               }}
             >
               <div className="flex items-center gap-2">
@@ -115,10 +127,13 @@ export function WorkflowStatusPanels({
           {status?.incomingReviewForResponse ? (
             <div 
               className="flex items-center justify-between p-3 bg-muted/20 rounded hover:bg-muted/30 transition-colors"
+              role="button"
+              tabIndex={0}
               onClick={(e) => {
                 e.stopPropagation();
                 onActionClick?.("review_for_response", "incoming");
               }}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onActionClick?.("review_for_response", "incoming"); }}
             >
               <div className="flex items-center gap-2">
                 <Eye className="h-4 w-4" style={{ color: 'var(--status-warning)' }} />
@@ -134,10 +149,13 @@ export function WorkflowStatusPanels({
           {status?.incomingReviewAndFwd ? (
             <div 
               className="flex items-center justify-between p-3 bg-muted/20 rounded hover:bg-muted/30 transition-colors"
+              role="button"
+              tabIndex={0}
               onClick={(e) => {
                 e.stopPropagation();
                 onActionClick?.("review_and_fwd", "incoming");
               }}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onActionClick?.("review_and_fwd", "incoming"); }}
             >
               <div className="flex items-center gap-2">
                 <Forward className="h-4 w-4 text-primary" />
@@ -153,10 +171,13 @@ export function WorkflowStatusPanels({
           {status?.incomingReadFyi ? (
             <div 
               className="flex items-center justify-between p-3 bg-muted/20 rounded hover:bg-muted/30 transition-colors"
+              role="button"
+              tabIndex={0}
               onClick={(e) => {
                 e.stopPropagation();
                 onActionClick?.("read_fyi", "incoming");
               }}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onActionClick?.("read_fyi", "incoming"); }}
             >
               <div className="flex items-center gap-2">
                 <FileText className="h-4 w-4 text-muted-foreground" />
@@ -179,7 +200,10 @@ export function WorkflowStatusPanels({
       {/* Panel 2: In Progress */}
       <div 
         className="bg-panel-glass rounded-lg p-6 border border-panel-border hover:border-primary/50 transition-colors cursor-pointer"
+        role="button"
+        tabIndex={0}
         onClick={() => onActionClick?.("view", "in_progress")}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onActionClick?.("view", "in_progress"); }}
       >
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
@@ -196,10 +220,13 @@ export function WorkflowStatusPanels({
           {status?.draftsInProgress ? (
             <div 
               className="flex items-center justify-between p-3 bg-muted/20 rounded hover:bg-muted/30 transition-colors"
+              role="button"
+              tabIndex={0}
               onClick={(e) => {
                 e.stopPropagation();
                 onActionClick?.("drafts_in_progress", "in_progress");
               }}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onActionClick?.("drafts_in_progress", "in_progress"); }}
             >
               <div className="flex items-center gap-2">
                 <FileText className="h-4 w-4 text-primary" />
@@ -215,10 +242,13 @@ export function WorkflowStatusPanels({
           {status?.itemsWaitingForReview ? (
             <div 
               className="flex items-center justify-between p-3 bg-muted/20 rounded hover:bg-muted/30 transition-colors"
+              role="button"
+              tabIndex={0}
               onClick={(e) => {
                 e.stopPropagation();
                 onActionClick?.("items_waiting_review", "in_progress");
               }}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onActionClick?.("items_waiting_review", "in_progress"); }}
             >
               <div className="flex items-center gap-2">
                 <Eye className="h-4 w-4" style={{ color: 'var(--status-warning)' }} />
@@ -241,7 +271,10 @@ export function WorkflowStatusPanels({
       {/* Panel 3: Ready */}
       <div 
         className="bg-panel-glass rounded-lg p-6 border border-panel-border hover:border-primary/50 transition-colors cursor-pointer"
+        role="button"
+        tabIndex={0}
         onClick={() => onActionClick?.("view", "ready")}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onActionClick?.("view", "ready"); }}
       >
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
@@ -258,10 +291,13 @@ export function WorkflowStatusPanels({
           {status?.draftsReady ? (
             <div 
               className="flex items-center justify-between p-3 bg-muted/20 rounded hover:bg-muted/30 transition-colors"
+              role="button"
+              tabIndex={0}
               onClick={(e) => {
                 e.stopPropagation();
                 onActionClick?.("drafts_ready", "ready");
               }}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onActionClick?.("drafts_ready", "ready"); }}
             >
               <div className="flex items-center gap-2">
                 <FileText className="h-4 w-4" style={{ color: 'var(--status-success)' }} />
@@ -277,10 +313,13 @@ export function WorkflowStatusPanels({
           {status?.reviewsPending ? (
             <div 
               className="flex items-center justify-between p-3 bg-muted/20 rounded hover:bg-muted/30 transition-colors"
+              role="button"
+              tabIndex={0}
               onClick={(e) => {
                 e.stopPropagation();
                 onActionClick?.("reviews_pending", "ready");
               }}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onActionClick?.("reviews_pending", "ready"); }}
             >
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="h-4 w-4" style={{ color: 'var(--status-success)' }} />

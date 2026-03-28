@@ -6,7 +6,7 @@
 
 import React, { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { Clock, Loader2, CheckCircle, AlertCircle, Calendar, FileText } from "lucide-react";
+import { Clock, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { executeCyranoTool } from "@/lib/cyrano-api";
 import { WorkflowArchaeology, WorkflowArchaeologyResult } from "@/components/time-tracking/workflow-archaeology";
 import { TimelineVisualization } from "@/components/time-tracking/timeline-visualization";
@@ -41,7 +41,7 @@ export default function TimeTracking() {
   const [userId] = useState('user-1'); // TODO: Get from auth context
 
   const chronometricMutation = useMutation({
-    mutationFn: async (params: any) => {
+    mutationFn: async (params: Record<string, unknown>) => {
       const result = await executeCyranoTool('chronometric_module', params);
       
       if (result.isError) {
@@ -57,7 +57,7 @@ export default function TimeTracking() {
   });
 
   const handleExecute = () => {
-    const params: any = { action };
+    const params: Record<string, unknown> = { action };
     
     if (startDate) params.start_date = startDate;
     if (endDate) params.end_date = endDate;
@@ -96,10 +96,11 @@ export default function TimeTracking() {
               
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-secondary mb-2">
+                  <label htmlFor="chrono-action" className="block text-sm font-medium text-secondary mb-2">
                     Action
                   </label>
                   <select
+                    id="chrono-action"
                     value={action}
                     onChange={(e) => setAction(e.target.value as ChronometricAction)}
                     className="w-full bg-primary-dark border border-border-gray rounded-lg px-4 py-2 text-primary focus:outline-none focus:ring-2 focus:ring-accent-gold"
@@ -135,10 +136,11 @@ export default function TimeTracking() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-secondary mb-2">
+                    <label htmlFor="start-date" className="block text-sm font-medium text-secondary mb-2">
                       Start Date
                     </label>
                     <input
+                      id="start-date"
                       type="date"
                       value={startDate}
                       onChange={(e) => setStartDate(e.target.value)}
@@ -146,10 +148,11 @@ export default function TimeTracking() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-secondary mb-2">
+                    <label htmlFor="end-date" className="block text-sm font-medium text-secondary mb-2">
                       End Date
                     </label>
                     <input
+                      id="end-date"
                       type="date"
                       value={endDate}
                       onChange={(e) => setEndDate(e.target.value)}
@@ -159,10 +162,11 @@ export default function TimeTracking() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-secondary mb-2">
+                  <label htmlFor="matter-id" className="block text-sm font-medium text-secondary mb-2">
                     Matter ID (optional)
                   </label>
                   <input
+                    id="matter-id"
                     type="text"
                     value={matterId}
                     onChange={(e) => setMatterId(e.target.value)}
@@ -172,9 +176,9 @@ export default function TimeTracking() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-secondary mb-2">
+                  <p className="block text-sm font-medium text-secondary mb-2">
                     Include Artifacts
-                  </label>
+                  </p>
                   <div className="flex flex-wrap gap-2">
                     {['email', 'calendar', 'documents', 'calls'].map(artifact => (
                       <button
@@ -227,7 +231,7 @@ export default function TimeTracking() {
                     <div className="space-y-2">
                       <h4 className="font-semibold text-primary">Available Workflows:</h4>
                       <ul className="list-disc list-inside space-y-1 text-secondary">
-                        {chronometricMutation.data.workflows.map((wf: any) => (
+                        {(chronometricMutation.data.workflows as Array<{id: string; name: string; description: string; steps: number}>).map((wf) => (
                           <li key={wf.id}>
                             <span className="font-medium">{wf.name}</span>: {wf.description} ({wf.steps} steps)
                           </li>
