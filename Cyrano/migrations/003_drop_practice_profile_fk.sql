@@ -6,6 +6,12 @@
 -- row in `users` (e.g. external-auth users, test users, CI fixtures).
 -- Removing the constraint keeps the column semantics intact while letting the
 -- onboarding flow work for any valid authenticated session.
+--
+-- Referential integrity is enforced at the application layer:
+--   • authenticateJWT middleware validates the JWT before any route handler runs
+--   • upsertPracticeProfile() rejects non-numeric user IDs (parseInt check)
+--   • Row ownership is enforced by always reading userId from req.user (JWT),
+--     never trusting a caller-supplied userId in the request body
 
 ALTER TABLE practice_profiles
   DROP CONSTRAINT IF EXISTS practice_profiles_user_id_fkey;
