@@ -30,6 +30,32 @@ import {
 } from '../modules/library/library-model.js';
 import { encryptSensitiveFields, decryptSensitiveFields } from './sensitive-data-encryption.js';
 
+const INT32_MAX = 2147483647;
+
+function normalizeUserId(userId: string | number): number {
+  const raw = typeof userId === 'number' ? userId.toString() : (userId ?? '').toString().trim();
+  if (!raw) {
+    throw new Error('User ID is required');
+  }
+
+  if (/^-?\d+$/.test(raw)) {
+    const parsed = parseInt(raw, 10);
+    if (!Number.isFinite(parsed)) {
+      throw new Error(`Invalid userId: ${userId}`);
+    }
+    return parsed;
+  }
+
+  // Stable, deterministic hash for non-numeric IDs (e.g., UUIDs, slugs)
+  let hash = 0;
+  for (let i = 0; i < raw.length; i++) {
+    hash = (hash * 31 + raw.charCodeAt(i)) >>> 0;
+  }
+
+  const normalized = hash % INT32_MAX;
+  return normalized === 0 ? 1 : normalized;
+}
+
 /**
  * Helper function to convert database row to PracticeProfile
  */
@@ -63,10 +89,7 @@ export async function upsertPracticeProfile(
   userId: string,
   profile: Partial<PracticeProfile>
 ): Promise<PracticeProfile> {
-  const userIdInt = parseInt(userId, 10);
-  if (isNaN(userIdInt)) {
-    throw new Error(`Invalid userId: ${userId}`);
-  }
+  const userIdInt = normalizeUserId(userId);
 
   // Check if profile exists
   const existing = await db
@@ -130,9 +153,15 @@ export async function upsertPracticeProfile(
 /**
  * Get practice profile for a user
  */
-export async function getPracticeProfile(userId: string): Promise<PracticeProfile | null> {
-  const userIdInt = parseInt(userId, 10);
-  if (isNaN(userIdInt)) {
+export async function getPracticeProfile(userId: string | number | null | undefined): Promise<PracticeProfile | null> {
+  if (userId === null || userId === undefined) {
+    return null;
+  }
+
+  let userIdInt: number;
+  try {
+    userIdInt = normalizeUserId(userId);
+  } catch {
     return null;
   }
 
@@ -198,8 +227,10 @@ export async function listLibraryItems(
     superseded?: boolean;
   }
 ): Promise<LibraryItem[]> {
-  const userIdInt = parseInt(userId, 10);
-  if (isNaN(userIdInt)) {
+  let userIdInt: number;
+  try {
+    userIdInt = normalizeUserId(userId);
+  } catch {
     return [];
   }
 
@@ -294,10 +325,7 @@ export async function upsertLibraryLocation(
   userId: string,
   location: Partial<LibraryLocation> & { type: 'local' | 'onedrive' | 'gdrive' | 's3'; name: string; path: string }
 ): Promise<LibraryLocation> {
-  const userIdInt = parseInt(userId, 10);
-  if (isNaN(userIdInt)) {
-    throw new Error(`Invalid userId: ${userId}`);
-  }
+  const userIdInt = normalizeUserId(userId);
 
   // Encrypt credentials before storing
   const encryptedCredentials = location.credentials 
@@ -344,8 +372,10 @@ export async function upsertLibraryLocation(
  * Get all library locations for a user
  */
 export async function getLibraryLocations(userId: string): Promise<LibraryLocation[]> {
-  const userIdInt = parseInt(userId, 10);
-  if (isNaN(userIdInt)) {
+  let userIdInt: number;
+  try {
+    userIdInt = normalizeUserId(userId);
+  } catch {
     return [];
   }
 
@@ -385,10 +415,7 @@ export async function enqueueIngest(
   userId: string,
   priority: 'low' | 'normal' | 'high' = 'normal'
 ): Promise<IngestQueueItem> {
-  const userIdInt = parseInt(userId, 10);
-  if (isNaN(userIdInt)) {
-    throw new Error(`Invalid userId: ${userId}`);
-  }
+  const userIdInt = normalizeUserId(userId);
 
   const [inserted] = await db
     .insert(ingestQueueTable)
@@ -417,9 +444,11 @@ export async function getIngestQueue(
   const conditions: SQL<unknown>[] = [];
 
   if (userId) {
-    const userIdInt = parseInt(userId, 10);
-    if (!isNaN(userIdInt)) {
+    try {
+      const userIdInt = normalizeUserId(userId);
       conditions.push(eq(ingestQueueTable.userId, userIdInt));
+    } catch {
+      // Ignore invalid userId filters
     }
   }
 
@@ -609,4 +638,3 @@ export async function getLibraryStats(userId: string): Promise<LibraryStats> {
     queueDepth: queue.length,
   };
 }
-
