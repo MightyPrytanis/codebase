@@ -30,6 +30,14 @@ import {
 } from '../modules/library/library-model.js';
 import { encryptSensitiveFields, decryptSensitiveFields } from './sensitive-data-encryption.js';
 
+function normalizeUserId(userId: string): number | null {
+  const numericId = Number(userId);
+  if (!Number.isFinite(numericId) || !Number.isSafeInteger(numericId) || numericId < 0) {
+    return null;
+  }
+  return numericId;
+}
+
 /**
  * Helper function to convert database row to PracticeProfile
  */
@@ -63,8 +71,8 @@ export async function upsertPracticeProfile(
   userId: string,
   profile: Partial<PracticeProfile>
 ): Promise<PracticeProfile> {
-  const userIdInt = parseInt(userId, 10);
-  if (isNaN(userIdInt)) {
+  const userIdInt = normalizeUserId(userId);
+  if (userIdInt === null) {
     throw new Error(`Invalid userId: ${userId}`);
   }
 
@@ -131,8 +139,8 @@ export async function upsertPracticeProfile(
  * Get practice profile for a user
  */
 export async function getPracticeProfile(userId: string): Promise<PracticeProfile | null> {
-  const userIdInt = parseInt(userId, 10);
-  if (isNaN(userIdInt)) {
+  const userIdInt = normalizeUserId(userId);
+  if (userIdInt === null) {
     return null;
   }
 
@@ -609,4 +617,3 @@ export async function getLibraryStats(userId: string): Promise<LibraryStats> {
     queueDepth: queue.length,
   };
 }
-

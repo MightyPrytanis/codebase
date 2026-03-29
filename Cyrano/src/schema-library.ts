@@ -13,7 +13,7 @@ import { users } from './schema.js';
  */
 export const practiceProfiles = pgTable('practice_profiles', {
   id: uuid('id').primaryKey().defaultRandom(),
-  userId: integer('user_id').notNull(),
+  userId: bigint('user_id', { mode: 'number' }).notNull(),
   
   // Jurisdictions
   primaryJurisdiction: text('primary_jurisdiction').notNull(),
@@ -159,4 +159,3 @@ export const ingestQueue = pgTable('ingest_queue', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
   processedAt: timestamp('processed_at'),
 });
-
