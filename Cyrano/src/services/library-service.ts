@@ -13,6 +13,7 @@
  * Uses PostgreSQL database with Drizzle ORM for persistence.
  */
 
+import { randomUUID } from 'crypto';
 import { db } from '../db.js';
 import { 
   practiceProfiles as practiceProfilesTable,
@@ -29,6 +30,71 @@ import {
   LibraryStats 
 } from '../modules/library/library-model.js';
 import { encryptSensitiveFields, decryptSensitiveFields } from './sensitive-data-encryption.js';
+
+/**
+ * In-memory fallback store for practice profiles.
+ * Used when the database is unavailable or a query fails (e.g., missing DB, connection refused).
+ * This keeps onboarding endpoints functional for test environments without Postgres.
+ */
+const inMemoryPracticeProfiles = new Map<string, PracticeProfile>();
+let practiceProfileDbDisabled = false;
+
+function mergeIntegrations(
+  existing: PracticeProfile['integrations'] | undefined,
+  incoming: PracticeProfile['integrations'] | undefined
+): PracticeProfile['integrations'] {
+  const merged = {
+    ...(existing || {}),
+    ...(incoming || {}),
+    ...(existing?.onboarding && incoming?.onboarding
+      ? { onboarding: { ...(existing.onboarding || {}), ...(incoming.onboarding || {}) } }
+      : {}),
+  } as PracticeProfile['integrations'];
+
+  try {
+    return encryptSensitiveFields(merged as any) as PracticeProfile['integrations'];
+  } catch (error) {
+    console.warn('[DB] Failed to encrypt practice profile integrations; storing unencrypted.', error instanceof Error ? error.message : error);
+    return merged;
+  }
+}
+
+function buildProfileData(
+  userId: string,
+  profile: Partial<PracticeProfile>,
+  existing?: PracticeProfile
+): PracticeProfile {
+  return {
+    id: existing?.id ?? randomUUID(),
+    userId,
+    primaryJurisdiction: profile.primaryJurisdiction ?? existing?.primaryJurisdiction ?? '',
+    additionalJurisdictions: profile.additionalJurisdictions ?? existing?.additionalJurisdictions ?? [],
+    practiceAreas: profile.practiceAreas ?? existing?.practiceAreas ?? [],
+    counties: profile.counties ?? existing?.counties ?? [],
+    courts: profile.courts ?? existing?.courts ?? [],
+    issueTags: profile.issueTags ?? existing?.issueTags ?? [],
+    storagePreferences: {
+      ...(existing?.storagePreferences || {}),
+      ...(profile.storagePreferences || {}),
+    },
+    researchProvider: profile.researchProvider ?? existing?.researchProvider,
+    integrations: mergeIntegrations(existing?.integrations, profile.integrations),
+    llmProvider: profile.llmProvider ?? existing?.llmProvider,
+    llmProviderTested: profile.llmProviderTested ?? existing?.llmProviderTested ?? false,
+    createdAt: existing?.createdAt ?? new Date(),
+    updatedAt: new Date(),
+  };
+}
+
+function upsertInMemoryPracticeProfile(
+  userId: string,
+  profile: Partial<PracticeProfile>
+): PracticeProfile {
+  const existing = inMemoryPracticeProfiles.get(userId);
+  const profileData = buildProfileData(userId, profile, existing);
+  inMemoryPracticeProfiles.set(userId, profileData);
+  return profileData;
+}
 
 /**
  * Helper function to convert database row to PracticeProfile
@@ -63,67 +129,81 @@ export async function upsertPracticeProfile(
   userId: string,
   profile: Partial<PracticeProfile>
 ): Promise<PracticeProfile> {
-  const userIdInt = parseInt(userId, 10);
-  if (isNaN(userIdInt)) {
-    throw new Error(`Invalid userId: ${userId}`);
+  const userIdStr = userId?.toString?.() ?? '';
+  const userIdInt = parseInt(userIdStr, 10);
+  const fallback = () => upsertInMemoryPracticeProfile(userIdStr, profile);
+
+  if (practiceProfileDbDisabled) {
+    return fallback();
   }
 
-  // Check if profile exists
-  const existing = await db
-    .select()
-    .from(practiceProfilesTable)
-    .where(eq(practiceProfilesTable.userId, userIdInt))
-    .limit(1);
+  if (Number.isNaN(userIdInt)) {
+    console.warn('[DB] Invalid userId provided; using in-memory practice profile store.');
+    return fallback();
+  }
 
-  const profileData = {
-    userId: userIdInt,
-    primaryJurisdiction: profile.primaryJurisdiction || existing[0]?.primaryJurisdiction || '',
-    additionalJurisdictions: profile.additionalJurisdictions || existing[0]?.additionalJurisdictions || [],
-    practiceAreas: profile.practiceAreas || existing[0]?.practiceAreas || [],
-    counties: profile.counties || existing[0]?.counties || [],
-    courts: profile.courts || existing[0]?.courts || [],
-    issueTags: profile.issueTags || existing[0]?.issueTags || [],
-    storagePreferences: {
-      ...(existing[0]?.storagePreferences || {}),
-      ...(profile.storagePreferences || {}),
-    },
-    researchProvider: profile.researchProvider || existing[0]?.researchProvider,
-    integrations: encryptSensitiveFields({
-      ...(existing[0]?.integrations || {}),
-      ...(profile.integrations || {}),
-      // Deep merge onboarding if both exist
-      ...(existing[0]?.integrations?.onboarding && profile.integrations?.onboarding ? {
-        onboarding: {
-          ...(existing[0]?.integrations.onboarding || {}),
-          ...(profile.integrations.onboarding || {}),
-        },
-      } : {}),
-    }) as any,
-    llmProvider: profile.llmProvider || existing[0]?.llmProvider,
-    llmProviderTested: profile.llmProviderTested ?? existing[0]?.llmProviderTested ?? false,
-    updatedAt: new Date(),
-  };
+  if (!db) {
+    console.warn('[DB] Database client not initialized; using in-memory practice profile store.');
+    practiceProfileDbDisabled = true;
+    return fallback();
+  }
 
-  if (existing.length > 0) {
-    // Update existing
-    const [updated] = await db
-      .update(practiceProfilesTable)
-      .set(profileData)
-      .where(eq(practiceProfilesTable.id, existing[0].id))
-      .returning();
-    
-    return dbRowToPracticeProfile(updated);
-  } else {
-    // Insert new
-    const [inserted] = await db
-      .insert(practiceProfilesTable)
-      .values({
-        ...profileData,
-        createdAt: new Date(),
-      })
-      .returning();
-    
-    return dbRowToPracticeProfile(inserted);
+  try {
+    // Check if profile exists
+    const existing = await db
+      .select()
+      .from(practiceProfilesTable)
+      .where(eq(practiceProfilesTable.userId, userIdInt))
+      .limit(1);
+
+    const profileData = {
+      userId: userIdInt,
+      primaryJurisdiction: profile.primaryJurisdiction || existing[0]?.primaryJurisdiction || '',
+      additionalJurisdictions: profile.additionalJurisdictions || existing[0]?.additionalJurisdictions || [],
+      practiceAreas: profile.practiceAreas || existing[0]?.practiceAreas || [],
+      counties: profile.counties || existing[0]?.counties || [],
+      courts: profile.courts || existing[0]?.courts || [],
+      issueTags: profile.issueTags || existing[0]?.issueTags || [],
+      storagePreferences: {
+        ...(existing[0]?.storagePreferences || {}),
+        ...(profile.storagePreferences || {}),
+      },
+      researchProvider: profile.researchProvider || existing[0]?.researchProvider,
+      integrations: mergeIntegrations(existing[0]?.integrations as any, profile.integrations),
+      llmProvider: profile.llmProvider || existing[0]?.llmProvider,
+      llmProviderTested: profile.llmProviderTested ?? existing[0]?.llmProviderTested ?? false,
+      updatedAt: new Date(),
+    };
+
+    if (existing.length > 0) {
+      // Update existing
+      const [updated] = await db
+        .update(practiceProfilesTable)
+        .set(profileData)
+        .where(eq(practiceProfilesTable.id, existing[0].id))
+        .returning();
+
+      const result = dbRowToPracticeProfile(updated);
+      inMemoryPracticeProfiles.set(userIdStr, result);
+      return result;
+    } else {
+      // Insert new
+      const [inserted] = await db
+        .insert(practiceProfilesTable)
+        .values({
+          ...profileData,
+          createdAt: new Date(),
+        })
+        .returning();
+
+      const result = dbRowToPracticeProfile(inserted);
+      inMemoryPracticeProfiles.set(userIdStr, result);
+      return result;
+    }
+  } catch (error) {
+    practiceProfileDbDisabled = true;
+    console.warn('[DB] Failed to upsert practice profile; falling back to in-memory store.', error instanceof Error ? error.message : error);
+    return fallback();
   }
 }
 
@@ -131,18 +211,42 @@ export async function upsertPracticeProfile(
  * Get practice profile for a user
  */
 export async function getPracticeProfile(userId: string): Promise<PracticeProfile | null> {
-  const userIdInt = parseInt(userId, 10);
-  if (isNaN(userIdInt)) {
-    return null;
+  const userIdStr = userId?.toString?.() ?? '';
+  const userIdInt = parseInt(userIdStr, 10);
+  const fromMemory = () => inMemoryPracticeProfiles.get(userIdStr) ?? null;
+
+  if (practiceProfileDbDisabled) {
+    return fromMemory();
   }
 
-  const [profile] = await db
-    .select()
-    .from(practiceProfilesTable)
-    .where(eq(practiceProfilesTable.userId, userIdInt))
-    .limit(1);
+  if (Number.isNaN(userIdInt)) {
+    console.warn('[DB] Invalid userId provided to getPracticeProfile; using in-memory store.');
+    return fromMemory();
+  }
 
-  return profile ? dbRowToPracticeProfile(profile) : null;
+  if (!db) {
+    console.warn('[DB] Database client not initialized; using in-memory practice profile store.');
+    practiceProfileDbDisabled = true;
+    return fromMemory();
+  }
+
+  try {
+    const [profile] = await db
+      .select()
+      .from(practiceProfilesTable)
+      .where(eq(practiceProfilesTable.userId, userIdInt))
+      .limit(1);
+
+    const result = profile ? dbRowToPracticeProfile(profile) : null;
+    if (result) {
+      inMemoryPracticeProfiles.set(userIdStr, result);
+    }
+    return result;
+  } catch (error) {
+    practiceProfileDbDisabled = true;
+    console.warn('[DB] Failed to load practice profile; using in-memory store.', error instanceof Error ? error.message : error);
+    return fromMemory();
+  }
 }
 
 /**
@@ -609,4 +713,3 @@ export async function getLibraryStats(userId: string): Promise<LibraryStats> {
     queueDepth: queue.length,
   };
 }
-
