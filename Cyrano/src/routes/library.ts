@@ -94,6 +94,15 @@ const LibraryFiltersSchema = z.object({
 /**
  * GET /api/onboarding/practice-profile
  * Get user's practice profile
+ *
+ * NOTE: Only the GET route belongs here.
+ * POST /api/onboarding/practice-profile and POST /api/onboarding/baseline-config
+ * are handled exclusively by onboarding.ts (the canonical handlers that return
+ * { success: true, ... } envelopes expected by client code and integration tests).
+ * Do NOT add duplicate POST onboarding route handlers in this file — doing so
+ * causes the library routes to intercept first (library routes are mounted before
+ * onboarding routes in http-bridge.ts) and return inconsistent response formats
+ * that break the test suite.
  */
 router.get('/onboarding/practice-profile', authenticateJWT, async (req: Request, res: Response) => {
   try {

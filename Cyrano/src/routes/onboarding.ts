@@ -92,7 +92,7 @@ const LLMTestSchema = z.object({
 });
 
 /**
- * POST /api/onboarding/practice-profile
+ * POST /api/onboarding/practice-profile  (canonical handler — do not duplicate in library.ts)
  * Save practice profile (Step 1-3 data)
  */
 router.post('/onboarding/practice-profile', authenticateJWT, async (req: Request, res: Response) => {
@@ -155,7 +155,7 @@ router.post('/onboarding/test-llm-provider', async (req: Request, res: Response)
 });
 
 /**
- * POST /api/onboarding/baseline-config
+ * POST /api/onboarding/baseline-config  (canonical handler — do not duplicate in library.ts)
  * Save Chronometric baseline configuration (Step 6)
  */
 router.post('/onboarding/baseline-config', authenticateJWT, async (req: Request, res: Response) => {
