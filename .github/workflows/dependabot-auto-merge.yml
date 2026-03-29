@@ -20,7 +20,9 @@ jobs:
     steps:
       - name: Fetch Dependabot metadata
         id: metadata
-        uses: dependabot/fetch-metadata@v2
+        # Pinned to a specific commit SHA to prevent tag moves from running unexpected code with elevated permissions.
+        # To update: find the latest commit for dependabot/fetch-metadata v2.x and replace the SHA below.
+        uses: dependabot/fetch-metadata@b251b9d714464f2e9e8dbcc2339d3cde3c87c41c
         with:
           github-token: "${{ env.AUTOMERGE_TOKEN }}"
 
