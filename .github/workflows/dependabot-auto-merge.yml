@@ -70,7 +70,7 @@ jobs:
 
       - name: Merge non-breaking update immediately
         if: steps.breaking.outputs.is_breaking == 'false'
-        run: gh pr merge --squash "$PR_URL"
+        run: gh pr merge --auto --squash "$PR_URL"
 
       - name: Notify maintainer of blocked breaking-change PR
         if: steps.breaking.outputs.is_breaking == 'true'
