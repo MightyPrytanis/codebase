@@ -44,46 +44,6 @@ const upload = multer({
 });
 
 // Validation schemas for input data
-const PracticeProfileSchema = z.object({
-  userId: z.string().optional(),
-  primaryJurisdiction: z.string().optional(),
-  additionalJurisdictions: z.array(z.string()).optional(),
-  practiceAreas: z.array(z.string()).optional(),
-  counties: z.array(z.string()).optional(),
-  courts: z.array(z.string()).optional(),
-  issueTags: z.array(z.string()).optional(),
-  storagePreferences: z.object({
-    localPath: z.string().optional(),
-    useOneDrive: z.boolean().optional(),
-    useGoogleDrive: z.boolean().optional(),
-    useS3: z.boolean().optional(),
-    s3Bucket: z.string().optional(),
-    cacheSize: z.number().optional(),
-  }).optional(),
-  researchProvider: z.enum(['westlaw', 'courtlistener', 'other']).optional(),
-  integrations: z.object({
-    clio: z.object({
-      enabled: z.boolean(),
-      clientId: z.string().optional(),
-    }).optional(),
-    // MiFile removed - use micourt_query tool for user-initiated docket queries
-    // miFile: z.object({
-    //   enabled: z.boolean().optional(),
-    //   enrolled: z.boolean().optional(),
-    // }).optional(),
-    outlook: z.object({
-      enabled: z.boolean(),
-      authenticated: z.boolean().optional(),
-    }).optional(),
-    gmail: z.object({
-      enabled: z.boolean(),
-      authenticated: z.boolean().optional(),
-    }).optional(),
-  }).optional(),
-  llmProvider: z.enum(['openai', 'anthropic', 'perplexity']).optional(),
-  llmProviderTested: z.boolean().optional(),
-});
-
 const LibraryLocationSchema = z.object({
   userId: z.string().optional(),
   name: z.string().min(1, 'Location name is required'),
@@ -120,15 +80,6 @@ const IngestRequestSchema = z.object({
   priority: z.enum(['low', 'normal', 'high']).optional(),
 });
 
-const BaselineConfigSchema = z.object({
-  userId: z.string().optional(),
-  minimumHoursPerWeek: z.number().min(0).max(168),
-  minimumHoursPerDay: z.number().min(0).max(24).optional(),
-  typicalSchedule: z.record(z.string(), z.number()).optional(),
-  offDays: z.array(z.string()).optional(),
-  useBaselineUntilDataAvailable: z.boolean().optional(),
-});
-
 const LibraryFiltersSchema = z.object({
   sourceType: z.array(z.string()).optional(),
   county: z.string().optional(),
@@ -138,93 +89,6 @@ const LibraryFiltersSchema = z.object({
   ingested: z.boolean().optional(),
   pinned: z.boolean().optional(),
   superseded: z.boolean().optional(),
-});
-
-/**
- * POST /api/onboarding/practice-profile
- * Create or update user's practice profile
- */
-router.post('/onboarding/practice-profile', authenticateJWT, async (req: Request, res: Response) => {
-  try {
-    // Validate request body type
-    if (!req.body || typeof req.body !== 'object') {
-      return res.status(400).json({ error: 'Invalid request body' });
-    }
-
-    // Validate and sanitize input using Zod schema
-    const validationResult = PracticeProfileSchema.safeParse(req.body);
-    if (!validationResult.success) {
-      return res.status(400).json({ 
-        error: 'Invalid practice profile data',
-        details: validationResult.error.issues
-      });
-    }
-
-    const profileData = validationResult.data;
-    
-    // Get userId from authenticated session
-    const user = (req as any).user;
-    const userId = user?.userId?.toString() || profileData.userId;
-    
-    if (!userId) {
-      return res.status(401).json({ error: 'User ID is required' });
-    }
-    
-    const profile = await upsertPracticeProfile(userId, profileData);
-    res.json(profile);
-  } catch (error) {
-    console.error('Error upserting practice profile:', error);
-    res.status(500).json({ 
-      error: 'Failed to save practice profile',
-      message: error instanceof Error ? error.message : String(error)
-    });
-  }
-});
-
-/**
- * POST /api/onboarding/baseline-config
- * Save Chronometric baseline configuration
- * Note: Once Chronometric Engine is created, this will call the pattern_learning module
- */
-router.post('/onboarding/baseline-config', authenticateJWT, async (req: Request, res: Response) => {
-  try {
-    const validationResult = BaselineConfigSchema.safeParse(req.body);
-    if (!validationResult.success) {
-      return res.status(400).json({ 
-        error: 'Invalid baseline config data',
-        details: validationResult.error.issues
-      });
-    }
-
-    const configData = validationResult.data;
-    const user = (req as any).user;
-    const userId = user?.userId?.toString() || configData.userId;
-    
-    if (!userId) {
-      return res.status(401).json({ error: 'User ID is required' });
-    }
-    
-    // Import baseline config service directly
-    // TODO: Once Chronometric Engine is created, use pattern_learning module via MCP
-    const { saveBaselineConfig } = await import('../engines/chronometric/services/baseline-config.js');
-    
-    const config = await saveBaselineConfig({
-      userId,
-      minimumHoursPerWeek: configData.minimumHoursPerWeek,
-      minimumHoursPerDay: configData.minimumHoursPerDay,
-      typicalSchedule: configData.typicalSchedule,
-      offDays: configData.offDays,
-      useBaselineUntilDataAvailable: configData.useBaselineUntilDataAvailable ?? true,
-    });
-    
-    res.json(config);
-  } catch (error) {
-    console.error('Error saving baseline config:', error);
-    res.status(500).json({ 
-      error: 'Failed to save baseline config',
-      message: error instanceof Error ? error.message : String(error)
-    });
-  }
 });
 
 /**
