@@ -30,6 +30,16 @@ import {
 } from '../modules/library/library-model.js';
 import { encryptSensitiveFields, decryptSensitiveFields } from './sensitive-data-encryption.js';
 
+const INT32_MIN = -2147483648;
+const INT32_MAX = 2147483647;
+
+function normalizeUserId(userId: string): number | null {
+  const parsed = Number.parseInt(userId, 10);
+  if (Number.isNaN(parsed)) return null;
+  if (parsed < INT32_MIN || parsed > INT32_MAX) return null;
+  return parsed;
+}
+
 /**
  * Helper function to convert database row to PracticeProfile
  */
@@ -63,8 +73,8 @@ export async function upsertPracticeProfile(
   userId: string,
   profile: Partial<PracticeProfile>
 ): Promise<PracticeProfile> {
-  const userIdInt = parseInt(userId, 10);
-  if (isNaN(userIdInt)) {
+  const userIdInt = normalizeUserId(userId);
+  if (userIdInt === null) {
     throw new Error(`Invalid userId: ${userId}`);
   }
 
@@ -131,10 +141,8 @@ export async function upsertPracticeProfile(
  * Get practice profile for a user
  */
 export async function getPracticeProfile(userId: string): Promise<PracticeProfile | null> {
-  const userIdInt = parseInt(userId, 10);
-  if (isNaN(userIdInt)) {
-    return null;
-  }
+  const userIdInt = normalizeUserId(userId);
+  if (userIdInt === null) return null;
 
   const [profile] = await db
     .select()
@@ -609,4 +617,3 @@ export async function getLibraryStats(userId: string): Promise<LibraryStats> {
     queueDepth: queue.length,
   };
 }
-
