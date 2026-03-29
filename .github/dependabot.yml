@@ -33,6 +33,15 @@ updates:
       - "dependencies"
       - "cyrano"
     groups:
+      # vitest and its companion packages must always move together because
+      # @vitest/coverage-v8 and @vitest/ui enforce an exact vitest peer dependency.
+      vitest:
+        patterns:
+          - "vitest"
+          - "@vitest/*"
+        update-types:
+          - "patch"
+          - "minor"
       non-breaking-deps:
         update-types:
           - "patch"
