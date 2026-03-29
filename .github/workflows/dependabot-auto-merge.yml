@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.actor == 'dependabot[bot]'
     env:
-      GH_TOKEN: ${{ secrets.DEPENDABOT_AUTOMERGE_TOKEN || secrets.GITHUB_TOKEN }}
+      GH_TOKEN: ${{ secrets.DEPENDABOT_AUTOMERGE_TOKEN || secrets.GH_AUTOMERGE_TOKEN || secrets.AUTO_MERGE_TOKEN || secrets.AUTO_APPROVE_TOKEN || secrets.GITHUB_TOKEN }}
     steps:
       - name: Fetch Dependabot metadata
         id: metadata
