@@ -50,7 +50,6 @@ jobs:
       github.event.pull_request.user.login == 'codefactor-io[bot]' &&
       github.event.pull_request.head.repo.full_name == github.repository
     env:
-      AUTOMERGE_TOKEN: ${{ secrets.CODEFACTOR_AUTOMERGE_TOKEN || secrets.GH_AUTOMERGE_TOKEN || secrets.AUTO_MERGE_TOKEN || secrets.AUTO_APPROVE_TOKEN || secrets.GITHUB_TOKEN }}
       GH_TOKEN: ${{ secrets.CODEFACTOR_AUTOMERGE_TOKEN || secrets.GH_AUTOMERGE_TOKEN || secrets.AUTO_MERGE_TOKEN || secrets.AUTO_APPROVE_TOKEN || secrets.GITHUB_TOKEN }}
       GITHUB_TOKEN: ${{ secrets.CODEFACTOR_AUTOMERGE_TOKEN || secrets.GH_AUTOMERGE_TOKEN || secrets.AUTO_MERGE_TOKEN || secrets.AUTO_APPROVE_TOKEN || secrets.GITHUB_TOKEN }}
 

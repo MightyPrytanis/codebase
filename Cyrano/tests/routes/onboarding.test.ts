@@ -103,13 +103,14 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
   }, 30000);
 
   afterAll(async () => {
-    await new Promise<void>((resolve) => {
-      if (server) {
-        server.close(() => resolve());
-      } else {
-        resolve();
-      }
-    });
+    if (server) {
+      await new Promise<void>((resolve, reject) => {
+        server!.close((err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+      });
+    }
   });
 
   describe('POST /api/onboarding/practice-profile', () => {
@@ -293,7 +294,14 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
     });
 
     it('should return incomplete status for new user', async () => {
-      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/status?userId=new-user&appId=lexfiat`, { headers: authHeaders });
+      // Use a unique userId that has never had data created for it.
+      // The JWT userId always takes precedence over query params, so we must
+      // issue a token for a genuinely fresh user rather than passing userId=new-user.
+      // Date.now() is unique per millisecond; sequential tests cannot collide.
+      const freshUserId = Date.now();
+      const freshToken = generateAccessToken({ userId: freshUserId, email: 'fresh@example.com', role: 'user' });
+      const freshHeaders = { Authorization: `Bearer ${freshToken}`, 'Content-Type': 'application/json' };
+      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/status?appId=lexfiat`, { headers: freshHeaders });
       expect(response.ok).toBe(true);
       const data = await response.json();
       expect(data.completed).toBe(false);
@@ -370,7 +378,12 @@ describeIfDatabaseConfigured('Onboarding API Integration Tests', () => {
     });
 
     it('should return default values for new user', async () => {
-      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/load-progress?userId=new-user-2`, { headers: authHeaders });
+      // Use a unique userId that has never had data created for it.
+      // Date.now() is unique per millisecond; sequential tests cannot collide.
+      const freshUserId = Date.now();
+      const freshToken = generateAccessToken({ userId: freshUserId, email: 'fresh2@example.com', role: 'user' });
+      const freshHeaders = { Authorization: `Bearer ${freshToken}`, 'Content-Type': 'application/json' };
+      const response = await fetchWithRetry(`${baseUrl}/api/onboarding/load-progress`, { headers: freshHeaders });
       expect(response.ok).toBe(true);
       const data = await response.json();
       expect(data.currentStep).toBe(1);
