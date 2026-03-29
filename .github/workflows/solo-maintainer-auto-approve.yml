@@ -19,6 +19,10 @@ jobs:
     if: |
       github.event.pull_request.user.login == github.repository_owner &&
       github.event.pull_request.draft == false
+    env:
+      AUTOMERGE_TOKEN: ${{ secrets.SOLO_MAINTAINER_TOKEN || secrets.GH_AUTOMERGE_TOKEN || secrets.AUTO_MERGE_TOKEN || secrets.AUTO_APPROVE_TOKEN || secrets.GITHUB_TOKEN }}
+      GH_TOKEN: ${{ secrets.SOLO_MAINTAINER_TOKEN || secrets.GH_AUTOMERGE_TOKEN || secrets.AUTO_MERGE_TOKEN || secrets.AUTO_APPROVE_TOKEN || secrets.GITHUB_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.SOLO_MAINTAINER_TOKEN || secrets.GH_AUTOMERGE_TOKEN || secrets.AUTO_MERGE_TOKEN || secrets.AUTO_APPROVE_TOKEN || secrets.GITHUB_TOKEN }}
 
     steps:
       - name: Check if PR author is repository owner
@@ -28,10 +32,10 @@ jobs:
           echo "Repository Owner: ${{ github.repository_owner }}"
 
           if [ "${{ github.event.pull_request.user.login }}" == "${{ github.repository_owner }}" ]; then
-            echo "is_owner=true" >> $GITHUB_OUTPUT
+            echo "is_owner=true" >> "$GITHUB_OUTPUT"
             echo "✓ PR author is the repository owner"
           else
-            echo "is_owner=false" >> $GITHUB_OUTPUT
+            echo "is_owner=false" >> "$GITHUB_OUTPUT"
             echo "✗ PR author is not the repository owner"
           fi
 
@@ -43,8 +47,6 @@ jobs:
             --approve \
             --body "✓ Auto-approved by solo maintainer workflow." \
             --repo ${{ github.repository }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Add label
         if: steps.check-owner.outputs.is_owner == 'true'
@@ -52,8 +54,6 @@ jobs:
           gh pr edit ${{ github.event.pull_request.number }} \
             --add-label "solo-maintainer-approved" \
             --repo ${{ github.repository }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
 
       - name: Comment on PR
@@ -72,6 +72,4 @@ jobs:
           ---
           *To disable this workflow, edit or delete .github/workflows/solo-maintainer-auto-approve.yml*" \
             --repo ${{ github.repository }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
