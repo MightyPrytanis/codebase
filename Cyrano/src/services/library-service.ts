@@ -35,6 +35,8 @@ const inMemoryProfiles = new Map<number, PracticeProfile>();
 
 // Circuit breaker: once the DB has failed, skip future attempts for this process
 // lifetime to avoid slow connection timeouts on every request.
+// Node.js is single-threaded, so there is no concurrent mutation risk here.
+// This flag only covers practice-profile operations; other DB operations are unaffected.
 let dbReachable = true;
 
 /**
@@ -153,9 +155,16 @@ export async function upsertPracticeProfile(
     }
   }
 
-  // In-memory fallback
+  // In-memory fallback.
+  // Note: integrations are stored here in their plain (unencrypted) form, which is
+  // consistent with what callers receive from the DB path (dbRowToPracticeProfile
+  // always decrypts before returning). encryptSensitiveFields is only needed for
+  // persisting to the database, so it is intentionally omitted here.
   const existing = inMemoryProfiles.get(userIdInt);
   const now = new Date();
+  // In-memory IDs use the numeric userId as a string. These differ from
+  // database-generated IDs (sequential integers from the DB) but the id field
+  // is only used internally and is never compared across storage mechanisms.
   const updated: PracticeProfile = {
     id: existing?.id ?? userIdInt.toString(),
     userId: userId,
