@@ -12,6 +12,8 @@ jobs:
   auto-merge:
     runs-on: ubuntu-latest
     if: github.actor == 'dependabot[bot]'
+    env:
+      GH_TOKEN: ${{ secrets.DEPENDABOT_AUTOMERGE_TOKEN || secrets.GITHUB_TOKEN }}
     steps:
       - name: Fetch Dependabot metadata
         id: metadata
@@ -49,27 +51,28 @@ jobs:
           echo "reason=${REASON}" >> $GITHUB_OUTPUT
           echo "update_type=${UPDATE_TYPE}" >> $GITHUB_OUTPUT
 
-      - name: Auto-approve non-breaking update
+      - name: Auto-approve non-breaking update (best-effort)
         if: steps.breaking.outputs.is_breaking == 'false'
         run: |
-          gh pr review --approve "$PR_URL" \
-            --body "✅ Auto-approved: non-breaking \`${{ steps.breaking.outputs.update_type }}\` dependency update."
+          if gh pr review --approve "$PR_URL" \
+            --body "✅ Auto-approved: non-breaking \`${{ steps.breaking.outputs.update_type }}\` dependency update."; then
+            echo "Auto-approval submitted."
+          else
+            echo "::warning::Auto-approval was not permitted with the current token; continuing to merge non-breaking update."
+          fi
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Merge non-breaking update immediately
         if: steps.breaking.outputs.is_breaking == 'false'
         run: gh pr merge --squash --admin "$PR_URL"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Notify maintainer of blocked breaking-change PR
         if: steps.breaking.outputs.is_breaking == 'true'
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BLOCK_REASON: ${{ steps.breaking.outputs.reason }}
         run: |
           cat <<'COMMENT_EOF' > /tmp/block-comment.md
@@ -93,5 +96,4 @@ jobs:
         run: gh pr edit "$PR_URL" --add-label "breaking-change"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
