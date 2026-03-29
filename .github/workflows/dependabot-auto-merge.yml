@@ -1,7 +1,7 @@
 name: Dependabot Auto-Merge
 
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
@@ -13,13 +13,18 @@ jobs:
     runs-on: ubuntu-latest
     if: github.actor == 'dependabot[bot]'
     env:
+      AUTOMERGE_TOKEN: ${{ secrets.DEPENDABOT_AUTOMERGE_TOKEN || secrets.GH_AUTOMERGE_TOKEN || secrets.AUTO_MERGE_TOKEN || secrets.AUTO_APPROVE_TOKEN || secrets.GITHUB_TOKEN }}
       GH_TOKEN: ${{ secrets.DEPENDABOT_AUTOMERGE_TOKEN || secrets.GH_AUTOMERGE_TOKEN || secrets.AUTO_MERGE_TOKEN || secrets.AUTO_APPROVE_TOKEN || secrets.GITHUB_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.DEPENDABOT_AUTOMERGE_TOKEN || secrets.GH_AUTOMERGE_TOKEN || secrets.AUTO_MERGE_TOKEN || secrets.AUTO_APPROVE_TOKEN || secrets.GITHUB_TOKEN }}
+      PR_URL: ${{ github.event.pull_request.html_url }}
     steps:
       - name: Fetch Dependabot metadata
         id: metadata
-        uses: dependabot/fetch-metadata@v2
+        # Pinned to a specific commit SHA to prevent tag moves from running unexpected code with elevated permissions.
+        # To update: find the latest commit for dependabot/fetch-metadata v2.x and replace the SHA below.
+        uses: dependabot/fetch-metadata@b251b9d714464f2e9e8dbcc2339d3cde3c87c41c
         with:
-          github-token: "${{ secrets.GITHUB_TOKEN }}"
+          github-token: "${{ env.AUTOMERGE_TOKEN }}"
 
       - name: Check for breaking changes
         id: breaking
@@ -47,9 +52,11 @@ jobs:
             fi
           fi
 
-          echo "is_breaking=${IS_BREAKING}" >> $GITHUB_OUTPUT
-          echo "reason=${REASON}" >> $GITHUB_OUTPUT
-          echo "update_type=${UPDATE_TYPE}" >> $GITHUB_OUTPUT
+          {
+            echo "is_breaking=${IS_BREAKING}"
+            echo "reason=${REASON}"
+            echo "update_type=${UPDATE_TYPE}"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Auto-approve non-breaking update (best-effort)
         if: steps.breaking.outputs.is_breaking == 'false'
@@ -60,19 +67,14 @@ jobs:
           else
             echo "::warning::Auto-approval was not permitted with the current token; continuing to merge non-breaking update."
           fi
-        env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
 
       - name: Merge non-breaking update immediately
         if: steps.breaking.outputs.is_breaking == 'false'
-        run: gh pr merge --squash --admin "$PR_URL"
-        env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: gh pr merge --squash "$PR_URL"
 
       - name: Notify maintainer of blocked breaking-change PR
         if: steps.breaking.outputs.is_breaking == 'true'
         env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
           BLOCK_REASON: ${{ steps.breaking.outputs.reason }}
         run: |
           cat <<'COMMENT_EOF' > /tmp/block-comment.md
@@ -94,6 +96,4 @@ jobs:
       - name: Label breaking-change PR for manual review
         if: steps.breaking.outputs.is_breaking == 'true'
         run: gh pr edit "$PR_URL" --add-label "breaking-change"
-        env:
-          PR_URL: ${{ github.event.pull_request.html_url }}
         continue-on-error: true
