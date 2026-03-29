@@ -20,6 +20,11 @@
 #     (auto-merged by the dependabot-auto-merge workflow)
 #   - major updates remain as individual PRs and require manual review
 #
+# Ignore policy:
+#   - typescript major updates are ignored across all packages until
+#     typescript-eslint releases a version that supports TypeScript 6+
+#     (typescript-eslint@8.57.2 requires typescript@>=4.8.4 <6.0.0)
+#
 version: 2
 updates:
   # Cyrano main package
@@ -37,6 +42,11 @@ updates:
         update-types:
           - "patch"
           - "minor"
+    ignore:
+      # typescript-eslint@8.57.2 requires typescript@>=4.8.4 <6.0.0;
+      # block major TS bumps until typescript-eslint supports TS6
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
 
   # Cyrano auth-server
   - package-ecosystem: "npm"
@@ -54,6 +64,9 @@ updates:
         update-types:
           - "patch"
           - "minor"
+    ignore:
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
 
   # LexFiat app
   - package-ecosystem: "npm"
@@ -70,6 +83,9 @@ updates:
         update-types:
           - "patch"
           - "minor"
+    ignore:
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
 
   # Arkiver app
   - package-ecosystem: "npm"
@@ -86,6 +102,9 @@ updates:
         update-types:
           - "patch"
           - "minor"
+    ignore:
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
 
   # Arkiver frontend
   - package-ecosystem: "npm"
@@ -102,6 +121,9 @@ updates:
         update-types:
           - "patch"
           - "minor"
+    ignore:
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
 
   # Labs - Potemkin app
   - package-ecosystem: "npm"
@@ -119,6 +141,9 @@ updates:
         update-types:
           - "patch"
           - "minor"
+    ignore:
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
 
   # Labs - Potemkin moral_reasoner
   - package-ecosystem: "npm"
@@ -136,3 +161,6 @@ updates:
         update-types:
           - "patch"
           - "minor"
+    ignore:
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
