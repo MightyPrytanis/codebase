@@ -15,6 +15,11 @@
 #   - /Labs/Potemkin/app (Potemkin experimental app)
 #   - /Labs/Potemkin/moral_reasoner (Potemkin moral reasoner)
 #
+# Grouping policy:
+#   - patch and minor updates are grouped into a single PR per directory
+#     (auto-merged by the dependabot-auto-merge workflow)
+#   - major updates remain as individual PRs and require manual review
+#
 version: 2
 updates:
   # Cyrano main package
@@ -27,6 +32,11 @@ updates:
     labels:
       - "dependencies"
       - "cyrano"
+    groups:
+      non-breaking-deps:
+        update-types:
+          - "patch"
+          - "minor"
 
   # Cyrano auth-server
   - package-ecosystem: "npm"
@@ -39,6 +49,11 @@ updates:
       - "dependencies"
       - "cyrano"
       - "auth-server"
+    groups:
+      non-breaking-deps:
+        update-types:
+          - "patch"
+          - "minor"
 
   # LexFiat app
   - package-ecosystem: "npm"
@@ -50,6 +65,11 @@ updates:
     labels:
       - "dependencies"
       - "lexfiat"
+    groups:
+      non-breaking-deps:
+        update-types:
+          - "patch"
+          - "minor"
 
   # Arkiver app
   - package-ecosystem: "npm"
@@ -61,6 +81,11 @@ updates:
     labels:
       - "dependencies"
       - "arkiver"
+    groups:
+      non-breaking-deps:
+        update-types:
+          - "patch"
+          - "minor"
 
   # Arkiver frontend
   - package-ecosystem: "npm"
@@ -72,6 +97,11 @@ updates:
     labels:
       - "dependencies"
       - "arkiver"
+    groups:
+      non-breaking-deps:
+        update-types:
+          - "patch"
+          - "minor"
 
   # Labs - Potemkin app
   - package-ecosystem: "npm"
@@ -84,6 +114,11 @@ updates:
       - "dependencies"
       - "labs"
       - "potemkin"
+    groups:
+      non-breaking-deps:
+        update-types:
+          - "patch"
+          - "minor"
 
   # Labs - Potemkin moral_reasoner
   - package-ecosystem: "npm"
@@ -96,3 +131,8 @@ updates:
       - "dependencies"
       - "labs"
       - "potemkin"
+    groups:
+      non-breaking-deps:
+        update-types:
+          - "patch"
+          - "minor"
