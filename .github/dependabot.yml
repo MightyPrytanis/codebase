@@ -33,6 +33,10 @@ updates:
       - "dependencies"
       - "cyrano"
     groups:
+      vitest-packages:
+        patterns:
+          - "vitest"
+          - "@vitest/*"
       non-breaking-deps:
         update-types:
           - "patch"
