@@ -143,7 +143,10 @@ router.post('/anonymization/terms', async (req: Request, res: Response) => {
 router.delete('/anonymization/terms/:id', async (req: Request, res: Response) => {
   try {
     const idParam = req.params['id'];
-    const id = (Array.isArray(idParam) ? idParam[0] : idParam) ?? '';
+    const id = Array.isArray(idParam) ? idParam[0] : idParam;
+    if (!id) {
+      return res.status(400).json({ success: false, error: 'Missing custom term id' });
+    }
     const removed = clientAnonymizationService.removeCustomTerm(id);
     if (!removed) {
       return res.status(404).json({ success: false, error: 'Custom term not found' });
@@ -203,7 +206,10 @@ router.post('/anonymization/exceptions', async (req: Request, res: Response) => 
 router.delete('/anonymization/exceptions/:id', async (req: Request, res: Response) => {
   try {
     const idParam = req.params['id'];
-    const id = (Array.isArray(idParam) ? idParam[0] : idParam) ?? '';
+    const id = Array.isArray(idParam) ? idParam[0] : idParam;
+    if (!id) {
+      return res.status(400).json({ success: false, error: 'Missing exception id' });
+    }
     const removed = clientAnonymizationService.removeException(id);
     if (!removed) {
       return res.status(404).json({ success: false, error: 'Exception not found' });
