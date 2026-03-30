@@ -1,55 +1,78 @@
 name: Solo Maintainer Auto-Approve
 
-# This workflow automatically approves PRs created by the repository owner/maintainer
-# to enable self-merging in solo developer repositories where the owner is also the
-# only contributor and reviewer.
+# This workflow automatically approves and merges PRs created by the repository
+# owner or trusted automation agents (Copilot, Codex, etc.) to enable self-merging
+# in solo developer repositories and keep CI pipelines flowing without manual steps.
+#
+# Trusted agents: logins listed in TRUSTED_AGENTS below are treated the same as the
+# repository owner for the purposes of this workflow.
 
 on:
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
+  contents: write
   pull-requests: write
+
+env:
+  # Trusted automation agents whose PRs should be auto-approved and merged.
+  # Add new agent logins here as needed.
+  TRUSTED_AGENTS: '["Codex","github-copilot[bot]","copilot-swe-agent[bot]","openai-code-agent[bot]"]'
+
 jobs:
+  # ── Job 1 ──────────────────────────────────────────────────────────────────
+  # Convert draft PRs from the owner or a trusted agent to "ready for review".
+  # This re-fires the pull_request.ready_for_review event, which triggers the
+  # auto-approve job below.
+  ready-pr:
+    runs-on: ubuntu-latest
+    if: |
+      github.event.pull_request.draft == true &&
+      (
+        github.event.pull_request.user.login == github.repository_owner ||
+        contains(fromJSON(env.TRUSTED_AGENTS), github.event.pull_request.user.login)
+      )
+    env:
+      GH_TOKEN: ${{ secrets.SOLO_MAINTAINER_TOKEN || secrets.GH_AUTOMERGE_TOKEN || secrets.AUTO_MERGE_TOKEN || secrets.AUTO_APPROVE_TOKEN || secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Mark PR as ready for review
+        run: |
+          echo "Converting draft PR #${{ github.event.pull_request.number }} to ready-for-review"
+          gh pr ready ${{ github.event.pull_request.number }} --repo ${{ github.repository }}
+
+  # ── Job 2 ──────────────────────────────────────────────────────────────────
+  # Approve and enable auto-merge for ready (non-draft) PRs from the owner or a
+  # trusted agent.  Auto-merge waits for all required status checks before
+  # actually merging, so CI must be green first.
   auto-approve:
     runs-on: ubuntu-latest
-
-    # Only run for PRs created by the repository owner
-    # This ensures the workflow only activates for solo maintainer use cases
     if: |
-      github.event.pull_request.user.login == github.repository_owner &&
-      github.event.pull_request.draft == false
+      github.event.pull_request.draft == false &&
+      (
+        github.event.pull_request.user.login == github.repository_owner ||
+        contains(fromJSON(env.TRUSTED_AGENTS), github.event.pull_request.user.login)
+      )
     env:
-      AUTOMERGE_TOKEN: ${{ secrets.SOLO_MAINTAINER_TOKEN || secrets.GH_AUTOMERGE_TOKEN || secrets.AUTO_MERGE_TOKEN || secrets.AUTO_APPROVE_TOKEN || secrets.GITHUB_TOKEN }}
       GH_TOKEN: ${{ secrets.SOLO_MAINTAINER_TOKEN || secrets.GH_AUTOMERGE_TOKEN || secrets.AUTO_MERGE_TOKEN || secrets.AUTO_APPROVE_TOKEN || secrets.GITHUB_TOKEN }}
       GITHUB_TOKEN: ${{ secrets.SOLO_MAINTAINER_TOKEN || secrets.GH_AUTOMERGE_TOKEN || secrets.AUTO_MERGE_TOKEN || secrets.AUTO_APPROVE_TOKEN || secrets.GITHUB_TOKEN }}
 
     steps:
-      - name: Check if PR author is repository owner
-        id: check-owner
-        run: |
-          echo "PR Author: ${{ github.event.pull_request.user.login }}"
-          echo "Repository Owner: ${{ github.repository_owner }}"
-
-          if [ "${{ github.event.pull_request.user.login }}" == "${{ github.repository_owner }}" ]; then
-            echo "is_owner=true" >> "$GITHUB_OUTPUT"
-            echo "✓ PR author is the repository owner"
-          else
-            echo "is_owner=false" >> "$GITHUB_OUTPUT"
-            echo "✗ PR author is not the repository owner"
-          fi
-
       - name: Auto-approve PR
-        if: steps.check-owner.outputs.is_owner == 'true'
         run: |
-          echo "Auto-approving PR #${{ github.event.pull_request.number }}"
+          echo "Auto-approving PR #${{ github.event.pull_request.number }} (author: ${{ github.event.pull_request.user.login }})"
           gh pr review ${{ github.event.pull_request.number }} \
             --approve \
             --body "✓ Auto-approved by solo maintainer workflow." \
             --repo ${{ github.repository }}
 
+      - name: Enable auto-merge
+        run: |
+          gh pr merge --auto --squash ${{ github.event.pull_request.number }} \
+            --repo ${{ github.repository }}
+        continue-on-error: true
+
       - name: Add label
-        if: steps.check-owner.outputs.is_owner == 'true'
         run: |
           gh pr edit ${{ github.event.pull_request.number }} \
             --add-label "solo-maintainer-approved" \
@@ -57,19 +80,17 @@ jobs:
         continue-on-error: true
 
       - name: Comment on PR
-        if: steps.check-owner.outputs.is_owner == 'true'
         run: |
           gh pr comment ${{ github.event.pull_request.number }} \
-            --body "🤖 **Solo Maintainer Auto-Approval**
+            --body "🤖 **Auto-Approval & Merge**
 
-          This PR has been automatically approved because:
-          - You are the repository owner and sole maintainer
+          This PR has been automatically approved and queued for merge because:
+          - The author (\`${{ github.event.pull_request.user.login }}\`) is the repository owner or a trusted automation agent
           - The PR is ready for review (not in draft mode)
-          - Solo maintainer workflow is enabled
 
-          You can now merge this PR once all required status checks pass.
+          Auto-merge is enabled — the PR will merge once all required status checks pass.
 
           ---
-          *To disable this workflow, edit or delete .github/workflows/solo-maintainer-auto-approve.yml*" \
+          *Managed by .github/workflows/solo-maintainer-auto-approve.yml*" \
             --repo ${{ github.repository }}
         continue-on-error: true
