@@ -31,6 +31,10 @@ import {
 } from '../modules/library/library-model.js';
 import { encryptSensitiveFields, decryptSensitiveFields } from './sensitive-data-encryption.js';
 
+// In-memory fallback for practice profiles when the database is unavailable or the
+// userId is non-numeric (e.g., tests or degraded environments).
+const inMemoryPracticeProfiles = new Map<string, PracticeProfile>();
+
 /**
  * In-memory fallback store for practice profiles.
  * Used when the database is unavailable or a query fails (e.g., missing DB, connection refused).
@@ -123,6 +127,58 @@ function dbRowToPracticeProfile(row: any): PracticeProfile {
 }
 
 /**
+ * Merge practice profile data (used for both DB and in-memory fallback)
+ */
+function mergePracticeProfile(
+  userId: string,
+  existing: PracticeProfile | null,
+  updates: Partial<PracticeProfile>,
+): PracticeProfile {
+  const baseProfile: PracticeProfile = existing ?? {
+    id: `memory-${userId}`,
+    userId,
+    primaryJurisdiction: '',
+    additionalJurisdictions: [],
+    practiceAreas: [],
+    counties: [],
+    courts: [],
+    issueTags: [],
+    storagePreferences: {},
+    researchProvider: undefined,
+    integrations: {},
+    llmProvider: undefined,
+    llmProviderTested: false,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  return {
+    ...baseProfile,
+    primaryJurisdiction: updates.primaryJurisdiction ?? baseProfile.primaryJurisdiction,
+    additionalJurisdictions: updates.additionalJurisdictions ?? baseProfile.additionalJurisdictions,
+    practiceAreas: updates.practiceAreas ?? baseProfile.practiceAreas,
+    counties: updates.counties ?? baseProfile.counties,
+    courts: updates.courts ?? baseProfile.courts,
+    issueTags: updates.issueTags ?? baseProfile.issueTags,
+    storagePreferences: {
+      ...(baseProfile.storagePreferences || {}),
+      ...(updates.storagePreferences || {}),
+    },
+    researchProvider: updates.researchProvider ?? baseProfile.researchProvider,
+    integrations: {
+      ...(baseProfile.integrations || {}),
+      ...(updates.integrations || {}),
+      ...(baseProfile.integrations?.onboarding && updates.integrations?.onboarding
+        ? { onboarding: { ...baseProfile.integrations.onboarding, ...updates.integrations.onboarding } }
+        : {}),
+    },
+    llmProvider: updates.llmProvider ?? baseProfile.llmProvider,
+    llmProviderTested: updates.llmProviderTested ?? baseProfile.llmProviderTested,
+    updatedAt: new Date(),
+  };
+}
+
+/**
  * Upsert a practice profile for a user
  */
 export async function upsertPracticeProfile(
@@ -156,6 +212,26 @@ export async function upsertPracticeProfile(
       .where(eq(practiceProfilesTable.userId, userIdInt))
       .limit(1);
 
+  const fallback = () => {
+    const merged = mergePracticeProfile(userId, inMemoryPracticeProfiles.get(userId) ?? null, profile);
+    inMemoryPracticeProfiles.set(userId, merged);
+    return merged;
+  };
+
+  const userIdInt = parseInt(userId, 10);
+  if (isNaN(userIdInt) || !db) {
+    // Non-numeric IDs or missing DB connection fall back to in-memory storage
+    return fallback();
+  }
+
+  try {
+    // Check if profile exists
+    const existing = await db
+      .select()
+      .from(practiceProfilesTable)
+      .where(eq(practiceProfilesTable.userId, userIdInt))
+      .limit(1);
+
     const profileData = {
       userId: userIdInt,
       primaryJurisdiction: profile.primaryJurisdiction || existing[0]?.primaryJurisdiction || '',
@@ -170,6 +246,17 @@ export async function upsertPracticeProfile(
       },
       researchProvider: profile.researchProvider || existing[0]?.researchProvider,
       integrations: mergeIntegrations(existing[0]?.integrations as any, profile.integrations),
+      integrations: encryptSensitiveFields({
+        ...(existing[0]?.integrations || {}),
+        ...(profile.integrations || {}),
+        // Deep merge onboarding if both exist
+        ...(existing[0]?.integrations?.onboarding && profile.integrations?.onboarding ? {
+          onboarding: {
+            ...(existing[0]?.integrations.onboarding || {}),
+            ...(profile.integrations.onboarding || {}),
+          },
+        } : {}),
+      }) as any,
       llmProvider: profile.llmProvider || existing[0]?.llmProvider,
       llmProviderTested: profile.llmProviderTested ?? existing[0]?.llmProviderTested ?? false,
       updatedAt: new Date(),
@@ -188,6 +275,9 @@ export async function upsertPracticeProfile(
       return result;
     } else {
       // Insert new
+      
+      return dbRowToPracticeProfile(updated);
+    } else {
       const [inserted] = await db
         .insert(practiceProfilesTable)
         .values({
@@ -203,6 +293,11 @@ export async function upsertPracticeProfile(
   } catch (error) {
     practiceProfileDbDisabled = true;
     console.warn('[DB] Failed to upsert practice profile; falling back to in-memory store.', error instanceof Error ? error.message : error);
+      
+      return dbRowToPracticeProfile(inserted);
+    }
+  } catch (error) {
+    console.warn('[Library Service] Falling back to in-memory practice profile store:', error);
     return fallback();
   }
 }
@@ -230,6 +325,13 @@ export async function getPracticeProfile(userId: string): Promise<PracticeProfil
     return fromMemory();
   }
 
+  const fallbackProfile = inMemoryPracticeProfiles.get(userId);
+
+  const userIdInt = parseInt(userId, 10);
+  if (isNaN(userIdInt) || !db) {
+    return fallbackProfile ?? null;
+  }
+
   try {
     const [profile] = await db
       .select()
@@ -246,6 +348,10 @@ export async function getPracticeProfile(userId: string): Promise<PracticeProfil
     practiceProfileDbDisabled = true;
     console.warn('[DB] Failed to load practice profile; using in-memory store.', error instanceof Error ? error.message : error);
     return fromMemory();
+    return profile ? dbRowToPracticeProfile(profile) : fallbackProfile ?? null;
+  } catch (error) {
+    console.warn('[Library Service] Falling back to in-memory practice profile store:', error);
+    return fallbackProfile ?? null;
   }
 }
 
