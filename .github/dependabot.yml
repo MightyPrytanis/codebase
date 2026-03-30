@@ -32,6 +32,11 @@ updates:
     labels:
       - "dependencies"
       - "cyrano"
+    ignore:
+      # Block TypeScript major bumps until typescript-eslint adds >=6 support
+      - dependency-name: "typescript"
+        update-types:
+          - "version-update:semver-major"
     groups:
       non-breaking-deps:
         update-types:
@@ -49,6 +54,11 @@ updates:
       - "dependencies"
       - "cyrano"
       - "auth-server"
+    ignore:
+      # Block TypeScript major bumps until typescript-eslint adds >=6 support
+      - dependency-name: "typescript"
+        update-types:
+          - "version-update:semver-major"
     groups:
       non-breaking-deps:
         update-types:
@@ -65,6 +75,11 @@ updates:
     labels:
       - "dependencies"
       - "lexfiat"
+    ignore:
+      # Block TypeScript major bumps until typescript-eslint adds >=6 support
+      - dependency-name: "typescript"
+        update-types:
+          - "version-update:semver-major"
     groups:
       non-breaking-deps:
         update-types:
@@ -81,6 +96,11 @@ updates:
     labels:
       - "dependencies"
       - "arkiver"
+    ignore:
+      # Block TypeScript major bumps until typescript-eslint adds >=6 support
+      - dependency-name: "typescript"
+        update-types:
+          - "version-update:semver-major"
     groups:
       non-breaking-deps:
         update-types:
@@ -97,6 +117,11 @@ updates:
     labels:
       - "dependencies"
       - "arkiver"
+    ignore:
+      # Block TypeScript major bumps until typescript-eslint adds >=6 support
+      - dependency-name: "typescript"
+        update-types:
+          - "version-update:semver-major"
     groups:
       non-breaking-deps:
         update-types:
@@ -114,6 +139,11 @@ updates:
       - "dependencies"
       - "labs"
       - "potemkin"
+    ignore:
+      # Block TypeScript major bumps until typescript-eslint adds >=6 support
+      - dependency-name: "typescript"
+        update-types:
+          - "version-update:semver-major"
     groups:
       non-breaking-deps:
         update-types:
@@ -131,6 +161,11 @@ updates:
       - "dependencies"
       - "labs"
       - "potemkin"
+    ignore:
+      # Block TypeScript major bumps until typescript-eslint adds >=6 support
+      - dependency-name: "typescript"
+        update-types:
+          - "version-update:semver-major"
     groups:
       non-breaking-deps:
         update-types:
