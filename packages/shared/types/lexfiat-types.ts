@@ -29,13 +29,13 @@ export interface Attorney {
   specialization: string | null;
   profilePhotoUrl: string | null;
   clioApiKey: string | null;
-  gmailCredentials: any | null;
+  gmailCredentials: Record<string, unknown> | null;
   calendarConnected: boolean | null;
   westlawConnected: boolean | null;
   westlawApiKey: string | null;
   claudeConnected: boolean | null;
   claudeApiKey: string | null;
-  dashboardLayout: any | null;
+  dashboardLayout: Record<string, unknown> | null;
   createdAt: Date | null;
 }
 
@@ -128,7 +128,7 @@ export interface WorkflowModule {
   type: string;
   active: boolean | null;
   attorneyId: string | null;
-  config: any | null;
+  config: Record<string, unknown> | null;
   lastActivity: Date | null;
 }
 
@@ -138,7 +138,7 @@ export interface MaeWorkflow {
   name: string;
   type: string;
   description: string | null;
-  config: any | null;
+  config: Record<string, unknown> | null;
   isTemplate: boolean | null;
   isActive: boolean | null;
   attorneyId: string | null;
@@ -150,7 +150,7 @@ export interface InsertMaeWorkflow {
   name: string;
   type: string;
   description?: string | null;
-  config?: any | null;
+  config?: Record<string, unknown> | null;
   isTemplate?: boolean | null;
   attorneyId?: string | null;
 }
@@ -162,7 +162,7 @@ export interface MaeWorkflowStep {
   stepOrder: number;
   stepType: string;
   stepName: string;
-  config: any | null;
+  config: Record<string, unknown> | null;
   isCompleted: boolean | null;
   createdAt: Date | null;
 }
@@ -172,7 +172,7 @@ export interface InsertMaeWorkflowStep {
   stepOrder: number;
   stepType: string;
   stepName: string;
-  config?: any | null;
+  config?: Record<string, unknown> | null;
 }
 
 // MAE Workflow Execution types
@@ -182,8 +182,8 @@ export interface MaeWorkflowExecution {
   caseId: string | null;
   status: string;
   currentStep: number | null;
-  results: any | null;
-  executionData: any | null;
+  results: Record<string, unknown> | null;
+  executionData: Record<string, unknown> | null;
   startedAt: Date | null;
   completedAt: Date | null;
   createdAt: Date | null;
@@ -194,8 +194,8 @@ export interface InsertMaeWorkflowExecution {
   caseId?: string | null;
   status?: string | null;
   currentStep?: number | null;
-  results?: any | null;
-  executionData?: any | null;
+  results?: Record<string, unknown> | null;
+  executionData?: Record<string, unknown> | null;
 }
 
 // AI Analysis types
@@ -203,10 +203,10 @@ export interface AiAnalysis {
   id: string;
   documentId: string | null;
   analysisType: string;
-  result: any | null;
+  result: Record<string, unknown> | null;
   confidence: number | null;
   workflowModuleId: string | null;
-  secondaryReview: any | null;
+  secondaryReview: Record<string, unknown> | null;
   secondaryReviewProvider: string | null;
   reviewStatus: string | null;
   createdAt: Date | null;
@@ -221,7 +221,7 @@ export interface Feedback {
   description: string;
   priority: string | null;
   status: string | null;
-  attachments: any | null;
+  attachments: unknown[] | null;
   createdAt: Date | null;
   updatedAt: Date | null;
 }
@@ -232,7 +232,7 @@ export interface InsertFeedback {
   title: string;
   description: string;
   priority?: string | null;
-  attachments?: any | null;
+  attachments?: unknown[] | null;
 }
 
 // AI Provider types
