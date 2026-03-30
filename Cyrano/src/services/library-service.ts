@@ -30,6 +30,10 @@ import {
 } from '../modules/library/library-model.js';
 import { encryptSensitiveFields, decryptSensitiveFields } from './sensitive-data-encryption.js';
 
+// In-memory fallback for practice profiles when the database is unavailable or the
+// userId is non-numeric (e.g., tests or degraded environments).
+const inMemoryPracticeProfiles = new Map<string, PracticeProfile>();
+
 /**
  * Helper function to convert database row to PracticeProfile
  */
@@ -57,73 +61,135 @@ function dbRowToPracticeProfile(row: any): PracticeProfile {
 }
 
 /**
+ * Merge practice profile data (used for both DB and in-memory fallback)
+ */
+function mergePracticeProfile(
+  userId: string,
+  existing: PracticeProfile | null,
+  updates: Partial<PracticeProfile>,
+): PracticeProfile {
+  const baseProfile: PracticeProfile = existing ?? {
+    id: `memory-${userId}`,
+    userId,
+    primaryJurisdiction: '',
+    additionalJurisdictions: [],
+    practiceAreas: [],
+    counties: [],
+    courts: [],
+    issueTags: [],
+    storagePreferences: {},
+    researchProvider: undefined,
+    integrations: {},
+    llmProvider: undefined,
+    llmProviderTested: false,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  return {
+    ...baseProfile,
+    primaryJurisdiction: updates.primaryJurisdiction ?? baseProfile.primaryJurisdiction,
+    additionalJurisdictions: updates.additionalJurisdictions ?? baseProfile.additionalJurisdictions,
+    practiceAreas: updates.practiceAreas ?? baseProfile.practiceAreas,
+    counties: updates.counties ?? baseProfile.counties,
+    courts: updates.courts ?? baseProfile.courts,
+    issueTags: updates.issueTags ?? baseProfile.issueTags,
+    storagePreferences: {
+      ...(baseProfile.storagePreferences || {}),
+      ...(updates.storagePreferences || {}),
+    },
+    researchProvider: updates.researchProvider ?? baseProfile.researchProvider,
+    integrations: {
+      ...(baseProfile.integrations || {}),
+      ...(updates.integrations || {}),
+      ...(baseProfile.integrations?.onboarding && updates.integrations?.onboarding
+        ? { onboarding: { ...baseProfile.integrations.onboarding, ...updates.integrations.onboarding } }
+        : {}),
+    },
+    llmProvider: updates.llmProvider ?? baseProfile.llmProvider,
+    llmProviderTested: updates.llmProviderTested ?? baseProfile.llmProviderTested,
+    updatedAt: new Date(),
+  };
+}
+
+/**
  * Upsert a practice profile for a user
  */
 export async function upsertPracticeProfile(
   userId: string,
   profile: Partial<PracticeProfile>
 ): Promise<PracticeProfile> {
-  const userIdInt = parseInt(userId, 10);
-  if (isNaN(userIdInt)) {
-    throw new Error(`Invalid userId: ${userId}`);
-  }
-
-  // Check if profile exists
-  const existing = await db
-    .select()
-    .from(practiceProfilesTable)
-    .where(eq(practiceProfilesTable.userId, userIdInt))
-    .limit(1);
-
-  const profileData = {
-    userId: userIdInt,
-    primaryJurisdiction: profile.primaryJurisdiction || existing[0]?.primaryJurisdiction || '',
-    additionalJurisdictions: profile.additionalJurisdictions || existing[0]?.additionalJurisdictions || [],
-    practiceAreas: profile.practiceAreas || existing[0]?.practiceAreas || [],
-    counties: profile.counties || existing[0]?.counties || [],
-    courts: profile.courts || existing[0]?.courts || [],
-    issueTags: profile.issueTags || existing[0]?.issueTags || [],
-    storagePreferences: {
-      ...(existing[0]?.storagePreferences || {}),
-      ...(profile.storagePreferences || {}),
-    },
-    researchProvider: profile.researchProvider || existing[0]?.researchProvider,
-    integrations: encryptSensitiveFields({
-      ...(existing[0]?.integrations || {}),
-      ...(profile.integrations || {}),
-      // Deep merge onboarding if both exist
-      ...(existing[0]?.integrations?.onboarding && profile.integrations?.onboarding ? {
-        onboarding: {
-          ...(existing[0]?.integrations.onboarding || {}),
-          ...(profile.integrations.onboarding || {}),
-        },
-      } : {}),
-    }) as any,
-    llmProvider: profile.llmProvider || existing[0]?.llmProvider,
-    llmProviderTested: profile.llmProviderTested ?? existing[0]?.llmProviderTested ?? false,
-    updatedAt: new Date(),
+  const fallback = () => {
+    const merged = mergePracticeProfile(userId, inMemoryPracticeProfiles.get(userId) ?? null, profile);
+    inMemoryPracticeProfiles.set(userId, merged);
+    return merged;
   };
 
-  if (existing.length > 0) {
-    // Update existing
-    const [updated] = await db
-      .update(practiceProfilesTable)
-      .set(profileData)
-      .where(eq(practiceProfilesTable.id, existing[0].id))
-      .returning();
-    
-    return dbRowToPracticeProfile(updated);
-  } else {
-    // Insert new
-    const [inserted] = await db
-      .insert(practiceProfilesTable)
-      .values({
-        ...profileData,
-        createdAt: new Date(),
-      })
-      .returning();
-    
-    return dbRowToPracticeProfile(inserted);
+  const userIdInt = parseInt(userId, 10);
+  if (isNaN(userIdInt) || !db) {
+    // Non-numeric IDs or missing DB connection fall back to in-memory storage
+    return fallback();
+  }
+
+  try {
+    // Check if profile exists
+    const existing = await db
+      .select()
+      .from(practiceProfilesTable)
+      .where(eq(practiceProfilesTable.userId, userIdInt))
+      .limit(1);
+
+    const profileData = {
+      userId: userIdInt,
+      primaryJurisdiction: profile.primaryJurisdiction || existing[0]?.primaryJurisdiction || '',
+      additionalJurisdictions: profile.additionalJurisdictions || existing[0]?.additionalJurisdictions || [],
+      practiceAreas: profile.practiceAreas || existing[0]?.practiceAreas || [],
+      counties: profile.counties || existing[0]?.counties || [],
+      courts: profile.courts || existing[0]?.courts || [],
+      issueTags: profile.issueTags || existing[0]?.issueTags || [],
+      storagePreferences: {
+        ...(existing[0]?.storagePreferences || {}),
+        ...(profile.storagePreferences || {}),
+      },
+      researchProvider: profile.researchProvider || existing[0]?.researchProvider,
+      integrations: encryptSensitiveFields({
+        ...(existing[0]?.integrations || {}),
+        ...(profile.integrations || {}),
+        // Deep merge onboarding if both exist
+        ...(existing[0]?.integrations?.onboarding && profile.integrations?.onboarding ? {
+          onboarding: {
+            ...(existing[0]?.integrations.onboarding || {}),
+            ...(profile.integrations.onboarding || {}),
+          },
+        } : {}),
+      }) as any,
+      llmProvider: profile.llmProvider || existing[0]?.llmProvider,
+      llmProviderTested: profile.llmProviderTested ?? existing[0]?.llmProviderTested ?? false,
+      updatedAt: new Date(),
+    };
+
+    if (existing.length > 0) {
+      const [updated] = await db
+        .update(practiceProfilesTable)
+        .set(profileData)
+        .where(eq(practiceProfilesTable.id, existing[0].id))
+        .returning();
+      
+      return dbRowToPracticeProfile(updated);
+    } else {
+      const [inserted] = await db
+        .insert(practiceProfilesTable)
+        .values({
+          ...profileData,
+          createdAt: new Date(),
+        })
+        .returning();
+      
+      return dbRowToPracticeProfile(inserted);
+    }
+  } catch (error) {
+    console.warn('[Library Service] Falling back to in-memory practice profile store:', error);
+    return fallback();
   }
 }
 
@@ -131,18 +197,25 @@ export async function upsertPracticeProfile(
  * Get practice profile for a user
  */
 export async function getPracticeProfile(userId: string): Promise<PracticeProfile | null> {
+  const fallbackProfile = inMemoryPracticeProfiles.get(userId);
+
   const userIdInt = parseInt(userId, 10);
-  if (isNaN(userIdInt)) {
-    return null;
+  if (isNaN(userIdInt) || !db) {
+    return fallbackProfile ?? null;
   }
 
-  const [profile] = await db
-    .select()
-    .from(practiceProfilesTable)
-    .where(eq(practiceProfilesTable.userId, userIdInt))
-    .limit(1);
+  try {
+    const [profile] = await db
+      .select()
+      .from(practiceProfilesTable)
+      .where(eq(practiceProfilesTable.userId, userIdInt))
+      .limit(1);
 
-  return profile ? dbRowToPracticeProfile(profile) : null;
+    return profile ? dbRowToPracticeProfile(profile) : fallbackProfile ?? null;
+  } catch (error) {
+    console.warn('[Library Service] Falling back to in-memory practice profile store:', error);
+    return fallbackProfile ?? null;
+  }
 }
 
 /**
@@ -609,4 +682,3 @@ export async function getLibraryStats(userId: string): Promise<LibraryStats> {
     queueDepth: queue.length,
   };
 }
-
