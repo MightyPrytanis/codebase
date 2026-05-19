@@ -11,11 +11,11 @@
   "dependencies": {},
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
-    "zod": "^4.3.6"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@types/node": "^25.5.0",
-    "tsx": "^4.7.0",
+    "@types/node": "^25.9.0",
+    "tsx": "^4.22.2",
     "typescript": "^5.3.0"
   }
 }
